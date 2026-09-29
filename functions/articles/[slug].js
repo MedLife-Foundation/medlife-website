@@ -40,7 +40,7 @@ export async function onRequestGet(context) {
     // Management Platform fallback: newly published articles live in Supabase.
     if (!article) {
       const u = new URL("https://ftvjakwogxdlxxbpfydf.supabase.co/rest/v1/public_site_content");
-      u.searchParams.set("select", "source_id,content_type,title,slug,excerpt,body,published_at,public_url,created_at,updated_at");
+      u.searchParams.set("select", "source_id,content_type,title,slug,excerpt,body,published_at,public_url,created_at,updated_at,image_url");
       u.searchParams.set("slug", "eq." + routeKey);
       u.searchParams.set("limit", "1");
       const response = await fetch(u, {
@@ -64,7 +64,7 @@ export async function onRequestGet(context) {
             content_en: row.body,
             author_name: "MedLife",
             category: row.content_type === "medical_article" ? "مقال طبي" : "محتوى MedLife",
-            image_url: row.metadata?.image_url || "",
+            image_url: row.image_url || "",
             slug: row.slug,
             canonical_path: row.public_url || `/articles/${row.slug}`,
             published_at: row.published_at,
