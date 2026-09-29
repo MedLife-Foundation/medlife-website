@@ -4,7 +4,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K
 const RESOURCES = {
   content: {
     table: "public_site_content",
-    select: "source_id,content_type,title,slug,excerpt,body,published_at,public_url,created_at,updated_at",
+    select: "source_id,content_type,title,slug,excerpt,body,published_at,public_url,created_at,updated_at,image_url",
     order: "published_at.desc"
   },
   activities: {
