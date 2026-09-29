@@ -86,7 +86,8 @@ export async function onRequestGet(context) {
     const bootstrap = `<script>(function(){const article=${safeArticle};window.__MEDLIFE_ARTICLE__=article;window.__MEDLIFE_ARTICLE_ROUTE__=${safeRoute};})();</script>`;
     const patched = html.replace(/<head>/i, `<head>${bootstrap}`);
     const canonicalKey = article.canonical_path || routeKey;
-    const canonical = new URL(`/articles/${encodeURIComponent(canonicalKey)}`, context.request.url).href;
+    const canonicalPath = String(canonicalKey).startsWith('/') ? String(canonicalKey) : '/articles/' + encodeURIComponent(canonicalKey);
+    const canonical = new URL(canonicalPath, context.request.url).href;
 
     return new Response(patched, {
       status: 200,
