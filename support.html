@@ -49,5 +49,7 @@ const modal=document.getElementById('detailModal'),body=document.getElementById(
 document.querySelectorAll('.detail-btn').forEach(btn=>btn.addEventListener('click',()=>{const c=cases[Number(btn.dataset.index)];title.textContent=`تفاصيل ${c[0]}`;body.innerHTML=`<h3 style="margin-top:0;color:var(--navy)">${c[1]}</h3><div class="detail-grid"><div><b>${c[2]}</b>المحافظة النموذجية</div><div><b>${c[4].toLocaleString('en-US')} ل.س</b>المبلغ المسجل</div><div><b>${c[3]}</b>نوع الدعم</div><div><b>100%</b>نسبة الإنجاز</div><div><b>مكتملة</b>حالة التنفيذ</div><div><b>موثق ضمن السجلات الداخلية</b>حالة التوثيق</div><div><b>بيانات المستفيد غير منشورة</b>الخصوصية</div><div><b>${c[0]}</b>رقم الحالة</div></div><div class="modal-note"><strong>ملاحظة:</strong> تفاصيل المحافظة والوصف المعروضة في هذه البطاقة بيانات نموذجية لأغراض العرض فقط، وليست سجلاً عاماً لمستفيد حقيقي. المبلغ ونوع المساعدة هما البيانات المعتمدة في هذه الصفحة.</div>`;modal.classList.add('show');modal.setAttribute('aria-hidden','false');}));
 function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}document.getElementById('closeModal').addEventListener('click',closeModal);modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 </script>
+<script src="/js/management-api.js" defer></script>
+<script src="/js/management-support.js" defer></script>
 </body>
 </html>

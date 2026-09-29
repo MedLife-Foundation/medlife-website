@@ -27,17 +27,53 @@ export async function onRequestGet(context) {
     return new Response("Not found", { status: 404 });
   }
 
-  if(!context.env.DB){
-    return new Response("Article service unavailable", { status: 502 });
-  }
-
   try {
-    // Canonical public paths are stored separately from the optional human-readable slug.
-    // Keep the slug fallback so previously published articles remain reachable.
-    const article = await context.env.DB
-      .prepare("SELECT * FROM articles WHERE status='published' AND (canonical_path = ? OR slug = ?) LIMIT 1")
-      .bind(routeKey, routeKey)
-      .first();
+    let article = null;
+
+    if (context.env.DB) {
+      article = await context.env.DB
+        .prepare("SELECT * FROM articles WHERE status='published' AND (canonical_path = ? OR slug = ?) LIMIT 1")
+        .bind(routeKey, routeKey)
+        .first();
+    }
+
+    // Management Platform fallback: newly published articles live in Supabase.
+    if (!article) {
+      const u = new URL("https://ftvjakwogxdlxxbpfydf.supabase.co/rest/v1/public_site_content");
+      u.searchParams.set("select", "source_id,content_type,title,slug,excerpt,body,published_at,public_url,created_at,updated_at,image_url");
+      u.searchParams.set("slug", "eq." + routeKey);
+      u.searchParams.set("limit", "1");
+      const response = await fetch(u, {
+        headers: {
+          apikey: "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K",
+          Authorization: "Bearer sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K",
+          Accept: "application/json"
+        }
+      });
+      if (response.ok) {
+        const rows = await response.json();
+        const row = Array.isArray(rows) ? rows[0] : null;
+        if (row) {
+          article = {
+            id: row.source_id,
+            title_ar: row.title,
+            title_en: row.title,
+            excerpt_ar: row.excerpt,
+            excerpt_en: row.excerpt,
+            content_ar: row.body,
+            content_en: row.body,
+            author_name: "MedLife",
+            category: row.content_type === "medical_article" ? "مقال طبي" : "محتوى MedLife",
+            image_url: row.image_url || "",
+            slug: row.slug,
+            canonical_path: row.public_url || `/articles/${row.slug}`,
+            published_at: row.published_at,
+            created_at: row.created_at,
+            updated_at: row.updated_at
+          };
+        }
+      }
+    }
 
     if (!article) return new Response("Not found", { status: 404 });
 
@@ -50,7 +86,8 @@ export async function onRequestGet(context) {
     const bootstrap = `<script>(function(){const article=${safeArticle};window.__MEDLIFE_ARTICLE__=article;window.__MEDLIFE_ARTICLE_ROUTE__=${safeRoute};})();</script>`;
     const patched = html.replace(/<head>/i, `<head>${bootstrap}`);
     const canonicalKey = article.canonical_path || routeKey;
-    const canonical = new URL(`/articles/${encodeURIComponent(canonicalKey)}`, context.request.url).href;
+    const canonicalPath = String(canonicalKey).startsWith('/') ? String(canonicalKey) : '/articles/' + encodeURIComponent(canonicalKey);
+    const canonical = new URL(canonicalPath, context.request.url).href;
 
     return new Response(patched, {
       status: 200,
