@@ -1,0 +1,107 @@
+/* Opt-in live support data from MedLife Management Platform.
+   The legacy page remains the fallback when there are no published management cases. */
+(function () {
+  "use strict";
+
+  const fmt = (value) => new Intl.NumberFormat("en-US").format(Number(value || 0));
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(value);
+  }
+
+  function card(c, open) {
+    const amountRequired = Number(c.amount_required || 0);
+    const amountSecured = Number(c.amount_secured || 0);
+    const progress = amountRequired > 0
+      ? Math.min(100, Math.round((amountSecured / amountRequired) * 100))
+      : 0;
+    const statusLabel = open ? (c.status === "supporting" ? "قيد الدعم" : "منشورة") : "مكتملة";
+    const action = c.public_url
+      ? `<a class="btn primary" href="${c.public_url}">${open ? "دعم هذه الحالة" : "عرض الحالة"}</a>`
+      : "";
+
+    return `
+      <article class="case-card">
+        <div class="case-top">
+          <span class="case-code">${c.case_code || ""}</span>
+          <span class="done">${statusLabel}</span>
+        </div>
+        <div class="case-body">
+          <h4>${c.subject || ""}</h4>
+          <div class="amount">${fmt(open ? amountRequired : amountSecured)} <small>${c.currency || "ل.س"}</small></div>
+          <div class="meta">
+            <div><b>${open ? fmt(amountRequired) : fmt(amountSecured)}</b>${open ? "المطلوب" : "المساعدة المسجلة"}</div>
+            <div><b>${open ? fmt(amountSecured) : "100%"}</b>${open ? "المؤمّن" : "نسبة الإنجاز"}</div>
+            <div><b>${c.category || "—"}</b>نوع الدعم</div>
+            <div><b>موثق</b>حالة التحقق</div>
+          </div>
+          ${action ? `<div class="support-action">${action}</div>` : ""}
+        </div>
+      </article>
+    `;
+  }
+
+  async function init() {
+    if (!window.MedLifeManagement) return;
+
+    try {
+      const result = await window.MedLifeManagement.support({ limit: 50 });
+      const rows = Array.isArray(result.data) ? result.data : [];
+      if (!rows.length) return;
+
+      const open = rows.filter((row) => row.status === "published" || row.status === "supporting");
+      const completed = rows.filter((row) => row.status === "closed");
+
+      setText("statCompleted", completed.length);
+      setText("statAmount", fmt(completed.reduce((sum, row) => sum + Number(row.amount_secured || 0), 0)));
+      setText("statOpen", open.length);
+
+      const completedGrid = document.getElementById("completedGrid");
+      if (completedGrid) {
+        completedGrid.innerHTML = completed.length
+          ? completed.map((row) => card(row, false)).join("")
+          : '<div class="empty">لا توجد مساعدات مكتملة منشورة حالياً.</div>';
+      }
+
+      const demo = document.querySelector("#completed .demo-banner");
+      if (demo) demo.style.display = "none";
+
+      const completedCount = document.querySelector('[data-tab="completed"] .count');
+      const openCount = document.querySelector('[data-tab="open"] .count');
+      if (completedCount) completedCount.textContent = String(completed.length);
+      if (openCount) openCount.textContent = String(open.length);
+
+      const openSection = document.getElementById("open");
+      if (openSection) {
+        const heading = openSection.querySelector(".section-heading");
+        const oldCard = openSection.querySelector(".open-card");
+        if (oldCard) oldCard.remove();
+
+        const grid = document.createElement("div");
+        grid.className = "completed-grid";
+        grid.innerHTML = open.length
+          ? open.map((row) => card(row, true)).join("")
+          : '<div class="empty">لا توجد حالياً حالات منشورة بحاجة إلى الدعم.</div>';
+        openSection.appendChild(grid);
+
+        if (heading) {
+          openSection.insertBefore(grid, openSection.querySelector(".request-box") || null);
+        }
+      }
+
+      const reviewText = document.querySelector("#review .empty");
+      if (reviewText) {
+        reviewText.textContent = "طلبات قيد الدراسة لا تُنشر للعامة. تظهر هنا فقط الحالات التي اعتمدها فريق ميدلايف للنشر.";
+      }
+    } catch (error) {
+      console.warn("Management support integration skipped:", error);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
