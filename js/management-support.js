@@ -101,15 +101,17 @@
         const oldManagementGrid = openSection.querySelector(".management-live-grid");
         if (oldManagementGrid) oldManagementGrid.remove();
 
-        const grid = document.createElement("div");
+        const grid = openSection.querySelector("#openGrid") || (() => {
+          const created = document.createElement("div");
+          created.className = "completed-grid";
+          created.id = "openGrid";
+          openSection.appendChild(created);
+          return created;
+        })();
         grid.className = "completed-grid management-live-grid";
         grid.innerHTML = open.length
           ? open.map((row) => card(row, true)).join("")
           : '<div class="empty">لا توجد حالياً حالات منشورة بحاجة إلى الدعم.</div>';
-
-        const requestBox = openSection.querySelector(".request-box");
-        if (requestBox) openSection.insertBefore(grid, requestBox);
-        else openSection.appendChild(grid);
       }
 
       const reviewText = document.querySelector("#review .empty");
