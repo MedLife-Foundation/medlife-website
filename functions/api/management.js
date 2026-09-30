@@ -167,7 +167,8 @@ export async function onRequestPost({ request }) {
       }
     }
 
-    const response = await fetch(SUPABASE_URL + "/rest/v1/" + target, {
+    const writeUrl = SUPABASE_URL + "/rest/v1/" + target + (body.action === "article_submission" ? "?select=id" : "");
+    const response = await fetch(writeUrl, {
       method: "POST",
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -182,7 +183,9 @@ export async function onRequestPost({ request }) {
       console.error("Public management write failed", target, response.status, text);
       return json({ success: false, error: "تعذر تسجيل الطلب في منصة الإدارة." }, 502);
     }
-    return json({ success: true, message: "تم تسجيل الطلب في منصة الإدارة." }, 201);
+    const created = body.action === "article_submission" ? await response.json().catch(() => []) : [];
+    const submissionId = Array.isArray(created) ? created[0]?.id || null : null;
+    return json({ success: true, submission_id: submissionId, message: "تم تسجيل الطلب في منصة الإدارة." }, 201);
   } catch (error) {
     console.error("Management API POST error", error);
     return json({ success: false, error: "تعذر استقبال الطلب حالياً." }, 500);
