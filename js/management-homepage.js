@@ -9,6 +9,32 @@ async function getHome(){
   const d=await r.json();
   return Array.isArray(d?.data)?d.data[0]:null;
 }
+async function getSiteSettings(){
+  try{
+    const r=await fetch("/api/management?resource=settings",{headers:{Accept:"application/json"},cache:"no-store"});
+    if(!r.ok)return null;
+    const d=await r.json();
+    const rows=Array.isArray(d?.data)?d.data:[];
+    const website=rows.find(x=>x?.key==="website");
+    return website?.value&&typeof website.value==="object"?website.value:null;
+  }catch(_){return null}
+}
+function applySiteSettings(settings){
+  if(!settings)return;
+  if(settings.site_title){
+    document.title=String(settings.site_title);
+    const meta=document.querySelector('meta[name="og:title"]');
+    if(meta)meta.setAttribute("content",String(settings.site_title));
+  }
+  if(settings.site_description){
+    const meta=document.querySelector('meta[name="description"]');
+    if(meta)meta.setAttribute("content",String(settings.site_description));
+  }
+  if(settings.site_footer){
+    const footer=document.querySelector(".ml-footer");
+    if(footer)footer.textContent=String(settings.site_footer);
+  }
+}
 function setText(root,selector,value){const el=root?.querySelector(selector);if(el&&value!==undefined)el.textContent=String(value??"");return el}
 function initHome(page){
   const d=page?.metadata;
@@ -130,7 +156,10 @@ function initHome(page){
 }
 (async()=>{
   if(!document.querySelector(".ml-hero"))return;
-  try{const page=await getHome();initHome(page)}
-  catch(e){console.warn("Managed homepage fallback active",e)}
+  try{
+    const [page,settings]=await Promise.all([getHome(),getSiteSettings()]);
+    initHome(page);
+    applySiteSettings(settings);
+  }catch(e){console.warn("Managed homepage fallback active",e)}
 })();
 })();
