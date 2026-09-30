@@ -87,12 +87,46 @@ function initHome(page){
     const grid=portal.querySelector(".ml-links-grid");
     if(grid)grid.innerHTML=(d.portals?.items||[]).map(x=>"<article class='ml-link-card'><h3>"+esc(x.title||"")+"</h3><p>"+esc(x.text||"")+"</p><a href='"+(url(x.url)||"#")+"'>"+esc(x.label||"")+"</a></article>").join("");
   }
+
   const social=document.querySelector("#social");
   if(social){
     setText(social,".ml-eyebrow",d.social?.eyebrow);
     setText(social,"h2",d.social?.title);
     setText(social,"p",d.social?.intro);
+    const grid=social.querySelector(".ml-social-grid");
+    if(grid && Array.isArray(d.social?.items) && d.social.items.length){
+      grid.innerHTML=d.social.items.map(x=>{
+        const href=url(x.url)||"#";
+        const icon=String(x.url||"").includes("instagram")?"fa-instagram":"fa-facebook";
+        return "<a class='ml-social-card' href='"+href+"' target='_blank' rel='noopener noreferrer'><span class='ml-social-icon'><i class='fa-brands "+icon+"'></i></span><span><strong>"+esc(x.title||"")+"</strong><small>"+esc(x.label||"")+"</small></span></a>";
+      }).join("");
+    }
   }
+  const contact=document.querySelector("#contact");
+  if(contact){
+    setText(contact,".ml-heading .ml-eyebrow",d.contact?.eyebrow);
+    setText(contact,".ml-heading h2",d.contact?.title);
+    setText(contact,".ml-heading p",d.contact?.intro);
+    const cards=contact.querySelectorAll(".ml-contact-card");
+    if(cards[0]){
+      setText(cards[0],"h3",d.contact?.organization_title);
+      setText(cards[0],".ml-contact-row span",d.contact?.organization_location);
+      const rows=cards[0].querySelectorAll(".ml-contact-row");
+      if(rows[1])setText(rows[1],"span",d.contact?.organization_note);
+      const a=cards[0].querySelector("a.ml-btn");if(a){a.textContent="صفحة تواصل معنا";a.href=url(d.contact?.organization_url)||a.href}
+    }
+    if(cards[1]){
+      setText(cards[1],"h3",d.contact?.forum_title);
+      const phone=cards[1].querySelector("a[href^='tel:+963182220555']");
+      const mobile=cards[1].querySelector("a[href^='tel:+963989913713']");
+      const email=cards[1].querySelector("a[href^='mailto:Forum@medlifesy.org']");
+      if(phone){phone.textContent=d.contact?.forum_phone||"";phone.href="tel:"+String(d.contact?.forum_phone||"").replace(/[^+0-9]/g,"")}
+      if(mobile){mobile.textContent=d.contact?.forum_mobile||"";mobile.href="tel:"+String(d.contact?.forum_mobile||"").replace(/[^+0-9]/g,"")}
+      if(email){email.textContent=d.contact?.forum_email||"";email.href="mailto:"+String(d.contact?.forum_email||"")}
+    }
+  }
+  const footer=document.querySelector(".ml-footer");
+  if(footer && d.footer?.text) footer.textContent=d.footer.text;
 }
 (async()=>{
   if(!document.querySelector(".ml-hero"))return;
