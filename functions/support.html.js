@@ -1,5 +1,9 @@
 const API_RESOURCE = "support";
 
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+}
+
 function sanitizeManagedHtml(value) {
   return String(value || "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -32,8 +36,15 @@ export async function onRequestGet(context) {
     const start = html.indexOf(startMarker);
     const end = html.indexOf(endMarker, start + startMarker.length);
     if (start < 0 || end < 0) return assetResponse;
+    let managed = html.slice(0, start + startMarker.length) + body + html.slice(end);
+    
+    const title = escapeHtml(page.title || "MedLife");
+    const description = escapeHtml(page.excerpt || "");
+    managed = managed.replace(/<title>[\s\S]*?<\/title>/i, "<title>" + title + " | MedLife</title>");
+    if (description) {
+      managed = managed.replace(/<meta\s+name=["']description["'][^>]*>/i, '<meta name="description" content="' + description + '">');
+    }
 
-    const managed = html.slice(0, start + startMarker.length) + body + html.slice(end);
     return new Response(managed, {
       status: assetResponse.status,
       headers: {
