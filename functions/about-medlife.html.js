@@ -1,5 +1,9 @@
 const API_RESOURCE = "about-medlife";
 
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+}
+
 function sanitizeManagedHtml(value) {
   return String(value || "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -27,8 +31,15 @@ export async function onRequestGet(context) {
     if (!body) return assetResponse;
 
     const html = await assetResponse.text();
-    const managed = html.replace(/<main\b[^>]*>[\s\S]*?<\/main>/i, "<main>" + body + "</main>");
+    let managed = html.replace(/<main\b[^>]*>[\s\S]*?<\/main>/i, "<main>" + body + "</main>");
     if (managed === html) return assetResponse;
+    
+    const title = escapeHtml(page.title || "MedLife");
+    const description = escapeHtml(page.excerpt || "");
+    managed = managed.replace(/<title>[\s\S]*?<\/title>/i, "<title>" + title + " | MedLife</title>");
+    if (description) {
+      managed = managed.replace(/<meta\s+name=["']description["'][^>]*>/i, '<meta name="description" content="' + description + '">');
+    }
 
     return new Response(managed, {
       status: assetResponse.status,
