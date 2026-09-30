@@ -1,5 +1,5 @@
 (() => {
-  const items = [
+  const baseItems = [
     ['index.html', 'الرئيسية', 'home'],
     ['about-medlife.html', 'عن المؤسسة', 'about'],
     ['index.html#programs', 'مجالات العمل', 'programs'],
@@ -10,12 +10,17 @@
     ['contact.html', 'تواصل معنا', 'contact']
   ];
 
+  let items = baseItems.slice();
   const rawPage = location.pathname.split('/').filter(Boolean).pop() || 'index.html';
   const page = rawPage.endsWith('/') ? rawPage.slice(0, -1) : rawPage;
   const home = page === '' || page === 'index.html';
 
   const activeKey = () => {
     if (page === 'gallery' || page === 'gallery.html') return 'gallery';
+    if (location.pathname.startsWith('/pages/')) {
+      const managedSlug = decodeURIComponent(location.pathname.replace(/^\/pages\//, '').replace(/\/$/, ''));
+      return 'managed:' + managedSlug;
+    }
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
     if (home) return 'home';
@@ -45,7 +50,25 @@
     }
   };
 
-  function build() {
+  async function loadManagedItems() {
+    try {
+      const response = await fetch('/api/management?resource=content&content_type=page&limit=50', {headers:{Accept:'application/json'},cache:'no-store'});
+      if (!response.ok) return;
+      const payload = await response.json();
+      const managed = Array.isArray(payload?.data) ? payload.data : [];
+      const extras = managed
+        .filter(page => page && page.slug && page.slug !== 'home' && page.status === 'published' && page.metadata?.nav?.show_main === true)
+        .map(page => ['/pages/' + encodeURIComponent(page.slug), String(page.metadata?.nav?.label || page.title || '').trim(), 'managed:' + page.slug])
+        .filter(item => item[1]);
+      const existing = new Set(items.map(item => item[0].split('#')[0]));
+      items = [...items, ...extras.filter(item => !existing.has(item[0]))];
+    } catch (error) {
+      console.warn('Managed navigation fallback active', error);
+    }
+  }
+
+  async function build() {
+    await loadManagedItems();
     removeLegacyHeaders();
 
     const current = activeKey();
