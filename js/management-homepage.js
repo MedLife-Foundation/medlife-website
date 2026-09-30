@@ -1,59 +1,102 @@
 (function(){
 "use strict";
-const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const safeUrl=v=>{try{const u=new URL(String(v||""),location.origin);return u.protocol==="https:"||u.origin===location.origin?u.href:""}catch{return""}};
-const text=(v,n=260)=>esc(String(v??"").trim().slice(0,n));
-function card(title,meta,desc,url){
-  const href=safeUrl(url)||"#";
-  return `<article style="background:#fff;border:1px solid rgba(15,35,63,.08);border-radius:18px;padding:20px;box-shadow:0 12px 30px rgba(15,35,63,.06)">
-    <div style="color:#e83255;font-size:10px;font-weight:900;margin-bottom:6px">${text(meta,80)}</div>
-    <h3 style="margin:0 0 8px;color:#12203a;font-size:17px;line-height:1.6">${text(title,180)}</h3>
-    <p style="margin:0;color:#738092;font-size:11px;line-height:1.9">${text(desc,300)}</p>
-    ${href!=="#" ? `<a href="${esc(href)}" style="display:inline-block;margin-top:12px;color:#e83255;font-size:10px;font-weight:900">عرض المزيد ←</a>` : ""}
-  </article>`;
-}
-async function get(resource){
-  const r=await fetch("/api/management?resource="+encodeURIComponent(resource)+"&limit=6",{headers:{Accept:"application/json"},cache:"no-store"});
+const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rich=v=>esc(v).replace(/&lt;span&gt;/g,"<span>").replace(/&lt;\/span&gt;/g,"</span>");
+const url=v=>{try{const u=new URL(String(v||""),location.origin);return u.protocol==="https:"||u.origin===location.origin?u.href:""}catch{return""}};
+async function getHome(){
+  const r=await fetch("/api/management?resource=content&content_type=page&slug=home&limit=1",{headers:{Accept:"application/json"},cache:"no-store"});
   if(!r.ok)throw 0;
   const d=await r.json();
-  return Array.isArray(d?.data)?d.data:[];
+  return Array.isArray(d?.data)?d.data[0]:null;
 }
-async function init(){
-  const anchor=document.querySelector("#programs");
-  if(!anchor)return;
-  try{
-    const [content,activities,campaigns,media]=await Promise.all([
-      get("content").catch(()=>[]),get("activities").catch(()=>[]),get("campaigns").catch(()=>[]),get("media").catch(()=>[])
-    ]);
-    if(content.length||activities.length||campaigns.length){
-      const section=document.createElement("section");
-      section.className="ml-section ml-soft ml-reveal";
-      section.id="managementLive";
-      section.innerHTML=`<div class="ml-wrap">
-        <div class="ml-heading"><div class="ml-eyebrow">آخر مستجدات ميدلايف</div><h2>منصة الإدارة تحافظ على الموقع محدثاً</h2><p>المحتوى العام المنشور والمعتمد يظهر هنا تلقائياً.</p></div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="managementLiveGrid"></div>
-      </div>`;
-      anchor.insertAdjacentElement("afterend",section);
-      const grid=section.querySelector("#managementLiveGrid");
-      const items=[
-        ...content.slice(0,2).map(x=>card(x.title,"مقال أو محتوى منشور",x.excerpt||x.body,safeUrl(x.public_url)||`/articles/${encodeURIComponent(x.slug||"")}`)),
-        ...activities.slice(0,2).map(x=>card(x.title,"نشاط · "+(x.governorate||"ميدلايف"),x.description,safeUrl(x.public_url)||"#")),
-        ...campaigns.slice(0,2).map(x=>card(x.name,"حملة · "+(x.governorate||"ميدلايف"),x.description,safeUrl(x.public_url)||"#"))
-      ].slice(0,6);
-      grid.innerHTML=items.join("");
-      const style=document.createElement("style");
-      style.textContent="@media(max-width:850px){#managementLiveGrid{grid-template-columns:1fr 1fr!important}}@media(max-width:560px){#managementLiveGrid{grid-template-columns:1fr!important}}";
-      section.appendChild(style);
+function setText(root,selector,value){const el=root?.querySelector(selector);if(el&&value!==undefined)el.textContent=String(value??"");return el}
+function initHome(page){
+  const d=page?.metadata;
+  if(!d||d.template!=="homepage")return;
+  const hero=document.querySelector(".ml-hero");
+  if(hero){
+    setText(hero,".ml-kicker",d.hero?.kicker);
+    const h=hero.querySelector("h1");if(h)h.innerHTML=rich(d.hero?.title||"");
+    setText(hero,"p",d.hero?.text);
+    const actions=hero.querySelector(".ml-actions");
+    if(actions){
+      const a=actions.querySelectorAll("a");
+      if(a[0]){a[0].textContent=d.hero?.primary_label||"";a[0].href=url(d.hero?.primary_url)||a[0].href}
+      if(a[1]){a[1].textContent=d.hero?.secondary_label||"";a[1].href=url(d.hero?.secondary_url)||a[1].href}
     }
-    if(media.length){
-      const gallery=document.querySelector("[data-home-gallery]");
-      if(gallery){
-        gallery.innerHTML=media.slice(0,6).map(x=>{
-          const u=safeUrl(x.public_url); return u?`<article class="ml-gallery-card"><img src="${esc(u)}" alt="${text(x.alt_text||x.caption||"من أنشطة ميدلايف",140)}" loading="lazy"><div class="ml-gallery-overlay"><h3>${text(x.caption||"من أنشطة ميدلايف",90)}</h3><p>من مكتبة الوسائط المنشورة في منصة الإدارة</p></div></article>`:"";
-        }).join("");
-      }
+  }
+  const stats=[...(d.stats||[])];
+  document.querySelectorAll(".ml-stat").forEach((el,i)=>{
+    const s=stats[i];if(!s)return;
+    const strong=el.querySelector("strong"),span=el.querySelector("span");
+    if(strong){strong.textContent=s.value||"";strong.dataset.count=s.value||""}
+    if(span)span.textContent=s.label||"";
+  });
+  const about=document.querySelector("#about");
+  if(about){
+    setText(about,".ml-heading .ml-eyebrow",d.about?.eyebrow);
+    setText(about,".ml-heading h2",d.about?.title);
+    setText(about,".ml-heading p",d.about?.intro);
+    const panels=about.querySelectorAll(".ml-panel");
+    if(panels[0]){
+      setText(panels[0],"h3",d.about?.panel_title);
+      setText(panels[0],"p",d.about?.panel_subtitle);
+      const pills=panels[0].querySelector(".ml-pill-row");if(pills)pills.innerHTML=(d.about?.pills||[]).map(x=>"<span class='ml-pill'>"+esc(x)+"</span>").join("");
     }
-  }catch(e){console.warn("Management homepage integration skipped",e);}
+    if(panels[1]){
+      setText(panels[1],"h3",d.about?.message_title);
+      const ps=panels[1].querySelectorAll("p");(d.about?.message_paragraphs||[]).slice(0,2).forEach((x,i)=>{if(ps[i])ps[i].textContent=x||""});
+      const a=panels[1].querySelector("a");if(a){a.textContent=d.about?.button_label||"";a.href=url(d.about?.button_url)||a.href}
+    }
+  }
+  const programs=document.querySelector("#programs");
+  if(programs){
+    setText(programs,".ml-heading .ml-eyebrow",d.programs?.eyebrow);
+    setText(programs,".ml-heading h2",d.programs?.title);
+    setText(programs,".ml-heading p",d.programs?.intro);
+    const grid=programs.querySelector(".ml-program-grid");
+    if(grid)grid.innerHTML=(d.programs?.items||[]).map(x=>"<article class='ml-program'><span class='ml-program-number'>"+esc(x.number)+"</span><h3>"+esc(x.title)+"</h3><p>"+esc(x.text)+"</p></article>").join("");
+  }
+  const support=document.querySelector(".ml-support");
+  if(support){
+    setText(support,".ml-eyebrow",d.support?.eyebrow);
+    setText(support,"h2",d.support?.title);
+    setText(support,"p",d.support?.text);
+    setText(support,".ml-support-card strong",d.support?.card_title);
+    setText(support,".ml-support-card span",d.support?.card_text);
+    const a=support.querySelectorAll(".ml-actions a");
+    if(a[0]){a[0].textContent=d.support?.primary_label||"";a[0].href=url(d.support?.primary_url)||a[0].href}
+    if(a[1]){a[1].textContent=d.support?.secondary_label||"";a[1].href=url(d.support?.secondary_url)||a[1].href}
+  }
+  const gallery=document.querySelector("#homepageGallery");
+  if(gallery){
+    setText(gallery,".ml-heading .ml-eyebrow",d.gallery?.eyebrow);
+    setText(gallery,".ml-heading h2",d.gallery?.title);
+    setText(gallery,".ml-heading p",d.gallery?.intro);
+    const grid=gallery.querySelector("[data-home-gallery]");
+    if(grid && Array.isArray(d.gallery?.items) && d.gallery.items.length){
+      grid.innerHTML=d.gallery.items.map(x=>"<article class='ml-gallery-card'><img src='"+(url(x.url)||"")+"' alt='"+esc(x.alt||"")+"' loading='lazy'><div class='ml-gallery-overlay'><h3>"+esc(x.title||"")+"</h3><p>"+esc(x.text||"")+"</p></div></article>").join("");
+    }
+    const a=gallery.querySelector(".ml-center a");if(a){a.textContent=d.gallery?.button_label||"";a.href=url(d.gallery?.button_url)||a.href}
+  }
+  const portal=document.querySelector(".ml-links-grid")?.closest(".ml-section");
+  if(portal){
+    setText(portal,".ml-heading .ml-eyebrow",d.portals?.eyebrow);
+    setText(portal,".ml-heading h2",d.portals?.title);
+    setText(portal,".ml-heading p",d.portals?.intro);
+    const grid=portal.querySelector(".ml-links-grid");
+    if(grid)grid.innerHTML=(d.portals?.items||[]).map(x=>"<article class='ml-link-card'><h3>"+esc(x.title||"")+"</h3><p>"+esc(x.text||"")+"</p><a href='"+(url(x.url)||"#")+"'>"+esc(x.label||"")+"</a></article>").join("");
+  }
+  const social=document.querySelector("#social");
+  if(social){
+    setText(social,".ml-eyebrow",d.social?.eyebrow);
+    setText(social,"h2",d.social?.title);
+    setText(social,"p",d.social?.intro);
+  }
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+(async()=>{
+  if(!document.querySelector(".ml-hero"))return;
+  try{const page=await getHome();initHome(page)}
+  catch(e){console.warn("Managed homepage fallback active",e)}
+})();
 })();
