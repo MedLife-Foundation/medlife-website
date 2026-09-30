@@ -2,9 +2,9 @@ const API_RESOURCE = "contact";
 
 function sanitizeManagedHtml(value) {
   return String(value || "")
-    .replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi, "")
-    .replace(/\\son[a-z]+\\s*=\\s*("[^"]*"|'[^']*')/gi, "")
-    .replace(/\\s(?:href|src)\\s*=\\s*("|')\\s*javascript:[\\s\\S]*?\\2/gi, "");
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*')/gi, "")
+    .replace(/\s(?:href|src)\s*=\s*("|')\s*javascript:[\s\S]*?\2/gi, "");
 }
 
 export async function onRequestGet(context) {
@@ -27,9 +27,10 @@ export async function onRequestGet(context) {
     if (!body) return assetResponse;
 
     const html = await assetResponse.text();
-    const managedMain = html.replace(/<main\\b[^>]*>[\\s\\S]*?<\\/main>/i, "<main>" + body + "</main>");
+    const managed = html.replace(/<main\b[^>]*>[\s\S]*?<\/main>/i, "<main>" + body + "</main>");
+    if (managed === html) return assetResponse;
 
-    return new Response(managedMain, {
+    return new Response(managed, {
       status: assetResponse.status,
       headers: {
         "content-type": "text/html; charset=UTF-8",
