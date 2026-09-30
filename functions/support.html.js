@@ -27,9 +27,13 @@ export async function onRequestGet(context) {
     if (!body) return assetResponse;
 
     const html = await assetResponse.text();
-    const managed = html.replace(/<div id="managedSupportPage">[\s\S]*?<\/div>\s*(?=<footer>)/i, "<div id="managedSupportPage">" + body + "</div>");
-    if (managed === html) return assetResponse;
+    const startMarker = "<!--MANAGED_SUPPORT_START-->";
+    const endMarker = "<!--MANAGED_SUPPORT_END-->";
+    const start = html.indexOf(startMarker);
+    const end = html.indexOf(endMarker, start + startMarker.length);
+    if (start < 0 || end < 0) return assetResponse;
 
+    const managed = html.slice(0, start + startMarker.length) + body + html.slice(end);
     return new Response(managed, {
       status: assetResponse.status,
       headers: {
