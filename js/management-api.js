@@ -39,6 +39,7 @@
     activities: (params) => request("activities", params),
     campaigns: (params) => request("campaigns", params),
     support: (params) => request("support", params),
-    media: (params) => request("media", params)
+    media: (params) => request("media", params),
+    settings: (params) => request("settings", params)
   });
 })();
