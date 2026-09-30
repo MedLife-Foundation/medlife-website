@@ -56,8 +56,16 @@
       if (!response.ok) return;
       const payload = await response.json();
       const managed = Array.isArray(payload?.data) ? payload.data : [];
+      const managedBySlug = new Map(managed.filter(page => page?.slug).map(page => [page.slug, page]));
+      items = items.map(item => {
+        const keyMap = {about:'about-medlife', support:'support', contact:'contact'};
+        const slug = keyMap[item[2]];
+        const page = slug ? managedBySlug.get(slug) : null;
+        if (!page || !page.metadata?.nav?.label) return item;
+        return [page.public_url || item[0], String(page.metadata.nav.label).trim() || item[1], item[2]];
+      });
       const extras = managed
-        .filter(page => page && page.slug && page.slug !== 'home' && page.status === 'published' && page.metadata?.nav?.show_main === true)
+        .filter(page => page && page.slug && page.slug !== 'home' && page.metadata?.nav?.show_main === true)
         .map(page => ['/pages/' + encodeURIComponent(page.slug), String(page.metadata?.nav?.label || page.title || '').trim(), 'managed:' + page.slug])
         .filter(item => item[1]);
       const existing = new Set(items.map(item => item[0].split('#')[0]));
@@ -154,7 +162,6 @@
         <div class="medlife-support-subnav-inner">
           <a href="support-request.html" data-support-key="request">تقديم طلب مساعدة</a>
           <a href="#cases" data-support-key="cases">استعراض الحالات</a>
-          <a href="support-donation.html?case=ML-SUP-2026-016" data-support-key="support">تقديم دعم</a>
         </div>`;
       header.insertAdjacentElement('afterend', sub);
 
