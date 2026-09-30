@@ -26,6 +26,11 @@ const RESOURCES = {
     table: "public_site_media",
     select: "source_id,file_name,mime_type,alt_text,caption,public_url,created_at",
     order: "created_at.desc"
+  },
+  settings: {
+    table: "public_site_settings",
+    select: "key,value,updated_at",
+    order: "key.asc"
   }
 };
 
