@@ -35,8 +35,10 @@
       const list=units.data||[];
       $("joinDepartments").innerHTML=list.length?list.map(x=>{
         const value=String(x.name_ar||x.name_en||"");
-        return '<label><input type="checkbox" name="requested_department" value="'+value.replace(/"/g,"&quot;")+'"><span>'+value+'</span></label>';
+        const unitId=String(x.id||"");
+        return '<label><input type="checkbox" name="requested_department" data-unit-id="'+unitId.replace(/"/g,"&quot;")+'" value="'+value.replace(/"/g,"&quot;")+'"><span>'+value+'</span></label>';
       }).join(""):"<div style='font-size:11px;color:#64748b'>لا توجد أقسام متاحة حالياً.</div>";
+      window.MedLifeDynamicForm?.refresh?.();
       if(!open) form.querySelectorAll("input,select,textarea,button").forEach(el=>{el.disabled=true});
     }catch(_){
       open=false;
@@ -50,6 +52,11 @@
     e.preventDefault();
     e.stopImmediatePropagation();
     if(!open)return;
+    if(window.MedLifeDynamicForm?.isLoading?.()){
+      alert("جارٍ تحميل نموذج الانضمام. يرجى الانتظار لحظات ثم المحاولة مجدداً.");
+      return;
+    }
+    if(window.MedLifeDynamicForm && !window.MedLifeDynamicForm.validate())return;
     const required=["email","password","full_name","mother_name","national_id","gender","phone","governorate","academic_status","interest"];
     for(const id of required){
       if(!$(id)?.value){alert("يرجى تعبئة جميع الحقول الإلزامية.");$(id)?.focus();return}
@@ -65,6 +72,8 @@
     const data={};
     ids.forEach(id=>data[id]=$(id)?.value||"");
     data.requested_departments=[...form.querySelectorAll('input[name="requested_department"]:checked')].map(x=>x.value);
+    data.form_id=window.MedLifeDynamicForm?.getFormId?.()||null;
+    data.form_data=window.MedLifeDynamicForm?.getData?.()||{};
 
     const button=$("submit"),msg=$("msg");
     button.disabled=true;
@@ -83,6 +92,7 @@
       msg.className="msg show ok";
       msg.textContent="تم استلام طلبك بنجاح. سيقوم فريق الموارد البشرية بمراجعته والتواصل معك عند الحاجة.";
       form.reset();
+      window.MedLifeDynamicForm?.reset?.();
     }catch(err){
       msg.className="msg show err";
       msg.textContent=err.message||"تعذر إرسال الطلب حالياً.";
