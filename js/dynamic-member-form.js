@@ -209,7 +209,9 @@
     for (const field of fields) {
       if (!visible(field)) continue;
       const value = getValue(field);
-      if (Array.isArray(value) ? value.length : field.field_type === "boolean" ? value === true : String(value ?? "").trim()) {
+      if (field.field_type === "boolean") {
+        result[field.field_key] = Boolean(value);
+      } else if (Array.isArray(value) ? value.length : String(value ?? "").trim()) {
         result[field.field_key] = value;
       }
     }
