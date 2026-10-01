@@ -46,6 +46,11 @@ const RESOURCES = {
     table: "admin_form_definitions",
     select: "id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,settings",
     order: "updated_at.desc"
+  },
+  membership_renewal_form: {
+    table: "admin_form_definitions",
+    select: "id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,settings",
+    order: "updated_at.desc"
   }
 };
 
@@ -105,6 +110,12 @@ async function fetchResource(resource, url) {
     query.set("is_public", "eq.true");
     query.set("limit", "1");
   }
+  if (resource === "membership_renewal_form") {
+    query.set("form_kind", "eq.membership_renewal");
+    query.set("status", "eq.published");
+    query.set("is_public", "eq.true");
+    query.set("limit", "1");
+  }
 
   const response = await fetch(SUPABASE_URL + "/rest/v1/" + config.table + "?" + query.toString(), {
     headers: {
@@ -117,7 +128,7 @@ async function fetchResource(resource, url) {
   let data;
   try { data = JSON.parse(body); } catch { data = { error: body }; }
   if (!response.ok) throw new Error("تعذر تحميل بيانات الموقع.");
-  if (resource === "join_form") {
+  if (resource === "join_form" || resource === "membership_renewal_form") {
     const form = Array.isArray(data) ? data[0] : null;
     if (!form?.id) return [];
     const fieldsResponse = await fetch(
@@ -133,7 +144,31 @@ async function fetchResource(resource, url) {
     const fieldsBody = await fieldsResponse.text();
     let fields;
     try { fields = JSON.parse(fieldsBody); } catch { fields = []; }
-    if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة نموذج الانضمام.");
+    if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة النموذج.");
+    if (resource === "membership_renewal_form") {
+      const unitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const units = await unitsResponse.json().catch(() => []);
+      const liveUnits = (Array.isArray(units) ? units : []).map(unit => ({
+        id: String(unit.id),
+        name_ar: cleanText(unit.name_ar || unit.name_en, 200),
+        name_en: cleanText(unit.name_en || unit.name_ar, 200),
+        unit_type: cleanText(unit.unit_type, 50)
+      })).filter(unit => unit.id && unit.name_ar);
+      const normalizedFields = fields.map(field => field.field_key === "current_units"
+        ? {...field, options: liveUnits.map(unit => ({value: unit.id, label_ar: unit.name_ar, label_en: unit.name_en}))}
+        : field
+      );
+      return [{...form, fields: normalizedFields, units: liveUnits}];
+    }
     return [{...form, fields}];
   }
   return Array.isArray(data) ? data : [];
@@ -147,12 +182,12 @@ function sanitizeFormValue(value) {
   return cleanText(value, 5000);
 }
 
-async function validateAndSanitizeFormData(body) {
+async function validateAndSanitizeFormData(body, expectedFormKind = "new_member") {
   const formId = cleanText(body.form_id, 80);
   if (!formId) return {form_id: null, form_version: null, form_data: {}, form_schema: {}};
 
   const formResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,updated_at&id=eq." + encodeURIComponent(formId) + "&form_kind=eq.new_member&status=eq.published&is_public=eq.true&limit=1",
+    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,updated_at&id=eq." + encodeURIComponent(formId) + "&form_kind=eq." + encodeURIComponent(expectedFormKind) + "&status=eq.published&is_public=eq.true&limit=1",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -186,6 +221,17 @@ async function validateAndSanitizeFormData(body) {
     const safeValue = sanitizeFormValue(value);
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
   }
+  for (const field of fieldRows) {
+    if (!field.required) continue;
+    const value = formData[field.field_key];
+    const missing = Array.isArray(value)
+      ? value.length === 0
+      : typeof value === "boolean"
+        ? value !== true
+        : value === undefined || value === null || String(value).trim() === "";
+    if (missing) throw new Error("يرجى تعبئة السؤال: " + String(field.label_ar || field.field_key));
+  }
+
   const formSchema = {
     form_id: form.id,
     form_key: form.form_key,
@@ -270,7 +316,9 @@ export async function onRequestPost({ request }) {
 
     const target = body.action === "article_submission"
       ? "public_article_submissions"
-      : "public_volunteer_applications";
+      : body.action === "membership_renewal"
+        ? "public_membership_renewal_submissions"
+        : "public_volunteer_applications";
 
     let payload;
     if (body.action === "article_submission") {
@@ -292,6 +340,133 @@ export async function onRequestPost({ request }) {
       if (!payload.title_ar || !payload.author_name || !payload.content_ar) {
         return json({ success: false, error: "يرجى إكمال عنوان المقال واسم الكاتب والمحتوى." }, 400);
       }
+    } else if (body.action === "membership_renewal") {
+      let dynamic;
+      try {
+        dynamic = await validateAndSanitizeFormData(body, "membership_renewal");
+      } catch (formError) {
+        return json({ success: false, error: formError.message || "نموذج التجديد غير صالح." }, 400);
+      }
+
+      const data = dynamic.form_data;
+      if (data.declaration_accurate !== true || data.privacy_consent !== true) {
+        return json({ success: false, error: "يرجى تأكيد صحة المعلومات والموافقة على استخدام البيانات." }, 400);
+      }
+
+      const requestedIds = Array.isArray(data.current_units)
+        ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 8)
+        : [];
+      if (!requestedIds.length) {
+        return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
+      }
+
+      const unitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const unitsRows = await unitsResponse.json().catch(() => []);
+      const activeUnits = Array.isArray(unitsRows) ? unitsRows : [];
+      const requestedUnits = activeUnits
+        .filter(unit => requestedIds.includes(String(unit.id)))
+        .map(unit => ({
+          id: String(unit.id),
+          name_ar: cleanText(unit.name_ar || unit.name_en, 200),
+          unit_type: cleanText(unit.unit_type, 50)
+        }));
+      if (requestedUnits.length !== requestedIds.length) {
+        return json({ success: false, error: "يوجد قسم أو فريق غير صالح ضمن الاختيار." }, 400);
+      }
+
+      const numberValue = value => {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : null;
+      };
+      const toArray = value => Array.isArray(value)
+        ? value.map(item => cleanText(item, 100)).filter(Boolean).slice(0, 30)
+        : [];
+      const certificateTypes = toArray(data.certificate_types).filter(value => value !== "none");
+
+      const payload = {
+        form_id: dynamic.form_id,
+        form_version: dynamic.form_version,
+        status: "pending",
+        full_name: cleanText(data.full_name, 150),
+        father_name: cleanText(data.father_name, 150),
+        mother_name: cleanText(data.mother_name, 150),
+        national_id: cleanText(data.national_id, 40),
+        country: cleanText(data.country, 100),
+        governorate: cleanText(data.governorate, 100),
+        city: cleanText(data.city, 120),
+        full_address: cleanText(data.full_address, 1000),
+        date_of_birth: normalizeDate(data.date_of_birth),
+        gender: cleanText(data.gender, 20),
+        email: cleanText(data.email, 250).toLowerCase(),
+        phone: cleanText(data.phone, 50),
+        academic_status: cleanText(data.academic_status, 60),
+        university: cleanText(data.university, 250),
+        specialty: cleanText(data.specialty, 250),
+        profession: cleanText(data.profession, 250),
+        workplace: cleanText(data.workplace, 250),
+        skills: cleanText(data.skills, 1000).split(/[,،]/).map(value => value.trim()).filter(Boolean).slice(0, 30),
+        join_date: normalizeDate(data.join_date),
+        requested_unit_ids: requestedUnits.map(unit => unit.id),
+        requested_units: requestedUnits,
+        current_role_in_team: cleanText(data.current_role_in_team, 250),
+        reported_total_volunteer_hours: numberValue(data.reported_total_volunteer_hours),
+        volunteer_commitment_hours: numberValue(data.volunteer_commitment_hours),
+        certificate_types: certificateTypes,
+        certificate_other: cleanText(data.certificate_other, 500),
+        availability: cleanText(data.availability, 50),
+        interest_areas: toArray(data.interest_areas),
+        continuing_as_volunteer: data.continuing_as_volunteer === true,
+        additional_notes: cleanText(data.additional_notes, 3000),
+        declaration_accurate: true,
+        privacy_consent: true,
+        form_data: {...dynamic.form_data, current_units: requestedUnits.map(unit => unit.id)},
+        form_schema: {
+          ...dynamic.form_schema,
+          fields: dynamic.form_schema.fields.map(field => field.field_key === "current_units"
+            ? {...field, options: requestedUnits.map(unit => ({value: unit.id, label_ar: unit.name_ar, label_en: unit.name_ar}))}
+            : field)
+        },
+        source: "public_website"
+      };
+
+      const requiredCore = [
+        "full_name","father_name","mother_name","national_id","country","governorate",
+        "full_address","date_of_birth","gender","email","phone","academic_status","join_date"
+      ];
+      if (requiredCore.some(key => !String(payload[key] ?? "").trim())) {
+        return json({ success: false, error: "يرجى إكمال جميع المعلومات الأساسية المطلوبة." }, 400);
+      }
+
+      const response = await fetch(SUPABASE_URL + "/rest/v1/public_membership_renewal_submissions?select=id", {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Membership renewal write failed", response.status, errorText);
+        return json({ success: false, error: "تعذر تسجيل طلب تجديد العضوية." }, 502);
+      }
+      const created = await response.json().catch(() => []);
+      return json({
+        success: true,
+        submission_id: Array.isArray(created) ? created[0]?.id || null : null,
+        message: "تم استلام طلب تجديد العضوية وسيتم تدقيقه من فريق ميدلايف."
+      }, 201);
     } else {
       const recruitmentResponse = await fetch(
         SUPABASE_URL + "/rest/v1/volunteer_recruitment_settings?select=is_open,opens_at,closes_at&id=eq.1",
