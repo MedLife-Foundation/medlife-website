@@ -31,6 +31,16 @@ const RESOURCES = {
     table: "public_site_settings",
     select: "key,value,updated_at",
     order: "key.asc"
+  },
+  volunteer_recruitment: {
+    table: "volunteer_recruitment_settings",
+    select: "id,is_open,title,intro,closed_message,application_url,opens_at,closes_at,updated_at",
+    order: "id.asc"
+  },
+  join_units: {
+    table: "org_units",
+    select: "id,name_ar,name_en,unit_type,description",
+    order: "sort_order.asc"
   }
 };
 
@@ -76,6 +86,13 @@ async function fetchResource(resource, url) {
   if (resource === "support") {
     const status = url.searchParams.get("status");
     if (status) query.set("status", "eq." + status);
+  }
+  if (resource === "volunteer_recruitment") {
+    query.set("id", "eq.1");
+  }
+  if (resource === "join_units") {
+    query.set("unit_type", "in.(department,field_team)");
+    query.set("is_active", "eq.true");
   }
 
   const response = await fetch(SUPABASE_URL + "/rest/v1/" + config.table + "?" + query.toString(), {
@@ -129,6 +146,9 @@ function volunteerPayload(body) {
     consultation_specialty: cleanText(body.consultation_specialty, 250),
     field_location: cleanText(body.field_location, 100),
     volunteer_certificate: cleanText(body.volunteer_certificate, 30),
+    requested_departments: Array.isArray(body.requested_departments)
+      ? body.requested_departments.map((item) => cleanText(item, 160)).filter(Boolean).slice(0, 6)
+      : [],
     source: "public_website"
   };
 }
@@ -166,10 +186,46 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يرجى إكمال عنوان المقال واسم الكاتب والمحتوى." }, 400);
       }
     } else {
+      const recruitmentResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/volunteer_recruitment_settings?select=is_open,opens_at,closes_at&id=eq.1",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const recruitment = await recruitmentResponse.json().catch(() => []);
+      const config = Array.isArray(recruitment) ? recruitment[0] : null;
+      const now = Date.now();
+      const opensAt = config?.opens_at ? Date.parse(config.opens_at) : null;
+      const closesAt = config?.closes_at ? Date.parse(config.closes_at) : null;
+      const isOpen = Boolean(config?.is_open) && (!opensAt || now >= opensAt) && (!closesAt || now < closesAt);
+      if (!isOpen) {
+        return json({ success: false, error: "باب الانضمام مغلق حالياً." }, 403);
+      }
+
       payload = volunteerPayload(body);
       if (!payload.full_name || !payload.phone || !payload.governorate) {
         return json({ success: false, error: "يرجى تعبئة الاسم والهاتف والمحافظة." }, 400);
       }
+
+      const unitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=name_ar,name_en&unit_type=in.(department,field_team)&is_active=eq.true",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const units = await unitsResponse.json().catch(() => []);
+      const allowedNames = new Set(
+        (Array.isArray(units) ? units : []).flatMap((unit) => [unit.name_ar, unit.name_en]).filter(Boolean)
+      );
+      payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
     }
 
     const writeUrl = SUPABASE_URL + "/rest/v1/" + target + (body.action === "article_submission" ? "?select=id" : "");
