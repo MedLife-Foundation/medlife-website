@@ -20,12 +20,11 @@
 
   async function load(){
     try{
-      const [r,u,formResponse]=await Promise.all([
+      const [r,u]=await Promise.all([
         fetch("/api/management?resource=volunteer_recruitment",{cache:"no-store"}),
-        fetch("/api/management?resource=join_units",{cache:"no-store"}),
-        fetch("/api/management?resource=join_form",{cache:"no-store"})
+        fetch("/api/management?resource=join_units",{cache:"no-store"})
       ]);
-      const rc=await r.json(), units=await u.json(), formPayload=await formResponse.json().catch(()=>({}));
+      const rc=await r.json(), units=await u.json();
       const cfg=rc.data?.[0]||{};
       const now=Date.now();
       const opens=cfg.opens_at?Date.parse(cfg.opens_at):null;
@@ -53,6 +52,10 @@
     e.preventDefault();
     e.stopImmediatePropagation();
     if(!open)return;
+    if(window.MedLifeDynamicForm?.isLoading?.()){
+      alert("جارٍ تحميل نموذج الانضمام. يرجى الانتظار لحظات ثم المحاولة مجدداً.");
+      return;
+    }
     if(window.MedLifeDynamicForm && !window.MedLifeDynamicForm.validate())return;
     const required=["email","password","full_name","mother_name","national_id","gender","phone","governorate","academic_status","interest"];
     for(const id of required){
