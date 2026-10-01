@@ -149,10 +149,10 @@ function sanitizeFormValue(value) {
 
 async function validateAndSanitizeFormData(body) {
   const formId = cleanText(body.form_id, 80);
-  if (!formId) return {form_id: null, form_data: {}};
+  if (!formId) return {form_id: null, form_version: null, form_data: {}, form_schema: {}};
 
   const formResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_kind,status,is_public,version&id=eq." + encodeURIComponent(formId) + "&form_kind=eq.new_member&status=eq.published&is_public=eq.true&limit=1",
+    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,updated_at&id=eq." + encodeURIComponent(formId) + "&form_kind=eq.new_member&status=eq.published&is_public=eq.true&limit=1",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -166,7 +166,7 @@ async function validateAndSanitizeFormData(body) {
   if (!form?.id) throw new Error("نموذج الانضمام غير صالح أو لم يعد منشوراً.");
 
   const fieldsResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,field_type&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&limit=200",
+    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,sort_order&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc&limit=200",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -176,7 +176,8 @@ async function validateAndSanitizeFormData(body) {
     }
   );
   const fields = await fieldsResponse.json().catch(() => []);
-  const allowed = new Set(Array.isArray(fields) ? fields.map(field => cleanText(field.field_key, 120)).filter(Boolean) : []);
+  const fieldRows = Array.isArray(fields) ? fields : [];
+  const allowed = new Set(fieldRows.map(field => cleanText(field.field_key, 120)).filter(Boolean));
   const raw = body.form_data && typeof body.form_data === "object" && !Array.isArray(body.form_data) ? body.form_data : {};
   const formData = {};
   for (const [key, value] of Object.entries(raw)) {
@@ -185,7 +186,30 @@ async function validateAndSanitizeFormData(body) {
     const safeValue = sanitizeFormValue(value);
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
   }
-  return {form_id: form.id, form_data: formData, version: form.version};
+  const formSchema = {
+    form_id: form.id,
+    form_key: form.form_key,
+    version: form.version,
+    name_ar: form.name_ar,
+    name_en: form.name_en,
+    description_ar: form.description_ar,
+    description_en: form.description_en,
+    captured_at: new Date().toISOString(),
+    fields: fieldRows.map(field => ({
+      field_key: field.field_key,
+      label_ar: field.label_ar,
+      label_en: field.label_en,
+      help_ar: field.help_ar,
+      placeholder_ar: field.placeholder_ar,
+      field_type: field.field_type,
+      required: Boolean(field.required),
+      options: Array.isArray(field.options) ? field.options.slice(0, 100) : [],
+      visibility: field.visibility && typeof field.visibility === "object" ? field.visibility : {mode:"always"},
+      target_unit_ids: Array.isArray(field.target_unit_ids) ? field.target_unit_ids.slice(0, 50) : [],
+      sort_order: Number(field.sort_order || 0)
+    }))
+  };
+  return {form_id: form.id, form_version: form.version, form_data: formData, form_schema: formSchema};
 }
 
 function volunteerPayload(body) {
@@ -229,7 +253,9 @@ function volunteerPayload(body) {
       ? body.requested_departments.map((item) => cleanText(item, 160)).filter(Boolean).slice(0, 6)
       : [],
     form_id: null,
+    form_version: null,
     form_data: {},
+    form_schema: {},
     source: "public_website"
   };
 }
@@ -295,7 +321,9 @@ export async function onRequestPost({ request }) {
       try {
         const dynamic = await validateAndSanitizeFormData(body);
         payload.form_id = dynamic.form_id;
+        payload.form_version = dynamic.form_version;
         payload.form_data = dynamic.form_data;
+        payload.form_schema = dynamic.form_schema;
       } catch (formError) {
         return json({ success: false, error: formError.message || "نموذج الانضمام غير صالح." }, 400);
       }
