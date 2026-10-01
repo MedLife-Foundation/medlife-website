@@ -41,6 +41,11 @@ const RESOURCES = {
     table: "org_units",
     select: "id,name_ar,name_en,unit_type,description",
     order: "sort_order.asc"
+  },
+  join_form: {
+    table: "admin_form_definitions",
+    select: "id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,settings",
+    order: "updated_at.desc"
   }
 };
 
@@ -94,6 +99,12 @@ async function fetchResource(resource, url) {
     query.set("unit_type", "in.(department,field_team)");
     query.set("is_active", "eq.true");
   }
+  if (resource === "join_form") {
+    query.set("form_kind", "eq.new_member");
+    query.set("status", "eq.published");
+    query.set("is_public", "eq.true");
+    query.set("limit", "1");
+  }
 
   const response = await fetch(SUPABASE_URL + "/rest/v1/" + config.table + "?" + query.toString(), {
     headers: {
@@ -106,7 +117,75 @@ async function fetchResource(resource, url) {
   let data;
   try { data = JSON.parse(body); } catch { data = { error: body }; }
   if (!response.ok) throw new Error("تعذر تحميل بيانات الموقع.");
+  if (resource === "join_form") {
+    const form = Array.isArray(data) ? data[0] : null;
+    if (!form?.id) return [];
+    const fieldsResponse = await fetch(
+      SUPABASE_URL + "/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,sort_order,is_active&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc",
+      {
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+          Accept: "application/json"
+        }
+      }
+    );
+    const fieldsBody = await fieldsResponse.text();
+    let fields;
+    try { fields = JSON.parse(fieldsBody); } catch { fields = []; }
+    if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة نموذج الانضمام.");
+    return [{...form, fields}];
+  }
   return Array.isArray(data) ? data : [];
+}
+
+function sanitizeFormValue(value) {
+  if (Array.isArray(value)) {
+    return value.slice(0, 30).map(item => sanitizeFormValue(item)).filter(item => item !== "");
+  }
+  if (typeof value === "boolean" || typeof value === "number") return value;
+  return cleanText(value, 5000);
+}
+
+async function validateAndSanitizeFormData(body) {
+  const formId = cleanText(body.form_id, 80);
+  if (!formId) return {form_id: null, form_data: {}};
+
+  const formResponse = await fetch(
+    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_kind,status,is_public,version&id=eq." + encodeURIComponent(formId) + "&form_kind=eq.new_member&status=eq.published&is_public=eq.true&limit=1",
+    {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+        Accept: "application/json"
+      }
+    }
+  );
+  const formRows = await formResponse.json().catch(() => []);
+  const form = Array.isArray(formRows) ? formRows[0] : null;
+  if (!form?.id) throw new Error("نموذج الانضمام غير صالح أو لم يعد منشوراً.");
+
+  const fieldsResponse = await fetch(
+    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,field_type&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&limit=200",
+    {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+        Accept: "application/json"
+      }
+    }
+  );
+  const fields = await fieldsResponse.json().catch(() => []);
+  const allowed = new Set(Array.isArray(fields) ? fields.map(field => cleanText(field.field_key, 120)).filter(Boolean) : []);
+  const raw = body.form_data && typeof body.form_data === "object" && !Array.isArray(body.form_data) ? body.form_data : {};
+  const formData = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const safeKey = cleanText(key, 120);
+    if (!allowed.has(safeKey) || /password|secret|token/i.test(safeKey)) continue;
+    const safeValue = sanitizeFormValue(value);
+    if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
+  }
+  return {form_id: form.id, form_data: formData, version: form.version};
 }
 
 function volunteerPayload(body) {
@@ -149,6 +228,8 @@ function volunteerPayload(body) {
     requested_departments: Array.isArray(body.requested_departments)
       ? body.requested_departments.map((item) => cleanText(item, 160)).filter(Boolean).slice(0, 6)
       : [],
+    form_id: null,
+    form_data: {},
     source: "public_website"
   };
 }
@@ -209,6 +290,14 @@ export async function onRequestPost({ request }) {
       payload = volunteerPayload(body);
       if (!payload.full_name || !payload.phone || !payload.governorate) {
         return json({ success: false, error: "يرجى تعبئة الاسم والهاتف والمحافظة." }, 400);
+      }
+
+      try {
+        const dynamic = await validateAndSanitizeFormData(body);
+        payload.form_id = dynamic.form_id;
+        payload.form_data = dynamic.form_data;
+      } catch (formError) {
+        return json({ success: false, error: formError.message || "نموذج الانضمام غير صالح." }, 400);
       }
 
       const unitsResponse = await fetch(
