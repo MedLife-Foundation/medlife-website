@@ -227,7 +227,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     const missing = Array.isArray(value)
       ? value.length === 0
       : typeof value === "boolean"
-        ? value !== true
+        ? false
         : value === undefined || value === null || String(value).trim() === "";
     if (missing) throw new Error("يرجى تعبئة السؤال: " + String(field.label_ar || field.field_key));
   }
