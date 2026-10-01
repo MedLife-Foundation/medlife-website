@@ -1,115 +1,354 @@
 (function(){
 "use strict";
-const form=document.getElementById("renewalForm"), progress=document.getElementById("progress"), sectionsHost=document.getElementById("sections");
-const errorBox=document.getElementById("formError"), successBox=document.getElementById("formSuccess");
-let model=null, fields=[], sections=[], step=0, loading=true;
+
+const form=document.getElementById("renewalForm");
+const progress=document.getElementById("progress");
+const sectionsHost=document.getElementById("sections");
+const errorBox=document.getElementById("formError");
+const successBox=document.getElementById("formSuccess");
+
+let model=null;
+let fields=[];
+let groupSections=[];
+let progressButtons=[];
+let step=0;
+let loading=true;
 
 const groupDefs=[
- {title:"المعلومات الأساسية",desc:"البيانات الشخصية وبيانات التواصل والعنوان.",min:5,max:129},
- {title:"المعلومات الأكاديمية والمهنية",desc:"الجامعة والاختصاص والمهنة والخبرات.",min:130,max:189},
- {title:"العضوية والتطوع",desc:"تاريخ الانضمام، الأقسام، الساعات، الشهادات والتفرغ.",min:190,max:280},
- {title:"التأكيد والخصوصية",desc:"التصريح بصحة المعلومات والموافقة على استخدامها.",min:281,max:999}
+  {title:"المعلومات الأساسية",desc:"البيانات الشخصية وبيانات التواصل والعنوان.",min:5,max:129},
+  {title:"المعلومات الأكاديمية والمهنية",desc:"الجامعة والاختصاص والمهنة والخبرات.",min:130,max:189},
+  {title:"العضوية والتطوع",desc:"تاريخ الانضمام، الأقسام، الساعات، الشهادات والتفرغ.",min:190,max:280},
+  {title:"التأكيد والخصوصية",desc:"التصريح بصحة المعلومات والموافقة على استخدامها.",min:281,max:999}
 ];
-function fieldListForGroup(group){return fields.filter(f=>Number(f.sort_order)>=group.min&&Number(f.sort_order)<=group.max).sort((a,b)=>Number(a.sort_order)-Number(b.sort_order))}
-function setError(msg){errorBox.textContent=msg||"";errorBox.className=msg?"error show":"error"}
-function setSuccess(msg){successBox.textContent=msg||"";successBox.className=msg?"success show":"success"}
-function escapeAttr(v){return String(v??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
-function buildOptions(f){
- const opts=Array.isArray(f.options)?f.options:[];
- return opts.map(o=>({value:String(o.value??o.label_ar??""),label:String(o.label_ar??o.label??o.value??"")})).filter(o=>o.value&&o.label)
+
+function setError(message){
+  errorBox.textContent=message||"";
+  errorBox.className=message?"error show":"error";
 }
-function renderField(f){
- const wrap=document.createElement("div"); wrap.className="field"+(f.field_type==="textarea"||f.field_type==="multi_select"||f.field_type==="boolean"?" full":""); wrap.dataset.key=f.field_key;
- const label=document.createElement("span"); label.textContent=String(f.label_ar||f.field_key)+(f.required?" *":""); wrap.appendChild(label);
- if(f.help_ar){const p=document.createElement("p");p.className="help";p.textContent=f.help_ar;wrap.appendChild(p)}
- if(f.field_key==="current_units") {
-   const note=document.createElement("p"); note.className="dept-note"; note.textContent="يمكنك اختيار أكثر من قسم أو فريق، لأن العضو قد ينتمي إلى أكثر من وحدة."; wrap.appendChild(note);
- }
- const type=String(f.field_type||"text");
- if(type==="multi_select"){
-   const box=document.createElement("div");box.className="options";
-   buildOptions(f).forEach(o=>{const l=document.createElement("label");l.className="option";const i=document.createElement("input");i.type="checkbox";i.name=f.field_key;i.value=o.value;i.dataset.key=f.field_key;const s=document.createElement("span");s.textContent=o.label;l.append(i,s);box.appendChild(l)});
-   wrap.appendChild(box);
- }else if(type==="boolean"){
-   const l=document.createElement("label");l.className="boolean";const i=document.createElement("input");i.type="checkbox";i.dataset.key=f.field_key;const s=document.createElement("span");s.textContent=f.label_ar||f.field_key;label.remove();l.append(i,s);wrap.appendChild(l)
- }else if(type==="select"){
-   const s=document.createElement("select");s.dataset.key=f.field_key;const ph=document.createElement("option");ph.value="";ph.textContent="اختر";s.appendChild(ph);buildOptions(f).forEach(o=>{const op=document.createElement("option");op.value=o.value;op.textContent=o.label;s.appendChild(op)});wrap.appendChild(s)
- }else{
-   const i=type==="textarea"?document.createElement("textarea"):document.createElement("input");
-   if(i.tagName==="INPUT") i.type=type==="phone"?"tel":type; i.dataset.key=f.field_key; if(f.placeholder_ar)i.placeholder=f.placeholder_ar; wrap.appendChild(i)
- }
- return wrap;
+
+function setSuccess(message){
+  successBox.textContent=message||"";
+  successBox.className=message?"success show":"success";
 }
+
+function fieldListForGroup(group){
+  return fields
+    .filter(field=>Number(field.sort_order)>=group.min && Number(field.sort_order)<=group.max)
+    .sort((a,b)=>Number(a.sort_order)-Number(b.sort_order));
+}
+
+function buildOptions(field){
+  const options=Array.isArray(field.options)?field.options:[];
+  return options
+    .map(option=>({
+      value:String(option.value??option.label_ar??""),
+      label:String(option.label_ar??option.label??option.value??"")
+    }))
+    .filter(option=>option.value&&option.label);
+}
+
+function getNodes(key){
+  return [...form.querySelectorAll('[data-key="'+CSS.escape(key)+'"]')];
+}
+
 function getValue(key,type){
- const nodes=[...form.querySelectorAll('[data-key="'+CSS.escape(key)+'"]')];
- if(type==="multi_select")return nodes.filter(n=>n.checked).map(n=>n.value);
- if(type==="boolean")return Boolean(nodes[0]?.checked);
- return nodes[0]?.value??"";
+  const nodes=getNodes(key);
+  if(type==="multi_select") return nodes.filter(node=>node.checked).map(node=>node.value);
+  if(type==="boolean") return Boolean(nodes[0]?.checked);
+  return nodes[0]?.value??"";
 }
-function validateStep(){
- const fs=fieldListForGroup(groupDefs[step]);
- for(const f of fs){
-   if(!f.required)continue;
-   const v=getValue(f.field_key,f.field_type);
-   const missing=Array.isArray(v)?v.length===0:(f.field_type==="boolean"?v!==true:!String(v).trim());
-   if(missing){setError("يرجى تعبئة السؤال: "+(f.label_ar||f.field_key));const target=form.querySelector('[data-key="'+CSS.escape(f.field_key)+'"]');target?.scrollIntoView({behavior:"smooth",block:"center"});target?.focus();return false}
- }
- setError("");return true;
+
+function setSectionVisible(index){
+  step=index;
+  groupSections.forEach((section,i)=>section.classList.toggle("active",i===index));
+  progressButtons.forEach((button,i)=>{
+    button.classList.toggle("active",i===index);
+    button.classList.toggle("done",i<index);
+  });
+  setError("");
+  window.scrollTo({top:0,behavior:"smooth"});
 }
+
+function renderField(field){
+  const wrapper=document.createElement("div");
+  wrapper.className="field"+(
+    field.field_type==="textarea"||
+    field.field_type==="multi_select"||
+    field.field_type==="boolean" ? " full":""
+  );
+  wrapper.dataset.key=field.field_key;
+
+  const label=document.createElement("span");
+  label.textContent=String(field.label_ar||field.field_key)+(field.required?" *":"");
+  wrapper.appendChild(label);
+
+  if(field.help_ar){
+    const help=document.createElement("p");
+    help.className="help";
+    help.textContent=String(field.help_ar);
+    wrapper.appendChild(help);
+  }
+
+  if(field.field_key==="current_units"){
+    const note=document.createElement("p");
+    note.className="dept-note";
+    note.textContent="يمكنك اختيار أكثر من قسم أو فريق لأن العضو قد ينتمي إلى أكثر من وحدة.";
+    wrapper.appendChild(note);
+  }
+
+  const type=String(field.field_type||"text");
+
+  if(type==="multi_select"){
+    const box=document.createElement("div");
+    box.className="options";
+    buildOptions(field).forEach(option=>{
+      const item=document.createElement("label");
+      item.className="option";
+      const input=document.createElement("input");
+      input.type="checkbox";
+      input.name=field.field_key;
+      input.value=option.value;
+      input.dataset.key=field.field_key;
+      const text=document.createElement("span");
+      text.textContent=option.label;
+      item.append(input,text);
+      box.appendChild(item);
+    });
+    wrapper.appendChild(box);
+  }else if(type==="boolean"){
+    const item=document.createElement("label");
+    item.className="boolean";
+    const input=document.createElement("input");
+    input.type="checkbox";
+    input.dataset.key=field.field_key;
+    const text=document.createElement("span");
+    text.textContent=String(field.label_ar||field.field_key);
+    label.remove();
+    item.append(input,text);
+    wrapper.appendChild(item);
+  }else if(type==="select"){
+    const select=document.createElement("select");
+    select.dataset.key=field.field_key;
+    const placeholder=document.createElement("option");
+    placeholder.value="";
+    placeholder.textContent="اختر";
+    select.appendChild(placeholder);
+    buildOptions(field).forEach(option=>{
+      const optionNode=document.createElement("option");
+      optionNode.value=option.value;
+      optionNode.textContent=option.label;
+      select.appendChild(optionNode);
+    });
+    wrapper.appendChild(select);
+  }else{
+    const input=type==="textarea"?document.createElement("textarea"):document.createElement("input");
+    if(input.tagName==="INPUT") input.type=type==="phone"?"tel":type;
+    input.dataset.key=field.field_key;
+    if(field.placeholder_ar) input.placeholder=String(field.placeholder_ar);
+    wrapper.appendChild(input);
+  }
+
+  return wrapper;
+}
+
+function fieldVisible(field){
+  if(field.field_key==="certificate_other"){
+    const values=getValue("certificate_types","multi_select");
+    return values.includes("other");
+  }
+  const rule=field.visibility||{};
+  if(rule.mode!=="when") return true;
+  const controlling=fields.find(x=>x.field_key===String(rule.field_key||""));
+  if(!controlling) return false;
+  const actual=getValue(controlling.field_key,controlling.field_type);
+  const expected=String(rule.value??"");
+  if(rule.operator==="not_equals") return Array.isArray(actual)?!actual.includes(expected):String(actual)!==expected;
+  if(rule.operator==="contains") return Array.isArray(actual)?actual.includes(expected):String(actual).includes(expected);
+  return Array.isArray(actual)?actual.includes(expected):String(actual)===expected;
+}
+
+function refreshVisibility(){
+  fields.forEach(field=>{
+    const wrapper=form.querySelector('[data-key="'+CSS.escape(field.field_key)+'"]');
+    if(!wrapper) return;
+    wrapper.style.display=fieldVisible(field)?"":"none";
+  });
+}
+
+function validateGroup(index){
+  const group=groupDefs[index];
+  const groupFields=fieldListForGroup(group);
+  refreshVisibility();
+
+  for(const field of groupFields){
+    if(!field.required || !fieldVisible(field) || field.field_type==="boolean") continue;
+    const value=getValue(field.field_key,field.field_type);
+    if(Array.isArray(value)?value.length===0:!String(value).trim()){
+      setError("يرجى تعبئة السؤال: "+String(field.label_ar||field.field_key));
+      const target=form.querySelector('[data-key="'+CSS.escape(field.field_key)+'"]');
+      target?.scrollIntoView({behavior:"smooth",block:"center"});
+      target?.focus();
+      return false;
+    }
+  }
+  setError("");
+  return true;
+}
+
+function validateAll(){
+  for(let i=0;i<groupDefs.length;i++){
+    if(!validateGroup(i)){setSectionVisible(i);return false;}
+  }
+
+  const continuing=getValue("continuing_as_volunteer","boolean");
+  if(typeof continuing!=="boolean"){
+    setError("يرجى تحديد رغبتك بالاستمرار كمتطوع.");
+    return false;
+  }
+
+  if(getValue("certificate_types","multi_select").length===0){
+    setError("يرجى تحديد حالة الشهادات.");
+    setSectionVisible(2);
+    return false;
+  }
+
+  if(getValue("declaration_accurate","boolean")!==true){
+    setError("يجب تأكيد صحة المعلومات قبل الإرسال.");
+    setSectionVisible(3);
+    return false;
+  }
+
+  if(getValue("privacy_consent","boolean")!==true){
+    setError("يجب الموافقة على استخدام البيانات لأغراض إدارة العضوية.");
+    setSectionVisible(3);
+    return false;
+  }
+
+  return true;
+}
+
 function collect(){
- const data={};
- for(const f of fields){
-   const v=getValue(f.field_key,f.field_type);
-   if(f.field_type==="boolean")data[f.field_key]=Boolean(v);
-   else if(Array.isArray(v)?v.length:String(v).trim())data[f.field_key]=v;
- }
- return data;
+  refreshVisibility();
+  const data={};
+  for(const field of fields){
+    if(!fieldVisible(field)) continue;
+    const value=getValue(field.field_key,field.field_type);
+    if(field.field_type==="boolean") data[field.field_key]=Boolean(value);
+    else if(Array.isArray(value)?value.length:String(value??"").trim()) data[field.field_key]=value;
+  }
+  return data;
 }
-function draw(){
- progress.innerHTML="";
- sectionsHost.innerHTML="";
- sections=groupDefs.map((g,i)=>({g,el:null}));
- groupDefs.forEach((g,i)=>{
-   const p=document.createElement("button");p.type="button";p.className="progress-item"+(i===step?" active ":"")+(i<step?" done":"");p.innerHTML='<span class="num">'+(i+1)+'</span><strong>'+g.title+'</strong>';p.addEventListener("click",()=>{if(i<=step||validateStep()){step=i;draw()}});progress.appendChild(p);
-   const sec=document.createElement("section");sec.className="section"+(i===step?" active":"");
-   const head=document.createElement("div");head.className="section-head";head.innerHTML='<div><h2>'+g.title+'</h2><p>'+g.desc+'</p></div>';sec.appendChild(head);
-   const grid=document.createElement("div");grid.className="grid";
-   fieldListForGroup(g).forEach(f=>grid.appendChild(renderField(f)));
-   sec.appendChild(grid);
-   const actions=document.createElement("div");actions.className="actions";
-   const back=document.createElement("button");back.type="button";back.className="btn btn-secondary";back.textContent=i===0?"العودة":"السابق";back.onclick=()=>{if(i===0){location.href="join-options.html"}else{step=i-1;setError("");draw()}};
-   const next=document.createElement("button");next.type="button";next.className="btn btn-primary";next.textContent=i===groupDefs.length-1?"إرسال طلب التجديد":"التالي";next.onclick=()=>{if(!validateStep())return;if(i===groupDefs.length-1){submit()}else{step=i+1;draw();window.scrollTo({top:0,behavior:"smooth"})}};
-   actions.append(back,next);sec.appendChild(actions);sectionsHost.appendChild(sec)
- });
+
+function build(){
+  progress.innerHTML="";
+  sectionsHost.innerHTML="";
+  groupSections=[];
+  progressButtons=[];
+
+  groupDefs.forEach((group,index)=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="progress-item"+(index===0?" active":"");
+    button.innerHTML='<span class="num">'+(index+1)+'</span><strong>'+group.title+'</strong>';
+    button.addEventListener("click",()=>{
+      if(index<=step){setSectionVisible(index);return;}
+      for(let i=step;i<index;i++){
+        if(!validateGroup(i)){setSectionVisible(i);return;}
+      }
+      setSectionVisible(index);
+    });
+    progress.appendChild(button);
+    progressButtons.push(button);
+
+    const section=document.createElement("section");
+    section.className="section"+(index===0?" active":"");
+    const head=document.createElement("div");
+    head.className="section-head";
+    head.innerHTML='<div><h2>'+group.title+'</h2><p>'+group.desc+'</p></div>';
+    section.appendChild(head);
+
+    const grid=document.createElement("div");
+    grid.className="grid";
+    fieldListForGroup(group).forEach(field=>grid.appendChild(renderField(field)));
+    section.appendChild(grid);
+
+    const actions=document.createElement("div");
+    actions.className="actions";
+
+    const back=document.createElement("button");
+    back.type="button";
+    back.className="btn btn-secondary";
+    back.textContent=index===0?"العودة":"السابق";
+    back.addEventListener("click",()=>{
+      if(index===0) location.href="join-options.html";
+      else setSectionVisible(index-1);
+    });
+
+    const next=document.createElement("button");
+    next.type="button";
+    next.className="btn btn-primary";
+    next.textContent=index===groupDefs.length-1?"إرسال طلب التجديد":"التالي";
+    next.addEventListener("click",()=>{
+      if(index===groupDefs.length-1){void submit();return}
+      if(validateGroup(index))setSectionVisible(index+1);
+    });
+
+    actions.append(back,next);
+    section.appendChild(actions);
+    sectionsHost.appendChild(section);
+    groupSections.push(section);
+  });
+
+  form.addEventListener("input",refreshVisibility);
+  form.addEventListener("change",refreshVisibility);
+  refreshVisibility();
 }
+
 async function load(){
- try{
-   const r=await fetch("/api/management?resource=membership_renewal_form",{cache:"no-store"});
-   const j=await r.json();if(!r.ok||!j.success)throw new Error(j.error||"تعذر تحميل نموذج تجديد العضوية.");
-   model=j.data?.[0]||null;if(!model?.id)throw new Error("نموذج تجديد العضوية غير متاح حالياً.");
-   fields=(Array.isArray(model.fields)?model.fields:[]).filter(f=>f?.is_active);
-   if(!fields.length)throw new Error("لم تتم تهيئة أسئلة النموذج بعد.");
-   draw();
- }catch(e){setError(e.message||"تعذر تحميل النموذج.");form.querySelectorAll("button").forEach(b=>b.disabled=true)}
- finally{loading=false}
+  try{
+    const response=await fetch("/api/management?resource=membership_renewal_form",{cache:"no-store"});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok||!payload.success) throw new Error(payload.error||"تعذر تحميل نموذج تجديد العضوية.");
+    model=payload.data?.[0]||null;
+    if(!model?.id) throw new Error("نموذج تجديد العضوية غير متاح حالياً.");
+    fields=(Array.isArray(model.fields)?model.fields:[]).filter(field=>field?.is_active);
+    if(!fields.length) throw new Error("لم تتم تهيئة أسئلة النموذج بعد.");
+    build();
+  }catch(error){
+    setError(error.message||"تعذر تحميل النموذج.");
+    form.querySelectorAll("button").forEach(button=>button.disabled=true);
+  }finally{
+    loading=false;
+  }
 }
+
 async function submit(){
- if(loading||!validateStep())return;
- const data=collect();
- const btn=[...form.querySelectorAll(".btn-primary")].find(b=>b.textContent.includes("إرسال"))||null;
- if(btn)btn.disabled=true;setError("");setSuccess("جارٍ إرسال طلب تجديد العضوية...");
- try{
-   const r=await fetch("/api/management",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-     action:"membership_renewal",
-     form_id:model.id,
-     form_data:data
-   })});
-   const j=await r.json().catch(()=>({}));
-   if(!r.ok||!j.success)throw new Error(j.error||"تعذر تسجيل طلب تجديد العضوية.");
-   setSuccess("تم استلام طلب تجديد العضوية بنجاح. سيتم تدقيق البيانات من فريق ميدلايف قبل اعتمادها في قاعدة الأعضاء.");
-   form.querySelectorAll("input,select,textarea,button").forEach(el=>el.disabled=true);
-   window.scrollTo({top:0,behavior:"smooth"});
- }catch(e){setSuccess("");setError(e.message||"تعذر إرسال الطلب حالياً.");if(btn)btn.disabled=false}
+  if(loading||!validateAll()) return;
+  const data=collect();
+  const button=[...form.querySelectorAll(".btn-primary")].find(node=>node.textContent.includes("إرسال"));
+  if(button) button.disabled=true;
+
+  setError("");
+  setSuccess("جارٍ إرسال طلب تجديد العضوية...");
+
+  try{
+    const response=await fetch("/api/management",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"membership_renewal",form_id:model.id,form_data:data})
+    });
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok||!payload.success) throw new Error(payload.error||"تعذر تسجيل طلب تجديد العضوية.");
+
+    setSuccess("تم استلام طلب تجديد العضوية بنجاح. سيقوم فريق ميدلايف بتدقيق البيانات قبل اعتمادها في قاعدة الأعضاء.");
+    form.querySelectorAll("input,select,textarea,button").forEach(element=>element.disabled=true);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(error){
+    setSuccess("");
+    setError(error.message||"تعذر إرسال الطلب حالياً.");
+    if(button) button.disabled=false;
+  }
 }
+
 void load();
 })();
