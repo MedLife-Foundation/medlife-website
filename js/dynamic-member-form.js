@@ -116,11 +116,16 @@
       const select = document.createElement("select");
       select.dataset.dynamicKey = field.field_key;
       select.dataset.dynamicField = "true";
-      select.innerHTML = '<option value="">اختر</option>' +
-        buildOptions(field).map(option =>
-          '<option value="' + option.value.replace(/"/g, "&quot;") + '">' +
-          option.label.replace(/</g, "&lt;") + "</option>"
-        ).join("");
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "اختر";
+      select.appendChild(placeholder);
+      buildOptions(field).forEach(option => {
+        const optionNode = document.createElement("option");
+        optionNode.value = option.value;
+        optionNode.textContent = option.label;
+        select.appendChild(optionNode);
+      });
       if (field.placeholder_ar) select.setAttribute("aria-label", String(field.placeholder_ar));
       if (field.required) select.required = true;
       wrapper.appendChild(select);
@@ -252,6 +257,7 @@
   window.MedLifeDynamicForm = {
     validate,
     getData,
+    refresh: refreshVisibility,
     getFormId: () => currentFormId,
     reset,
     isLoading: () => loading
