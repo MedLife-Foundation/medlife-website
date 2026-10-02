@@ -115,7 +115,7 @@
 
     // Some legacy pages use different wrapper/class names. Identify those
     // headers by their actual navigation links instead of relying on class names.
-    document.querySelectorAll('body header, body nav').forEach(element => {
+    document.querySelectorAll('body header, body > nav').forEach(element => {
       if (element.closest('.medlife-global-header')) return;
       const links = [...element.querySelectorAll('a[href]')].map(a => normalizeHref(a.getAttribute('href')));
       const matched = new Set(links.filter(href => canonicalPaths.includes(href)));
