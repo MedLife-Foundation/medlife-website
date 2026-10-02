@@ -58,6 +58,30 @@ function getValue(key,type){
   return nodes[0]?.value??"";
 }
 
+function getUnitRoles(){
+  const roles={};
+  getValue("current_units","multi_select").forEach(unitId=>{
+    const node=form.querySelector('[data-unit-role="'+CSS.escape(String(unitId))+'"]');
+    if(node?.value) roles[String(unitId)]=node.value;
+  });
+  return roles;
+}
+
+function validateUnitRoles(){
+  const units=getValue("current_units","multi_select");
+  const roles=getUnitRoles();
+  for(const unitId of units){
+    const role=roles[String(unitId)];
+    if(role!=="volunteer" && role!=="supervisor"){
+      const label=form.querySelector('[data-unit-label="'+CSS.escape(String(unitId))+'"]')?.textContent||"القسم المختار";
+      setError("يرجى تحديد دورك في: "+label);
+      form.querySelector('[data-unit-role="'+CSS.escape(String(unitId))+'"]')?.focus();
+      return false;
+    }
+  }
+  return true;
+}
+
 function setSectionVisible(index){
   step=index;
   groupSections.forEach((section,i)=>section.classList.toggle("active",i===index));
@@ -82,6 +106,11 @@ function renderField(field){
   label.textContent=String(field.label_ar||field.field_key)+(field.required?" *":"");
   wrapper.appendChild(label);
 
+  if(field.field_key==="current_unit_roles"){
+    wrapper.style.display="none";
+    return wrapper;
+  }
+
   if(field.help_ar){
     const help=document.createElement("p");
     help.className="help";
@@ -92,13 +121,61 @@ function renderField(field){
   if(field.field_key==="current_units"){
     const note=document.createElement("p");
     note.className="dept-note";
-    note.textContent="يمكنك اختيار أكثر من قسم أو فريق لأن العضو قد ينتمي إلى أكثر من وحدة.";
+    note.textContent="يمكنك اختيار عدة وحدات. بعد اختيار كل وحدة، حدّد دورك فيها بشكل مستقل.";
     wrapper.appendChild(note);
   }
 
   const type=String(field.field_type||"text");
 
-  if(type==="multi_select"){
+  if(field.field_key==="current_units"){
+    const box=document.createElement("div");
+    box.className="unit-role-list";
+    buildOptions(field).forEach(option=>{
+      const item=document.createElement("div");
+      item.className="unit-role-item";
+      const head=document.createElement("label");
+      head.className="option";
+      head.dataset.unitLabel=option.value;
+      const input=document.createElement("input");
+      input.type="checkbox";
+      input.name=field.field_key;
+      input.value=option.value;
+      input.dataset.key=field.field_key;
+      const text=document.createElement("span");
+      text.textContent=option.label;
+      head.append(input,text);
+
+      const select=document.createElement("select");
+      select.dataset.unitRole=option.value;
+      select.setAttribute("aria-label","الدور في "+option.label);
+      select.disabled=true;
+      const placeholder=document.createElement("option");
+      placeholder.value="";
+      placeholder.textContent="اختر الدور";
+      select.appendChild(placeholder);
+      [
+        {value:"volunteer",label:"متطوع"},
+        {value:"supervisor",label:"مشرف"}
+      ].forEach(role=>{
+        const roleOption=document.createElement("option");
+        roleOption.value=role.value;
+        roleOption.textContent=role.label;
+        select.appendChild(roleOption);
+      });
+
+      input.addEventListener("change",()=>{
+        select.disabled=!input.checked;
+        if(!input.checked) select.value="";
+      });
+
+      const roleWrap=document.createElement("div");
+      roleWrap.className="unit-role-select";
+      roleWrap.appendChild(select);
+      item.append(head,roleWrap);
+      box.appendChild(item);
+    });
+    wrapper.appendChild(box);
+  }else if(type==="multi_select"){
     const box=document.createElement("div");
     box.className="options";
     buildOptions(field).forEach(option=>{
@@ -206,6 +283,11 @@ function validateAll(){
     return false;
   }
 
+  if(!validateUnitRoles()){
+    setSectionVisible(2);
+    return false;
+  }
+
   if(getValue("certificate_types","multi_select").length===0){
     setError("يرجى تحديد حالة الشهادات.");
     setSectionVisible(2);
@@ -232,10 +314,12 @@ function collect(){
   const data={};
   for(const field of fields){
     if(!fieldVisible(field)) continue;
+    if(field.field_key==="current_unit_roles") continue;
     const value=getValue(field.field_key,field.field_type);
     if(field.field_type==="boolean") data[field.field_key]=Boolean(value);
     else if(Array.isArray(value)?value.length:String(value??"").trim()) data[field.field_key]=value;
   }
+  data.current_unit_roles=getUnitRoles();
   return data;
 }
 
