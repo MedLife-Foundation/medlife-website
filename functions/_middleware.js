@@ -1,5 +1,42 @@
 const CMS_SUPABASE_URL = "https://ftvjakwogxdlxxbpfydf.supabase.co";
 const CMS_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const PUBLIC_HEADER_ROUTES = new Set([
+  "/",
+  "/index.html",
+  "/about-medlife.html",
+  "/about-medlife-foundation.html",
+  "/about-medlife/index.html",
+  "/articles.html",
+  "/article-reader-v6.html",
+  "/article-reader-v7.html",
+  "/article-reader-v8.html",
+  "/forum.html",
+  "/forum-v2.html",
+  "/forum-v3.html",
+  "/gallery.html",
+  "/initiatives-gallery.html",
+  "/support.html",
+  "/support-request.html",
+  "/support-donation.html",
+  "/contact.html",
+  "/contact-page.html",
+  "/join-options.html",
+  "/join-us.html",
+  "/login.html",
+  "/forgot-password.html",
+  "/reset-password.html",
+  "/new-member.html",
+  "/member-join.html",
+  "/current-member.html",
+  "/members.html",
+  "/submit-article.html",
+  "/submit-article-v2.html",
+  "/submit-article-v3.html",
+  "/submit-article-v4.html",
+  "/submit-article-v5.html",
+  "/submit-article-v6.html",
+  "/submit-article-v6/index.html"
+]);
 const CMS_LEGACY_ROUTES = new Set([
   "/about-medlife.html",
   "/support.html",
@@ -92,7 +129,7 @@ export async function onRequest(context) {
       return new Response(html,{status:response.status,statusText:response.statusText,headers});
     }
 
-    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute) return response;
+    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute && !PUBLIC_HEADER_ROUTES.has(path)) return response;
 
     let html = await response.text();
 
@@ -110,16 +147,16 @@ export async function onRequest(context) {
 
     // Always use the current navigation script version when a managed page
     // already contains a previous site-nav reference.
-    html = html.replace(/\/site-nav\.js\?v=[^"']+/g, "/site-nav.js?v=20261002-cms1");
+    html = html.replace(/\/site-nav\.js(?:\?v=[^"']+)?/g, "/site-nav.js?v=20261002-cms2");
 
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
-    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
+    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms2" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
+      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms2" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
       tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
@@ -138,15 +175,20 @@ export async function onRequest(context) {
       tags.push('<script src="/contact-ui-align-final.js?v=20260831-contact-ui-align-final" defer></script>');
       tags.push('<script src="/contact-ui-final-fix.js?v=20260831-contact-ui-final-fix" defer></script>');
     }
+    if (PUBLIC_HEADER_ROUTES.has(path) && !html.includes('/site-nav.js')) {
+      tags.push('<script src="/site-nav.js?v=20261002-cms2" defer></script>');
+    }
+
     const marker = tags.join('');
     if (marker) {
       const alreadyHasAll = tags.every(tag => {
         const src = tag.match(/(?:src|href)="([^"]+)/)?.[1] || '';
         return src && html.includes(src);
       });
-      if (!alreadyHasAll) html = html.includes('</body>') ? html.replace('</body>', `${marker}</body>`) : `${html}${marker}`;
+      if (!alreadyHasAll) html = html.includes('</body>') ? html.replace('</body>', marker + '</body>') : html + marker;
     }
 
+    const headers = new Headers(response.headers);
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');

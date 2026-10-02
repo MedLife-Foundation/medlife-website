@@ -84,14 +84,24 @@
     document.querySelectorAll('.medlife-global-header').forEach(el => el.remove());
     document.querySelectorAll('body > header.top, body header.top').forEach(el => el.remove());
     if (page === 'forum-v3.html' || page === 'forum-v3') {
-      document.querySelectorAll('body > header.nav').forEach(el => el.remove());
+      document.querySelectorAll('body > header.nav, body > header.topbar').forEach(el => el.remove());
     }
     if (page === 'gallery' || page === 'gallery.html') {
-      document.querySelectorAll('body > header.gallery-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());
+      document.querySelectorAll('body > header.gallery-legacy-header').forEach(el => el.remove());
     }
     if (page === 'support' || page === 'support.html') {
       document.querySelectorAll('body > header.support-legacy-header').forEach(el => el.remove());
     }
+
+    // Remove legacy navigation-only headers on public pages while preserving
+    // content headers such as article/support/contact hero sections.
+    document.querySelectorAll('body > header:not(.medlife-global-header)').forEach(header => {
+      const cls = String(header.className || '');
+      const isNavigationHeader =
+        /(?:^|\s)(?:nav|top|topbar)(?:\s|$)/i.test(cls) ||
+        !!header.querySelector('.nav, .logo, .nav-actions');
+      if (isNavigationHeader) header.remove();
+    });
   };
 
   async function build() {
