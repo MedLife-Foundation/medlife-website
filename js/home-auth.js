@@ -4,7 +4,7 @@
   function wire(){
     const btn=document.getElementById('loginBtn');
     const mobile=document.getElementById('mobileLoginBtn');
-    const go=()=>{window.location.href='login.html'};
+    const go=()=>{window.location.href='https://admin.medlifesy.org/login?next=/'};
     if(btn){btn.onclick=go;btn.setAttribute('aria-label','دخول الأعضاء');}
     if(mobile){mobile.onclick=go;}
   }
