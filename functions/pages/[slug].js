@@ -19,7 +19,6 @@ async function fetchPage(slug) {
     select: "title,slug,excerpt,body,metadata,published_at,public_url,updated_at",
     slug: "eq." + slug,
     content_type: "eq.page",
-    status: "eq.published",
     limit: "1"
   });
   const response = await fetch(SUPABASE_URL + "/rest/v1/public_site_content?" + query.toString(), {
