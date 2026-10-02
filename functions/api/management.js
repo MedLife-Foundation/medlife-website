@@ -116,6 +116,8 @@ async function fetchResource(resource, url) {
     query.set("form_kind", "eq.membership_renewal");
     query.set("status", "eq.published");
     query.set("is_public", "eq.true");
+    const requestedFormKey = cleanText(url.searchParams.get("form_key"), 120);
+    if (requestedFormKey) query.set("form_key", "eq." + requestedFormKey);
     query.set("limit", "1");
   }
 
@@ -239,7 +241,43 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
   }
   for (const field of fieldRows) {
-    if (!field.required) continue;
+    if (field.field_type === "boolean" && typeof formData[field.field_key] === "string") {
+      const rawBoolean = String(formData[field.field_key]).toLowerCase();
+      formData[field.field_key] = rawBoolean === "true" || rawBoolean === "yes" || rawBoolean === "1";
+    }
+    if (field.field_type === "multi_select" && formData[field.field_key] !== undefined && !Array.isArray(formData[field.field_key])) {
+      formData[field.field_key] = [formData[field.field_key]];
+    }
+  }
+
+  const fieldIsVisible = (field) => {
+    const targetUnitIds = Array.isArray(field.target_unit_ids)
+      ? field.target_unit_ids.map(value => cleanText(value, 80)).filter(Boolean)
+      : [];
+    if (targetUnitIds.length) {
+      const selectedUnits = new Set(
+        Array.isArray(formData.current_units)
+          ? formData.current_units.map(value => cleanText(value, 80)).filter(Boolean)
+          : []
+      );
+      if (!targetUnitIds.some(id => selectedUnits.has(id))) return false;
+    }
+    const visibility = field.visibility && typeof field.visibility === "object" ? field.visibility : {};
+    if (visibility.mode !== "when") return true;
+    const actual = formData[cleanText(visibility.field_key, 120)];
+    const expected = String(visibility.value ?? "");
+    const operator = cleanText(visibility.operator, 30) || "equals";
+    if (operator === "contains") {
+      return Array.isArray(actual)
+        ? actual.map(String).includes(expected)
+        : String(actual ?? "").toLowerCase().includes(expected.toLowerCase());
+    }
+    if (operator === "not_equals") return String(actual ?? "") !== expected;
+    return String(actual ?? "") === expected;
+  };
+
+  for (const field of fieldRows) {
+    if (!field.required || !fieldIsVisible(field)) continue;
     const value = formData[field.field_key];
     const missing = Array.isArray(value)
       ? value.length === 0
@@ -472,6 +510,10 @@ export async function onRequestPost({ request }) {
         profession: cleanText(data.profession, 250),
         workplace: cleanText(data.workplace, 250),
         skills: cleanText(data.skills, 1000).split(/[,،]/).map(value => value.trim()).filter(Boolean).slice(0, 30),
+        self_declared_talents: toArray(data.talent_areas),
+        undiscovered_talents: cleanText(data.undiscovered_talents, 2000),
+        desired_contributions: toArray(data.desired_contributions),
+        development_interests: toArray(data.development_interests),
         join_date: normalizeDate(data.join_date),
         requested_unit_ids: requestedUnits.map(unit => unit.id),
         requested_units: requestedUnits,
