@@ -6,6 +6,7 @@
     ['articles.html', 'المقالات', 'articles'],
     ['forum-v3.html', 'المنتدى', 'forum'],
     ['gallery.html', 'الصور', 'gallery'],
+    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities'],
     ['support.html', 'صندوق الدعم', 'support'],
     ['contact.html', 'تواصل معنا', 'contact']
   ];
