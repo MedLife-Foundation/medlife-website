@@ -374,7 +374,7 @@ export async function onRequestPost({ request }) {
       }
 
       const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
         {
           headers: {
             apikey: SUPABASE_PUBLISHABLE_KEY,
