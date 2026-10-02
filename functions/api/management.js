@@ -425,6 +425,14 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.some(unit => unit.left_on && (unit.left_on < unit.joined_on || unit.left_on > today))) {
         return json({ success: false, error: "تواريخ انتهاء الانتساب يجب أن تكون بعد تاريخ البدء وألا تتجاوز تاريخ اليوم." }, 400);
       }
+      const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
+      const overallContinuing = data.continuing_as_volunteer === true;
+      if (overallContinuing !== hasContinuingUnit) {
+        return json({ success: false, error: hasContinuingUnit
+          ? "يوجد قسم ما زلت مستمراً فيه، لذلك يجب اختيار الاستمرار مع ميدلايف أيضاً."
+          : "لم تعد مستمراً بأي قسم مختار، لذلك يجب اختيار عدم الاستمرار مع ميدلايف."
+        }, 400);
+      }
 
       const numberValue = value => {
         const n = Number(value);
