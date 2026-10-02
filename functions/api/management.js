@@ -455,6 +455,7 @@ export async function onRequestPost({ request }) {
       const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
         ? data.current_unit_details
         : {};
+      const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
       }
@@ -476,14 +477,23 @@ export async function onRequestPost({ request }) {
         .map(unit => {
           const raw = requestedUnitDetails[String(unit.id)];
           const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
-          const role = cleanText(detail.role, 30).toLowerCase();
+          let role = cleanText(detail.role, 30).toLowerCase();
           const joinedOn = normalizeDate(detail.joined_on);
           const continuing = detail.continuing === true;
           const leftOn = normalizeDate(detail.left_on);
-          const roleStartedOn = normalizeDate(detail.role_started_on);
-          const roleContinuing = detail.role_continuing === true;
-          const roleLeftOn = normalizeDate(detail.role_left_on);
+          let roleStartedOn = normalizeDate(detail.role_started_on);
+          let roleContinuing = detail.role_continuing === true;
+          let roleLeftOn = normalizeDate(detail.role_left_on);
+          const roleContinuingProvided = Object.prototype.hasOwnProperty.call(detail, "role_continuing");
           const notes = cleanText(detail.notes, 1500);
+
+          if (!supervisorForm) {
+            role = "volunteer";
+            roleStartedOn = joinedOn;
+            roleContinuing = continuing;
+            roleLeftOn = continuing ? null : leftOn;
+          }
+
           return {
             id: String(unit.id),
             name_ar: cleanText(unit.name_ar || unit.name_en, 200),
@@ -494,7 +504,7 @@ export async function onRequestPost({ request }) {
             left_on: leftOn,
             role_started_on: roleStartedOn,
             role_continuing: roleContinuing,
-            role_continuing_provided: Object.prototype.hasOwnProperty.call(detail, "role_continuing"),
+            role_continuing_provided: supervisorForm ? roleContinuingProvided : true,
             role_left_on: roleLeftOn,
             notes
           };
@@ -502,7 +512,6 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
-      const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
       const allowedUnitRoles = supervisorForm
         ? ["volunteer","assistant_supervisor","supervisor","general_supervisor"]
         : ["volunteer"];
@@ -513,8 +522,9 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.some(unit => !unit.joined_on)) {
         return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
       }
-      if (requestedUnits.some(unit => !unit.role_started_on)) {
-        return json({ success: false, error: "يرجى تحديد تاريخ بدء الدور داخل كل وحدة." }, 400);
+      const missingRoleStart = requestedUnits.find(unit => !unit.role_started_on);
+      if (missingRoleStart) {
+        return json({ success: false, error: "يرجى تحديد تاريخ بدء الدور داخل «" + missingRoleStart.name_ar + "»." }, 400);
       }
       if (requestedUnits.some(unit => unit.role_started_on > today || unit.role_started_on < unit.joined_on)) {
         return json({ success: false, error: "تاريخ بدء الدور يجب أن يكون بعد أو في تاريخ الانضمام إلى الوحدة وألا يكون في المستقبل." }, 400);
@@ -586,6 +596,8 @@ export async function onRequestPost({ request }) {
         academic_status: cleanText(data.academic_status, 60),
         university: cleanText(data.university, 250),
         specialty: cleanText(data.specialty, 250),
+        consultation_specialty: cleanText(data.consultation_specialty, 250),
+        consultation_specialty_other: cleanText(data.consultation_specialty_other, 500),
         profession: cleanText(data.profession, 250),
         workplace: cleanText(data.workplace, 250),
         skills: cleanText(data.skills, 1000).split(/[,،]/).map(value => value.trim()).filter(Boolean).slice(0, 30),
@@ -599,6 +611,9 @@ export async function onRequestPost({ request }) {
         requested_unit_roles: Object.fromEntries(requestedUnits.map(unit => [unit.id, unit.role])),
         requested_unit_details: Object.fromEntries(requestedUnits.map(unit => [unit.id, {
           role: unit.role,
+          role_started_on: unit.role_started_on,
+          role_continuing: unit.role_continuing,
+          role_left_on: unit.role_left_on,
           joined_on: unit.joined_on,
           continuing: unit.continuing,
           left_on: unit.left_on,
