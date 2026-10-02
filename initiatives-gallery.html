@@ -41,8 +41,22 @@
 .activity-body p{margin:0 0 14px;color:var(--ml-muted);font-size:12px;line-height:2.05}
 .activity-info{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;color:#748096;font-size:10px;line-height:1.8}
 .activity-info strong{display:block;color:var(--ml-navy);font-size:10px}
-.activities-empty{text-align:center;padding:45px 20px;border:1px dashed #dce3eb;border-radius:20px;color:#7b8798;background:#fbfcfe}
+.activity-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.activity-action{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;border-radius:10px;font:800 11px Cairo,sans-serif;cursor:pointer;text-decoration:none}
+.activity-action.primary{background:var(--ml-red);color:#fff;border:1px solid var(--ml-red)}
+.activity-action.secondary{background:#fff;color:var(--ml-navy);border:1px solid var(--ml-line)}
+.activity-action:hover{transform:translateY(-2px)}
+.activities-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:58px 20px;border:1px dashed #dce3eb;border-radius:20px;color:#7b8798;background:#fbfcfe}
+.activities-empty strong{color:var(--ml-navy);font-size:15px}
+.activities-empty span{font-size:12px}
 .activities-loading{text-align:center;padding:45px 20px;color:#7b8798}
+.activity-preview{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(6,10,22,.94)}
+.activity-preview.open{display:flex}
+.activity-preview button{position:absolute;top:18px;left:22px;min-width:78px;height:42px;border:0;border-radius:10px;background:#fff;color:var(--ml-navy);font:800 12px Cairo,sans-serif;cursor:pointer}
+.activity-preview-inner{text-align:center;max-width:min(1100px,94vw)}
+.activity-preview-inner img{display:block;max-width:100%;max-height:80vh;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.4)}
+.activity-preview-inner span{display:block;color:#fff;font:700 13px Cairo,sans-serif;margin-top:10px}
+
 @media(max-width:1050px){.activities-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.activities-hero-grid{grid-template-columns:1fr;text-align:center}.activities-hero p{margin-inline:auto}.activities-hero-art{max-width:520px;margin-inline:auto}}
 @media(max-width:700px){.activities-hero{padding:48px 0 42px}.activities-hero h1{font-size:34px}.activities-grid{grid-template-columns:1fr}.activity-cover{height:210px}.activities-section{padding-top:58px!important}}
 </style>
@@ -54,10 +68,10 @@
     <div>
       <div class="ml-eyebrow">من الميدان إلى الموقع</div>
       <h1>مبادرات وأنشطة <span>ميدلايف</span></h1>
-      <p>هنا تُعرض الأنشطة التي اعتمدها فريق ميدلايف للنشر العام، مع بياناتها الأساسية وصورتها الرئيسية عند توفرها. وتأتي هذه الصفحة ضمن الموقع الرسمي نفسه، بنفس الهوية البصرية والتنقّل العام.</p>
+      <p>هنا تُعرض الأنشطة التي اعتمدها فريق ميدلايف للنشر العام، مع بياناتها الأساسية وصورتها الرئيسية عند توفرها. تظهر روابط التغطية أو ألبومات الصور فقط عندما تكون مسجلة ومتحققة من فريق الإدارة.</p>
     </div>
-    <div class="activities-hero-art">
-      <img src="./logo.PNG" alt="شعار مؤسسة ميدلايف">
+    <div class="activities-hero-art" aria-hidden="true">
+      <img src="./logo.PNG" alt="">
     </div>
   </div>
 </section>
@@ -67,7 +81,7 @@
     <div class="ml-heading">
       <div class="ml-eyebrow">الأنشطة المنشورة</div>
       <h2>ما الذي يحدث على أرض الواقع؟</h2>
-      <p>تظهر هنا فقط الأنشطة المفعّلة للعامة من منصة الإدارة المركزية.</p>
+      <p>تظهر هنا فقط الأنشطة المفعّلة للعامة من منصة الإدارة المركزية، ولا تُنشأ روابط تلقائية لمصادر أو ألبومات غير موجودة.</p>
     </div>
     <div class="activities-toolbar" id="activityFilters" aria-label="تصفية الأنشطة"></div>
     <div id="managementActivities" aria-live="polite">
