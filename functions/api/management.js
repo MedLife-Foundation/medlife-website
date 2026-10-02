@@ -393,6 +393,7 @@ export async function onRequestPost({ request }) {
           const role = cleanText(detail.role, 30).toLowerCase();
           const joinedOn = normalizeDate(detail.joined_on);
           const continuing = detail.continuing === true;
+          const leftOn = normalizeDate(detail.left_on);
           const notes = cleanText(detail.notes, 1500);
           return {
             id: String(unit.id),
@@ -401,6 +402,7 @@ export async function onRequestPost({ request }) {
             role,
             joined_on: joinedOn,
             continuing,
+            left_on: leftOn,
             notes
           };
         });
@@ -410,8 +412,18 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.some(unit => !["volunteer","supervisor"].includes(unit.role))) {
         return json({ success: false, error: "يرجى تحديد الدور داخل كل قسم أو وحدة." }, 400);
       }
+      const today = new Date().toISOString().slice(0, 10);
       if (requestedUnits.some(unit => !unit.joined_on)) {
         return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.joined_on > today)) {
+        return json({ success: false, error: "تاريخ بدء الانتساب لا يمكن أن يكون في المستقبل." }, 400);
+      }
+      if (requestedUnits.some(unit => !unit.continuing && !unit.left_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء كل انتساب غير مستمر." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.left_on && (unit.left_on < unit.joined_on || unit.left_on > today))) {
+        return json({ success: false, error: "تواريخ انتهاء الانتساب يجب أن تكون بعد تاريخ البدء وألا تتجاوز تاريخ اليوم." }, 400);
       }
 
       const numberValue = value => {
@@ -453,6 +465,7 @@ export async function onRequestPost({ request }) {
           role: unit.role,
           joined_on: unit.joined_on,
           continuing: unit.continuing,
+          left_on: unit.left_on,
           notes: unit.notes
         }])),
         reported_total_volunteer_hours: numberValue(data.reported_total_volunteer_hours),
