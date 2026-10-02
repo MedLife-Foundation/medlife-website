@@ -87,13 +87,13 @@
   const removeLegacyHeaders = () => {
     document.querySelectorAll('.medlife-global-header').forEach(el => el.remove());
     document.querySelectorAll('body > header.top, body header.top').forEach(el => el.remove());
-    if (page === 'forum-v3.html' || page === 'forum-v3') {
+    if (currentPage === 'forum-v3.html' || currentPage === 'forum-v3') {
       document.querySelectorAll('body > header.nav').forEach(el => el.remove());
     }
-    if (page === 'gallery' || page === 'gallery.html') {
+    if (currentPage === 'gallery' || currentPage === 'gallery.html') {
       document.querySelectorAll('body > header.gallery-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());
     }
-    if (page === 'support' || page === 'support.html') {
+    if (currentPage === 'support' || currentPage === 'support.html') {
       document.querySelectorAll('body > header.support-legacy-header').forEach(el => el.remove());
     }
   };
