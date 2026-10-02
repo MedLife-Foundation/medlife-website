@@ -1,3 +1,4 @@
+// Production navigation build marker: 2026-10-02
 (() => {
   const fallbackItems = [
     ['index.html', 'الرئيسية', 'home'],
