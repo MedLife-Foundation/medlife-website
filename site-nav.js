@@ -69,7 +69,13 @@
     if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
     if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';
     if (page === 'support' || page === 'support.html') return 'support';
-    const match = items.find(item => item[0].split('#')[0] === page && !item[0].includes('#'));
+    const currentPath = location.pathname.replace(/\/$/, '') || '/';
+    const match = items.find(item => {
+      const target = String(item[0]);
+      if (target.includes('#')) return target.split('#')[0].replace(/\/$/, '') === currentPath;
+      try { return new URL(target, location.origin).pathname.replace(/\/$/, '') === currentPath; }
+      catch { return target.replace(/\/$/, '') === currentPath; }
+    });
     return match ? match[2] : '';
   };
 
