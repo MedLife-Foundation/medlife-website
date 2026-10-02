@@ -101,7 +101,7 @@ async function fetchResource(resource, url) {
     query.set("id", "eq.1");
   }
   if (resource === "join_units") {
-    query.set("unit_type", "in.(department,field_team)");
+    query.set("unit_type", "in.(cell,department,field_team)");
     query.set("is_active", "eq.true");
   }
   if (resource === "join_form") {
@@ -147,7 +147,7 @@ async function fetchResource(resource, url) {
     if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة النموذج.");
     if (resource === "membership_renewal_form") {
       const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
         {
           headers: {
             apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -177,6 +177,16 @@ async function fetchResource(resource, url) {
 function sanitizeFormValue(value) {
   if (Array.isArray(value)) {
     return value.slice(0, 30).map(item => sanitizeFormValue(item)).filter(item => item !== "");
+  }
+  if (value && typeof value === "object") {
+    const output = {};
+    for (const [key, item] of Object.entries(value).slice(0, 50)) {
+      const safeKey = cleanText(key, 120);
+      if (!safeKey || /password|secret|token/i.test(safeKey)) continue;
+      const safeValue = sanitizeFormValue(item);
+      if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") output[safeKey] = safeValue;
+    }
+    return output;
   }
   if (typeof value === "boolean" || typeof value === "number") return value;
   return cleanText(value, 5000);
@@ -354,8 +364,11 @@ export async function onRequestPost({ request }) {
       }
 
       const requestedIds = Array.isArray(data.current_units)
-        ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 8)
+        ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 26)
         : [];
+      const requestedRoleMap = data.current_unit_roles && typeof data.current_unit_roles === "object" && !Array.isArray(data.current_unit_roles)
+        ? data.current_unit_roles
+        : {};
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
       }
@@ -374,13 +387,20 @@ export async function onRequestPost({ request }) {
       const activeUnits = Array.isArray(unitsRows) ? unitsRows : [];
       const requestedUnits = activeUnits
         .filter(unit => requestedIds.includes(String(unit.id)))
-        .map(unit => ({
-          id: String(unit.id),
-          name_ar: cleanText(unit.name_ar || unit.name_en, 200),
-          unit_type: cleanText(unit.unit_type, 50)
-        }));
+        .map(unit => {
+          const role = cleanText(requestedRoleMap[String(unit.id)], 30).toLowerCase();
+          return {
+            id: String(unit.id),
+            name_ar: cleanText(unit.name_ar || unit.name_en, 200),
+            unit_type: cleanText(unit.unit_type, 50),
+            role
+          };
+        });
       if (requestedUnits.length !== requestedIds.length) {
-        return json({ success: false, error: "يوجد قسم أو فريق غير صالح ضمن الاختيار." }, 400);
+        return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
+      }
+      if (requestedUnits.some(unit => !["volunteer","supervisor"].includes(unit.role))) {
+        return json({ success: false, error: "يرجى تحديد الدور داخل كل قسم أو وحدة: متطوع أو مشرف." }, 400);
       }
 
       const numberValue = value => {
@@ -417,7 +437,7 @@ export async function onRequestPost({ request }) {
         join_date: normalizeDate(data.join_date),
         requested_unit_ids: requestedUnits.map(unit => unit.id),
         requested_units: requestedUnits,
-        current_role_in_team: cleanText(data.current_role_in_team, 250),
+        requested_unit_roles: Object.fromEntries(requestedUnits.map(unit => [unit.id, unit.role])),
         reported_total_volunteer_hours: numberValue(data.reported_total_volunteer_hours),
         volunteer_commitment_hours: numberValue(data.volunteer_commitment_hours),
         certificate_types: certificateTypes,
