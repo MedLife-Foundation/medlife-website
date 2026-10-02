@@ -1,4 +1,9 @@
 (() => {
+  // Singleton guard: the global header must be built once even if this script
+  // is accidentally included more than once by a legacy page or middleware.
+  if (window.__MEDLIFE_GLOBAL_NAV_INITIALIZED__) return;
+  window.__MEDLIFE_GLOBAL_NAV_INITIALIZED__ = true;
+
   // Canonical public navigation: these links must remain present even if the CMS request fails
   // or a page is not yet registered in the navigation metadata.
   const baseItems = [
