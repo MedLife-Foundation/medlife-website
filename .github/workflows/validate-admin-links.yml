@@ -76,9 +76,15 @@ jobs:
           print(f'OK: validated {len(pages)} admin entrypoints; all internal static targets exist.')
           PY
 
-      - name: Validate admin redirect contract
+      - name: Validate admin route contract
         run: |
-          grep -Eq '^/admin([[:space:]]+|/)$' /dev/null || true
-          grep -Eq '^/admin-members([[:space:]]|/|/admin-members)' _redirects || true
-          grep -Eq '^/articles-admin([[:space:]]|/|/articles-admin)' _redirects || true
-          echo 'OK: admin route contract contains no stale /admin-v2 expectation.'
+          grep -Eq '^/admin-members[[:space:]]+/members-admin\.html[[:space:]]+301 _redirects
+          grep -Eq '^/admin-members/\s+/members-admin\.html[[:space:]]+301 _redirects
+          grep -Eq '^/articles-admin[[:space:]]+/admin/editorial-command-center-v24\.html[[:space:]]+200 _redirects
+          grep -Eq '^/articles-admin/\s+/admin/editorial-command-center-v24\.html[[:space:]]+200 _redirects
+          grep -Eq '^/articles-admin\.html[[:space:]]+/admin/editorial-command-center-v24\.html[[:space:]]+200 _redirects
+          if grep -Eq 'admin-v2\.html|admin-members-v3(\.html)?|articles-admin-v2\.html' _redirects; then
+            echo 'Stale admin target detected in _redirects'
+            exit 1
+          fi
+          echo 'OK: admin redirect targets match existing entrypoints.'
