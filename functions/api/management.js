@@ -136,7 +136,7 @@ async function fetchResource(resource, url) {
     const form = Array.isArray(data) ? data[0] : null;
     if (!form?.id) return [];
     const fieldsResponse = await fetch(
-      SUPABASE_URL + "/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,target_unit_types,sort_order,is_active&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc",
+      SUPABASE_URL + "/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,help_ar,placeholder_ar,field_type,required,options,validation,visibility,target_unit_ids,target_unit_types,sort_order,is_active&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc",
       {
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
