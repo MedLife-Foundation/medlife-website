@@ -1,5 +1,5 @@
 (() => {
-  const baseItems = [
+  const fallbackItems = [
     ['index.html', 'الرئيسية', 'home'],
     ['about-medlife.html', 'عن المؤسسة', 'about'],
     ['index.html#programs', 'مجالات العمل', 'programs'],
@@ -10,10 +10,8 @@
     ['contact.html', 'تواصل معنا', 'contact']
   ];
 
-  let items = baseItems.slice();
-  const rawPage = location.pathname.split('/').filter(Boolean).pop() || 'index.html';
-  const page = rawPage.endsWith('/') ? rawPage.slice(0, -1) : rawPage;
-  const home = page === '' || page === 'index.html';
+  let items = fallbackItems.slice();
+  let navigationLoadedFromSettings = false;
 
   const activeKey = () => {
     if (page === 'gallery' || page === 'gallery.html') return 'gallery';
@@ -52,11 +50,41 @@
 
   async function loadManagedItems() {
     try {
-      const response = await fetch('/api/management?resource=content&content_type=page&limit=50', {headers:{Accept:'application/json'},cache:'no-store'});
-      if (!response.ok) return;
-      const payload = await response.json();
+      const [settingsResponse, contentResponse] = await Promise.all([
+        fetch('/api/management?resource=settings', {headers:{Accept:'application/json'},cache:'no-store'}),
+        fetch('/api/management?resource=content&content_type=page&limit=50', {headers:{Accept:'application/json'},cache:'no-store'})
+      ]);
+
+      if (settingsResponse.ok) {
+        const settingsPayload = await settingsResponse.json();
+        const website = Array.isArray(settingsPayload?.data)
+          ? settingsPayload.data.find(item => item?.key === 'website')?.value
+          : null;
+        const configured = Array.isArray(website?.navigation) ? website.navigation : [];
+        const normalized = configured
+          .map((item, index) => ({
+            url: String(item?.url || '').trim(),
+            label: String(item?.label || '').trim(),
+            key: String(item?.key || ('nav-' + index)).trim(),
+            enabled: item?.enabled !== false
+          }))
+          .filter(item => item.url && item.label && item.enabled)
+          .map(item => [item.url, item.label, item.key]);
+        if (normalized.length) {
+          items = normalized;
+          navigationLoadedFromSettings = true;
+        }
+      }
+
+      if (!navigationLoadedFromSettings) items = fallbackItems.slice();
+
+      if (!contentResponse.ok) return;
+      const payload = await contentResponse.json();
       const managed = Array.isArray(payload?.data) ? payload.data : [];
       const managedBySlug = new Map(managed.filter(page => page?.slug).map(page => [page.slug, page]));
+
+      // Existing managed pages can override their label/URL without becoming
+      // the source of truth for the navigation order.
       items = items.map(item => {
         const keyMap = {about:'about-medlife', support:'support', contact:'contact'};
         const slug = keyMap[item[2]];
@@ -64,6 +92,9 @@
         if (!page || !page.metadata?.nav?.label) return item;
         return [page.public_url || item[0], String(page.metadata.nav.label).trim() || item[1], item[2]];
       });
+
+      // Pages explicitly marked for the main navigation are still appended
+      // when they are not already represented in the centrally configured menu.
       const extras = managed
         .filter(page => page && page.slug && page.slug !== 'home' && page.metadata?.nav?.show_main === true)
         .map(page => ['/pages/' + encodeURIComponent(page.slug), String(page.metadata?.nav?.label || page.title || '').trim(), 'managed:' + page.slug])
@@ -71,6 +102,7 @@
       const existing = new Set(items.map(item => item[0].split('#')[0]));
       items = [...items, ...extras.filter(item => !existing.has(item[0]))];
     } catch (error) {
+      items = fallbackItems.slice();
       console.warn('Managed navigation fallback active', error);
     }
   }
