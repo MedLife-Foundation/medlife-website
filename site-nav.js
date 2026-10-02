@@ -1,22 +1,20 @@
 (() => {
+  // Canonical public navigation: these links must remain present even if the CMS request fails
+  // or a page is not yet registered in the navigation metadata.
   const baseItems = [
     ['index.html', 'الرئيسية', 'home', 0],
+    ['about-medlife.html', 'عن المؤسسة', 'about', 10],
     ['index.html#programs', 'مجالات العمل', 'programs', 20],
-    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60]
+    ['articles.html', 'المقالات', 'articles', 30],
+    ['forum-v3.html', 'المنتدى', 'forum', 40],
+    ['gallery.html', 'الصور', 'gallery', 50],
+    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60],
+    ['support.html', 'صندوق الدعم', 'support', 70],
+    ['contact.html', 'تواصل معنا', 'contact', 80]
   ];
 
   async function loadManagedItems() {
-    const fallback = [
-      ['index.html', 'الرئيسية', 'home', 0],
-      ['about-medlife.html', 'عن المؤسسة', 'about', 10],
-      ['index.html#programs', 'مجالات العمل', 'programs', 20],
-      ['articles.html', 'المقالات', 'articles', 30],
-      ['forum-v3.html', 'المنتدى', 'forum', 40],
-      ['gallery.html', 'الصور', 'gallery', 50],
-      ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60],
-      ['support.html', 'صندوق الدعم', 'support', 70],
-      ['contact.html', 'تواصل معنا', 'contact', 80]
-    ];
+    const fallback = baseItems;
 
     try {
       const response = await fetch('/api/management?resource=content&content_type=page&limit=50', {
@@ -39,13 +37,11 @@
       const combined = [...baseItems];
       const seen = new Set(combined.map(item => String(item[0])));
       for (const item of managed) {
-        if (seen.has(String(item[0]))) {
-          const index = combined.findIndex(existing => String(existing[0]) === String(item[0]));
-          if (index >= 0) combined[index] = item;
-        } else {
-          combined.push(item);
-          seen.add(String(item[0]));
-        }
+        // Canonical navigation keeps its exact public label and URL.
+        // The CMS may still add additional main-menu pages after these core links.
+        if (seen.has(String(item[0]))) continue;
+        combined.push(item);
+        seen.add(String(item[0]));
       }
 
       if (!combined.some(item => item[2] === 'activities')) combined.push(baseItems[2]);
