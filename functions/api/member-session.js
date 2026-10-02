@@ -143,16 +143,10 @@ async function resolveRedirect(db, memberId, accountRole) {
         await ensureLegacyRoleMapping(db,memberId,accountRole);
         const roles = await db.prepare(`SELECT role_key FROM medlife_admin_user_roles WHERE member_id=?`).bind(memberId).all();
         const keys = new Set((roles.results || []).map(r => r.role_key));
-        if (keys.has("system_admin")) return "/admin-system.html";
-        if (keys.has("content_manager") || keys.has("content_editor") || keys.has("medical_reviewer")) return "/articles-admin";
-        if (keys.has("members_manager")) return "/members-admin";
-        if (keys.has("support_manager")) return "/support-admin";
-        if (keys.has("complaints_manager")) return "/complaints-admin";
+        if (keys.has("system_admin") || keys.has("content_manager") || keys.has("content_editor") || keys.has("medical_reviewer") || keys.has("members_manager") || keys.has("support_manager") || keys.has("complaints_manager")) return "https://admin.medlifesy.org/";
         const permissions = await db.prepare(`SELECT DISTINCT rp.permission_key FROM medlife_admin_user_roles ur JOIN medlife_admin_role_permissions rp ON rp.role_key=ur.role_key WHERE ur.member_id=?`).bind(memberId).all();
         const p = new Set((permissions.results || []).map(x => x.permission_key));
-        if ([...p].some(x => x.startsWith("join."))) return "/join-admin";
-        if ([...p].some(x => x.startsWith("support."))) return "/support-admin";
-        if ([...p].some(x => x.startsWith("complaints."))) return "/complaints-admin";
+        if ([...p].some(x => x.startsWith("join.") || x.startsWith("support.") || x.startsWith("complaints."))) return "https://admin.medlifesy.org/";
     } catch (error) { console.error("admin redirect resolution error:", error); }
     return "/members.html";
 }
