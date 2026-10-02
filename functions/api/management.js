@@ -545,6 +545,11 @@ export async function onRequestPost({ request }) {
         gender: cleanText(data.gender, 20),
         email: cleanText(data.email, 250).toLowerCase(),
         phone: cleanText(data.phone, 50),
+        emergency_contact_name: cleanText(data.emergency_contact_name, 150),
+        emergency_contact_relationship: cleanText(data.emergency_contact_relationship, 50),
+        emergency_contact_phone: cleanText(data.emergency_contact_phone, 50),
+        emergency_contact_alt_phone: cleanText(data.emergency_contact_alt_phone, 50),
+        emergency_contact_notes: cleanText(data.emergency_contact_notes, 1500),
         supervisor_start_date: normalizeDate(data.supervisor_start_date),
         academic_status: cleanText(data.academic_status, 60),
         university: cleanText(data.university, 250),
@@ -594,6 +599,10 @@ export async function onRequestPost({ request }) {
       ];
       if (requiredCore.some(key => !String(payload[key] ?? "").trim())) {
         return json({ success: false, error: "يرجى إكمال جميع المعلومات الأساسية المطلوبة." }, 400);
+      }
+      const requiredEmergency = ["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone"];
+      if (requiredEmergency.some(key => !String(payload[key] ?? "").trim())) {
+        return json({ success: false, error: "يرجى تعبئة اسم شخص الطوارئ وصلته ورقم هاتفه." }, 400);
       }
 
       const response = await fetch(SUPABASE_URL + "/rest/v1/public_membership_renewal_submissions?select=id", {
