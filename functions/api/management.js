@@ -652,13 +652,18 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يرجى تعبئة اسم شخص الطوارئ وصلته ورقم هاتفه." }, 400);
       }
 
-      const response = await fetch(SUPABASE_URL + "/rest/v1/public_membership_renewal_submissions?select=id", {
+      // The public API uses the anonymous publishable key. Avoid return=representation
+      // because PostgREST would then require SELECT privilege on the membership table.
+      // Generate the row ID ourselves, insert with return=minimal, and return the known ID.
+      const submissionId = crypto.randomUUID();
+      payload.id = submissionId;
+      const response = await fetch(SUPABASE_URL + "/rest/v1/public_membership_renewal_submissions", {
         method: "POST",
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
           Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
           "Content-Type": "application/json",
-          Prefer: "return=representation"
+          Prefer: "return=minimal"
         },
         body: JSON.stringify(payload)
       });
@@ -667,10 +672,9 @@ export async function onRequestPost({ request }) {
         console.error("Membership renewal write failed", response.status, errorText);
         return json({ success: false, error: "تعذر تسجيل طلب تجديد العضوية." }, 502);
       }
-      const created = await response.json().catch(() => []);
       return json({
         success: true,
-        submission_id: Array.isArray(created) ? created[0]?.id || null : null,
+        submission_id: submissionId,
         message: "تم استلام طلب تجديد العضوية وسيتم تدقيقه من فريق ميدلايف."
       }, 201);
     } else {
