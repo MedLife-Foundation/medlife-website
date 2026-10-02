@@ -75,6 +75,7 @@
     }
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
+    if (currentPath.startsWith('/activities/')) return 'activities';
     if (home) return 'home';
 
     const match = items.find(([url]) => normalizedPath(url) === currentPath);
