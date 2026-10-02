@@ -16,11 +16,11 @@ export async function onRequest(context) {
     let html = await response.text();
     const tags = [];
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
-    if (isSupportPage) tags.push('<script src="/site-nav.js?v=20260831-support1" defer></script>');
+    if (isSupportPage) tags.push('<script src="/site-nav.js?v=20261002-activities2" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      tags.push('<script src="/site-nav.js?v=20260831-contact-final10" defer></script>');
+      tags.push('<script src="/site-nav.js?v=20261002-activities2" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
       tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
