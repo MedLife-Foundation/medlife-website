@@ -337,6 +337,10 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     const values={};
     for(const f of schema?.fields||[])values[f.field_key]=data[f.field_key];
     const unitsData=data.current_unit_details||{};
+    const consultationField=(schema?.fields||[]).find(f=>f.field_key==="consultation_specialty");
+    const consultationValue=values.consultation_specialty==="other"
+      ? values.consultation_specialty_other
+      : (Array.isArray(consultationField?.options)?consultationField.options.find(o=>String(o.value)===String(values.consultation_specialty))?.label_ar:values.consultation_specialty);
     const items=[
       ["الاسم الكامل",values.full_name],
       ["اسم الأب",values.father_name],
@@ -351,6 +355,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       ["الوضع الأكاديمي / المهني",values.academic_status],
       ["الجامعة",values.student_university||values.graduation_university||values.university],
       ["الاختصاص",values.residency_specialty||values.specialist_specialty||values.specialty],
+      ["اختصاص الاستشارة",consultationValue],
       ["ساعات التطوع الأسبوعية",values.volunteer_commitment_hours]
     ].filter(([,v])=>v!==undefined&&String(v).trim()!=="");
     const unitCards=selectedIds().map(id=>{
