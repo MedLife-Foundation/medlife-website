@@ -20,7 +20,7 @@
 <section class="hero"><h1>إدارة أعضاء MedLife</h1><p>مراجعة طلبات الانضمام وإدارة حالات العضوية.</p></section>
 <section class="login" id="loginBox"><label for="adminKey">مفتاح المشرف</label><input id="adminKey" type="password" autocomplete="current-password" placeholder="أدخل مفتاح الإدارة"><button class="primary" id="loginButton" style="width:100%;margin-top:12px">دخول</button><div id="loginMessage" class="message"></div></section>
 <section class="dashboard" id="dashboard">
-<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;color:var(--navy)">طلبات وأعضاء MedLife</h2><p style="margin:5px 0;color:var(--muted)">البيانات المعروضة هنا إدارية وخاصة.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" id="exportButton">تصدير بيانات الهجرة</button><button class="secondary" id="logoutButton">تسجيل الخروج</button></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;color:var(--navy)">طلبات وأعضاء MedLife</h2><p style="margin:5px 0;color:var(--muted)">البيانات المعروضة هنا إدارية وخاصة.</p></div><button class="secondary" id="logoutButton">تسجيل الخروج</button></div>
 <div class="notice"><i class="fa-solid fa-shield-halved"></i> الرقم الوطني وبيانات التواصل تظهر فقط داخل لوحة الإدارة المصرّح لها.</div>
 <div class="stats"><div class="stat"><small>الإجمالي</small><strong id="total">0</strong></div><div class="stat"><small>قيد المراجعة</small><strong id="pending">0</strong></div><div class="stat"><small>نشط</small><strong id="active">0</strong></div><div class="stat"><small>معلّق</small><strong id="suspended">0</strong></div><div class="stat"><small>غير نشط</small><strong id="inactive">0</strong></div></div>
 <div class="filters">
@@ -40,7 +40,7 @@ let adminKey=sessionStorage.getItem('medlife_members_admin_key')||'',cache=[],se
 const statusLabels={pending:'قيد المراجعة',active:'نشط',suspended:'معلّق',inactive:'غير نشط'};
 const roleLabels={volunteer:'متطوع',supervisor:'مشرف',general_supervisor:'مشرف عام',assistant_supervisor:'مساعد مشرف'};
 const cellLabels={plasma_cell:'Plasma Cell',neuron_cell:'Neuron Cell',astrocyte_cell:'Astrocyte Cell',leukocyte_cell:'Leukocyte Cell',heart_cell:'Heart Cell',red_blood_cell:'Red Blood Cell',blog:'المدونة',design:'التصميم',video_editing:'المونتاج',visual_media:'الإعلام المرئي',instagram:'الإنستا',telegram:'التليجرام',administration:'الإدارة',voice_over:'Voice Over',coordination:'التنسيق',university_media:'إعلامي جامعات',field:'ميداني'};
-loginButton.addEventListener('click',login);keyInput.addEventListener('keydown',e=>{if(e.key==='Enter')login()});document.getElementById('logoutButton').addEventListener('click',()=>{sessionStorage.removeItem('medlife_members_admin_key');location.reload()});document.getElementById('exportButton').addEventListener('click',exportMembers);
+loginButton.addEventListener('click',login);keyInput.addEventListener('keydown',e=>{if(e.key==='Enter')login()});document.getElementById('logoutButton').addEventListener('click',()=>{sessionStorage.removeItem('medlife_members_admin_key');location.reload()});
 ['statusFilter','roleFilter','cellFilter'].forEach(id=>document.getElementById(id).addEventListener('change',load));document.getElementById('refresh').addEventListener('click',load);let searchTimer;document.getElementById('searchFilter').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(load,300)});
 document.getElementById('close').addEventListener('click',()=>modal.classList.remove('open'));modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
 async function login(){const key=keyInput.value.trim();if(!key){showLogin('أدخل مفتاح المشرف.');return}adminKey=key;sessionStorage.setItem('medlife_members_admin_key',adminKey);if(await load(true)){loginBox.style.display='none';dashboard.style.display='block'}}
@@ -53,22 +53,6 @@ function showDetail(id){const m=cache.find(x=>Number(x.id)===id);if(!m)return;se
 function addAction(text,cls,fn){const b=document.createElement('button');b.className=cls;b.textContent=text;b.onclick=fn;modalActions.appendChild(b)}
 async function updateSelected(status){if(!selectedId)return;await updateStatus(selectedId,status);modal.classList.remove('open')}
 async function updateStatus(id,status){try{const data=await api('/api/members-admin',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})});await load();if(data.membership_number)alert(`${data.message}\nرقم العضوية: ${data.membership_number}`);else alert(data.message)}catch(e){alert(e.message)}}
-async function exportMembers(){
- try{
-  const p=new URLSearchParams({export:'1',status:document.getElementById('statusFilter').value,role:document.getElementById('roleFilter').value,cell:document.getElementById('cellFilter').value,search:document.getElementById('searchFilter').value.trim()});
-  const data=await api('/api/members-admin?'+p.toString());
-  const members=data.members||[];
-  if(!members.length){alert('لا توجد سجلات لتصديرها.');return}
-  const headers=['id','membership_number','full_name','mother_name','national_id','date_of_birth','email','phone','gender','education_level','study_year','university','resident_specialty','residency_year','residency_hospital','address','governorate','medlife_role','cell','field_location','join_date','volunteer_certificate','status','academic_status','faculty','graduation_year','profession','workplace'];
-  const escCsv=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const lines=[headers.map(escCsv).join(',')];
-  for(const m of members) lines.push(headers.map(h=>escCsv(m[h])).join(','));
-  const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='medlife-legacy-members-export.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  alert(`تم تصدير ${members.length} سجل. لا تحذف بيانات D1 بعد؛ الملف مخصص للهجرة إلى Master Database.`);
- }catch(e){alert('تعذر تصدير البيانات: '+e.message)}
-}
 function fieldLabel(v){const labels={damascus:'دمشق',aleppo:'حلب',tartous:'طرطوس',latakia:'اللاذقية',homs:'حمص',hasakah:'الحسكة'};return labels[v]||v||''}function date(v){if(!v)return'';const d=new Date(v.replace(' ','T'));return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('ar-SY',{year:'numeric',month:'long',day:'numeric'})}function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
 if(adminKey){keyInput.value='';load(true).then(ok=>{if(ok){loginBox.style.display='none';dashboard.style.display='block'}else{sessionStorage.removeItem('medlife_members_admin_key');keyInput.value=''}})}
 </script>
