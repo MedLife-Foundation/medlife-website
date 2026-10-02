@@ -161,7 +161,7 @@
           `).join('')}
         </nav>
         <div class="medlife-global-actions" aria-label="إجراءات العضوية">
-          <a class="member" href="https://admin.medlifesy.org/login?next=/" rel="noopener">دخول الأعضاء</a>
+          <a class="member" href="/login.html">دخول الأعضاء</a>
           <a class="join" href="/join-options.html">الانضمام</a>
         </div>
         <button class="medlife-global-menu" type="button" aria-label="فتح قائمة التنقل" aria-expanded="false" aria-controls="medlife-global-mobile">القائمة</button>
@@ -170,7 +170,7 @@
         ${items.map(([url, label, key]) => `
           <a href="${url}" data-key="${key}" class="${key === current ? 'active' : ''}">${label}</a>
         `).join('')}
-        <a href="https://admin.medlifesy.org/login?next=/" rel="noopener">دخول الأعضاء</a>
+        <a href="/login.html">دخول الأعضاء</a>
         <a class="mobile-join" href="/join-options.html">الانضمام إلى ميدلايف</a>
       </div>
     `;
