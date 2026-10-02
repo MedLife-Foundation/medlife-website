@@ -78,6 +78,7 @@
     if (page === 'gallery' || page === 'gallery.html') return 'gallery';
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
+    if (page === 'initiatives-gallery' || page === 'initiatives-gallery.html') return 'activities';
     if (location.pathname.startsWith('/activities/')) return 'activities';
     if (home) return 'home';
     if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
