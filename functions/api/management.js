@@ -9,7 +9,7 @@ const RESOURCES = {
   },
   activities: {
     table: "public_site_activities",
-    select: "source_id,title,activity_type,description,governorate,city,start_at,end_at,status,participant_target,participant_count,cover_image_url,source_url,gallery_url,created_at,updated_at",
+    select: "source_id,title,activity_type,description,details,governorate,city,start_at,end_at,status,participant_target,participant_count,cover_image_url,slug,source_url,gallery_url,gallery,created_at,updated_at",
     order: "start_at.desc"
   },
   campaigns: {
@@ -88,6 +88,8 @@ async function fetchResource(resource, url) {
   if (resource === "activities") {
     const status = url.searchParams.get("status");
     if (status) query.set("status", "eq." + status);
+    const slug = url.searchParams.get("slug");
+    if (slug) query.set("slug", "eq." + slug);
   }
   if (resource === "campaigns") {
     const status = url.searchParams.get("status");
