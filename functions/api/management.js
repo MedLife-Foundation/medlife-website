@@ -504,6 +504,7 @@ export async function onRequestPost({ request }) {
         gender: cleanText(data.gender, 20),
         email: cleanText(data.email, 250).toLowerCase(),
         phone: cleanText(data.phone, 50),
+        supervisor_start_date: normalizeDate(data.supervisor_start_date),
         academic_status: cleanText(data.academic_status, 60),
         university: cleanText(data.university, 250),
         specialty: cleanText(data.specialty, 250),
