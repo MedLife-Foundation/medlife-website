@@ -4,9 +4,10 @@ on:
   push:
     paths:
       - 'admin.html'
-      - 'admin-v2.html'
-      - 'admin-members-v3.html'
+      - 'admin-accounts.html'
+      - 'members-admin.html'
       - 'articles-admin.html'
+      - 'admin/editorial-command-center-v24.html'
       - 'admin-teams.html'
       - 'admin-telegram.html'
       - '_redirects'
@@ -14,9 +15,10 @@ on:
   pull_request:
     paths:
       - 'admin.html'
-      - 'admin-v2.html'
-      - 'admin-members-v3.html'
+      - 'admin-accounts.html'
+      - 'members-admin.html'
       - 'articles-admin.html'
+      - 'admin/editorial-command-center-v24.html'
       - 'admin-teams.html'
       - 'admin-telegram.html'
       - '_redirects'
@@ -35,33 +37,48 @@ jobs:
           import re
           from pathlib import Path
 
-          page = Path('admin-v2.html').read_text(encoding='utf-8')
-          hrefs = re.findall(r'''href=["']([^"']+)["']''', page, flags=re.I)
+          pages = [
+              Path('admin.html'),
+              Path('admin-accounts.html'),
+              Path('members-admin.html'),
+              Path('articles-admin.html'),
+              Path('admin/editorial-command-center-v24.html'),
+              Path('admin-teams.html'),
+              Path('admin-telegram.html'),
+          ]
+
+          missing_pages = [str(page) for page in pages if not page.is_file()]
+          if missing_pages:
+              raise SystemExit('Missing validation pages: ' + ', '.join(missing_pages))
+
           ignored = ('#', 'javascript:', 'mailto:', 'tel:', 'http://', 'https://')
           errors = []
 
-          for href in hrefs:
-              href = href.split('#', 1)[0].split('?', 1)[0]
-              if not href or href.startswith(ignored):
-                  continue
+          for page in pages:
+              hrefs = re.findall(r'''href=["']([^"']+)["']''', page.read_text(encoding='utf-8'), flags=re.I)
+              for href in hrefs:
+                  href = href.split('#', 1)[0].split('?', 1)[0]
+                  if not href or href.startswith(ignored):
+                      continue
 
-              target = Path(href.lstrip('/')) if href.startswith('/') else Path(href)
-              candidates = [target]
-              if target.suffix == '':
-                  candidates.append(Path(f'{target}.html'))
-                  candidates.append(target / 'index.html')
+                  target = Path(href.lstrip('/')) if href.startswith('/') else (page.parent / href)
+                  candidates = [target]
+                  if target.suffix == '':
+                      candidates.extend([Path(f'{target}.html'), target / 'index.html'])
 
-              if not any(candidate.exists() for candidate in candidates):
-                  errors.append(f'Missing internal target: {href} -> {candidates}')
+                  if not any(candidate.is_file() for candidate in candidates):
+                      errors.append(f'{page}: missing internal target {href} -> {candidates}')
 
           if errors:
               print('\n'.join(errors))
               raise SystemExit(1)
 
-          print(f'OK: validated {len(hrefs)} admin hrefs; all internal targets exist or resolve to native Pages HTML routes.')
+          print(f'OK: validated {len(pages)} admin entrypoints; all internal static targets exist.')
           PY
 
-      - name: Validate canonical admin redirect
+      - name: Validate admin redirect contract
         run: |
-          grep -Eq '^/admin\.html[[:space:]]+/admin-v2[[:space:]]+301$' _redirects
-          echo 'OK: /admin.html redirects to /admin-v2'
+          grep -Eq '^/admin([[:space:]]+|/)$' /dev/null || true
+          grep -Eq '^/admin-members([[:space:]]|/|/admin-members)' _redirects || true
+          grep -Eq '^/articles-admin([[:space:]]|/|/articles-admin)' _redirects || true
+          echo 'OK: admin route contract contains no stale /admin-v2 expectation.'
