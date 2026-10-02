@@ -7,40 +7,11 @@ export async function onRequest(context) {
 
     const path = new URL(context.request.url).pathname.toLowerCase();
     const isArticlesLibrary = path === '/articles' || path === '/articles/' || path.endsWith('/articles.html');
-    const isArticlesAdmin = path === '/articles-admin' || path === '/articles-admin/' || path.endsWith('/articles-admin.html');
-    const isArticleReader = path === '/article-reader-v5.html' || path.startsWith('/articles/');
-    const isSupportPage = path === '/support' || path === '/support/' || path === '/support.html';
-    const isContactPage = path === '/contact' || path === '/contact/' || path === '/contact.html';
-
-    if (isArticlesAdmin) {
-      let html = await response.text();
-      const styleTag = '<link rel="stylesheet" href="/articles-admin-layout.css?v=20260901-3">';
-      const scriptTags = [
-        '<script src="/articles-admin-actions.js?v=20260901-1" defer></script>',
-        '<script src="/articles-admin-ai-cover.js?v=20260901-4" defer></script>',
-        '<script src="/articles-admin-canonical-panel.js?v=20260901-2" defer></script>'
-      ];
-      if (!html.includes('/articles-admin-layout.css')) {
-        html = html.includes('</head>') ? html.replace('</head>', `${styleTag}</head>`) : `${styleTag}${html}`;
-      }
-      for (const tag of scriptTags) {
-        const marker = tag.match(/(?:src|href)="([^"]+)/)?.[1] || '';
-        if (marker && !html.includes(marker)) {
-          html = html.includes('</body>') ? html.replace('</body>', `${tag}</body>`) : `${html}${tag}`;
-        }
-      }
-      const headers = new Headers(response.headers);
-      headers.delete('content-length');
-      headers.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');
-      headers.set('pragma','no-cache');
-      return new Response(html,{status:response.status,statusText:response.statusText,headers});
-    }
 
     if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage) return response;
 
     let html = await response.text();
     const tags = [];
-    if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
     if (isSupportPage) tags.push('<script src="/site-nav.js?v=20260831-support1" defer></script>');
     if (isContactPage) {
