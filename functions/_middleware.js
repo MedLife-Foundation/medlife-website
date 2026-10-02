@@ -189,7 +189,6 @@ export async function onRequest(context) {
     }
 
     const headers = new Headers(response.headers);
-    const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');
     headers.set('pragma','no-cache');
