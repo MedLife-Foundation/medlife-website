@@ -12,20 +12,31 @@
 /submit-article /submit-article-v6 200
 /submit-article/ /submit-article-v6 200
 
-# General administration is served directly by admin.html.
-# Do not rewrite /admin to avoid a canonical redirect loop.
+# Administrative area is a separate application.
+# All legacy admin entrypoints from the old website shell point to the
+# single canonical management platform on admin.medlifesy.org.
 
-/admin-members /members-admin.html 301
-/admin-members/ /members-admin.html 301
-/admin-members.html /members-admin.html 301
-/admin-members-v3.html /members-admin.html 301
-/admin-teams.html /admin-teams 301
-/admin-telegram.html /admin-telegram 301
-
-# Articles admin: content accounts use a dedicated role-aware entrypoint.
-/articles-admin /admin/editorial-command-center-v24.html 200
-/articles-admin/ /admin/editorial-command-center-v24.html 200
-/articles-admin.html /admin/editorial-command-center-v24.html 200
+/admin https://admin.medlifesy.org/ 301
+/admin/ https://admin.medlifesy.org/ 301
+/admin.html https://admin.medlifesy.org/ 301
+/admin-login https://admin.medlifesy.org/login 301
+/admin-login.html https://admin.medlifesy.org/login 301
+/admin-setup.html https://admin.medlifesy.org/login 301
+/admin-members https://admin.medlifesy.org/ 301
+/admin-members/ https://admin.medlifesy.org/ 301
+/admin-members.html https://admin.medlifesy.org/ 301
+/admin-members-v3.html https://admin.medlifesy.org/ 301
+/admin-accounts https://admin.medlifesy.org/ 301
+/admin-accounts.html https://admin.medlifesy.org/ 301
+/admin-roles https://admin.medlifesy.org/ 301
+/admin-roles.html https://admin.medlifesy.org/ 301
+/admin-teams https://admin.medlifesy.org/ 301
+/admin-teams.html https://admin.medlifesy.org/ 301
+/admin-telegram https://admin.medlifesy.org/ 301
+/admin-telegram.html https://admin.medlifesy.org/ 301
+/articles-admin https://admin.medlifesy.org/ 301
+/articles-admin/ https://admin.medlifesy.org/ 301
+/articles-admin.html https://admin.medlifesy.org/ 301
 
 # Articles admin API is served by the dedicated Worker/D1 stack.
 /api/articles https://medlife-articles-api.broad-frog-3978.workers.dev/articles 200
