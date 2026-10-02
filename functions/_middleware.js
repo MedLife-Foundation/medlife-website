@@ -5,7 +5,7 @@ function normalizeSiteNavScripts(html) {
   return String(html || "").replace(/<script\b[^>]*src=["'][^"']*\/site-nav\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi, tag => {
     if (found) return "";
     found = true;
-    return tag.replace(/src=["'][^"']*\/site-nav\.js(?:\?[^"']*)?["']/i, 'src="/site-nav.js?v=20261003-navfix1"');
+    return tag.replace(/src=["'][^"']*\/site-nav\.js(?:\?[^"']*)?["']/i, 'src="/site-nav.js?v=20261003-navfix2"');
   });
 }
 
@@ -161,11 +161,11 @@ export async function onRequest(context) {
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
-    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261003-navfix1" defer></script>');
+    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261003-navfix2" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261003-navfix1" defer></script>');
+      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261003-navfix2" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
       tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
@@ -185,7 +185,7 @@ export async function onRequest(context) {
       tags.push('<script src="/contact-ui-final-fix.js?v=20260831-contact-ui-final-fix" defer></script>');
     }
     if (PUBLIC_HEADER_ROUTES.has(path) && !html.includes('/site-nav.js')) {
-      tags.push('<script src="/site-nav.js?v=20261003-navfix1" defer></script>');
+      tags.push('<script src="/site-nav.js?v=20261003-navfix2" defer></script>');
     }
 
     const marker = tags.join('');
