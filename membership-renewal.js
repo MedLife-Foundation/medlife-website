@@ -64,9 +64,11 @@ function getUnitDetails(){
     const key=String(unitId);
     const role=form.querySelector('[data-unit-role="'+CSS.escape(key)+'"]')?.value||"";
     const joinedOn=form.querySelector('[data-unit-joined="'+CSS.escape(key)+'"]')?.value||"";
-    const continuing=form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.value==="true";
+    const continuingValue=form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.value||"";
+    const continuing=continuingValue==="true";
+    const leftOn=form.querySelector('[data-unit-left="'+CSS.escape(key)+'"]')?.value||"";
     const notes=form.querySelector('[data-unit-notes="'+CSS.escape(key)+'"]')?.value||"";
-    details[key]={role,joined_on:joinedOn,continuing,notes};
+    details[key]={role,joined_on:joinedOn,continuing,left_on:leftOn,notes};
   });
   return details;
 }
@@ -88,9 +90,20 @@ function validateUnitDetails(){
       form.querySelector('[data-unit-joined="'+CSS.escape(key)+'"]')?.focus();
       return false;
     }
-    if(typeof detail.continuing!=="boolean"){
+    const continuingValue=form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.value||"";
+    if(continuingValue!=="true" && continuingValue!=="false"){
       setError("يرجى تحديد هل ما زلت مستمراً في: "+label);
       form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.focus();
+      return false;
+    }
+    if(!detail.continuing && !/^\d{4}-\d{2}-\d{2}$/.test(detail.left_on)){
+      setError("يرجى تحديد تاريخ انتهاء انتسابك إلى: "+label);
+      form.querySelector('[data-unit-left="'+CSS.escape(key)+'"]')?.focus();
+      return false;
+    }
+    if(detail.left_on && detail.left_on < detail.joined_on){
+      setError("تاريخ انتهاء الانتساب لا يمكن أن يسبق تاريخ البدء في: "+label);
+      form.querySelector('[data-unit-left="'+CSS.escape(key)+'"]')?.focus();
       return false;
     }
   }
