@@ -19,6 +19,7 @@
 /admin https://admin.medlifesy.org/ 301
 /admin/ https://admin.medlifesy.org/ 301
 /admin.html https://admin.medlifesy.org/ 301
+/admin/* https://admin.medlifesy.org/ 301
 /admin-login https://admin.medlifesy.org/login 301
 /admin-login.html https://admin.medlifesy.org/login 301
 /admin-setup.html https://admin.medlifesy.org/login 301
@@ -37,6 +38,7 @@
 /articles-admin https://admin.medlifesy.org/ 301
 /articles-admin/ https://admin.medlifesy.org/ 301
 /articles-admin.html https://admin.medlifesy.org/ 301
+/articles-admin/* https://admin.medlifesy.org/ 301
 
 # Articles admin API is served by the dedicated Worker/D1 stack.
 /api/articles https://medlife-articles-api.broad-frog-3978.workers.dev/articles 200
