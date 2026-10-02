@@ -53,5 +53,4 @@
 # CMS-managed authentication and membership pages.
 /new-member /pages/new-member 200
 /new-member.html /pages/new-member 200
-/login https://admin.medlifesy.org/login 301
-/login.html https://admin.medlifesy.org/login 301
+/login /login.html 301
