@@ -39,17 +39,30 @@
         ])
         .filter(item => item[2] !== 'home');
 
+      const normalizeNavPath = value => {
+        try {
+          const url = new URL(String(value || ''), location.origin);
+          return url.pathname.replace(/\\/$/, '').toLowerCase() || '/';
+        } catch {
+          return String(value || '').split('#')[0].replace(/\\/$/, '').toLowerCase() || '/';
+        }
+      };
+
+      // Keep the canonical public header as the source of truth. A CMS page
+      // with the same public pathname must not create a second menu item,
+      // even when the CMS returns an absolute URL while the base item is relative.
       const combined = [...baseItems];
-      const seen = new Set(combined.map(item => String(item[0])));
+      const seen = new Set(baseItems.map(item => normalizeNavPath(item[0])));
       for (const item of managed) {
-        // Canonical navigation keeps its exact public label and URL.
-        // The CMS may still add additional main-menu pages after these core links.
-        if (seen.has(String(item[0]))) continue;
+        const key = normalizeNavPath(item[0]);
+        if (seen.has(key)) continue;
         combined.push(item);
-        seen.add(String(item[0]));
+        seen.add(key);
       }
 
-      if (!combined.some(item => item[2] === 'activities')) combined.push(baseItems[2]);
+      if (!combined.some(item => normalizeNavPath(item[0]) === normalizeNavPath(baseItems[6][0]))) {
+        combined.push(baseItems[6]);
+      }
       return combined.sort((a,b) => Number(a[3] ?? 1000) - Number(b[3] ?? 1000));
     } catch {
       return fallback;
