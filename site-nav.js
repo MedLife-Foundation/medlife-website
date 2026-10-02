@@ -6,6 +6,7 @@
     ['articles.html', 'المقالات', 'articles'],
     ['forum-v3.html', 'المنتدى', 'forum'],
     ['gallery.html', 'الصور', 'gallery'],
+    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities'],
     ['support.html', 'صندوق الدعم', 'support'],
     ['contact.html', 'تواصل معنا', 'contact']
   ];
@@ -18,6 +19,7 @@
     if (page === 'gallery' || page === 'gallery.html') return 'gallery';
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
+    if (location.pathname.startsWith('/activities/')) return 'activities';
     if (home) return 'home';
     if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
     if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';
