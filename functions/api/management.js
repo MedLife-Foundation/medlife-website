@@ -250,10 +250,29 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     }
   }
 
+  const selectedUnitTypes = new Set();
+  const selectedUnitIds = Array.isArray(formData.current_units)
+    ? formData.current_units.map(value => cleanText(value, 80)).filter(Boolean)
+    : [];
+  if (selectedUnitIds.length) {
+    const selectedUnitsResponse = await fetch(
+      SUPABASE_URL + "/rest/v1/org_units?select=id,unit_type&id=in.(" + selectedUnitIds.map(encodeURIComponent).join(",") + ")",
+      {
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+          Accept: "application/json"
+        }
+      }
+    );
+    const selectedUnits = await selectedUnitsResponse.json().catch(() => []);
+    for (const unit of (Array.isArray(selectedUnits) ? selectedUnits : [])) {
+      const type = cleanText(unit.unit_type, 50);
+      if (type) selectedUnitTypes.add(type);
+    }
+  }
+
   const fieldIsVisible = (field) => {
-    const selectedUnitIds = Array.isArray(formData.current_units)
-      ? formData.current_units.map(value => cleanText(value, 80)).filter(Boolean)
-      : [];
     const targetUnitIds = Array.isArray(field.target_unit_ids)
       ? field.target_unit_ids.map(value => cleanText(value, 80)).filter(Boolean)
       : [];
@@ -262,25 +281,8 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     const targetUnitTypes = Array.isArray(field.target_unit_types)
       ? field.target_unit_types.map(value => cleanText(value, 50)).filter(Boolean)
       : [];
-    if (targetUnitTypes.length) {
-      const selectedUnitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,unit_type&id=in.(" + selectedUnitIds.map(encodeURIComponent).join(",") + ")",
-        {
-          headers: {
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-            Accept: "application/json"
-          }
-        }
-      );
-      const selectedUnits = await selectedUnitsResponse.json().catch(() => []);
-      const selectedTypes = new Set(
-        (Array.isArray(selectedUnits) ? selectedUnits : [])
-          .map(unit => cleanText(unit.unit_type, 50))
-          .filter(Boolean)
-      );
-      if (!targetUnitTypes.some(type => selectedTypes.has(type))) return false;
-    }
+    if (targetUnitTypes.length && !targetUnitTypes.some(type => selectedUnitTypes.has(type))) return false;
+
     const visibility = field.visibility && typeof field.visibility === "object" ? field.visibility : {};
     if (visibility.mode !== "when") return true;
     const actual = formData[cleanText(visibility.field_key, 120)];
