@@ -55,6 +55,7 @@ export async function onRequest(context) {
     const isArticleReader = path === '/article-reader-v5.html' || path.startsWith('/articles/');
     const isSupportPage = path === '/support' || path === '/support/' || path === '/support.html';
     const isContactPage = path === '/contact' || path === '/contact/' || path === '/contact.html';
+    const isManagedCmsRoute = CMS_LEGACY_ROUTES.has(path);
 
     if (isArticlesAdmin) {
       let html = await response.text();
@@ -80,7 +81,7 @@ export async function onRequest(context) {
       return new Response(html,{status:response.status,statusText:response.statusText,headers});
     }
 
-    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage) return response;
+    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute) return response;
 
     let html = await response.text();
 
@@ -96,7 +97,7 @@ export async function onRequest(context) {
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
-    if (isSupportPage) tags.push('<script src="/site-nav.js?v=20261002-activities-safe1" defer></script>');
+    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
