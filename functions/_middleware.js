@@ -23,7 +23,7 @@ const CMS_LEGACY_ROUTES = new Set([
 async function fetchManagedLegacyPage(pathname) {
   if (!CMS_LEGACY_ROUTES.has(pathname)) return null;
   const query = new URLSearchParams({
-    select: "title,body,metadata,status,public_url,updated_at",
+    select: "title,body,metadata,public_url,updated_at",
     content_type: "eq.page",
     public_url: "eq." + pathname,
     limit: "1"
@@ -40,9 +40,12 @@ async function fetchManagedLegacyPage(pathname) {
     if (!response.ok) return {state:"error"};
     const rows = await response.json().catch(() => []);
     const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row) return {state:"unmanaged"};
-    if (row.metadata?.template !== "legacy_html") return {state:"unmanaged"};
-    if (row.status !== "published") return {state:"unpublished"};
+    // This function is called only for routes explicitly registered in CMS_LEGACY_ROUTES.
+    // The public projection contains published rows only, so absence means the managed
+    // legacy route is not currently published. This prevents archived/unpublished pages
+    // from falling back to their old repository HTML.
+    if (!row) return {state:"unpublished"};
+    if (row.metadata?.template !== "legacy_html") return {state:"unpublished"};
     if (!String(row.body || "").trim()) return {state:"unpublished"};
     return {state:"published", row};
   } catch {
