@@ -366,8 +366,8 @@ export async function onRequestPost({ request }) {
       const requestedIds = Array.isArray(data.current_units)
         ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 26)
         : [];
-      const requestedRoleMap = data.current_unit_roles && typeof data.current_unit_roles === "object" && !Array.isArray(data.current_unit_roles)
-        ? data.current_unit_roles
+      const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
+        ? data.current_unit_details
         : {};
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
@@ -388,19 +388,30 @@ export async function onRequestPost({ request }) {
       const requestedUnits = activeUnits
         .filter(unit => requestedIds.includes(String(unit.id)))
         .map(unit => {
-          const role = cleanText(requestedRoleMap[String(unit.id)], 30).toLowerCase();
+          const raw = requestedUnitDetails[String(unit.id)];
+          const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+          const role = cleanText(detail.role, 30).toLowerCase();
+          const joinedOn = normalizeDate(detail.joined_on);
+          const continuing = detail.continuing === true;
+          const notes = cleanText(detail.notes, 1500);
           return {
             id: String(unit.id),
             name_ar: cleanText(unit.name_ar || unit.name_en, 200),
             unit_type: cleanText(unit.unit_type, 50),
-            role
+            role,
+            joined_on: joinedOn,
+            continuing,
+            notes
           };
         });
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
       if (requestedUnits.some(unit => !["volunteer","supervisor"].includes(unit.role))) {
-        return json({ success: false, error: "يرجى تحديد الدور داخل كل قسم أو وحدة: متطوع أو مشرف." }, 400);
+        return json({ success: false, error: "يرجى تحديد الدور داخل كل قسم أو وحدة." }, 400);
+      }
+      if (requestedUnits.some(unit => !unit.joined_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
       }
 
       const numberValue = value => {
@@ -438,6 +449,12 @@ export async function onRequestPost({ request }) {
         requested_unit_ids: requestedUnits.map(unit => unit.id),
         requested_units: requestedUnits,
         requested_unit_roles: Object.fromEntries(requestedUnits.map(unit => [unit.id, unit.role])),
+        requested_unit_details: Object.fromEntries(requestedUnits.map(unit => [unit.id, {
+          role: unit.role,
+          joined_on: unit.joined_on,
+          continuing: unit.continuing,
+          notes: unit.notes
+        }])),
         reported_total_volunteer_hours: numberValue(data.reported_total_volunteer_hours),
         volunteer_commitment_hours: numberValue(data.volunteer_commitment_hours),
         certificate_types: certificateTypes,
@@ -524,7 +541,7 @@ export async function onRequestPost({ request }) {
       }
 
       const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=name_ar,name_en&unit_type=in.(department,field_team)&is_active=eq.true",
+        SUPABASE_URL + "/rest/v1/org_units?select=name_ar,name_en&unit_type=in.(cell,department,field_team)&is_active=eq.true",
         {
           headers: {
             apikey: SUPABASE_PUBLISHABLE_KEY,
