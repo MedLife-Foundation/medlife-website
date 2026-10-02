@@ -15,7 +15,7 @@ function jsonArticle(row){
     category: row.category || row.metadata?.category || "مقال طبي",
     image_url: row.image_url || row.metadata?.image_url || "",
     slug: row.slug,
-    canonical_path: row.public_url || "/articles/" + encodeURIComponent(row.slug),
+    canonical_path: "/articles/" + encodeURIComponent(row.slug),
     published_at: row.published_at,
     created_at: row.created_at,
     updated_at: row.updated_at
