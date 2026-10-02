@@ -1,16 +1,61 @@
 (() => {
-  const items = [
-    ['index.html', 'الرئيسية', 'home'],
-    ['about-medlife.html', 'عن المؤسسة', 'about'],
-    ['index.html#programs', 'مجالات العمل', 'programs'],
-    ['articles.html', 'المقالات', 'articles'],
-    ['forum-v3.html', 'المنتدى', 'forum'],
-    ['gallery.html', 'الصور', 'gallery'],
-    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities'],
-    ['support.html', 'صندوق الدعم', 'support'],
-    ['contact.html', 'تواصل معنا', 'contact']
+  const baseItems = [
+    ['index.html', 'الرئيسية', 'home', 0],
+    ['index.html#programs', 'مجالات العمل', 'programs', 20],
+    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60]
   ];
 
+  async function loadManagedItems() {
+    const fallback = [
+      ['index.html', 'الرئيسية', 'home', 0],
+      ['about-medlife.html', 'عن المؤسسة', 'about', 10],
+      ['index.html#programs', 'مجالات العمل', 'programs', 20],
+      ['articles.html', 'المقالات', 'articles', 30],
+      ['forum-v3.html', 'المنتدى', 'forum', 40],
+      ['gallery.html', 'الصور', 'gallery', 50],
+      ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60],
+      ['support.html', 'صندوق الدعم', 'support', 70],
+      ['contact.html', 'تواصل معنا', 'contact', 80]
+    ];
+
+    try {
+      const response = await fetch('/api/management?resource=content&content_type=page&limit=50', {
+        headers: {Accept:'application/json'},
+        cache:'no-store'
+      });
+      if (!response.ok) return fallback;
+      const payload = await response.json();
+      const pages = Array.isArray(payload?.data) ? payload.data : [];
+      const managed = pages
+        .filter(page => page?.status === 'published' && page?.metadata?.nav?.show_main === true && page?.public_url)
+        .map(page => [
+          String(page.public_url),
+          String(page.metadata?.nav?.label || page.title || 'صفحة'),
+          String(page.slug || ''),
+          Number.isFinite(Number(page.metadata?.nav?.order)) ? Number(page.metadata.nav.order) : 1000
+        ])
+        .filter(item => item[2] !== 'home');
+
+      const combined = [...baseItems];
+      const seen = new Set(combined.map(item => String(item[0])));
+      for (const item of managed) {
+        if (seen.has(String(item[0]))) {
+          const index = combined.findIndex(existing => String(existing[0]) === String(item[0]));
+          if (index >= 0) combined[index] = item;
+        } else {
+          combined.push(item);
+          seen.add(String(item[0]));
+        }
+      }
+
+      if (!combined.some(item => item[2] === 'activities')) combined.push(baseItems[2]);
+      return combined.sort((a,b) => Number(a[3] ?? 1000) - Number(b[3] ?? 1000));
+    } catch {
+      return fallback;
+    }
+  }
+
+  let items = null;
   const rawPage = location.pathname.split('/').filter(Boolean).pop() || 'index.html';
   const page = rawPage.endsWith('/') ? rawPage.slice(0, -1) : rawPage;
   const home = page === '' || page === 'index.html';
@@ -47,8 +92,9 @@
     }
   };
 
-  function build() {
+  async function build() {
     removeLegacyHeaders();
+    items = await loadManagedItems();
 
     const current = activeKey();
     const header = document.createElement('header');
@@ -215,6 +261,6 @@
   }
 
   window.addEventListener('hashchange', () => setActive(activeKey()));
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
-  else build();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { void build(); });
+  else void build();
 })();
