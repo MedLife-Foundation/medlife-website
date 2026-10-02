@@ -4,8 +4,9 @@
   const text = (value) => String(value ?? "");
   const safeUrl = (value) => {
     try {
-      const url = new URL(text(value).trim(), location.origin);
-      if (url.protocol === "https:" || url.origin === location.origin) return url.href;
+      const raw = text(value).trim();
+      const url = new URL(raw, location.origin);
+      if (url.protocol === "https:" || url.origin === location.origin || url.protocol === "tel:" || url.protocol === "mailto:") return url.href;
     } catch {}
     return "";
   };
