@@ -502,7 +502,8 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
-      const allowedUnitRoles = formKey === "membership_renewal_supervisor"
+      const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
+      const allowedUnitRoles = supervisorForm
         ? ["volunteer","assistant_supervisor","supervisor","general_supervisor"]
         : ["volunteer"];
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
