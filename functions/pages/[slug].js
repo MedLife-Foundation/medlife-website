@@ -68,7 +68,20 @@ export async function onRequestGet({params, request}) {
   const origin = new URL(request.url).origin;
   const title = esc(page.title || "صفحة ميدلايف");
   const excerpt = esc(page.excerpt || "");
-  const body = renderBody(page.body, page.title || "صفحة ميدلايف");
+  const rawBody = String(page.body || "").trim();
+  if (/^<!doctype html>/i.test(rawBody) || /^<html[\s>]/i.test(rawBody)) {
+    const fullHtml = rawBody.replace(/\/site-nav\.js\?v=[^"']+/g, "/site-nav.js?v=20261002-cms1");
+    return new Response(fullHtml, {
+      status: 200,
+      headers: {
+        "content-type":"text/html; charset=UTF-8",
+        "cache-control":"no-store, no-cache, must-revalidate",
+        "x-medlife-managed-page":"1"
+      }
+    });
+  }
+
+  const body = renderBody(rawBody, page.title || "صفحة ميدلايف");
   const metaDescription = excerpt || "مؤسسة ميدلايف الطبية الخيرية التطوعية";
 
   const html = '<!doctype html>' +
