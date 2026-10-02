@@ -97,9 +97,9 @@
 
     const normalizeHref = href => {
       try {
-        return new URL(String(href || ''), location.origin).pathname.replace(/\\/$/, '') || '/';
+        return new URL(String(href || ''), location.origin).pathname.replace(/\/$/, '') || '/';
       } catch {
-        return String(href || '').split('#')[0].replace(/\\/$/, '') || '/';
+        return String(href || '').split('#')[0].replace(/\/$/, '') || '/';
       }
     };
 
