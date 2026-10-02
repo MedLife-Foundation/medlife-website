@@ -134,7 +134,6 @@
     const portals = home.portals || {};
     const portalSection = document.querySelector(".ml-links-grid")?.closest(".ml-section");
     if (portalSection) {
-      setText(".ml-links-grid", undefined);
       const head = portalSection.querySelector(".ml-heading");
       if (head) {
         head.querySelector(".ml-eyebrow")?.replaceChildren(document.createTextNode(text(portals.eyebrow)));
