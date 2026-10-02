@@ -480,6 +480,9 @@ export async function onRequestPost({ request }) {
           const joinedOn = normalizeDate(detail.joined_on);
           const continuing = detail.continuing === true;
           const leftOn = normalizeDate(detail.left_on);
+          const roleStartedOn = normalizeDate(detail.role_started_on);
+          const roleContinuing = detail.role_continuing === true;
+          const roleLeftOn = normalizeDate(detail.role_left_on);
           const notes = cleanText(detail.notes, 1500);
           return {
             id: String(unit.id),
@@ -489,18 +492,41 @@ export async function onRequestPost({ request }) {
             joined_on: joinedOn,
             continuing,
             left_on: leftOn,
+            role_started_on: roleStartedOn,
+            role_continuing: roleContinuing,
+            role_continuing_provided: Object.prototype.hasOwnProperty.call(detail, "role_continuing"),
+            role_left_on: roleLeftOn,
             notes
           };
         });
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
-      if (requestedUnits.some(unit => !["volunteer","supervisor"].includes(unit.role))) {
-        return json({ success: false, error: "يرجى تحديد الدور داخل كل قسم أو وحدة." }, 400);
+      const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
+      const allowedUnitRoles = supervisorForm
+        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor"]
+        : ["volunteer"];
+      if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
+        return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
       }
       const today = new Date().toISOString().slice(0, 10);
       if (requestedUnits.some(unit => !unit.joined_on)) {
         return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
+      }
+      if (requestedUnits.some(unit => !unit.role_started_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ بدء الدور داخل كل وحدة." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.role_started_on > today || unit.role_started_on < unit.joined_on)) {
+        return json({ success: false, error: "تاريخ بدء الدور يجب أن يكون بعد أو في تاريخ الانضمام إلى الوحدة وألا يكون في المستقبل." }, 400);
+      }
+      if (requestedUnits.some(unit => !unit.role_continuing_provided)) {
+        return json({ success: false, error: "يرجى تحديد حالة استمرار الدور داخل كل وحدة." }, 400);
+      }
+      if (requestedUnits.some(unit => !unit.role_continuing && !unit.role_left_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء الدور الذي لم تعد تشغله." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.role_continuing && !unit.continuing)) {
+        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد انتهاء العضوية في الوحدة." }, 400);
       }
       if (requestedUnits.some(unit => unit.joined_on > today)) {
         return json({ success: false, error: "تاريخ بدء الانتساب لا يمكن أن يكون في المستقبل." }, 400);
@@ -510,6 +536,12 @@ export async function onRequestPost({ request }) {
       }
       if (requestedUnits.some(unit => unit.left_on && (unit.left_on < unit.joined_on || unit.left_on > today))) {
         return json({ success: false, error: "تواريخ انتهاء الانتساب يجب أن تكون بعد تاريخ البدء وألا تتجاوز تاريخ اليوم." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.role_left_on && (unit.role_left_on < unit.role_started_on || unit.role_left_on > today))) {
+        return json({ success: false, error: "تواريخ انتهاء الدور يجب أن تكون بعد تاريخ بدء الدور وألا تتجاوز تاريخ اليوم." }, 400);
+      }
+      if (requestedUnits.some(unit => unit.role_left_on && unit.left_on && unit.role_left_on > unit.left_on)) {
+        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
       }
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
       const overallContinuing = data.continuing_as_volunteer === true;
