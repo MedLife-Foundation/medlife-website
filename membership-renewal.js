@@ -58,24 +58,39 @@ function getValue(key,type){
   return nodes[0]?.value??"";
 }
 
-function getUnitRoles(){
-  const roles={};
+function getUnitDetails(){
+  const details={};
   getValue("current_units","multi_select").forEach(unitId=>{
-    const node=form.querySelector('[data-unit-role="'+CSS.escape(String(unitId))+'"]');
-    if(node?.value) roles[String(unitId)]=node.value;
+    const key=String(unitId);
+    const role=form.querySelector('[data-unit-role="'+CSS.escape(key)+'"]')?.value||"";
+    const joinedOn=form.querySelector('[data-unit-joined="'+CSS.escape(key)+'"]')?.value||"";
+    const continuing=form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.value==="true";
+    const notes=form.querySelector('[data-unit-notes="'+CSS.escape(key)+'"]')?.value||"";
+    details[key]={role,joined_on:joinedOn,continuing,notes};
   });
-  return roles;
+  return details;
 }
 
-function validateUnitRoles(){
+function validateUnitDetails(){
   const units=getValue("current_units","multi_select");
-  const roles=getUnitRoles();
+  const details=getUnitDetails();
   for(const unitId of units){
-    const role=roles[String(unitId)];
-    if(role!=="volunteer" && role!=="supervisor"){
-      const label=form.querySelector('[data-unit-label="'+CSS.escape(String(unitId))+'"]')?.textContent||"القسم المختار";
+    const key=String(unitId);
+    const detail=details[key]||{};
+    const label=form.querySelector('[data-unit-label="'+CSS.escape(key)+'"]')?.textContent||"الوحدة المختارة";
+    if(detail.role!=="volunteer" && detail.role!=="supervisor"){
       setError("يرجى تحديد دورك في: "+label);
-      form.querySelector('[data-unit-role="'+CSS.escape(String(unitId))+'"]')?.focus();
+      form.querySelector('[data-unit-role="'+CSS.escape(key)+'"]')?.focus();
+      return false;
+    }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(detail.joined_on)){
+      setError("يرجى تحديد تاريخ بدء انتسابك إلى: "+label);
+      form.querySelector('[data-unit-joined="'+CSS.escape(key)+'"]')?.focus();
+      return false;
+    }
+    if(typeof detail.continuing!=="boolean"){
+      setError("يرجى تحديد هل ما زلت مستمراً في: "+label);
+      form.querySelector('[data-unit-continuing="'+CSS.escape(key)+'"]')?.focus();
       return false;
     }
   }
@@ -106,7 +121,7 @@ function renderField(field){
   label.textContent=String(field.label_ar||field.field_key)+(field.required?" *":"");
   wrapper.appendChild(label);
 
-  if(field.field_key==="current_unit_roles"){
+  if(field.field_key==="current_unit_details"){
     wrapper.style.display="none";
     return wrapper;
   }
@@ -145,33 +160,71 @@ function renderField(field){
       text.textContent=option.label;
       head.append(input,text);
 
-      const select=document.createElement("select");
-      select.dataset.unitRole=option.value;
-      select.setAttribute("aria-label","الدور في "+option.label);
-      select.disabled=true;
-      const placeholder=document.createElement("option");
-      placeholder.value="";
-      placeholder.textContent="اختر الدور";
-      select.appendChild(placeholder);
+      const details=document.createElement("div");
+      details.className="unit-role-details";
+
+      const role=document.createElement("select");
+      role.dataset.unitRole=option.value;
+      role.setAttribute("aria-label","الدور في "+option.label);
+      role.disabled=true;
+      const rolePlaceholder=document.createElement("option");
+      rolePlaceholder.value="";
+      rolePlaceholder.textContent="الدور داخل الوحدة";
+      role.appendChild(rolePlaceholder);
       [
         {value:"volunteer",label:"متطوع"},
         {value:"supervisor",label:"مشرف"}
-      ].forEach(role=>{
+      ].forEach(itemRole=>{
         const roleOption=document.createElement("option");
-        roleOption.value=role.value;
-        roleOption.textContent=role.label;
-        select.appendChild(roleOption);
+        roleOption.value=itemRole.value;
+        roleOption.textContent=itemRole.label;
+        role.appendChild(roleOption);
       });
+
+      const joined=document.createElement("input");
+      joined.type="date";
+      joined.dataset.unitJoined=option.value;
+      joined.setAttribute("aria-label","تاريخ بدء الانتساب إلى "+option.label);
+      joined.disabled=true;
+
+      const continuing=document.createElement("select");
+      continuing.dataset.unitContinuing=option.value;
+      continuing.setAttribute("aria-label","الاستمرار في "+option.label);
+      continuing.disabled=true;
+      const contPlaceholder=document.createElement("option");
+      contPlaceholder.value="";
+      contPlaceholder.textContent="هل ما زلت مستمراً؟";
+      continuing.appendChild(contPlaceholder);
+      [{value:"true",label:"نعم، مستمر"},{value:"false",label:"لا، توقفت"}].forEach(itemCont=>{
+        const contOption=document.createElement("option");
+        contOption.value=itemCont.value;
+        contOption.textContent=itemCont.label;
+        continuing.appendChild(contOption);
+      });
+
+      const notes=document.createElement("textarea");
+      notes.dataset.unitNotes=option.value;
+      notes.setAttribute("aria-label","ملاحظات عن "+option.label);
+      notes.placeholder="ملاحظات عن انتسابك إلى هذه الوحدة";
+      notes.disabled=true;
+      notes.rows=2;
 
       input.addEventListener("change",()=>{
-        select.disabled=!input.checked;
-        if(!input.checked) select.value="";
+        const enabled=input.checked;
+        role.disabled=!enabled;
+        joined.disabled=!enabled;
+        continuing.disabled=!enabled;
+        notes.disabled=!enabled;
+        if(!enabled){
+          role.value="";
+          joined.value="";
+          continuing.value="";
+          notes.value="";
+        }
       });
 
-      const roleWrap=document.createElement("div");
-      roleWrap.className="unit-role-select";
-      roleWrap.appendChild(select);
-      item.append(head,roleWrap);
+      details.append(role,joined,continuing,notes);
+      item.append(head,details);
       box.appendChild(item);
     });
     wrapper.appendChild(box);
@@ -283,7 +336,7 @@ function validateAll(){
     return false;
   }
 
-  if(!validateUnitRoles()){
+  if(!validateUnitDetails()){
     setSectionVisible(2);
     return false;
   }
@@ -319,7 +372,7 @@ function collect(){
     if(field.field_type==="boolean") data[field.field_key]=Boolean(value);
     else if(Array.isArray(value)?value.length:String(value??"").trim()) data[field.field_key]=value;
   }
-  data.current_unit_roles=getUnitRoles();
+  data.current_unit_details=getUnitDetails();
   return data;
 }
 
