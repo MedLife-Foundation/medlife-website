@@ -98,8 +98,8 @@
     document.querySelectorAll('body > header:not(.medlife-global-header)').forEach(header => {
       const cls = String(header.className || '');
       const isNavigationHeader =
-        /(?:^|\s)(?:nav|top|topbar|head)(?:\s|$)/i.test(cls) ||
-        !!header.querySelector('.nav, .logo, .nav-actions, .back');
+        /(?:^|\s)(?:nav|top|topbar)(?:\s|$)/i.test(cls) ||
+        !!header.querySelector('.nav, .logo, .nav-actions');
       if (isNavigationHeader) header.remove();
     });
   };
