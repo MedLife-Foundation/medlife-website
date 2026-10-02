@@ -202,6 +202,13 @@ function renderField(field){
         continuing.appendChild(contOption);
       });
 
+      const leftOn=document.createElement("input");
+      leftOn.type="date";
+      leftOn.dataset.unitLeft=option.value;
+      leftOn.setAttribute("aria-label","تاريخ انتهاء الانتساب إلى "+option.label);
+      leftOn.disabled=true;
+      leftOn.style.display="none";
+
       const notes=document.createElement("textarea");
       notes.dataset.unitNotes=option.value;
       notes.setAttribute("aria-label","ملاحظات عن "+option.label);
@@ -209,21 +216,32 @@ function renderField(field){
       notes.disabled=true;
       notes.rows=2;
 
+      continuing.addEventListener("change",()=>{
+        const showEndDate=input.checked && continuing.value==="false";
+        leftOn.disabled=!showEndDate;
+        leftOn.style.display=showEndDate ? "" : "none";
+        if(!showEndDate) leftOn.value="";
+      });
+
       input.addEventListener("change",()=>{
         const enabled=input.checked;
         role.disabled=!enabled;
         joined.disabled=!enabled;
         continuing.disabled=!enabled;
+        leftOn.disabled=!enabled || continuing.value!=="false";
+        leftOn.style.display=enabled && continuing.value==="false" ? "" : "none";
         notes.disabled=!enabled;
         if(!enabled){
           role.value="";
           joined.value="";
           continuing.value="";
+          leftOn.value="";
           notes.value="";
+          leftOn.style.display="none";
         }
       });
 
-      details.append(role,joined,continuing,notes);
+      details.append(role,joined,continuing,leftOn,notes);
       item.append(head,details);
       box.appendChild(item);
     });
@@ -367,7 +385,7 @@ function collect(){
   const data={};
   for(const field of fields){
     if(!fieldVisible(field)) continue;
-    if(field.field_key==="current_unit_roles") continue;
+    if(field.field_key==="current_unit_details") continue;
     const value=getValue(field.field_key,field.field_type);
     if(field.field_type==="boolean") data[field.field_key]=Boolean(value);
     else if(Array.isArray(value)?value.length:String(value??"").trim()) data[field.field_key]=value;
