@@ -140,7 +140,7 @@ ${galleryHtml}
 </main>
 <div class="activity-lightbox" id="activityLightbox" aria-hidden="true"><button type="button" id="activityLightboxClose">إغلاق</button><img id="activityLightboxImage" alt=""></div>
 <footer class="ml-footer">© 2026 مؤسسة ميدلايف الطبية الخيرية التطوعية — بالعمل التطوعي نصنع الأثر.</footer>
-<script src="/site-nav.js"></script>
+<script src="/site-nav.js?v=20261002-activities2"></script>
 <script>
 (() => {
  const box=document.getElementById("activityLightbox"), image=document.getElementById("activityLightboxImage");
