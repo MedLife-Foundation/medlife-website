@@ -37,5 +37,5 @@ $('#lang')?.addEventListener('click',()=>{alert('النسخة الإنجليزي
 let selected='';$$('.type').forEach(b=>b.addEventListener('click',()=>{$$('.type').forEach(x=>x.classList.remove('active'));b.classList.add('active');selected=b.dataset.type}));
 $('#bookingForm').addEventListener('submit',async e=>{e.preventDefault();const msg=$('#msg');if(!selected){msg.textContent='يرجى اختيار نوع الحجز أولاً.';return}const data=Object.fromEntries(new FormData(e.target));data.type=selected;msg.textContent='⏳ جارٍ إرسال طلب الحجز...';try{const r=await fetch('/api/forum-bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const j=await r.json();if(!r.ok)throw new Error(j.error||'تعذر إرسال الطلب');msg.textContent='✅ تم استلام طلبك بنجاح. رقم الحجز: '+(j.booking_id||'سيتم إرساله لك');e.target.reset();$$('.type').forEach(x=>x.classList.remove('active'));selected=''}catch(err){msg.textContent='⚠️ تعذر إرسال الطلب حالياً. يرجى المحاولة مرة أخرى أو التواصل معنا هاتفياً.'}});
 </script>
-<script src="/site-nav.js"></script>
+<script src="/site-nav.js?v=20261002-activities2"></script>
 </body></html>
