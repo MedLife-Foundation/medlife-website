@@ -68,7 +68,8 @@ async function load(){
         const date=formatDate(x.start_at);
         const place=locationText(x);
         const buttons=[];
-        if(sourceUrl) buttons.push('<a class="activity-action primary" href="'+sourceUrl+'" target="_blank" rel="noopener noreferrer">التغطية / المصدر</a>');
+        if(x.slug) buttons.push('<a class="activity-action primary" href="/activities/'+encodeURIComponent(String(x.slug))+'">مزيد من التفاصيل</a>');
+        if(sourceUrl) buttons.push('<a class="activity-action secondary" href="'+sourceUrl+'" target="_blank" rel="noopener noreferrer">التغطية / المصدر</a>');
         if(galleryUrl) buttons.push('<a class="activity-action secondary" href="'+galleryUrl+'" target="_blank" rel="noopener noreferrer">ألبوم الصور</a>');
         if(image) buttons.push('<button type="button" class="activity-action secondary" data-preview>عرض الصورة</button>');
 
