@@ -494,6 +494,7 @@ export async function onRequestPost({ request }) {
             left_on: leftOn,
             role_started_on: roleStartedOn,
             role_continuing: roleContinuing,
+            role_continuing_provided: Object.prototype.hasOwnProperty.call(detail, "role_continuing"),
             role_left_on: roleLeftOn,
             notes
           };
@@ -517,7 +518,7 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.some(unit => unit.role_started_on > today || unit.role_started_on < unit.joined_on)) {
         return json({ success: false, error: "تاريخ بدء الدور يجب أن يكون بعد أو في تاريخ الانضمام إلى الوحدة وألا يكون في المستقبل." }, 400);
       }
-      if (requestedUnits.some(unit => !["true","false"].includes(String(unit.role_continuing === true ? "true" : "false")))) {
+      if (requestedUnits.some(unit => !unit.role_continuing_provided)) {
         return json({ success: false, error: "يرجى تحديد حالة استمرار الدور داخل كل وحدة." }, 400);
       }
       if (requestedUnits.some(unit => !unit.role_continuing && !unit.role_left_on)) {
