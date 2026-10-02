@@ -11,7 +11,13 @@ const CMS_LEGACY_ROUTES = new Set([
   "/membership-renewal.html",
   "/support-request.html",
   "/login.html",
-  "/new-member.html"
+  "/new-member.html",
+  "/about-medlife-foundation.html",
+  "/current-member.html",
+  "/members.html",
+  "/member-join.html",
+  "/submit-article-v6.html",
+  "/support-donation.html"
 ]);
 
 async function fetchManagedLegacyPage(pathname) {
