@@ -1,5 +1,14 @@
 const CMS_SUPABASE_URL = "https://ftvjakwogxdlxxbpfydf.supabase.co";
 const CMS_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+function normalizeSiteNavScripts(html) {
+  let found = false;
+  return String(html || "").replace(/<script\b[^>]*src=["'][^"']*\/site-nav\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi, tag => {
+    if (found) return "";
+    found = true;
+    return tag.replace(/src=["'][^"']*\/site-nav\.js(?:\?[^"']*)?["']/i, 'src="/site-nav.js?v=20261002-cms3"');
+  });
+}
+
 const PUBLIC_HEADER_ROUTES = new Set([
   "/",
   "/index.html",
@@ -147,7 +156,7 @@ export async function onRequest(context) {
 
     // Always use the current navigation script version when a managed page
     // already contains a previous site-nav reference.
-    html = html.replace(/\/site-nav\.js(?:\?v=[^"']+)?/g, "/site-nav.js?v=20261002-cms2");
+    html = normalizeSiteNavScripts(html);
 
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
