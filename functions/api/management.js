@@ -220,7 +220,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   if (!form?.id) throw new Error("نموذج الانضمام غير صالح أو لم يعد منشوراً.");
 
   const fieldsResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,target_unit_types,sort_order&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc&limit=200",
+    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,validation,visibility,target_unit_ids,target_unit_types,sort_order&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc&limit=200",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -241,6 +241,18 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
   }
   for (const field of fieldRows) {
+    if (field.field_type === "number" && formData[field.field_key] !== undefined && formData[field.field_key] !== null && String(formData[field.field_key]).trim() !== "") {
+      const number = Number(formData[field.field_key]);
+      const rules = field.validation && typeof field.validation === "object" ? field.validation : {};
+      if (!Number.isFinite(number)) throw new Error("القيمة في «" + String(field.label_ar || field.field_key) + "» يجب أن تكون رقماً.");
+      if (rules.min !== undefined && number < Number(rules.min)) throw new Error("القيمة في «" + String(field.label_ar || field.field_key) + "» يجب ألا تقل عن " + rules.min + ".");
+      if (rules.max !== undefined && number > Number(rules.max)) throw new Error("القيمة في «" + String(field.label_ar || field.field_key) + "» يجب ألا تتجاوز " + rules.max + ".");
+      if (rules.step !== undefined && Number(rules.step) > 0 && rules.min !== undefined) {
+        const steps = (number - Number(rules.min)) / Number(rules.step);
+        if (Math.abs(steps - Math.round(steps)) > 1e-9) throw new Error("القيمة في «" + String(field.label_ar || field.field_key) + "» لا تطابق الزيادة المحددة: " + rules.step + ".");
+      }
+      formData[field.field_key] = number;
+    }
     if (field.field_type === "boolean" && typeof formData[field.field_key] === "string") {
       const rawBoolean = String(formData[field.field_key]).toLowerCase();
       formData[field.field_key] = rawBoolean === "true" || rawBoolean === "yes" || rawBoolean === "1";
@@ -326,6 +338,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       field_type: field.field_type,
       required: Boolean(field.required),
       options: Array.isArray(field.options) ? field.options.slice(0, 100) : [],
+      validation: field.validation && typeof field.validation === "object" ? field.validation : {},
       visibility: field.visibility && typeof field.visibility === "object" ? field.visibility : {mode:"always"},
       target_unit_ids: Array.isArray(field.target_unit_ids) ? field.target_unit_ids.slice(0, 50) : [],
       target_unit_types: Array.isArray(field.target_unit_types) ? field.target_unit_types.slice(0, 10) : [],
