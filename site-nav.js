@@ -42,9 +42,9 @@
       const normalizeNavPath = value => {
         try {
           const url = new URL(String(value || ''), location.origin);
-          return url.pathname.replace(/\\/$/, '').toLowerCase() || '/';
+          return url.pathname.replace(/\/$/, '').toLowerCase() || '/';
         } catch {
-          return String(value || '').split('#')[0].replace(/\\/$/, '').toLowerCase() || '/';
+          return String(value || '').split('#')[0].replace(/\/$/, '').toLowerCase() || '/';
         }
       };
 
