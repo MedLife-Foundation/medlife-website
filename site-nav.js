@@ -86,32 +86,61 @@
   };
 
   const removeLegacyHeaders = () => {
-    document.querySelectorAll('.medlife-global-header').forEach(el => el.remove());
-    document.querySelectorAll('body > header.top, body header.top').forEach(el => el.remove());
-    if (page === 'forum-v3.html' || page === 'forum-v3') {
-      document.querySelectorAll('body > header.nav, body > header.topbar').forEach(el => el.remove());
-    }
-    if (page === 'gallery' || page === 'gallery.html') {
-      document.querySelectorAll('body > header.gallery-legacy-header').forEach(el => el.remove());
-    }
-    if (page === 'support' || page === 'support.html') {
-      document.querySelectorAll('body > header.support-legacy-header').forEach(el => el.remove());
-    }
+    const canonicalPaths = [
+      '/about-medlife.html',
+      '/articles.html',
+      '/forum-v3.html',
+      '/gallery.html',
+      '/support.html',
+      '/contact.html'
+    ];
 
-    // Remove legacy navigation-only headers on public pages while preserving
-    // content headers such as article/support/contact hero sections.
-    document.querySelectorAll('body > header:not(.medlife-global-header)').forEach(header => {
-      const cls = String(header.className || '');
-      const isNavigationHeader =
-        /(?:^|\s)(?:nav|top|topbar)(?:\s|$)/i.test(cls) ||
-        !!header.querySelector('.nav, .logo, .nav-actions');
-      if (isNavigationHeader) header.remove();
+    const normalizeHref = href => {
+      try {
+        return new URL(String(href || ''), location.origin).pathname.replace(/\\/$/, '') || '/';
+      } catch {
+        return String(href || '').split('#')[0].replace(/\\/$/, '') || '/';
+      }
+    };
+
+    // Remove any previously generated global header first.
+    document.querySelectorAll('.medlife-global-header').forEach(el => el.remove());
+
+    // Remove known legacy navigation containers.
+    document.querySelectorAll(
+      'body > header.top, body header.top, body > header.nav, body > header.topbar,' +
+      'body > header.gallery-legacy-header, body > header.support-legacy-header,' +
+      'body > .site-header, body > .topbar, body > .navin'
+    ).forEach(el => el.remove());
+
+    // Some legacy pages use different wrapper/class names. Identify those
+    // headers by their actual navigation links instead of relying on class names.
+    document.querySelectorAll('body header, body nav').forEach(element => {
+      if (element.closest('.medlife-global-header')) return;
+      const links = [...element.querySelectorAll('a[href]')].map(a => normalizeHref(a.getAttribute('href')));
+      const matched = new Set(links.filter(href => canonicalPaths.includes(href)));
+      if (matched.size >= 4) {
+        const container = element.closest('header') || element;
+        if (container && container !== document.body) container.remove();
+      }
+    });
+
+    // Remove remaining top-level navigation-only wrappers that contain several
+    // canonical links but are not semantic <header>/<nav> elements.
+    document.querySelectorAll('body > *').forEach(element => {
+      if (element.closest('.medlife-global-header')) return;
+      const cls = String(element.className || '');
+      if (!/(site-header|topbar|navin|navigation|header-in)/i.test(cls)) return;
+      const links = [...element.querySelectorAll('a[href]')].map(a => normalizeHref(a.getAttribute('href')));
+      const matched = new Set(links.filter(href => canonicalPaths.includes(href)));
+      if (matched.size >= 4) element.remove();
     });
   };
 
   async function build() {
     removeLegacyHeaders();
     items = await loadManagedItems();
+    removeLegacyHeaders();
 
     const current = activeKey();
     const header = document.createElement('header');
