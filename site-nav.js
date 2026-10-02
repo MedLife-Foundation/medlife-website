@@ -13,6 +13,42 @@
   let items = fallbackItems.slice();
   let navigationLoadedFromSettings = false;
 
+  // Canonical member-login guard: legacy/static pages may still contain /login.html.
+  // Intercept those links before navigation so every member entry point reaches the
+  // current management platform, regardless of which page supplied the link.
+  const MEMBER_LOGIN_URL = 'https://admin.medlifesy.org/login?next=/';
+  const isMemberLoginLink = link => {
+    if (!link) return false;
+    const href = String(link.getAttribute('href') || '').trim();
+    const label = String(link.textContent || '').replace(/\\s+/g, ' ').trim();
+    return href === '/login' || href === '/login.html' ||
+      href.endsWith('/login') || href.endsWith('/login.html') ||
+      label === 'دخول الأعضاء';
+  };
+
+  document.addEventListener('click', event => {
+    const link = event.target?.closest?.('a');
+    if (!isMemberLoginLink(link)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.location.assign(MEMBER_LOGIN_URL);
+  }, true);
+
+  const normalizeMemberLoginLinks = () => {
+    document.querySelectorAll('a').forEach(link => {
+      if (isMemberLoginLink(link)) {
+        link.setAttribute('href', MEMBER_LOGIN_URL);
+        link.setAttribute('rel', 'noopener');
+      }
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', normalizeMemberLoginLinks, {once:true});
+  } else {
+    normalizeMemberLoginLinks();
+  }
+
   const activeKey = () => {
     if (page === 'gallery' || page === 'gallery.html') return 'gallery';
     if (location.pathname.startsWith('/pages/')) {
