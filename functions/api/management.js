@@ -9,7 +9,7 @@ const RESOURCES = {
   },
   activities: {
     table: "public_site_activities",
-    select: "source_id,title,activity_type,description,governorate,city,start_at,end_at,status,participant_target,participant_count,created_at,updated_at",
+    select: "source_id,title,activity_type,description,governorate,city,start_at,end_at,status,participant_target,participant_count,cover_image_url,created_at,updated_at",
     order: "start_at.desc"
   },
   campaigns: {
