@@ -1,3 +1,48 @@
+const CMS_SUPABASE_URL = "https://ftvjakwogxdlxxbpfydf.supabase.co";
+const CMS_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const CMS_LEGACY_ROUTES = new Set([
+  "/about-medlife.html",
+  "/support.html",
+  "/contact.html",
+  "/articles.html",
+  "/gallery.html",
+  "/forum-v3.html",
+  "/join-options.html",
+  "/membership-renewal.html",
+  "/support-request.html",
+  "/login.html",
+  "/new-member.html"
+]);
+
+async function fetchManagedLegacyPage(pathname) {
+  if (!CMS_LEGACY_ROUTES.has(pathname)) return null;
+  const query = new URLSearchParams({
+    select: "title,body,metadata,status,public_url,updated_at",
+    content_type: "eq.page",
+    public_url: "eq." + pathname,
+    status: "eq.published",
+    limit: "1"
+  });
+  try {
+    const response = await fetch(CMS_SUPABASE_URL + "/rest/v1/public_site_content?" + query.toString(), {
+      headers: {
+        apikey: CMS_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: "Bearer " + CMS_SUPABASE_PUBLISHABLE_KEY,
+        Accept: "application/json"
+      },
+      cf: {cacheTtl: 0}
+    });
+    if (!response.ok) return {state:"error"};
+    const rows = await response.json().catch(() => []);
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row) return {state:"unpublished"};
+    if (row.metadata?.template !== "legacy_html") return {state:"unpublished"};
+    return {state:"published", row};
+  } catch {
+    return {state:"error"};
+  }
+}
+
 export async function onRequest(context) {
   let response;
   try {
@@ -11,6 +56,7 @@ export async function onRequest(context) {
     const isArticleReader = path === '/article-reader-v5.html' || path.startsWith('/articles/');
     const isSupportPage = path === '/support' || path === '/support/' || path === '/support.html';
     const isContactPage = path === '/contact' || path === '/contact/' || path === '/contact.html';
+    const isManagedCmsRoute = CMS_LEGACY_ROUTES.has(path);
 
     if (isArticlesAdmin) {
       let html = await response.text();
@@ -36,17 +82,34 @@ export async function onRequest(context) {
       return new Response(html,{status:response.status,statusText:response.statusText,headers});
     }
 
-    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage) return response;
+    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute) return response;
 
     let html = await response.text();
+
+    const managedPage = await fetchManagedLegacyPage(path);
+    if (managedPage?.state === "unpublished") {
+      const headers = new Headers(response.headers);
+      headers.delete('content-length');
+      headers.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');
+      headers.set('pragma','no-cache');
+      return new Response('الصفحة غير متاحة حالياً.', {status:404, headers});
+    }
+    if (managedPage?.state === "published") {
+      html = String(managedPage.row.body || "");
+    }
+
+    // Always use the current navigation script version when a managed page
+    // already contains a previous site-nav reference.
+    html = html.replace(/\/site-nav\.js\?v=[^"']+/g, "/site-nav.js?v=20261002-cms1");
+
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
-    if (isSupportPage) tags.push('<script src="/site-nav.js?v=20261002-activities-safe1" defer></script>');
+    if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      tags.push('<script src="/site-nav.js?v=20261002-activities-safe1" defer></script>');
+      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
       tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
