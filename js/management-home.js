@@ -137,9 +137,9 @@
       setText(".ml-links-grid", undefined);
       const head = portalSection.querySelector(".ml-heading");
       if (head) {
-        setText(".ml-heading .ml-eyebrow", portals.eyebrow);
-        setText(".ml-heading h2", portals.title);
-        setText(".ml-heading p", portals.intro);
+        head.querySelector(".ml-eyebrow")?.replaceChildren(document.createTextNode(text(portals.eyebrow)));
+        head.querySelector("h2")?.replaceChildren(document.createTextNode(text(portals.title)));
+        head.querySelector("p")?.replaceChildren(document.createTextNode(text(portals.intro)));
       }
       setRepeater(".ml-links-grid", portals.items, (item) => {
         const card = make("article", "ml-link-card");
@@ -159,6 +159,24 @@
     setText("#social .ml-social-head .ml-eyebrow", social.eyebrow);
     setText("#social .ml-social-head h2", social.title);
     setText("#social .ml-social-head p", social.intro);
+    setRepeater("#social .ml-social-grid", social.items, (item) => {
+      const href = safeUrl(item?.url);
+      if (!href) return null;
+      const card = make("a", "ml-social-card");
+      card.href = href;
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+      const icon = make("span", "ml-social-icon");
+      const i = document.createElement("i");
+      const host = (() => { try { return new URL(href).hostname.toLowerCase(); } catch { return ""; } })();
+      i.className = host.includes("instagram") ? "fa-brands fa-instagram" : "fa-brands fa-facebook";
+      icon.append(i);
+      const copy = document.createElement("span");
+      copy.append(make("strong", "", item?.title));
+      copy.append(make("small", "", item?.label));
+      card.append(icon, copy);
+      return card;
+    });
 
     const contact = home.contact || {};
     setText("#contact .ml-heading .ml-eyebrow", contact.eyebrow);
