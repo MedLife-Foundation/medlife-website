@@ -1,87 +1,31 @@
-// Production navigation build marker: 2026-10-02
 (() => {
-  const fallbackItems = [
+  const items = [
     ['index.html', 'الرئيسية', 'home'],
     ['about-medlife.html', 'عن المؤسسة', 'about'],
     ['index.html#programs', 'مجالات العمل', 'programs'],
     ['articles.html', 'المقالات', 'articles'],
     ['forum-v3.html', 'المنتدى', 'forum'],
     ['gallery.html', 'الصور', 'gallery'],
-    ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities'],
     ['support.html', 'صندوق الدعم', 'support'],
     ['contact.html', 'تواصل معنا', 'contact']
   ];
 
-  let items = fallbackItems.slice();
-  let navigationLoadedFromSettings = false;
-
-  const normalizedPath = value => {
-    const raw = String(value || '').trim();
-    if (!raw) return '';
-    try {
-      const url = new URL(raw, location.origin);
-      return url.pathname.replace(/\/+$/, '') || '/';
-    } catch {
-      const clean = raw.split('#')[0].split('?')[0].replace(/^\.\//, '').replace(/\/+$/, '');
-      return clean ? '/' + clean.replace(/^\//, '') : '/';
-    }
-  };
-
-  const currentPath = normalizedPath(location.pathname);
-  const currentPage = currentPath === '/'
-    ? 'index.html'
-    : decodeURIComponent(currentPath.split('/').pop() || 'index.html').toLowerCase();
-  const home = currentPath === '/' || currentPage === 'index.html';
-
-  // Canonical member-login guard: legacy/static pages may still contain /login.html.
-  // Intercept those links before navigation so every member entry point reaches the
-  // public login landing page, regardless of which page supplied the link.
-  const MEMBER_LOGIN_URL = '/login.html';
-  const isMemberLoginLink = link => {
-    if (!link) return false;
-    const href = String(link.getAttribute('href') || '').trim();
-    const label = String(link.textContent || '').replace(/\\s+/g, ' ').trim();
-    return href === '/login' || href === '/login.html' ||
-      href.endsWith('/login') || href.endsWith('/login.html') ||
-      label === 'دخول الأعضاء';
-  };
-
-  document.addEventListener('click', event => {
-    const link = event.target?.closest?.('a');
-    if (!isMemberLoginLink(link)) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    window.location.assign(MEMBER_LOGIN_URL);
-  }, true);
-
-  const normalizeMemberLoginLinks = () => {
-    document.querySelectorAll('a').forEach(link => {
-      if (isMemberLoginLink(link)) {
-        link.setAttribute('href', MEMBER_LOGIN_URL);
-        link.setAttribute('rel', 'noopener');
-      }
-    });
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', normalizeMemberLoginLinks, {once:true});
-  } else {
-    normalizeMemberLoginLinks();
-  }
+  const rawPage = location.pathname.split('/').filter(Boolean).pop() || 'index.html';
+  const page = rawPage.endsWith('/') ? rawPage.slice(0, -1) : rawPage;
+  const home = page === '' || page === 'index.html';
 
   const activeKey = () => {
-    if (currentPath.startsWith('/pages/')) {
-      const managedSlug = decodeURIComponent(currentPath.replace(/^\/pages\//, '').replace(/\/$/, ''));
-      return 'managed:' + managedSlug;
-    }
+    if (page === 'gallery' || page === 'gallery.html') return 'gallery';
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
-    if (currentPath.startsWith('/activities/')) return 'activities';
     if (home) return 'home';
-
-    const match = items.find(([url]) => normalizedPath(url) === currentPath);
+    if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
+    if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';
+    if (page === 'support' || page === 'support.html') return 'support';
+    const match = items.find(item => item[0].split('#')[0] === page && !item[0].includes('#'));
     return match ? match[2] : '';
   };
+
   const setActive = key => {
     document.querySelectorAll('.medlife-global-nav a, .medlife-global-mobile a')
       .forEach(a => a.classList.toggle('active', a.dataset.key === key));
@@ -90,109 +34,18 @@
   const removeLegacyHeaders = () => {
     document.querySelectorAll('.medlife-global-header').forEach(el => el.remove());
     document.querySelectorAll('body > header.top, body header.top').forEach(el => el.remove());
-    if (currentPage === 'forum-v3.html' || currentPage === 'forum-v3') {
+    if (page === 'forum-v3.html' || page === 'forum-v3') {
       document.querySelectorAll('body > header.nav').forEach(el => el.remove());
     }
-    if (currentPage === 'gallery' || currentPage === 'gallery.html') {
+    if (page === 'gallery' || page === 'gallery.html') {
       document.querySelectorAll('body > header.gallery-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());
     }
-    if (currentPage === 'support' || currentPage === 'support.html') {
+    if (page === 'support' || page === 'support.html') {
       document.querySelectorAll('body > header.support-legacy-header').forEach(el => el.remove());
     }
   };
 
-  async function loadManagedItems() {
-    try {
-      const [settingsResponse, contentResponse] = await Promise.all([
-        fetch('/api/management?resource=settings', {headers:{Accept:'application/json'},cache:'no-store'}),
-        fetch('/api/management?resource=content&content_type=page&limit=50', {headers:{Accept:'application/json'},cache:'no-store'})
-      ]);
-
-      if (settingsResponse.ok) {
-        const settingsPayload = await settingsResponse.json();
-        const website = Array.isArray(settingsPayload?.data)
-          ? settingsPayload.data.find(item => item?.key === 'website')?.value
-          : null;
-        const configured = Array.isArray(website?.navigation) ? website.navigation : [];
-        const normalized = configured
-          .map((item, index) => ({
-            url: String(item?.url || '').trim(),
-            label: String(item?.label || '').trim(),
-            key: String(item?.key || ('nav-' + index)).trim(),
-            enabled: item?.enabled !== false
-          }))
-          .filter(item => item.url && item.label && item.enabled)
-          .map(item => [item.url, item.label, item.key]);
-        if (normalized.length) {
-          items = normalized;
-          navigationLoadedFromSettings = true;
-        }
-
-        // Keep the public activities entry discoverable even when an older or
-        // partially configured navigation record omits it. The database still
-        // controls the order and labels of the configured entries.
-        if (!items.some(([, , key]) => key === 'activities')) {
-          const activitiesItem = fallbackItems.find(([, , key]) => key === 'activities');
-          const supportIndex = items.findIndex(([, , key]) => key === 'support');
-          if (activitiesItem) {
-            items.splice(supportIndex >= 0 ? supportIndex : items.length, 0, activitiesItem);
-          }
-        }
-      }
-
-      if (!navigationLoadedFromSettings) items = fallbackItems.slice();
-
-      if (!contentResponse.ok) return;
-      const payload = await contentResponse.json();
-      const managed = Array.isArray(payload?.data) ? payload.data : [];
-      const managedBySlug = new Map(managed.filter(page => page?.slug).map(page => [page.slug, page]));
-
-      // Existing managed pages can override their label/URL without becoming
-      // the source of truth for the navigation order.
-      items = items.map(item => {
-        const keyMap = {about:'about-medlife', support:'support', contact:'contact'};
-        const slug = keyMap[item[2]];
-        const page = slug ? managedBySlug.get(slug) : null;
-        if (!page || !page.metadata?.nav?.label) return item;
-        return [page.public_url || item[0], String(page.metadata.nav.label).trim() || item[1], item[2]];
-      });
-
-      // The centrally configured navigation controls order and visibility.
-      // CMS pages marked show_main are appended only when they are not already
-      // represented by the same canonical public route.
-      const existingRoutes = new Set(items.map(([url]) => normalizedPath(url)).filter(Boolean));
-      const existingSlugs = new Set();
-      items.forEach(([url, , key]) => {
-        if (key && key.startsWith('managed:')) existingSlugs.add(key.slice('managed:'.length));
-        const route = normalizedPath(url);
-        const last = route.split('/').pop() || '';
-        const slug = last.replace(/\.html?$/i, '');
-        if (slug) existingSlugs.add(slug);
-      });
-
-      const extras = managed
-        .filter(page => page && page.slug && page.slug !== 'home' && page.metadata?.nav?.show_main === true)
-        .map(page => [
-          page.public_url || ('/pages/' + encodeURIComponent(page.slug)),
-          String(page.metadata?.nav?.label || page.title || '').trim(),
-          'managed:' + page.slug
-        ])
-        .filter(item => item[1])
-        .filter(([url, , key]) => {
-          const slug = key.slice('managed:'.length);
-          const route = normalizedPath(url);
-          return !existingRoutes.has(route) && !existingSlugs.has(slug);
-        });
-
-      items = [...items, ...extras];
-    } catch (error) {
-      items = fallbackItems.slice();
-      console.warn('Managed navigation fallback active', error);
-    }
-  }
-
-  async function build() {
-    await loadManagedItems();
+  function build() {
     removeLegacyHeaders();
 
     const current = activeKey();
@@ -278,6 +131,7 @@
         <div class="medlife-support-subnav-inner">
           <a href="support-request.html" data-support-key="request">تقديم طلب مساعدة</a>
           <a href="#cases" data-support-key="cases">استعراض الحالات</a>
+          <a href="support-donation.html?case=ML-SUP-2026-016" data-support-key="support">تقديم دعم</a>
         </div>`;
       header.insertAdjacentElement('afterend', sub);
 

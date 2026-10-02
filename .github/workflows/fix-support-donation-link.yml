@@ -1,0 +1,42 @@
+name: Fix Support Donation Link
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-support-donation-link.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch donation button
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('support.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'href="support-request.html?case=ML-SUP-2026-016">دعم هذه الحالة'
+          new = 'href="support-donation.html?case=ML-SUP-2026-016">دعم هذه الحالة'
+          if old in s:
+              p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          else:
+              print('Donation link already patched or target not found.')
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add support.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "fix support donation button destination"
+            git push
+          fi

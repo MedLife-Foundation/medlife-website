@@ -1,0 +1,100 @@
+name: Apply Pages Articles Canonical API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'database/migrations/2026-08-28-articles-canonical-identity.sql'
+      - '.github/workflows/apply-pages-articles-canonical-api.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align Pages Articles API with canonical identity
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('functions/api/articles/index.js')
+          text = path.read_text(encoding='utf-8')
+
+          marker = "async function ensureEditorialBriefTable(db){"
+          helper = """async function ensureCanonicalIdentity(db){
+            for(const [column,type] of [['slug','TEXT'],['canonical_path','TEXT']]){
+              try{await db.prepare(`ALTER TABLE articles ADD COLUMN ${column} ${type}`).run();}
+              catch(e){if(!String(e?.message||e).toLowerCase().includes('duplicate column'))throw e;}
+            }
+            await db.prepare(\"UPDATE articles SET slug=COALESCE(NULLIF(trim(slug),''),'article-'||id), canonical_path=COALESCE(NULLIF(trim(canonical_path),''),'/articles/'||COALESCE(NULLIF(trim(slug),''),'article-'||id)) WHERE slug IS NULL OR trim(slug)='' OR canonical_path IS NULL OR trim(canonical_path)=''\").run();
+            try{await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_slug_unique ON articles(slug)').run();}catch(e){console.warn('slug unique index:',e?.message||e);}
+            try{await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_canonical_path_unique ON articles(canonical_path)').run();}catch(e){console.warn('canonical path unique index:',e?.message||e);}
+          }
+          """
+          if 'async function ensureCanonicalIdentity(db)' not in text:
+              if marker not in text:
+                  raise SystemExit('Editorial brief marker not found')
+              text = text.replace(marker, helper + marker, 1)
+
+          text = text.replace("if (!env.DB) return json({ success: false, error: \"Database binding 'DB' is not configured.\" }, 500);\n  try {", "if (!env.DB) return json({ success: false, error: \"Database binding 'DB' is not configured.\" }, 500);\n  try {\n    await ensureCanonicalIdentity(env.DB);", 1)
+
+          old_public = "SELECT id,title_ar,title_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles WHERE status='published' ORDER BY COALESCE(published_at,created_at) DESC,id DESC"
+          new_public = "SELECT id,slug,canonical_path,title_ar,title_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles WHERE status='published' ORDER BY COALESCE(published_at,created_at) DESC,id DESC"
+          text = text.replace(old_public, new_public, 1)
+          old_admin = "SELECT id,title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles ORDER BY CASE status WHEN 'pending' THEN 0 WHEN 'draft' THEN 1 WHEN 'published' THEN 2 WHEN 'rejected' THEN 3 ELSE 4 END,datetime(created_at) DESC,id DESC"
+          new_admin = "SELECT id,slug,canonical_path,title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles ORDER BY CASE status WHEN 'pending' THEN 0 WHEN 'draft' THEN 1 WHEN 'published' THEN 2 WHEN 'rejected' THEN 3 ELSE 4 END,datetime(created_at) DESC,id DESC"
+          text = text.replace(old_admin, new_admin, 1)
+
+          # Persist the slug supplied by the publish UI, or keep the existing slug forever.
+          old_status = "const status=publicSubmission?'pending':(['draft','published'].includes(requestedStatus)&&['admin','reviewer'].includes(String(user?.role||'').toLowerCase())?requestedStatus:'pending');\n    const result=await db.prepare(`INSERT INTO articles(title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?, ?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorMemberId,authorName,authorEmail,category,imageUrl,status).run();"
+          new_status = "const status=publicSubmission?'pending':(['draft','published'].includes(requestedStatus)&&['admin','reviewer'].includes(String(user?.role||'').toLowerCase())?requestedStatus:'pending');\n    const articleSlug=await uniqueArticleSlug(db,b.slug||b.canonical_path?.split('/').pop()||`article-${Date.now().toString(36)}`);\n    const canonicalPath=`/articles/${articleSlug}`;\n    const result=await db.prepare(`INSERT INTO articles(slug,canonical_path,title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(articleSlug,canonicalPath,titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorMemberId,authorName,authorEmail,category,imageUrl,status).run();"
+          if old_status in text:
+              text = text.replace(old_status, new_status, 1)
+
+          old_update = "const publishedAt=status==='published'?(article.published_at||new Date().toISOString()):null;await db.prepare(`UPDATE articles SET title_ar=?,title_en=?,content_ar=?,content_en=?,excerpt_ar=?,excerpt_en=?,author_name=?,author_email=?,category=?,image_url=?,status=?,rejection_reason=?,published_at=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorName,authorEmail,category,imageUrl,status,status==='rejected'?rejectionReason:null,publishedAt,id).run();"
+          new_update = "const publishedAt=status==='published'?(article.published_at||new Date().toISOString()):null;const articleSlug=await uniqueArticleSlug(db,b.slug||article.slug||`article-${id}`,id);const canonicalPath=`/articles/${articleSlug}`;await db.prepare(`UPDATE articles SET slug=?,canonical_path=?,title_ar=?,title_en=?,content_ar=?,content_en=?,excerpt_ar=?,excerpt_en=?,author_name=?,author_email=?,category=?,image_url=?,status=?,rejection_reason=?,published_at=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(articleSlug,canonicalPath,titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorName,authorEmail,category,imageUrl,status,status==='rejected'?rejectionReason:null,publishedAt,id).run();"
+          if old_update in text:
+              text = text.replace(old_update, new_update, 1)
+
+          marker2 = "function clean(value,max){return String(value??'').trim().slice(0,max)}"
+          helper2 = """async function uniqueArticleSlug(db,requested,id=null){
+            const base=String(requested||'article').toLowerCase().normalize('NFKC').trim().replace(/[^a-z0-9\\u0600-\\u06ff]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||`article-${id||Date.now().toString(36)}`;
+            let candidate=base;
+            for(let i=0;i<20;i++){
+              const row=id?await db.prepare('SELECT id FROM articles WHERE slug=? AND id<>? LIMIT 1').bind(candidate,id).first():await db.prepare('SELECT id FROM articles WHERE slug=? LIMIT 1').bind(candidate).first();
+              if(!row)return candidate;
+              candidate=`${base}-${crypto.randomUUID().slice(0,8)}`;
+            }
+            return `${base}-${Date.now().toString(36)}`;
+          }
+          """
+          if 'async function uniqueArticleSlug(' not in text:
+              if marker2 not in text:
+                  raise SystemExit('clean helper marker not found')
+              text = text.replace(marker2, helper2 + marker2, 1)
+
+          # Existing articles already have article-{id} identity after the runtime backfill.
+          text = text.replace("slug:`article-${id}`", "slug:article.slug||`article-${id}`,canonical_path:article.canonical_path||`/articles/${article.slug||`article-${id}`}`", 1)
+          text = text.replace("slug:`article-${article.id}`", "slug:article.slug||`article-${article.id}`,canonical_path:article.canonical_path||`/articles/${article.slug||`article-${article.id}`}`", 1)
+
+          path.write_text(text, encoding='utf-8')
+
+      - name: Validate patched JavaScript
+        run: |
+          node --check functions/api/articles/index.js
+
+      - name: Commit API changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add functions/api/articles/index.js
+          git diff --cached --quiet && exit 0
+          git commit -m "fix(articles): persist canonical slug and path in Pages API"
+          git push

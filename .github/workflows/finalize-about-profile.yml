@@ -1,0 +1,74 @@
+name: Finalize About Profile
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update About page only
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('about-medlife.html')
+          text = p.read_text(encoding='utf-8')
+
+          # Remove the decorative empty circles completely.
+          text = text.replace('.logo-box:before,.logo-box:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(229,42,80,.14)}', '')
+
+          # Lazy-load gallery images so they don't block initial rendering.
+          text = re.sub(r'(<figure class="gallery-card">\s*<img)(?![^>]*\bloading=)', r'\1 loading="lazy" decoding="async" fetchpriority="low"', text)
+
+          media_css = '''\n.media-section{padding:82px 0;background:linear-gradient(180deg,#f7f8fb,#fff)}\n.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}\n.media-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 8px 25px rgba(21,29,54,.05);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}\n.media-card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(21,29,54,.09);border-color:#f0cbd4}\n.media-card .media-label{display:block;color:var(--red);font-size:11px;font-weight:900;margin-bottom:7px}\n.media-card h3{margin:0 0 8px;color:var(--navy);font-size:17px}\n.media-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.9}\n.media-card a{display:inline-flex;margin-top:13px;color:var(--red);font-size:12px;font-weight:900}\n.media-note{margin-top:18px;text-align:center;color:#7d8797;font-size:11px;line-height:1.9}\n.community-section{padding:82px 0;background:#fff}\n.community-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}\n.community-card{background:#f9fafc;border:1px solid var(--line);border-radius:20px;padding:24px}\n.community-card .community-label{display:block;color:var(--red);font-size:11px;font-weight:900;margin-bottom:7px}\n.community-card h3{margin:0 0 9px;color:var(--navy);font-size:17px}\n.community-card p{margin:0;color:var(--muted);font-size:13px;line-height:2}\n.community-card small{display:block;margin-top:13px;color:#8993a4;font-size:10px}\n.community-note{margin-top:18px;padding:15px 18px;border:1px dashed #d9dfe8;border-radius:14px;color:#7d8797;font-size:11px;text-align:center}\n@media(max-width:960px){.media-grid,.community-grid{grid-template-columns:1fr 1fr}}\n@media(max-width:620px){.media-grid,.community-grid{grid-template-columns:1fr}}\n'''
+          if '.media-section{' not in text:
+              text = text.replace('.cta{background:var(--navy);', media_css + '\n.cta{background:var(--navy);', 1)
+
+          media_section = '''\n<section class="section media-section reveal" id="media"><div class="wrap"><div class="section-head"><span class="eyebrow">الحضور الإعلامي والرقمي</span><h2>ميدلايف في الإعلام والمنصات الرقمية</h2><p>نوثق هنا أبرز المساحات الإعلامية والرقمية التي ظهر فيها اسم ميدلايف أو نُشرت فيها أخبار ومبادرات مرتبطة بها، مع الحفاظ على الروابط التي أمكن التحقق من صلتها بالمؤسسة.</p></div><div class="media-grid">
+<article class="media-card"><span class="media-label">المنصة الرسمية</span><h3>LinkedIn — Med Life Syria</h3><p>الصفحة المؤسسية التي تنشر أخبار المؤسسة ومبادراتها ومحتواها التطوعي والصحي.</p><a href="https://sy.linkedin.com/company/med-life-syria" target="_blank" rel="noopener noreferrer">زيارة الصفحة</a></article>
+<article class="media-card"><span class="media-label">القناة الرسمية</span><h3>YouTube — MedLife</h3><p>القناة المخصصة للتغطيات المصورة والمحتوى التوعوي واللقاءات والمواد التدريبية.</p><a href="https://www.youtube.com/@medlifesy" target="_blank" rel="noopener noreferrer">زيارة القناة</a></article>
+<article class="media-card"><span class="media-label">وكالة الأنباء السورية</span><h3>سانا — تغطيات ميدلايف</h3><p>تغطيات رسمية لنشاطات المؤسسة في طرطوس، ومنها منتدى المطالعة والفعاليات الصحية.</p><a href="https://sana.sy/governorates/tartus/" target="_blank" rel="noopener noreferrer">استعراض تغطيات طرطوس</a></article>
+<article class="media-card"><span class="media-label">سانا — 2026</span><h3>منتدى المطالعة في طرطوس</h3><p>تغطية لمبادرة أطلقتها ميدلايف لتعزيز القراءة المتعمقة وتنمية قدرات الشباب.</p><a href="https://sana.sy/culture-and-arts/2409961/" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">سانا — 2026</span><h3>التوعية بمخاطر أشعة الشمس</h3><p>تغطية لفعالية صحية وتوعوية نظمتها ميدلايف بالتعاون مع جمعية جسور الأمل نبض الغد.</p><a href="https://sana.sy/governorates/tartus/2519122/" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">صحيفة الثورة</span><h3>برامج طبية جديدة لميدلايف</h3><p>تغطية صحفية تناولت برامج المؤسسة وخططها وانتشار فرقها والتدريب والعمل التطوعي.</p><a href="https://archive.thawra.sy/?p=731600" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">صحيفة الحرية</span><h3>التوعية الصحية في طرطوس</h3><p>تغطية لأنشطة صحية شاركت فيها ميدلايف مع جهات صحية ومجتمعية محلية.</p><a href="https://alhurriyah.sy/%D9%81%D8%B9%D8%A7%D9%84%D9%8A%D8%A9-%D8%AA%D9%88%D8%B9%D9%88%D9%8A%D8%A9-%D8%A8%D8%B7%D8%B1%D8%B7%D9%88%D8%B3-%D9%84%D9%85%D8%AE%D8%A7%D8%B7%D8%B1-%D8%A7%D9%84%D8%AA%D8%B9%D8%B1%D8%B6-%D9%84%D8%A3/" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">صحيفة الحرية</span><h3>صحة الفم والأسنان في المدارس</h3><p>تغطية لفعالية توعوية في مدرسة الكرامة بمشاركة مؤسسة ميدلايف.</p><a href="https://alhurriyah.sy/%D9%81%D8%B9%D8%A7%D9%84%D9%8A%D8%A9-%D8%AA%D9%88%D8%B9%D9%88%D9%8A%D8%A9-%D8%AD%D9%88%D9%84-%D8%B5%D8%AD%D8%A9-%D8%A7%D9%84%D9%81%D9%85-%D9%88%D8%A7%D9%84%D8%A3%D8%B3%D9%86%D8%A7%D9%86-%D8%A8%D9%85/" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">Syria Home News</span><h3>مبادرة «بسمة أمل»</h3><p>تغطية لمبادرة إنسانية في مشفى الأطفال بطرطوس لدعم الأطفال وإدخال الفرح إلى قلوبهم.</p><a href="https://syriahomenews.com/%D9%85%D8%A8%D8%A7%D8%AF%D8%B1%D8%A9-%D8%A8%D8%B3%D9%85%D8%A9-%D8%A3%D9%85%D9%84-%D9%81%D9%8A-%D9%85%D8%B3%D8%AA%D8%B4%D9%81%D9%89-%D8%A7%D9%84%D8%A3%D8%B7%D9%81%D8%A7%D9%84-%D8%A8/" target="_blank" rel="noopener noreferrer">قراءة التغطية</a></article>
+<article class="media-card"><span class="media-label">تغطية رقمية</span><h3>Yalla Syria News</h3><p>إعادة نشر لتغطية منتدى المطالعة الذي أطلقته ميدلايف في طرطوس.</p><a href="https://yallasyrianews.com/a/97034" target="_blank" rel="noopener noreferrer">قراءة المادة</a></article>
+<article class="media-card"><span class="media-label">شبكة الخدمات المتكاملة</span><h3>مؤسسة ميدلايف ضمن مزودي الخدمات</h3><p>إدراج المؤسسة ضمن شبكة الخدمات المتكاملة في طرطوس مع بيانات التواصل.</p><a href="https://www.dosal-tartous.org/ar/providers" target="_blank" rel="noopener noreferrer">استعراض الدليل</a></article>
+</div><div class="media-note">لم ندرج حسابات Facebook وInstagram هنا لعدم توفر نتيجة بحث موثوقة كافية لتأكيد الرابط الرسمي، ويمكن إضافتها فور تثبيت الروابط الرسمية.</div></div></section>
+'''
+          if 'id="media"' not in text:
+              text = text.replace('<section class="logo-strip reveal">', media_section + '<section class="logo-strip reveal">', 1)
+
+          community_section = '''\n<section class="section community-section reveal" id="community-voices"><div class="wrap"><div class="section-head"><span class="eyebrow">من المجتمع</span><h2>ماذا قال المشاركون والجهات المحلية؟</h2><p>بدلاً من عرض تقييمات غير موثقة، نعرض هنا انطباعات وشهادات منشورة في مصادر يمكن الرجوع إليها.</p></div><div class="community-grid">
+<article class="community-card"><span class="community-label">أهالٍ ومشاركون — سانا</span><h3>أهمية المبادرات الصحية المبسطة</h3><p>أفاد عدد من الأهالي المشاركين في فعالية الوقاية من أضرار أشعة الشمس بأهمية المبادرة والمعلومات التي قدمتها، ودورها في حماية صحة الأطفال وتعزيز الوعي الصحي لدى الأسر.</p><small>المصدر: سانا — 5 تموز 2026</small></article>
+<article class="community-card"><span class="community-label">جامعة طرطوس — دعم التطوع</span><h3>تشجيع الطلاب على المشاركة</h3><p>بحسب التغطية المنشورة عبر منصة ميدلايف، عبّر عميد كلية الطب البشري في جامعة طرطوس عن دعمه لفكرة المؤسسة وأهمية تعزيز ثقافة التطوع لدى طلاب الطب وتشجيعهم على النشاطات الإنسانية والطبية الميدانية.</p><small>المصدر: Med Life Syria / LinkedIn — 2025</small></article>
+<article class="community-card"><span class="community-label">الإعلام المحلي</span><h3>التركيز على الوصول إلى المجتمع</h3><p>أبرزت تغطية صحيفة الحرية مساهمة فريق ميدلايف في إيصال الرسائل الصحية إلى شرائح أوسع من المجتمع المحلي من خلال الفعاليات التوعوية المشتركة.</p><small>المصدر: صحيفة الحرية — 2025</small></article>
+</div><div class="community-note">حتى الآن لا تتوفر مادة منشورة مستقلة وموثوقة تكفي لوصف «رأي الشارع السوري» أو «الرأي العالمي» ككل. لذلك نحافظ هنا على الدقة ونقتصر على الشهادات والانطباعات المنشورة فعلياً.</div></div></section>
+'''
+          if 'id="community-voices"' not in text:
+              text = text.replace('<section class="logo-strip reveal">', community_section + '<section class="logo-strip reveal">', 1)
+
+          p.write_text(text, encoding='utf-8')
+          print('About profile finalized.')
+
+      - name: Remove this temporary workflow
+        shell: bash
+        run: |
+          git config user.name 'MedLife Bot'
+          git config user.email 'actions@medlifesy.org'
+          git add about-medlife.html .github/workflows/finalize-about-profile.yml
+          git rm .github/workflows/finalize-about-profile.yml
+          git commit -m 'feat(about): expand media and community profile [skip ci]' || exit 0
+          git push

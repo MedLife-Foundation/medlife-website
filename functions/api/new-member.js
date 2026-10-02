@@ -6,12 +6,6 @@ import { hashPassword, json } from './_auth.js';
 export async function onRequest({request,env}){
  if(request.method==='OPTIONS')return json({success:true});if(request.method!=='POST')return json({success:false,error:'Method not allowed.'},405);if(!env.MEMBERS_DB)return json({success:false,error:"Database binding 'MEMBERS_DB' is not configured."},500);
  try{
-  const recruitmentResponse=await fetch(new URL('/api/management?resource=volunteer_recruitment',request.url),{headers:{'Accept':'application/json'}});
-  const recruitmentPayload=await recruitmentResponse.json().catch(()=>null);
-  const recruitment=recruitmentPayload?.data?.[0];
-  const now=Date.now(),opensAt=recruitment?.opens_at?Date.parse(recruitment.opens_at):null,closesAt=recruitment?.closes_at?Date.parse(recruitment.closes_at):null;
-  const recruitmentOpen=Boolean(recruitment?.is_open)&&(!opensAt||now>=opensAt)&&(!closesAt||now<closesAt);
-  if(!recruitmentResponse.ok||!recruitmentOpen)return json({success:false,error:recruitment?.closed_message||'باب الانضمام مغلق حالياً.'},403);
   const b=await request.json(),clean=(v,n=5000)=>String(v??'').trim().slice(0,n);
   const full_name=clean(b.full_name,150),mother_name=clean(b.mother_name,150),national_id=clean(b.national_id,40),gender=clean(b.gender,20),email=clean(b.email,200).toLowerCase(),phone=clean(b.phone,40),governorate=clean(b.governorate,100),address=clean(b.address,500),academic_status=clean(b.academic_status,30),interest=clean(b.interest,150),motivation=clean(b.motivation,2000),password=String(b.password||'');
   if(!full_name||!mother_name||!national_id||!gender||!email||!password||!phone||!governorate||!academic_status||!interest)return json({success:false,error:'يرجى تعبئة جميع الحقول الأساسية وإنشاء البريد وكلمة المرور.'},400);

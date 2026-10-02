@@ -94,7 +94,7 @@ async function init(){
 }
 $('logout').onclick=async()=>{
   try{await fetch('/api/admin-session?action=logout',{method:'POST',credentials:'include'});}
-  finally{location.href='https://admin.medlifesy.org/login';}
+  finally{location.href='/login.html';}
 };
 init();
 </script>

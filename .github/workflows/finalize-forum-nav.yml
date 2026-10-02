@@ -1,0 +1,43 @@
+name: Finalize Forum navigation
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject exact shared navigation loader
+        shell: python
+        run: |
+          from pathlib import Path
+          page = Path('forum-v3.html')
+          text = page.read_text(encoding='utf-8')
+          tag = '<script src="/site-nav.js"></script>'
+          if text.count(tag) == 0:
+              if '</body>' not in text:
+                  raise SystemExit('forum-v3.html has no closing body tag')
+              text = text.replace('</body>', tag + '\n</body>', 1)
+              page.write_text(text, encoding='utf-8')
+          count = page.read_text(encoding='utf-8').count(tag)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one shared nav loader, found {count}')
+
+      - name: Commit change and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'MedLife Bot'
+          git config user.email 'actions@medlifesy.org'
+          git add forum-v3.html .github/workflows/finalize-forum-nav.yml
+          git diff --cached --quiet && { echo 'No change staged'; exit 1; }
+          git commit -m 'fix(forum): load shared global navigation'
+          git rm .github/workflows/finalize-forum-nav.yml
+          git commit -m 'chore: remove temporary forum navigation workflow'
+          git push

@@ -1,0 +1,120 @@
+name: Finalize Support navigation v2
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-support-navigation
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch support page and shared navigation
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          page = Path('support.html')
+          text = page.read_text(encoding='utf-8')
+          loader = '<script src="/site-nav.js"></script>'
+          if loader not in text:
+              if '</body>' not in text:
+                  raise SystemExit('support.html has no closing body tag')
+              text = text.replace('</body>', loader + '\n</body>', 1)
+          text = re.sub(r'<header[^>]*class="[^"]*(?:support|top|nav)[^"]*"[^>]*>.*?</header>', '', text, count=1, flags=re.S)
+          page.write_text(text, encoding='utf-8')
+
+          nav = Path('site-nav.js')
+          js = nav.read_text(encoding='utf-8')
+          js = js.replace("if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';", "if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';\n    if (page === 'support' || page === 'support.html') return 'support';")
+          js = js.replace("    if (page === 'gallery' || page === 'gallery.html') {\n      document.querySelectorAll('body > header.gallery-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());\n    }", "    if (page === 'gallery' || page === 'gallery.html') {\n      document.querySelectorAll('body > header.gallery-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());\n    }\n    if (page === 'support' || page === 'support.html') {\n      document.querySelectorAll('body > header.support-legacy-header, body > header:not(.medlife-global-header)').forEach(el => el.remove());\n    }")
+          marker = "    if (current === 'forum') {"
+          block = r'''    if (current === 'support') {
+      const sub = document.createElement('nav');
+      sub.className = 'medlife-support-subnav';
+      sub.setAttribute('aria-label', 'تنقل صندوق الدعم');
+      sub.innerHTML = `
+        <div class="medlife-support-subnav-inner">
+          <a href="#request" data-support-key="request">تقديم طلب مساعدة</a>
+          <a href="#cases" data-support-key="cases">استعراض الحالات</a>
+          <a href="#support" data-support-key="support">تقديم دعم</a>
+        </div>`;
+      header.insertAdjacentElement('afterend', sub);
+
+      const style = document.createElement('style');
+      style.id = 'medlife-support-subnav-style';
+      style.textContent = `
+        .medlife-support-subnav{position:sticky;top:72px;z-index:2400;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #e8edf3;box-shadow:0 5px 15px rgba(21,29,54,.045);animation:medlifeSupportSubnavIn .28s ease-out both}
+        .medlife-support-subnav-inner{width:min(1180px,calc(100% - 28px));min-height:48px;margin:auto;display:flex;align-items:stretch;justify-content:center;gap:3px;overflow-x:auto;scrollbar-width:none}
+        .medlife-support-subnav-inner::-webkit-scrollbar{display:none}
+        .medlife-support-subnav-inner a{position:relative;display:flex;align-items:center;justify-content:center;padding:0 17px;color:#151d36;text-decoration:none;font:800 12px Cairo,sans-serif;white-space:nowrap;transition:color .2s ease,background .2s ease}
+        .medlife-support-subnav-inner a::after{content:"";position:absolute;left:14px;right:14px;bottom:6px;height:2px;border-radius:999px;background:#e83255;transform:scaleX(0);transition:transform .2s ease}
+        .medlife-support-subnav-inner a:hover{color:#e83255;background:#fff8fa;border-radius:8px}
+        .medlife-support-subnav-inner a.active{color:#e83255}
+        .medlife-support-subnav-inner a.active::after{transform:scaleX(1)}
+        @keyframes medlifeSupportSubnavIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+        @media(max-width:700px){.medlife-support-subnav{top:64px}.medlife-support-subnav-inner{justify-content:flex-start}.medlife-support-subnav-inner a{padding:0 13px;font-size:11px}}
+      `;
+      document.head.appendChild(style);
+
+      const supportLinks = [...sub.querySelectorAll('[data-support-key]')];
+      const setSupportActive = key => supportLinks.forEach(a => a.classList.toggle('active', a.dataset.supportKey === key));
+      const targets = supportLinks.map(a => [a.getAttribute('href').slice(1), a.dataset.supportKey]);
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible) setSupportActive(visible.target.dataset.supportKey);
+        }, {rootMargin:'-26% 0px -58% 0px', threshold:[0,.2,.5,.8]});
+        targets.forEach(([id,key]) => { const el=document.getElementById(id); if(el){el.dataset.supportKey=key;observer.observe(el);} });
+      }
+      supportLinks.forEach(a => a.addEventListener('click', e => {
+        const id = a.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (id === 'request' && !target) { e.preventDefault(); document.getElementById('heroRequest')?.click(); }
+        if (id === 'support' && !target) {
+          e.preventDefault();
+          const el = document.querySelector('.support-action a, .request-box a, a[href*="support-donation"], a[href*="support-donat"]');
+          el?.click();
+        }
+        setSupportActive(a.dataset.supportKey);
+      }));
+    }
+
+'''
+          if "if (current === 'support')" not in js:
+              js = js.replace(marker, block + marker, 1)
+          nav.write_text(js, encoding='utf-8')
+
+      - name: Commit atomically with retry
+        shell: bash
+        run: |
+          git config user.name 'MedLife Bot'
+          git config user.email 'actions@medlifesy.org'
+          git add support.html site-nav.js
+          if git diff --cached --quiet; then
+            git rm --ignore-unmatch .github/workflows/finalize-support-nav-v2.yml
+            git commit -m 'chore: remove temporary support navigation workflow' || true
+          else
+            git commit -m 'fix(support): use shared navigation and add support subnav'
+            git rm .github/workflows/finalize-support-nav-v2.yml
+            git commit -m 'chore: remove temporary support navigation workflow'
+          fi
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; git reset --hard origin/main; git checkout -- .github/workflows/finalize-support-nav-v2.yml 2>/dev/null || true; git add support.html site-nav.js .github/workflows/finalize-support-nav-v2.yml; git commit -m 'fix(support): use shared navigation and add support subnav' || true; }
+            if git push origin HEAD:main; then exit 0; fi
+            sleep 2
+          done
+          exit 1

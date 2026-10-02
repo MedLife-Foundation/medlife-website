@@ -1,0 +1,118 @@
+name: Repair Articles V25
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-articles-v25.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair Worker, articles index, and legacy article
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          worker = Path('workers/articles-api/worker.js')
+          text = worker.read_text(encoding='utf-8')
+
+          # Normalize HTML that was stored with escaped/backslashed tags.
+          marker = 'function normalizeArticleContent(v){'
+          if marker not in text:
+              helper = r'''function normalizeArticleContent(v){
+            let s=String(v??'').trim();
+            s=s.replace(/\\(?=<\/?[a-z][^>]*>)/gi,'');
+            s=s.replace(/&lt;((?:\/?)(?:h[1-6]|p|div|ul|ol|li|table|thead|tbody|tr|th|td|strong|em|blockquote|hr|br|a|section|figure|figcaption)\b[^&]*?)&gt;/gi,'<$1>');
+            s=s.replace(/&#x20;/gi,' ');
+            s=s.replace(/&nbsp;/gi,' ');
+            s=s.replace(/&quot;/gi,'"');
+            s=s.replace(/&#39;/gi,"'");
+            let n=0;
+            s=s.replace(/<h([2-6])([^>]*)>([\s\S]*?)<\/h\1>/gi,(m,l,a,c)=>{
+              if(/\bid\s*=\s*["'][^"']+["']/i.test(a)) return m;
+              n++; return `<h${l} id="section-${n}"${a}>${c}</h${l}>`;
+            });
+            return s;
+          }
+          '''
+              text = text.replace('function slug(v){', helper + 'function slug(v){', 1)
+
+          # Keep content normalized whenever an article is created or edited.
+          text = text.replace('b.content_ar,b.content_en,b.author_name', 'normalizeArticleContent(b.content_ar),normalizeArticleContent(b.content_en),b.author_name')
+          text = text.replace('b.content_ar,b.content_en,b.author_name,b.author_email', 'normalizeArticleContent(b.content_ar),normalizeArticleContent(b.content_en),b.author_name,b.author_email')
+
+          # Public listing: backfill slugs for every published article, then expose only slug URLs.
+          old = "if(p[0]==='public'&&p[1]==='articles'){if(req.method!=='GET')return json({error:'Method not allowed'},405);if(p[2])return json(await env.DB.prepare(\"SELECT id,title_ar,title_en,slug,excerpt_ar,excerpt_en,content_ar,content_en,author_name,category,image_url,created_at,updated_at FROM articles WHERE slug=? AND status='published'\").bind(p[2]).first());return json((await env.DB.prepare(\"SELECT id,title_ar,title_en,slug,excerpt_ar,excerpt_en,author_name,category,image_url,created_at,updated_at FROM articles WHERE status='published' AND slug IS NOT NULL ORDER BY created_at DESC\").all()).results)}"
+          new = """if(p[0]==='public'&&p[1]==='articles'){
+            if(req.method!=='GET')return json({error:'Method not allowed'},405);
+            await ensureSlugColumn(env.DB);
+            const published=(await env.DB.prepare(\"SELECT * FROM articles WHERE status='published' ORDER BY created_at DESC\").all()).results||[];
+            for(const a of published){
+              if(!a.slug){const s=await uniqueSlug(env.DB,a.title_ar||a.title_en||'article',a.id);await env.DB.prepare('UPDATE articles SET slug=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(s,a.id).run();a.slug=s;}
+              a.content_ar=normalizeArticleContent(a.content_ar); a.content_en=normalizeArticleContent(a.content_en);
+            }
+            if(p[2]){const a=published.find(x=>x.slug===p[2]);return json(a||null,a?200:404);}
+            return json(published.map(a=>({id:a.id,title_ar:a.title_ar,title_en:a.title_en,slug:a.slug,excerpt_ar:a.excerpt_ar,excerpt_en:a.excerpt_en,author_name:a.author_name,category:a.category,image_url:a.image_url,created_at:a.created_at,updated_at:a.updated_at})));
+          }"""
+          if old in text:
+              text = text.replace(old,new,1)
+          else:
+              print('WARNING: public articles block pattern not found; slug backfill may already differ.')
+
+          worker.write_text(text,encoding='utf-8')
+
+          # Clean the public index without disturbing its existing MedLife design.
+          index = Path('articles.html')
+          html = index.read_text(encoding='utf-8')
+          cleanup = r'''<script id="medlife-articles-v25-cleanup">
+          (() => {
+            const familySlug = '/articles/family-planning-conscious-choice';
+            const legacy = '/article-reader-v3?id=3';
+            const normalize = (a) => {
+              const href = a.getAttribute('href') || '';
+              if (href === legacy || href.includes('article-reader-v3?id=3')) {
+                const text = (a.textContent || '').replace(/\\s+/g,' ').trim();
+                if (/وسائل تنظيم الأسرة/.test(text)) a.setAttribute('href', familySlug);
+              }
+              if (/family-planning\.html/i.test(href)) a.setAttribute('href', familySlug);
+            };
+            const dedupe = () => {
+              const seen = new Set();
+              document.querySelectorAll('a[href*="/articles/"],a[href*="article-reader-v3"]').forEach(normalize);
+              document.querySelectorAll('a[href="'+familySlug+'"]').forEach(a => {
+                const card = a.closest('.public-article-card,article,.article-card,.card');
+                const key = (card || a).textContent.replace(/\\s+/g,' ').trim().slice(0,300);
+                if (seen.has(key) && card) card.remove(); else seen.add(key);
+              });
+            };
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dedupe); else dedupe();
+          })();
+          </script>'''
+          if 'medlife-articles-v25-cleanup' not in html:
+              html = html.replace('</body>', cleanup + '\n</body>')
+          index.write_text(html,encoding='utf-8')
+
+          # Remove the old static family-planning page; publication is now dynamic.
+          legacy_file = Path('articles/family-planning.html')
+          if legacy_file.exists():
+              legacy_file.unlink()
+
+      - name: Commit repairs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workers/articles-api/worker.js articles.html articles/family-planning.html
+          git diff --cached --quiet && exit 0
+          git commit -m "fix(articles): unify V25 publishing and legacy cleanup"
+          git push

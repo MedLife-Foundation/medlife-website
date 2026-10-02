@@ -12,33 +12,20 @@
 /submit-article /submit-article-v6 200
 /submit-article/ /submit-article-v6 200
 
-# Administrative area is a separate application.
-# All legacy admin entrypoints from the old website shell point to the
-# single canonical management platform on admin.medlifesy.org.
+# General administration is served directly by admin.html.
+# Do not rewrite /admin to avoid a canonical redirect loop.
 
-/admin https://admin.medlifesy.org/ 301
-/admin/ https://admin.medlifesy.org/ 301
-/admin.html https://admin.medlifesy.org/ 301
-/admin/* https://admin.medlifesy.org/ 301
-/admin-login https://admin.medlifesy.org/login 301
-/admin-login.html https://admin.medlifesy.org/login 301
-/admin-setup.html https://admin.medlifesy.org/login 301
-/admin-members https://admin.medlifesy.org/ 301
-/admin-members/ https://admin.medlifesy.org/ 301
-/admin-members.html https://admin.medlifesy.org/ 301
-/admin-members-v3.html https://admin.medlifesy.org/ 301
-/admin-accounts https://admin.medlifesy.org/ 301
-/admin-accounts.html https://admin.medlifesy.org/ 301
-/admin-roles https://admin.medlifesy.org/ 301
-/admin-roles.html https://admin.medlifesy.org/ 301
-/admin-teams https://admin.medlifesy.org/ 301
-/admin-teams.html https://admin.medlifesy.org/ 301
-/admin-telegram https://admin.medlifesy.org/ 301
-/admin-telegram.html https://admin.medlifesy.org/ 301
-/articles-admin https://admin.medlifesy.org/ 301
-/articles-admin/ https://admin.medlifesy.org/ 301
-/articles-admin.html https://admin.medlifesy.org/ 301
-/articles-admin/* https://admin.medlifesy.org/ 301
+/admin-members /admin-members-v3 301
+/admin-members/ /admin-members-v3 301
+/admin-members.html /admin-members-v3 301
+/admin-members-v3.html /admin-members-v3 301
+/admin-teams.html /admin-teams 301
+/admin-telegram.html /admin-telegram 301
+
+# Articles admin: content accounts use a dedicated role-aware entrypoint.
+/articles-admin /articles-admin-v2.html 200
+/articles-admin/ /articles-admin-v2.html 200
+/articles-admin.html /articles-admin-v2.html 200
 
 # Articles admin API is served by the dedicated Worker/D1 stack.
 /api/articles https://medlife-articles-api.broad-frog-3978.workers.dev/articles 200
@@ -46,23 +33,3 @@
 
 # NOTE: /articles/* is intentionally NOT rewritten here.
 # Canonical article URLs are handled by functions/articles/[slug].js.
-
-# CMS-managed public pages. Keep the public URL while routing through the CMS renderer.
-/about-medlife /pages/about-medlife 200
-/support /pages/support 200
-/contact /pages/contact 200
-/gallery /pages/gallery 200
-/gallery.html /pages/gallery 200
-/forum-v3 /pages/forum-v3 200
-/forum-v3.html /pages/forum-v3 200
-/join-options /pages/join-options 200
-/join-options.html /pages/join-options 200
-/membership-renewal /pages/membership-renewal 200
-/membership-renewal.html /pages/membership-renewal 200
-/support-request /pages/support-request 200
-/support-request.html /pages/support-request 200
-
-# CMS-managed authentication and membership pages.
-/new-member /pages/new-member 200
-/new-member.html /pages/new-member 200
-/login /login.html 301

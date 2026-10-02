@@ -1,0 +1,65 @@
+name: Apply Articles Canonical Runtime
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'database/migrations/2026-08-28-articles-canonical-identity.sql'
+      - 'database/migrations/2026-09-02-articles-identity.sql'
+      - '.github/workflows/apply-articles-canonical-runtime.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce canonical article identity in Articles API Worker
+        shell: python
+        run: |
+          from pathlib import Path
+
+          worker = Path('workers/articles-api/worker.js')
+          text = worker.read_text(encoding='utf-8')
+
+          start = text.find('async function ensureCanonicalColumns(db){')
+          end = text.find('async function ensureEditorialSchema(db)', start)
+          if start < 0 or end < 0:
+              raise SystemExit('Could not locate canonical identity helper')
+
+          helper = """async function ensureCanonicalColumns(db){
+            for(const [column,type] of [['slug','TEXT'],['canonical_path','TEXT'],['article_code','TEXT']]){
+              try{await db.prepare(`ALTER TABLE articles ADD COLUMN ${column} ${type}`).run();}
+              catch(e){if(!String(e?.message||e).toLowerCase().includes('duplicate column'))throw e;}
+            }
+            await db.prepare(\"UPDATE articles SET slug=COALESCE(NULLIF(trim(slug),''),'article-'||id), canonical_path=COALESCE(NULLIF(trim(canonical_path),''),'/articles/'||COALESCE(NULLIF(trim(slug),''),'article-'||id)), article_code=COALESCE(NULLIF(trim(article_code),''),'ML-ART-'||printf('%08d',id)) WHERE slug IS NULL OR trim(slug)='' OR canonical_path IS NULL OR trim(canonical_path)='' OR article_code IS NULL OR trim(article_code)=''\").run();
+            try{await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_slug_unique ON articles(slug)').run();}catch(e){console.warn('slug unique index:',e?.message||e);}
+            try{await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_canonical_path_unique ON articles(canonical_path)').run();}catch(e){console.warn('canonical path unique index:',e?.message||e);}
+            try{await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_article_code_unique ON articles(article_code)').run();}catch(e){console.warn('article code unique index:',e?.message||e);}
+            try{await db.prepare(`CREATE TRIGGER IF NOT EXISTS articles_article_code_after_insert
+              AFTER INSERT ON articles
+              FOR EACH ROW
+              WHEN NEW.article_code IS NULL OR trim(NEW.article_code)=''
+              BEGIN
+                UPDATE articles SET article_code='ML-ART-'||printf('%08d',NEW.id) WHERE id=NEW.id;
+              END`).run();}catch(e){console.warn('article code trigger:',e?.message||e);}
+          }
+          """
+          text = text[:start] + helper + text[end:]
+          text = text.replace('await ensureSlugColumn(env.DB);', 'await ensureCanonicalColumns(env.DB);')
+          worker.write_text(text, encoding='utf-8')
+
+      - name: Commit Worker changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add workers/articles-api/worker.js
+          git diff --cached --quiet && exit 0
+          git commit -m "fix(articles): add stable unique article code"
+          git push

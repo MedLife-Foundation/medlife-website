@@ -1,0 +1,98 @@
+name: Repair Pages Articles Slug API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-pages-articles-slug-api.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch Pages Articles API
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('functions/api/articles/index.js')
+          text = p.read_text(encoding='utf-8')
+
+          # Return the persisted canonical identity to both public and admin clients.
+          text = text.replace(
+              "SELECT id,title_ar,title_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles WHERE status='published'",
+              "SELECT id,title_ar,title_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at,slug,canonical_path FROM articles WHERE status='published'",
+              1)
+          text = text.replace(
+              "slug:`article-${article.id}`,views:0",
+              "slug:article.slug||`article-${article.id}`,canonical_path:article.canonical_path||`/articles/${article.slug||`article-${article.id}`}`,views:0",
+              1)
+
+          text = text.replace(
+              "SELECT id,title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at FROM articles ORDER BY",
+              "SELECT id,title_ar,title_en,content_ar,content_en,excerpt_ar,excerpt_en,author_member_id,author_name,author_email,category,image_url,status,rejection_reason,published_at,created_at,updated_at,slug,canonical_path FROM articles ORDER BY",
+              1)
+          text = text.replace(
+              "slug:`article-${article.id}`,views:0,editorial_brief",
+              "slug:article.slug||`article-${article.id}`,canonical_path:article.canonical_path||`/articles/${article.slug||`article-${article.id}`}`,views:0,editorial_brief",
+              1)
+
+          # On creation, persist the requested slug instead of letting the UI-only slug disappear.
+          needle = "const articleId=result.meta?.last_row_id??null;"
+          insert = needle + "if(articleId){const requestedSlug=await uniqueArticleSlug(db,b.slug||titleAr||titleEn||`article-${articleId}`,articleId);await db.prepare('UPDATE articles SET slug=?,canonical_path=? WHERE id=?').bind(requestedSlug,`/articles/${requestedSlug}`,articleId).run();}"
+          if needle in text and "uniqueArticleSlug(db,b.slug||titleAr" not in text:
+              text = text.replace(needle, insert, 1)
+
+          # On update, preserve the current slug unless a new one was explicitly selected.
+          needle = "if(!article)return json({success:false,error:'المقال غير موجود.'},404);"
+          insert = needle + "const requestedSlug=await uniqueArticleSlug(db,b.slug||article.slug||article.title_ar||article.title_en||`article-${id}`,id);"
+          if needle in text and "const requestedSlug=await uniqueArticleSlug" not in text:
+              text = text.replace(needle, insert, 1)
+
+          old_sql = "UPDATE articles SET title_ar=?,title_en=?,content_ar=?,content_en=?,excerpt_ar=?,excerpt_en=?,author_name=?,author_email=?,category=?,image_url=?,status=?,rejection_reason=?,published_at=?,updated_at=CURRENT_TIMESTAMP WHERE id=?"
+          new_sql = "UPDATE articles SET title_ar=?,title_en=?,content_ar=?,content_en=?,excerpt_ar=?,excerpt_en=?,author_name=?,author_email=?,category=?,image_url=?,status=?,rejection_reason=?,published_at=?,slug=?,canonical_path=?,updated_at=CURRENT_TIMESTAMP WHERE id=?"
+          if old_sql in text:
+              text = text.replace(old_sql, new_sql, 1)
+          old_bind = ".bind(titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorName,authorEmail,category,imageUrl,status,status==='rejected'?rejectionReason:null,publishedAt,id).run();"
+          new_bind = ".bind(titleAr,titleEn,contentAr,contentEn,excerptAr,excerptEn,authorName,authorEmail,category,imageUrl,status,status==='rejected'?rejectionReason:null,publishedAt,requestedSlug,`/articles/${requestedSlug}`,id).run();"
+          if old_bind in text:
+              text = text.replace(old_bind, new_bind, 1)
+          text = text.replace(
+              "return json({success:true,message:status==='published'?'تم حفظ التعديلات ونشر المقال.':status==='rejected'?'تم رفض المقال وحفظ سبب الرفض.':'تم حفظ تعديلات المقال.',id,status,slug:`article-${id}`});",
+              "return json({success:true,message:status==='published'?'تم حفظ التعديلات ونشر المقال.':status==='rejected'?'تم رفض المقال وحفظ سبب الرفض.':'تم حفظ تعديلات المقال.',id,status,slug:requestedSlug,canonical_path:`/articles/${requestedSlug}`});",
+              1)
+
+          # Add a small, deterministic slug allocator if it is not already present.
+          if "async function uniqueArticleSlug" not in text:
+              marker = "function clean(value,max){"
+              helper = r'''async function uniqueArticleSlug(db,value,excludeId=null){
+            const base=String(value??'').normalize('NFKC').toLowerCase().trim().replace(/[\u064B-\u065F\u0670]/g,'').replace(/[إأآٱ]/g,'ا').replace(/[ى]/g,'ي').replace(/[ؤ]/g,'و').replace(/[ئ]/g,'ي').replace(/[ـ]/g,'').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,90)||'article';
+            let candidate=base, n=2;
+            while(true){
+              const row=excludeId==null?await db.prepare('SELECT id FROM articles WHERE slug=? LIMIT 1').bind(candidate).first():await db.prepare('SELECT id FROM articles WHERE slug=? AND id<>? LIMIT 1').bind(candidate,excludeId).first();
+              if(!row)return candidate;
+              candidate=`${base}-${n++}`;
+            }
+          }
+          '''
+              if marker not in text:
+                  raise SystemExit('clean() marker not found')
+              text = text.replace(marker, helper + marker, 1)
+
+          p.write_text(text, encoding='utf-8')
+      - name: Verify patch
+        run: |
+          grep -q "slug:article.slug" functions/api/articles/index.js
+          grep -q "uniqueArticleSlug" functions/api/articles/index.js
+          grep -q "canonical_path" functions/api/articles/index.js
+      - name: Commit
+        run: |
+          git config user.name 'MedLife Bot'
+          git config user.email 'actions@medlifesy.org'
+          git add functions/api/articles/index.js
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'fix(articles): persist canonical slugs in Pages API'
+          git push
