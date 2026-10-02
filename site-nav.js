@@ -15,8 +15,8 @@
 
   // Canonical member-login guard: legacy/static pages may still contain /login.html.
   // Intercept those links before navigation so every member entry point reaches the
-  // current management platform, regardless of which page supplied the link.
-  const MEMBER_LOGIN_URL = 'https://admin.medlifesy.org/login?next=/';
+  // public login landing page, regardless of which page supplied the link.
+  const MEMBER_LOGIN_URL = '/login.html';
   const isMemberLoginLink = link => {
     if (!link) return false;
     const href = String(link.getAttribute('href') || '').trim();
