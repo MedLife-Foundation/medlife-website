@@ -49,3 +49,9 @@
 /membership-renewal.html /pages/membership-renewal 200
 /support-request /pages/support-request 200
 /support-request.html /pages/support-request 200
+
+# CMS-managed authentication and membership pages.
+/new-member /pages/new-member 200
+/new-member.html /pages/new-member 200
+/login /pages/login 200
+/login.html /pages/login 200
