@@ -187,11 +187,11 @@ function mapAdminRole(role) {
 }
 
 function redirectForRole(role) {
-  if (role === 'system_admin') return '/admin.html';
-  if (['content_manager', 'content_editor', 'medical_reviewer'].includes(role)) return '/articles-admin';
-  if (role === 'members_manager') return '/members-admin';
-  if (role === 'support_manager') return '/support-admin';
-  if (role === 'complaints_manager') return '/complaints-admin';
+  // All administrative roles use the single Management Platform.
+  // Permissions inside the platform determine which modules the user can manage.
+  if (['system_admin', 'content_manager', 'content_editor', 'medical_reviewer', 'members_manager', 'support_manager', 'complaints_manager'].includes(role)) {
+    return 'https://admin.medlifesy.org/';
+  }
   return '/members.html';
 }
 
