@@ -126,6 +126,17 @@
           items = normalized;
           navigationLoadedFromSettings = true;
         }
+
+        // Keep the public activities entry discoverable even when an older or
+        // partially configured navigation record omits it. The database still
+        // controls the order and labels of the configured entries.
+        if (!items.some(([, , key]) => key === 'activities')) {
+          const activitiesItem = fallbackItems.find(([, , key]) => key === 'activities');
+          const supportIndex = items.findIndex(([, , key]) => key === 'support');
+          if (activitiesItem) {
+            items.splice(supportIndex >= 0 ? supportIndex : items.length, 0, activitiesItem);
+          }
+        }
       }
 
       if (!navigationLoadedFromSettings) items = fallbackItems.slice();

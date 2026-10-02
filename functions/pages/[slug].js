@@ -63,7 +63,7 @@ footer{background:#0d1426;color:#98a4b7;text-align:center;padding:28px;font-size
 <section class="hero"><div class="eyebrow">MedLife · صفحة مُدارة</div><h1>${title}</h1>${excerpt ? "<p>"+excerpt+"</p>" : ""}</section>
 <main><article class="card">${body || "<div class='empty'>لا يوجد محتوى منشور لهذه الصفحة بعد.</div>"}</article></main>
 <footer>© 2026 مؤسسة ميدلايف الطبية الخيرية التطوعية — بالعمل التطوعي نصنع الأثر.</footer>
-<script src="/site-nav.js"></script>
+<script src="/site-nav.js?v=20261002-activities2"></script>
 </body></html>`;
 
   return new Response(html, {
