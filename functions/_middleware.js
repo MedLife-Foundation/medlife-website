@@ -20,7 +20,6 @@ async function fetchManagedLegacyPage(pathname) {
     select: "title,body,metadata,status,public_url,updated_at",
     content_type: "eq.page",
     public_url: "eq." + pathname,
-    status: "eq.published",
     limit: "1"
   });
   try {
@@ -35,8 +34,10 @@ async function fetchManagedLegacyPage(pathname) {
     if (!response.ok) return {state:"error"};
     const rows = await response.json().catch(() => []);
     const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row) return {state:"unpublished"};
-    if (row.metadata?.template !== "legacy_html") return {state:"unpublished"};
+    if (!row) return {state:"unmanaged"};
+    if (row.metadata?.template !== "legacy_html") return {state:"unmanaged"};
+    if (row.status !== "published") return {state:"unpublished"};
+    if (!String(row.body || "").trim()) return {state:"unpublished"};
     return {state:"published", row};
   } catch {
     return {state:"error"};
