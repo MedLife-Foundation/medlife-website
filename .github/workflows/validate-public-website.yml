@@ -61,3 +61,9 @@ jobs:
               raise SystemExit("Public login entry is not connected to the canonical management login.")
 
           print("Public website ownership and integration validated successfully.")
+
+      - name: Syntax check public runtime
+        run: |
+          node --check site-nav.js
+          node --check functions/_middleware.js
+          node --check functions/articles/[slug].js
