@@ -129,7 +129,7 @@ export async function onRequest(context) {
       return new Response(html,{status:response.status,statusText:response.statusText,headers});
     }
 
-    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute) return response;
+    if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage && !isManagedCmsRoute && !PUBLIC_HEADER_ROUTES.has(path)) return response;
 
     let html = await response.text();
 
@@ -147,7 +147,7 @@ export async function onRequest(context) {
 
     // Always use the current navigation script version when a managed page
     // already contains a previous site-nav reference.
-    html = html.replace(/\/site-nav\.js\?v=[^"']+/g, "/site-nav.js?v=20261002-cms2");
+    html = html.replace(/\/site-nav\.js(?:\?v=[^"']+)?/g, "/site-nav.js?v=20261002-cms2");
 
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
