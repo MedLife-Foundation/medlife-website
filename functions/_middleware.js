@@ -32,13 +32,14 @@ async function fetchManagedLegacyPage(pathname) {
       },
       cf: {cacheTtl: 0}
     });
-    if (!response.ok) return null;
+    if (!response.ok) return {state:"error"};
     const rows = await response.json().catch(() => []);
     const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row || row.metadata?.template !== "legacy_html" || !String(row.body || "").trim()) return null;
-    return row;
+    if (!row) return {state:"unpublished"};
+    if (row.metadata?.template !== "legacy_html") return {state:"unpublished"};
+    return {state:"published", row};
   } catch {
-    return null;
+    return {state:"error"};
   }
 }
 
@@ -86,8 +87,15 @@ export async function onRequest(context) {
     let html = await response.text();
 
     const managedPage = await fetchManagedLegacyPage(path);
-    if (managedPage) {
-      html = String(managedPage.body);
+    if (managedPage?.state === "unpublished") {
+      const headers = new Headers(response.headers);
+      headers.delete('content-length');
+      headers.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');
+      headers.set('pragma','no-cache');
+      return new Response('الصفحة غير متاحة حالياً.', {status:404, headers});
+    }
+    if (managedPage?.state === "published") {
+      html = String(managedPage.row.body || "");
     }
 
     // Always use the current navigation script version when a managed page
