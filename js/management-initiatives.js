@@ -1,19 +1,99 @@
 (function(){
 "use strict";
+
+const TYPES={
+  medical:"طبي",
+  awareness:"توعية",
+  training:"تدريب",
+  humanitarian:"إنساني",
+  community:"مجتمعي",
+  school:"مدارس",
+  other:"أخرى"
+};
+
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-async function init(){
- const grid=document.querySelector("main .grid"); if(!grid)return;
- try{
-  const r=await fetch("/api/management?resource=activities&limit=12",{headers:{Accept:"application/json"},cache:"no-store"});
-  if(!r.ok)return;
-  const d=await r.json(),rows=Array.isArray(d?.data)?d.data:[];if(!rows.length)return;
-  const section=document.createElement("section");
-  section.className="management-activities";
-  section.innerHTML=`<div style="text-align:center;margin-bottom:22px"><div style="color:#ff2a54;font-weight:900;font-size:12px">منصة الإدارة</div><h2 style="margin:6px 0;color:#14213d">أحدث أنشطة ميدلايف</h2><p style="margin:0;color:#697586">الأنشطة التي اعتمدها الفريق للعرض العام.</p></div><div class="mg-grid"></div>`;
-  grid.parentNode.insertBefore(section,grid);
-  section.querySelector(".mg-grid").innerHTML=rows.map(x=>`<article class="card"><div class="body"><div class="source">${esc(x.activity_type||"نشاط")} · ${esc(x.governorate||"ميدلايف")}</div><h2>${esc(x.title)}</h2><p>${esc(x.description||"نشاط من أنشطة ميدلايف المنشورة.")}</p><div class="source">${esc(x.city||"")} ${x.start_at?"· "+new Date(x.start_at).toLocaleDateString("ar-SY"):""}</div></div></article>`).join("");
-  const s=document.createElement("style");s.textContent=".management-activities{padding:42px 0}.mg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}@media(max-width:900px){.mg-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.mg-grid{grid-template-columns:1fr}}";section.appendChild(s);
- }catch(e){console.warn("Management initiatives integration skipped",e);}
+const safeUrl=v=>{
+  try{
+    const u=new URL(String(v||""),location.origin);
+    return u.protocol==="https:" || u.origin===location.origin ? u.href : "";
+  }catch{return "";}
+};
+const formatDate=v=>{
+  if(!v)return "";
+  const d=new Date(v);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("ar-SY",{year:"numeric",month:"long",day:"numeric"});
+};
+
+async function load(){
+  const host=document.getElementById("managementActivities");
+  const filtersHost=document.getElementById("activityFilters");
+  if(!host)return;
+
+  try{
+    const r=await fetch("/api/management?resource=activities&limit=50",{headers:{Accept:"application/json"},cache:"no-store"});
+    if(!r.ok)throw new Error("activities request failed");
+    const payload=await r.json();
+    const rows=Array.isArray(payload?.data)?payload.data:[];
+
+    if(!rows.length){
+      host.innerHTML='<div class="activities-empty">لا توجد أنشطة منشورة للعامة حاليًا.</div>';
+      if(filtersHost)filtersHost.innerHTML="";
+      return;
+    }
+
+    const typeValues=[...new Set(rows.map(x=>String(x.activity_type||"other")))];
+    const filters=["all",...typeValues];
+
+    if(filtersHost){
+      filtersHost.innerHTML=filters.map((key,i)=>'<button type="button" class="activities-filter '+(i===0?"active":"")+'" data-filter="'+esc(key)+'">'+(key==="all"?"الكل":esc(TYPES[key]||key))+"</button>").join("");
+    }
+
+    const render=filter=>{
+      const visible=filter==="all"?rows:rows.filter(x=>String(x.activity_type||"other")===filter);
+      if(!visible.length){
+        host.innerHTML='<div class="activities-empty">لا توجد أنشطة ضمن هذا التصنيف.</div>';
+        return;
+      }
+
+      host.innerHTML='<div class="activities-grid">'+visible.map(x=>{
+        const image=safeUrl(x.cover_image_url);
+        const type=TYPES[x.activity_type]||x.activity_type||"نشاط";
+        const date=formatDate(x.start_at);
+        const location=[x.city,x.governorate].filter(Boolean).join(" — ");
+        return '<article class="activity-card">'+
+          '<div class="activity-cover '+(image?"":"placeholder")+'">'+
+            (image
+              ? '<img src="'+image+'" alt="'+esc(x.title||"نشاط ميدلايف")+'" loading="lazy">'
+              : '<img src="/logo.PNG" alt="ميدلايف" loading="lazy"><span class="activity-no-image">لم تتم إضافة صورة</span>')+
+          '</div>'+
+          '<div class="activity-body">'+
+            '<div class="activity-meta"><span class="activity-chip primary">'+esc(type)+'</span>'+(date?'<span class="activity-chip">'+esc(date)+'</span>':"")+'</div>'+
+            '<h2>'+esc(x.title||"نشاط ميدلايف")+'</h2>'+
+            '<p>'+esc(x.description||"نشاط من أنشطة ميدلايف المنشورة.")+'</p>'+
+            '<div class="activity-info">'+
+              (location?'<div><strong>المكان</strong>'+esc(location)+'</div>':"")+
+              (x.participant_count!=null?'<div><strong>المشاركون</strong>'+esc(String(x.participant_count))+'</div>':"")+
+            '</div>'+
+          '</div>'+
+        '</article>';
+      }).join("")+'</div>';
+    };
+
+    render("all");
+
+    filtersHost?.querySelectorAll(".activities-filter").forEach(button=>{
+      button.addEventListener("click",()=>{
+        filtersHost.querySelectorAll(".activities-filter").forEach(b=>b.classList.remove("active"));
+        button.classList.add("active");
+        render(button.dataset.filter||"all");
+      });
+    });
+  }catch(error){
+    console.warn("Management activities integration skipped",error);
+    host.innerHTML='<div class="activities-empty">تعذر تحميل الأنشطة المنشورة حاليًا.</div>';
+  }
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load,{once:true});
+else load();
 })();
