@@ -7,6 +7,9 @@ export async function onRequest(context) {
 
     const path = new URL(context.request.url).pathname.toLowerCase();
     const isArticlesLibrary = path === '/articles' || path === '/articles/' || path.endsWith('/articles.html');
+    const isArticleReader = path.startsWith('/articles/') && path !== '/articles/';
+    const isSupportPage = path === '/support' || path === '/support/' || path === '/support.html';
+    const isContactPage = path === '/contact' || path === '/contact/' || path === '/contact.html';
 
     if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage) return response;
 
