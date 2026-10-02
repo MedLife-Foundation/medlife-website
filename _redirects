@@ -15,17 +15,17 @@
 # General administration is served directly by admin.html.
 # Do not rewrite /admin to avoid a canonical redirect loop.
 
-/admin-members /admin-members-v3 301
-/admin-members/ /admin-members-v3 301
-/admin-members.html /admin-members-v3 301
-/admin-members-v3.html /admin-members-v3 301
+/admin-members /members-admin.html 301
+/admin-members/ /members-admin.html 301
+/admin-members.html /members-admin.html 301
+/admin-members-v3.html /members-admin.html 301
 /admin-teams.html /admin-teams 301
 /admin-telegram.html /admin-telegram 301
 
 # Articles admin: content accounts use a dedicated role-aware entrypoint.
-/articles-admin /articles-admin-v2.html 200
-/articles-admin/ /articles-admin-v2.html 200
-/articles-admin.html /articles-admin-v2.html 200
+/articles-admin /admin/editorial-command-center-v24.html 200
+/articles-admin/ /admin/editorial-command-center-v24.html 200
+/articles-admin.html /admin/editorial-command-center-v24.html 200
 
 # Articles admin API is served by the dedicated Worker/D1 stack.
 /api/articles https://medlife-articles-api.broad-frog-3978.workers.dev/articles 200
