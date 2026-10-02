@@ -1,3 +1,47 @@
+const CMS_SUPABASE_URL = "https://ftvjakwogxdlxxbpfydf.supabase.co";
+const CMS_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const CMS_LEGACY_ROUTES = new Set([
+  "/about-medlife.html",
+  "/support.html",
+  "/contact.html",
+  "/articles.html",
+  "/gallery.html",
+  "/forum-v3.html",
+  "/join-options.html",
+  "/membership-renewal.html",
+  "/support-request.html",
+  "/login.html",
+  "/new-member.html"
+]);
+
+async function fetchManagedLegacyPage(pathname) {
+  if (!CMS_LEGACY_ROUTES.has(pathname)) return null;
+  const query = new URLSearchParams({
+    select: "title,body,metadata,status,public_url,updated_at",
+    content_type: "eq.page",
+    public_url: "eq." + pathname,
+    status: "eq.published",
+    limit: "1"
+  });
+  try {
+    const response = await fetch(CMS_SUPABASE_URL + "/rest/v1/public_site_content?" + query.toString(), {
+      headers: {
+        apikey: CMS_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: "Bearer " + CMS_SUPABASE_PUBLISHABLE_KEY,
+        Accept: "application/json"
+      },
+      cf: {cacheTtl: 0}
+    });
+    if (!response.ok) return null;
+    const rows = await response.json().catch(() => []);
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row || row.metadata?.template !== "legacy_html" || !String(row.body || "").trim()) return null;
+    return row;
+  } catch {
+    return null;
+  }
+}
+
 export async function onRequest(context) {
   let response;
   try {
@@ -39,6 +83,16 @@ export async function onRequest(context) {
     if (!isArticlesLibrary && !isArticleReader && !isSupportPage && !isContactPage) return response;
 
     let html = await response.text();
+
+    const managedPage = await fetchManagedLegacyPage(path);
+    if (managedPage) {
+      html = String(managedPage.body);
+    }
+
+    // Always use the current navigation script version when a managed page
+    // already contains a previous site-nav reference.
+    html = html.replace(/\/site-nav\.js\?v=[^"']+/g, "/site-nav.js?v=20261002-cms1");
+
     const tags = [];
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
@@ -46,7 +100,7 @@ export async function onRequest(context) {
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      tags.push('<script src="/site-nav.js?v=20261002-activities-safe1" defer></script>');
+      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261002-cms1" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
       tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
