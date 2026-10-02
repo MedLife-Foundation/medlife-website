@@ -1,5 +1,11 @@
 const escHtml = (value) => String(value ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
-const nl2p = (value) => String(value ?? "").trim().split(/\n\s*\n|\n/).filter(Boolean).map(x => "<p>" + escHtml(x) + "</p>").join("");
+const escapeText = (value) => String(value ?? "");
+const nl2p = (value) => escapeText(value).trim().split(/\n\s*\n|\n/).filter(Boolean).map(x => "<p>" + escHtml(x) + "</p>").join("");
+const renderBody = (page) => {
+  const html = page?.metadata?.html_body;
+  if (typeof html === "string" && html.trim()) return html;
+  return nl2p(page?.body || "");
+};
 const safeUrl = (value, origin) => {
   try {
     const u = new URL(String(value || ""), origin);
@@ -22,7 +28,7 @@ export async function onRequestGet({ params, request }) {
 
   const title = escHtml(page.title || "MedLife");
   const excerpt = escHtml(page.excerpt || "");
-  const body = nl2p(page.body || "");
+  const body = renderBody(page);
   const canonical = safeUrl(page.public_url || ("/pages/" + slug), origin);
 
   const html = `<!doctype html>
@@ -59,7 +65,7 @@ footer{background:#0d1426;color:#98a4b7;text-align:center;padding:28px;font-size
   return new Response(html, {
     headers: {
       "content-type":"text/html; charset=UTF-8",
-      "cache-control":"public, max-age=60, s-maxage=60"
+      "cache-control":"no-store, no-cache, must-revalidate"
     }
   });
 }
