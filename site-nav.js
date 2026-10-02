@@ -13,6 +13,24 @@
   let items = fallbackItems.slice();
   let navigationLoadedFromSettings = false;
 
+  const normalizedPath = value => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw, location.origin);
+      return url.pathname.replace(/\/+$/, '') || '/';
+    } catch {
+      const clean = raw.split('#')[0].split('?')[0].replace(/^\.\//, '').replace(/\/+$/, '');
+      return clean ? '/' + clean.replace(/^\//, '') : '/';
+    }
+  };
+
+  const currentPath = normalizedPath(location.pathname);
+  const currentPage = currentPath === '/'
+    ? 'index.html'
+    : decodeURIComponent(currentPath.split('/').pop() || 'index.html').toLowerCase();
+  const home = currentPath === '/' || currentPage === 'index.html';
+
   // Canonical member-login guard: legacy/static pages may still contain /login.html.
   // Intercept those links before navigation so every member entry point reaches the
   // public login landing page, regardless of which page supplied the link.
@@ -50,21 +68,17 @@
   }
 
   const activeKey = () => {
-    if (page === 'gallery' || page === 'gallery.html') return 'gallery';
-    if (location.pathname.startsWith('/pages/')) {
-      const managedSlug = decodeURIComponent(location.pathname.replace(/^\/pages\//, '').replace(/\/$/, ''));
+    if (currentPath.startsWith('/pages/')) {
+      const managedSlug = decodeURIComponent(currentPath.replace(/^\/pages\//, '').replace(/\/$/, ''));
       return 'managed:' + managedSlug;
     }
     if (home && location.hash === '#programs') return 'programs';
     if (home && location.hash === '#homepageGallery') return 'gallery';
     if (home) return 'home';
-    if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
-    if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';
-    if (page === 'support' || page === 'support.html') return 'support';
-    const match = items.find(item => item[0].split('#')[0] === page && !item[0].includes('#'));
+
+    const match = items.find(([url]) => normalizedPath(url) === currentPath);
     return match ? match[2] : '';
   };
-
   const setActive = key => {
     document.querySelectorAll('.medlife-global-nav a, .medlife-global-mobile a')
       .forEach(a => a.classList.toggle('active', a.dataset.key === key));
@@ -129,14 +143,34 @@
         return [page.public_url || item[0], String(page.metadata.nav.label).trim() || item[1], item[2]];
       });
 
-      // Pages explicitly marked for the main navigation are still appended
-      // when they are not already represented in the centrally configured menu.
+      // The centrally configured navigation controls order and visibility.
+      // CMS pages marked show_main are appended only when they are not already
+      // represented by the same canonical public route.
+      const existingRoutes = new Set(items.map(([url]) => normalizedPath(url)).filter(Boolean));
+      const existingSlugs = new Set();
+      items.forEach(([url, , key]) => {
+        if (key && key.startsWith('managed:')) existingSlugs.add(key.slice('managed:'.length));
+        const route = normalizedPath(url);
+        const last = route.split('/').pop() || '';
+        const slug = last.replace(/\.html?$/i, '');
+        if (slug) existingSlugs.add(slug);
+      });
+
       const extras = managed
         .filter(page => page && page.slug && page.slug !== 'home' && page.metadata?.nav?.show_main === true)
-        .map(page => ['/pages/' + encodeURIComponent(page.slug), String(page.metadata?.nav?.label || page.title || '').trim(), 'managed:' + page.slug])
-        .filter(item => item[1]);
-      const existing = new Set(items.map(item => item[0].split('#')[0]));
-      items = [...items, ...extras.filter(item => !existing.has(item[0]))];
+        .map(page => [
+          page.public_url || ('/pages/' + encodeURIComponent(page.slug)),
+          String(page.metadata?.nav?.label || page.title || '').trim(),
+          'managed:' + page.slug
+        ])
+        .filter(item => item[1])
+        .filter(([url, , key]) => {
+          const slug = key.slice('managed:'.length);
+          const route = normalizedPath(url);
+          return !existingRoutes.has(route) && !existingSlugs.has(slug);
+        });
+
+      items = [...items, ...extras];
     } catch (error) {
       items = fallbackItems.slice();
       console.warn('Managed navigation fallback active', error);
