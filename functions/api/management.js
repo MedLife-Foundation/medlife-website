@@ -305,6 +305,12 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
         ? actual.map(String).includes(expected)
         : String(actual ?? "").toLowerCase().includes(expected.toLowerCase());
     }
+    if (operator === "in") {
+      const allowed = String(visibility.value ?? "").split(",").map(item => item.trim()).filter(Boolean);
+      return Array.isArray(actual)
+        ? actual.some(item => allowed.includes(String(item)))
+        : allowed.includes(String(actual ?? ""));
+    }
     if (operator === "not_equals") return String(actual ?? "") !== expected;
     return String(actual ?? "") === expected;
   };
