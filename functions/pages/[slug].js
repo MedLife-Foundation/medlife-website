@@ -26,6 +26,10 @@ export async function onRequestGet({ params, request }) {
   const page = Array.isArray(payload?.data) ? payload.data[0] : null;
   if (!page) return new Response("الصفحة غير موجودة.", { status: 404 });
 
+  if (page?.metadata?.template === "legacy_html" && typeof page.body === "string" && /<html[\\s>]/i.test(page.body)) {
+    return new Response(page.body, { headers: { "content-type":"text/html; charset=UTF-8", "cache-control":"no-store, no-cache, must-revalidate" } });
+  }
+
   const title = escHtml(page.title || "MedLife");
   const excerpt = escHtml(page.excerpt || "");
   const body = renderBody(page);
