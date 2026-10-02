@@ -173,6 +173,11 @@ async function fetchResource(resource, url) {
     }
     return [{...form, fields}];
   }
+  if (resource === "content") {
+    // public_site_content is a published-only projection; expose an explicit
+    // status value to consumers without requiring a status column in the table.
+    return Array.isArray(data) ? data.map(row => ({...row, status:"published"})) : [];
+  }
   return Array.isArray(data) ? data : [];
 }
 
