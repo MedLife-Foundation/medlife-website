@@ -33,3 +33,8 @@
 
 # NOTE: /articles/* is intentionally NOT rewritten here.
 # Canonical article URLs are handled by functions/articles/[slug].js.
+
+# CMS-managed public pages. Keep the public URL while routing through the CMS renderer.
+/about-medlife /pages/about-medlife 200
+/support /pages/support 200
+/contact /pages/contact 200
