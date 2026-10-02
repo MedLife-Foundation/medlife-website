@@ -136,7 +136,7 @@ async function fetchResource(resource, url) {
     const form = Array.isArray(data) ? data[0] : null;
     if (!form?.id) return [];
     const fieldsResponse = await fetch(
-      SUPABASE_URL + "/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,sort_order,is_active&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc",
+      SUPABASE_URL + "/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,target_unit_types,sort_order,is_active&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc",
       {
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -220,7 +220,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   if (!form?.id) throw new Error("نموذج الانضمام غير صالح أو لم يعد منشوراً.");
 
   const fieldsResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,sort_order&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc&limit=200",
+    SUPABASE_URL + "/rest/v1/admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,visibility,target_unit_ids,target_unit_types,sort_order&form_id=eq." + encodeURIComponent(form.id) + "&is_active=eq.true&order=sort_order.asc&limit=200",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -251,16 +251,35 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   }
 
   const fieldIsVisible = (field) => {
+    const selectedUnitIds = Array.isArray(formData.current_units)
+      ? formData.current_units.map(value => cleanText(value, 80)).filter(Boolean)
+      : [];
     const targetUnitIds = Array.isArray(field.target_unit_ids)
       ? field.target_unit_ids.map(value => cleanText(value, 80)).filter(Boolean)
       : [];
-    if (targetUnitIds.length) {
-      const selectedUnits = new Set(
-        Array.isArray(formData.current_units)
-          ? formData.current_units.map(value => cleanText(value, 80)).filter(Boolean)
-          : []
+    if (targetUnitIds.length && !targetUnitIds.some(id => selectedUnitIds.includes(id))) return false;
+
+    const targetUnitTypes = Array.isArray(field.target_unit_types)
+      ? field.target_unit_types.map(value => cleanText(value, 50)).filter(Boolean)
+      : [];
+    if (targetUnitTypes.length) {
+      const selectedUnitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=id,unit_type&id=in.(" + selectedUnitIds.map(encodeURIComponent).join(",") + ")",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
       );
-      if (!targetUnitIds.some(id => selectedUnits.has(id))) return false;
+      const selectedUnits = await selectedUnitsResponse.json().catch(() => []);
+      const selectedTypes = new Set(
+        (Array.isArray(selectedUnits) ? selectedUnits : [])
+          .map(unit => cleanText(unit.unit_type, 50))
+          .filter(Boolean)
+      );
+      if (!targetUnitTypes.some(type => selectedTypes.has(type))) return false;
     }
     const visibility = field.visibility && typeof field.visibility === "object" ? field.visibility : {};
     if (visibility.mode !== "when") return true;
@@ -307,6 +326,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       options: Array.isArray(field.options) ? field.options.slice(0, 100) : [],
       visibility: field.visibility && typeof field.visibility === "object" ? field.visibility : {mode:"always"},
       target_unit_ids: Array.isArray(field.target_unit_ids) ? field.target_unit_ids.slice(0, 50) : [],
+      target_unit_types: Array.isArray(field.target_unit_types) ? field.target_unit_types.slice(0, 10) : [],
       sort_order: Number(field.sort_order || 0)
     }))
   };
@@ -527,6 +547,7 @@ export async function onRequestPost({ request }) {
           notes: unit.notes
         }])),
         reported_total_volunteer_hours: numberValue(data.reported_total_volunteer_hours),
+        field_available_days: toArray(data.field_available_days),
         volunteer_commitment_hours: numberValue(data.volunteer_commitment_hours),
         certificate_types: certificateTypes,
         certificate_other: cleanText(data.certificate_other, 500),
