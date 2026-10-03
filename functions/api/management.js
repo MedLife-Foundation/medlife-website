@@ -151,7 +151,7 @@ async function fetchResource(resource, url) {
     if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة النموذج.");
     if (resource === "membership_renewal_form") {
       const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team,other)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
         {
           headers: {
             apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -166,7 +166,7 @@ async function fetchResource(resource, url) {
         name_ar: cleanText(unit.name_ar || unit.name_en, 200),
         name_en: cleanText(unit.name_en || unit.name_ar, 200),
         unit_type: cleanText(unit.unit_type, 50)
-      })).filter(unit => unit.id && unit.name_ar);
+      })).filter(unit => unit.id && unit.name_ar && (unit.unit_type !== "other" || requestedFormKey === "membership_renewal_supervisor"));
       const normalizedFields = fields.map(field => field.field_key === "current_units"
         ? {...field, options: liveUnits.map(unit => ({value: unit.id, label_ar: unit.name_ar, label_en: unit.name_en}))}
         : field
