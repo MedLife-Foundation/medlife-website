@@ -379,8 +379,13 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     const unitCards=selectedIds().map(id=>{
       const u=units.find(x=>String(x.id)===id),d=unitsData[id]||{};
       const role=isSupervisorForm()?(roleLabels[d.role]||d.role||"—"):"عضو / متطوع";
+      const isAdmin=String(u?.unit_type)==="other";
+      const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
+      const positionLabel=Array.isArray(positionField?.options)?positionField.options.find(o=>String(o.value)===String(d.senior_management_position))?.label_ar:d.senior_management_position;
       const roleLine=isSupervisorForm()
-        ? "الدور: "+role+" · بدء الدور: "+(d.role_started_on||"—")+" · "+(d.role_continuing?"مستمر":"انتهى"+(d.role_left_on?" في "+d.role_left_on:""))
+        ? (isAdmin
+          ? "المنصب: "+(positionLabel||"—")+" · بدء المنصب: "+(d.role_started_on||"—")+" · "+(d.role_continuing?"مستمر":"انتهى"+(d.role_left_on?" في "+d.role_left_on:""))
+          : "الدور: "+role+" · بدء الدور: "+(d.role_started_on||"—")+" · "+(d.role_continuing?"مستمر":"انتهى"+(d.role_left_on?" في "+d.role_left_on:"")))
         : "الانتساب: "+(d.joined_on||"—")+" · "+(d.continuing?"مستمر":"منتهٍ"+(d.left_on?" في "+d.left_on:""));
       return'<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u?.unit_type))+'</span></div><div class="help" style="font-size:11px">'+esc(roleLine)+'</div></div>';
     }).join("");
