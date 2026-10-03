@@ -557,7 +557,7 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
       const allowedUnitRoles = supervisorForm
-        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor"]
+        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
         : ["volunteer"];
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
