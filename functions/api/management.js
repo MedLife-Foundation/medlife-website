@@ -470,8 +470,27 @@ export async function onRequestPost({ request }) {
           }
         }
       );
-      const unitsRows = await unitsResponse.json().catch(() => []);
-      const activeUnits = (Array.isArray(unitsRows) ? unitsRows : []).filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
+      let unitsRows = await unitsResponse.json().catch(() => []);
+      if (!Array.isArray(unitsRows)) unitsRows = [];
+      // General Administration is valid only for the supervisor renewal form.
+      // Fetch it explicitly as a fallback so the public submission path does not
+      // reject its real unit id if the broader unit query is filtered differently.
+      if (supervisorForm && requestedIds.includes("87673bd2-5151-4f8b-95e9-dba4f2a11045") &&
+          !unitsRows.some(unit => String(unit.id) === "87673bd2-5151-4f8b-95e9-dba4f2a11045")) {
+        const adminResponse = await fetch(
+          SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&id=eq.87673bd2-5151-4f8b-95e9-dba4f2a11045&is_active=eq.true&limit=1",
+          {
+            headers: {
+              apikey: SUPABASE_PUBLISHABLE_KEY,
+              Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+              Accept: "application/json"
+            }
+          }
+        );
+        const adminRows = await adminResponse.json().catch(() => []);
+        if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
+      }
+      const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
       const requestedUnits = activeUnits
         .filter(unit => requestedIds.includes(String(unit.id)))
         .map(unit => {
