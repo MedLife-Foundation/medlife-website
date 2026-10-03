@@ -21,6 +21,27 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 @media print{header,.hero,.footer,.confirmation-actions{display:none!important}body{background:#fff}.wrap{width:100%}.confirmation{padding:0}.id-card{box-shadow:none;border:1px solid #d9dde5}.id-card-top{background:#fff!important;color:#151d36!important}.id-status{border:1px solid #f0cf9d}.confirm-section,.confirmation-note,.confirm-thanks{break-inside:avoid}}
 
 @media(max-width:800px){.unit-choices{grid-template-columns:repeat(2,minmax(0,1fr)}}@media(max-width:650px){.grid,.choice-grid,.unit-card-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.unit-choices{grid-template-columns:1fr}.card{padding:19px}.nav{min-height:64px}.logo{height:42px}.hero{padding-top:36px}}
+
+/* Membership form & receipt visual system */
+:root{--surface:#fff;--surface2:#f8fafc;--ink:#18223b;--sub:#667085;--accent:#e83255;--accent-soft:#fff1f4;--border:#e7ebf2;--shadow:0 14px 45px rgba(24,34,59,.08)}
+body{background:linear-gradient(180deg,#f9fbfd 0%,#f5f7fa 100%)}
+.wrap{width:min(1120px,calc(100% - 32px))}
+header{backdrop-filter:blur(10px);background:rgba(255,255,255,.94)}
+.hero{padding:42px 0 22px}.hero .badge{box-shadow:0 4px 16px rgba(232,50,85,.08)}.hero h1{letter-spacing:-.4px}.hero p{max-width:760px}
+.card{padding:30px;border-radius:22px;box-shadow:var(--shadow);border-color:#e3e8ef}
+.note{position:relative;padding:16px 18px 16px 20px;margin-bottom:24px;background:linear-gradient(135deg,#fff9ef,#fffdf9);border-color:#f5d7a8}.note:before{content:"";position:absolute;right:0;top:10px;bottom:10px;width:4px;border-radius:4px;background:#e9a23b}
+.progress{height:7px;margin:0 0 28px;background:#eef1f5}.progress span{background:linear-gradient(90deg,#e83255,#ff7185)}
+.section{margin:0 0 18px;padding:18px 0 4px;border-bottom:1px solid #eef1f5}.section:first-child{padding-top:0}.section h2{font-size:19px;letter-spacing:-.2px}.section p{font-size:11px;margin-top:3px}
+.grid{gap:16px}.field{gap:8px}.field label{font-size:12px}.help{padding-inline:2px}
+input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;background:#fff;transition:border-color .18s,box-shadow .18s,transform .18s}.field textarea{min-height:120px}.choice-grid{gap:10px}.choice{min-height:48px;align-items:center;padding:12px 13px;border-color:#e1e6ed;background:#fafbfd;transition:.18s}.choice:hover,.unit-choice:hover{border-color:#ffb9c5;background:#fff7f9}.choice input,.unit-choice input{flex:0 0 auto}
+.units{gap:16px}.unit-group{padding:16px;border-radius:18px;background:#fbfcfe;border-color:#e2e7ee}.unit-group h3{font-size:13px;margin-bottom:12px}.unit-choices{gap:10px}.unit-choice{min-height:48px;align-items:center;padding:12px;border-radius:13px;transition:.18s}.unit-choice:has(input:checked){border-color:#f28da0;background:#fff2f5;box-shadow:0 4px 14px rgba(232,50,85,.07)}
+.unit-details{gap:14px;margin-top:16px}.unit-card{padding:18px;border-radius:18px;background:linear-gradient(180deg,#fffafb,#fff);border-color:#f4cbd3;box-shadow:0 7px 22px rgba(232,50,85,.045)}.unit-card-head{padding-bottom:11px;border-bottom:1px solid #f2e5e8;margin-bottom:15px}.unit-card-head strong{font-size:14px}.unit-card-grid{gap:14px}
+.actions{margin-top:28px;padding-top:20px;border-top:1px solid #eef1f5}.btn{min-height:48px}.btn-primary{box-shadow:0 8px 20px rgba(232,50,85,.18)}
+.status{margin-top:18px}
+.confirmation{padding:16px 0 54px}.id-card{border-radius:24px;box-shadow:0 22px 65px rgba(24,34,59,.11);border-color:#dde3eb}.id-card-top{padding:24px 28px;background:linear-gradient(135deg,#151d36 0%,#263150 100%)}.id-brand strong{font-size:16px;line-height:1.6}.id-brand span{font-size:10px;margin-top:4px}.id-status{background:#fff5e8;border:1px solid #f4d29f;color:#865014}
+.id-card-main{padding:26px 28px;grid-template-columns:160px 1fr;gap:26px}.id-photo{padding:17px;border-radius:18px;background:linear-gradient(180deg,#fafbfc,#fff);box-shadow:inset 0 0 0 1px #f0f2f5}.id-initials{width:88px;height:88px;margin-bottom:11px}.id-meta{gap:11px}.id-meta>div{min-height:72px;padding:12px 13px;border-radius:13px;background:#fcfdff}.id-meta>div:last-child{border-color:#f4b8c4;background:#fff5f7}.id-meta>div:last-child strong{color:var(--accent);font-size:14px}
+.confirmation-note{margin:0 28px 0;padding:16px 18px;background:#f0faf6;border-color:#c8ebdc;color:#145f49;border-radius:14px}.confirm-section{padding:24px 28px}.confirm-section h3{font-size:15px}.confirm-grid{gap:11px}.confirm-item{min-height:62px;padding:11px 13px;border-radius:13px;background:#fcfdff}.confirm-unit{padding:14px;border-radius:14px}.confirm-thanks{padding:26px 28px;background:#fafbfd}.confirm-actions{padding:24px 28px 30px}
+@media(max-width:650px){.wrap{width:min(100% - 20px,1120px)}.hero{padding:30px 0 16px}.hero h1{font-size:28px}.card{padding:17px;border-radius:18px}.section{padding-top:16px}.unit-card{padding:14px}.actions{margin-top:22px}.btn-primary{min-width:100%}.btn-secondary{width:100%;text-align:center}.confirmation{padding-top:8px}.id-card{border-radius:18px}.id-card-top{padding:18px 16px;flex-direction:column;gap:12px}.id-brand{align-items:flex-start}.id-brand img{height:38px}.id-brand strong{font-size:13px}.id-card-main{padding:18px 16px;grid-template-columns:1fr;gap:15px}.id-photo{display:grid;grid-template-columns:72px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:right}.id-initials{width:64px;height:64px;grid-row:1/3;margin:0}.id-photo strong{font-size:13px}.id-photo span{margin-top:0!important}.id-meta{grid-template-columns:1fr 1fr;gap:9px}.id-meta>div{min-height:68px}.confirmation-note{margin:0 16px;padding:14px}.confirm-section{padding:19px 16px}.confirm-grid{grid-template-columns:1fr}.confirm-actions{padding:20px 16px 22px}.confirm-thanks{padding:22px 16px}}
 </style>
 </head>
 <body>
@@ -30,7 +51,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 <div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لإعادة تسجيل بيانات عضويتهم في قاعدة البيانات الجديدة. لا تحتاج إلى إنشاء حساب الآن؛ بعد اعتماد العضوية يمكن إنشاء الحساب من المنصة.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
-<div class="actions"><button class="btn btn-primary" id="submit" type="submit">إرسال بيانات العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
+<div class="actions"><button class="btn btn-primary" id="submit" type="submit">إرسال طلب تجديد العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
@@ -393,7 +414,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     }).join("");
     confirmation.innerHTML='<div class="id-card">'+
       '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>بطاقة استلام وتجديد العضوية</span></div></div><div class="id-status">قيد المراجعة</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(values.full_name))+'</div><strong>'+esc(values.full_name||"")+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال طلب العضوية</span></div><div class="id-meta">'+
+      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(values.full_name))+'</div><strong>'+esc(values.full_name||"")+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال طلب تجديد العضوية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>حالة الطلب</span><strong>قيد المراجعة</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
