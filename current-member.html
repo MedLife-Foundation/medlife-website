@@ -83,13 +83,15 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       const roleLeft=isSupervisorForm()?((roleContinuingValue==="true")?"":get("unit_role_left")):(continuing?"":get("unit_left"));
       details[id]={
         role:get("unit_role")||"volunteer",
+        senior_management_position:get("senior_management_position"),
         role_started_on:roleStarted,
         role_continuing:roleContinuing,
         role_left_on:roleLeft,
         joined_on:joined,
         continuing,
         left_on:continuing?"":get("unit_left"),
-        notes:get("unit_notes")
+        notes:get("unit_notes"),
+        seniorManagementPosition:get("senior_management_position")
       };
     });
     out.current_unit_details=details;
@@ -186,9 +188,9 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         const roleOptionsHtml='<div class="field'+(isAdmin?" full":"")+'"><label>'+roleLabel+' <span class="req">*</span></label><select name="'+roleName+'_'+esc(id)+'">'+options+'</select></div>';
         return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u?.unit_type))+'</span></div><div class="unit-card-grid">'+
           roleOptionsHtml+
-          '<div class="field"><label>تاريخ بدء هذا الدور <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||"")+'"></div>'+
-          '<div class="field"><label>هل ما زلت تشغل هذا الدور؟ <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا الدور</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى هذا الدور</option></select></div>'+
-          '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>تاريخ انتهاء الدور <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
+          '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||"")+'"></div>'+
+          '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا الدور</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى هذا الدور</option></select></div>'+
+          '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
           '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(d.joined||"")+'"></div>'+
           '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.continuing==="true"?" selected":"")+' >نعم، ما زلت مستمراً</option><option value="false"'+(d.continuing==="false"?" selected":"")+' >لا، تركتها</option></select></div>'+
           '<div class="field '+(d.continuing==="false"?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(d.left||"")+'"></div>'+
