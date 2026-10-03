@@ -491,8 +491,26 @@ export async function onRequestPost({ request }) {
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
       }
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
-      const requestedUnits = activeUnits
-        .filter(unit => requestedIds.includes(String(unit.id)))
+      // Validate the exact submitted IDs directly. This avoids rejecting a valid
+      // supervisor-only unit such as General Administration because the broader
+      // public unit query is filtered differently.
+      const requestedUnitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&is_active=eq.true&id=in.(" + requestedIds.map(encodeURIComponent).join(",") + ")",
+        {
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const exactUnitRows = await requestedUnitsResponse.json().catch(() => []);
+      const exactUnits = Array.isArray(exactUnitRows) ? exactUnitRows : [];
+      const validExactUnits = exactUnits.filter(unit =>
+        ["cell","department","field_team"].includes(String(unit.unit_type)) ||
+        (supervisorForm && String(unit.unit_type) === "other")
+      );
+      const requestedUnits = validExactUnits
         .map(unit => {
           const raw = requestedUnitDetails[String(unit.id)];
           const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
@@ -502,7 +520,6 @@ export async function onRequestPost({ request }) {
           const leftOn = normalizeDate(detail.left_on);
           let roleStartedOn = normalizeDate(detail.role_started_on);
           let roleContinuing = detail.role_continuing === true;
-          let roleLeftOn = normalizeDate(detail.role_left_on);
           const roleContinuingProvided = Object.prototype.hasOwnProperty.call(detail, "role_continuing");
           const notes = cleanText(detail.notes, 1500);
           const seniorManagementPosition = cleanText(detail.senior_management_position, 120);
@@ -513,7 +530,6 @@ export async function onRequestPost({ request }) {
             role = "volunteer";
             roleStartedOn = joinedOn;
             roleContinuing = continuing;
-            roleLeftOn = continuing ? null : leftOn;
           }
 
           return {
@@ -528,7 +544,7 @@ export async function onRequestPost({ request }) {
             role_started_on: roleStartedOn,
             role_continuing: roleContinuing,
             role_continuing_provided: supervisorForm ? roleContinuingProvided : true,
-            role_left_on: roleLeftOn,
+            role_left_on: supervisorForm ? normalizeDate(detail.role_left_on) : (continuing ? null : leftOn),
             notes
           };
         });
