@@ -51,6 +51,11 @@ const RESOURCES = {
     table: "admin_form_definitions",
     select: "id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,settings",
     order: "updated_at.desc"
+  },
+  birthdays: {
+    table: "public_site_birthdays",
+    select: "volunteer_id,display_name,birth_month,birth_day",
+    order: "display_name.asc"
   }
 };
 
@@ -111,6 +116,21 @@ async function fetchResource(resource, url) {
     query.set("status", "eq.published");
     query.set("is_public", "eq.true");
     query.set("limit", "1");
+  }
+  if (resource === "birthdays") {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Damascus",
+      month: "numeric",
+      day: "numeric"
+    }).formatToParts(now);
+    const month = parts.find(part => part.type === "month")?.value;
+    const day = parts.find(part => part.type === "day")?.value;
+    if (month && day) {
+      query.set("birth_month", "eq." + month);
+      query.set("birth_day", "eq." + day);
+    }
+    query.set("limit", "20");
   }
   if (resource === "membership_renewal_form") {
     query.set("form_kind", "eq.membership_renewal");
@@ -557,7 +577,7 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
       const allowedUnitRoles = supervisorForm
-        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor"]
+        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
         : ["volunteer"];
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
@@ -755,7 +775,7 @@ export async function onRequestPost({ request }) {
         success: true,
         submission_id: submissionId,
         membership_number: receipt?.success ? receipt.membership_number : null,
-        message: "تم استلام طلب تجديد العضوية وسيتم تدقيقه من فريق ميدلايف."
+        message: "تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء ميدلايف."
       }, 201);
     } else {
       const recruitmentResponse = await fetch(

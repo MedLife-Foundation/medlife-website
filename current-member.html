@@ -48,14 +48,14 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
 <section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Membership</div><h1 id="title">تجديد العضوية</h1><p id="description">نقوم بإعادة بناء قاعدة بيانات MedLife، لذلك نحتاج إلى معلومات محدثة ودقيقة تساعدنا في إدارة العضوية والخلايا والأقسام واكتشاف المواهب.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لإعادة تسجيل بيانات عضويتهم في قاعدة البيانات الجديدة. لا تحتاج إلى إنشاء حساب الآن؛ بعد اعتماد العضوية يمكن إنشاء الحساب من المنصة.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لتحديث بيانات عضويتهم. بعد الإرسال تُسجّل البيانات مباشرة في قاعدة العضوية الرسمية، ولا تحتاج إلى انتظار موافقة إدارية.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
-<div class="actions"><button class="btn btn-primary" id="submit" type="submit">إرسال طلب تجديد العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
+<div class="actions"><button class="btn btn-primary" id="submit" type="submit">تسجيل تجديد العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">تتم مراجعة البيانات من فريق MedLife قبل اعتمادها في قاعدة العضوية الرسمية.</div></main>
+<div class="footer" id="footerNote">يتم تحديث سجل العضوية مباشرة بعد الإرسال الناجح، مع إمكانية التصحيح الإداري للمستخدمين المخولين.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -72,7 +72,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     {value:"volunteer",label:"متطوع / عضو"},
     {value:"assistant_supervisor",label:"مساعد مشرف"},
     {value:"supervisor",label:"مشرف"},
-    {value:"general_supervisor",label:"مشرف عام"}
+    {value:"general_supervisor",label:"مشرف عام"},
+    {value:"content_writer",label:"كاتب محتوى"}
   ];
   const roleLabels=Object.fromEntries(roleOptions.map(x=>[x.value,x.label]));
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
@@ -313,7 +314,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         const isAdmin=String(unit?.unit_type)==="other";
         if(isAdmin){
           if(!d.senior_management_position)return"يرجى تحديد المنصب في الإدارة العامة.";
-        }else if(!["volunteer","assistant_supervisor","supervisor","general_supervisor"].includes(d.role)){
+        }else if(!["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"].includes(d.role)){
           return"يرجى تحديد دورك داخل «"+unitName+"».";
         }
         if(!d.role_started_on)return isAdmin?"يرجى تحديد تاريخ بدء المنصب.":"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
@@ -413,12 +414,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       return'<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u?.unit_type))+'</span></div><div class="help" style="font-size:11px">'+esc(roleLine)+'</div></div>';
     }).join("");
     confirmation.innerHTML='<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>بطاقة استلام وتجديد العضوية</span></div></div><div class="id-status">قيد المراجعة</div></div>'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>بطاقة تجديد العضوية</span></div></div><div class="id-status">تم التحديث</div></div>'+
       '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(values.full_name))+'</div><strong>'+esc(values.full_name||"")+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال طلب تجديد العضوية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
-      '<div><span>حالة الطلب</span><strong>قيد المراجعة</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
+      '<div><span>حالة الطلب</span><strong>تم التحديث</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم استلام طلب تجديد عضويتك بنجاح. هذا الإيصال يثبت استلام طلب التجديد، ورقم العضوية الظاهر فيه هو رقم عضويتك المحجوز لهذا الطلب ويستمر معك عند اعتماد التجديد.</div>'+
+      '<div class="confirmation-note">تم تسجيل تجديد عضويتك بنجاح وتحديث بياناتك في قاعدة عضوية MedLife مباشرة. رقم العضوية الظاهر هو رقمك المسجل، ويمكن للفريق المخول تصحيح أي معلومة تحتاج إلى تحديث.</div>'+
       '<section class="confirm-section"><h3>البيانات الشخصية والتواصل</h3><div class="confirm-grid">'+items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(formatValue(v)||"—")+'</strong></div>').join("")+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>البيانات الخاصة بكل خلية أو قسم أو فريق تم اختياره في الطلب.</p><div class="confirm-units">'+unitCards+'</div></section>'+
       '<section class="confirm-section"><h3>معلومات الطوارئ</h3><div class="confirm-grid">'+[
@@ -428,7 +429,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         ["رقم بديل",values.emergency_contact_alt_phone],
         ["ملاحظات الطوارئ",values.emergency_contact_notes]
       ].filter(([,v])=>v!==undefined&&String(v).trim()!=="").map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(formatValue(v)||"—")+'</strong></div>').join("")+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتجديد عضويتك</h3><p>سيقوم فريق MedLife بمراجعة المعلومات والتأكد منها قبل اعتماد التجديد في قاعدة العضوية الرسمية.</p></div>'+
+      '<div class="confirm-thanks"><h3>شكراً لتجديد عضويتك ❤️</h3><p>تم تحديث عضويتك مباشرة في قاعدة أعضاء MedLife. في حال اكتشفت لاحقاً أي معلومة تحتاج إلى تصحيح، يمكن للمستخدمين المخولين تعديل السجل من قاعدة بيانات الفريق.</p></div>'+
       '<div class="confirm-actions"><button type="button" class="btn btn-primary" id="printConfirmation">طباعة البطاقة</button><a class="btn btn-secondary" href="join-options.html">العودة</a></div>'+
       '</div>';
     confirmation.classList.remove("hidden");
@@ -464,7 +465,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(error){setStatus("err",error);return;}
     const data=collect();
     submit.disabled=true;
-    setStatus("ok","جارٍ إرسال بيانات العضوية...");
+    setStatus("ok","جارٍ تسجيل تجديد العضوية مباشرة...");
     try{
       const r=await fetch("/api/management",{
         method:"POST",
@@ -473,7 +474,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       });
       const p=await r.json();
       if(!r.ok||!p.success)throw new Error(p.error||"تعذر إرسال الطلب.");
-      setStatus("ok","تم استلام بياناتك بنجاح.");
+      setStatus("ok","تم تسجيل وتجديد عضويتك بنجاح.");
       renderConfirmation(data,p.submission_id,p.membership_number);
       window.scrollTo({top:0,behavior:"smooth"});
     }catch(e){
