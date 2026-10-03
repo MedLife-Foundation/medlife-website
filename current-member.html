@@ -81,9 +81,12 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       const roleContinuingValue=get("unit_role_continuing");
       const roleContinuing=isSupervisorForm()?roleContinuingValue==="true":continuing;
       const roleLeft=isSupervisorForm()?((roleContinuingValue==="true")?"":get("unit_role_left")):(continuing?"":get("unit_left"));
+      const unit=units.find(u=>String(u.id)===id);
+      const seniorPosition=get("senior_management_position");
+      if(isSupervisorForm()&&String(unit?.unit_type)==="other"&&seniorPosition)out.senior_management_position=seniorPosition;
       details[id]={
         role:get("unit_role")||"volunteer",
-        senior_management_position:get("senior_management_position"),
+        senior_management_position:seniorPosition,
         role_started_on:roleStarted,
         role_continuing:roleContinuing,
         role_left_on:roleLeft,
