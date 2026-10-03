@@ -145,7 +145,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       const rows=units.filter(u=>u.unit_type===g[0]);
       if(!rows.length)return"";
       return'<div class="unit-group"><h3>'+g[1]+'</h3><div class="unit-choices">'+rows.map(u=>'<label class="unit-choice"><input type="checkbox" name="current_units" value="'+esc(u.id)+'" data-unit="'+esc(u.id)+'"><span>'+esc(u.name_ar||u.name_en)+'</span></label>').join("")+'</div></div>';
-    }).join("")+'</div><div id="unitDetails" class="unit-details"></div>';
+    }).join("")+'</div><div id="unitDetails" class="unit-details"></div><div id="seniorManagementPositionHost" class="unit-details"></div>';
   }
 
   function renderField(f){
