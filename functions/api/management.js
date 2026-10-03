@@ -623,6 +623,35 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.some(unit => unit.role_left_on && unit.left_on && unit.role_left_on > unit.left_on)) {
         return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
       }
+      const contentWritingDepartmentSelected = requestedUnits.some(unit =>
+        unit.unit_type === "department" &&
+        unit.name_ar === "كتابة محتوى" &&
+        unit.role === "content_writer"
+      );
+      const contentCellNames = new Set([
+        "Plasma Cell",
+        "Neuron Cell",
+        "Astrocyte Cell",
+        "Leukocyte Cell",
+        "Stem Cells",
+        "Red Blood Cell",
+        "Heart Cell",
+        "المدونة الطبية"
+      ]);
+      if (supervisorForm && contentWritingDepartmentSelected) {
+        const supervisedContentCells = requestedUnits.filter(unit =>
+          unit.unit_type === "cell" &&
+          contentCellNames.has(unit.name_ar) &&
+          unit.role === "supervisor"
+        );
+        if (!supervisedContentCells.length) {
+          return json({
+            success: false,
+            error: "عند اختيار «كتابة محتوى» يجب تحديد خلية محتوى واحدة على الأقل تكون مشرفاً عليها."
+          }, 400);
+        }
+      }
+
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
       const overallContinuing = data.continuing_as_volunteer === true;
       if (overallContinuing !== hasContinuingUnit) {
