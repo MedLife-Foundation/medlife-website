@@ -740,9 +740,21 @@ export async function onRequestPost({ request }) {
         console.error("Membership renewal write failed", response.status, errorText);
         return json({ success: false, error: "تعذر تسجيل طلب تجديد العضوية." }, 502);
       }
+      const receiptResponse = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_membership_renewal_receipt", {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({p_submission_id: submissionId, p_email: cleanText(data.email, 250).toLowerCase()})
+      });
+      const receipt = await receiptResponse.json().catch(() => ({}));
       return json({
         success: true,
         submission_id: submissionId,
+        membership_number: receipt?.success ? receipt.membership_number : null,
         message: "تم استلام طلب تجديد العضوية وسيتم تدقيقه من فريق ميدلايف."
       }, 201);
     } else {
