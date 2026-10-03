@@ -119,7 +119,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     if(["full_name","father_name","mother_name","national_id","country","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية","البيانات الأساسية ووسائل التواصل"];
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو في حال تعذر التواصل معك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
-    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك داخل MedLife","سجل الانضمام والخلايا والأقسام والأدوار والاختصاصات التي تقدمها."];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","senior_management_position","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك داخل MedLife","سجل الانضمام والخلايا والأقسام والأدوار والاختصاصات التي تقدمها."];
     if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife"];
     if(k==="field_available_days")return["التوفر للعمل الميداني","تظهر هذه الإجابة عند اختيار فريق ميداني."];
     if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت"];
@@ -150,7 +150,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
   function renderField(f){
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
-    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position")return"";
+    if(f.field_key==="current_unit_details")return"";
     const req=f.required?'<span class="req"> *</span>':"";
     const help=f.help_ar?'<div class="help">'+esc(f.help_ar)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
@@ -173,12 +173,6 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         notes:get("unit_notes")
       };
     });
-    const seniorPositionValue=form.querySelector('[name="senior_management_position"]')?.value||"";
-    const seniorPositionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
-    const seniorPositionOptions=Array.isArray(seniorPositionField?.options)?seniorPositionField.options:[];
-    const seniorPositionSelect=u?.unit_type==="other"
-      ? '<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select data-field="senior_management_position" name="senior_management_position"><option value="">اختر المنصب</option>'+seniorPositionOptions.map(o=>'<option value="'+esc(o.value)+'"'+(String(o.value)===String(seniorPositionValue)?" selected":"")+'>'+esc(o.label_ar||o.label_en||o.value)+'</option>').join("")+'</select><div class="help">اختر المنصب الإداري الرسمي الذي تشغله في الإدارة العامة.</div></div>'
-      : "";
     const ids=selectedIds();
     detailsHost.innerHTML=ids.map(id=>{
       const u=units.find(x=>String(x.id)===id),d=prev[id]||{};
@@ -186,7 +180,6 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         const options='<option value="">اختر الدور</option>'+roleOptions.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("");
         return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u?.unit_type))+'</span></div><div class="unit-card-grid">'+
           '<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>'+
-          seniorPositionSelect+
           '<div class="field"><label>تاريخ بدء هذا الدور <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||"")+'"></div>'+
           '<div class="field"><label>هل ما زلت تشغل هذا الدور؟ <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا الدور</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى هذا الدور</option></select></div>'+
           '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>تاريخ انتهاء الدور <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
