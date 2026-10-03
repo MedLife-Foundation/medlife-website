@@ -150,7 +150,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
   function renderField(f){
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
-    if(f.field_key==="current_unit_details")return"";
+    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position")return"";
     const req=f.required?'<span class="req"> *</span>':"";
     const help=f.help_ar?'<div class="help">'+esc(f.help_ar)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
