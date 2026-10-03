@@ -40,6 +40,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
   const qs=new URLSearchParams(location.search);
   const formKey=(qs.get("form_key")==="membership_renewal_supervisor"||qs.get("form")==="supervisor")?"membership_renewal_supervisor":"membership_renewal";
   const $=id=>document.getElementById(id);
+  const escSel=v=>String(v??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"');
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
 
@@ -74,7 +75,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     const details={};
     document.querySelectorAll(".unit-card").forEach(card=>{
       const id=String(card.dataset.unitId);
-      const get=n=>card.querySelector('[name="'+n+'_'+CSS.escape(id)+'"]')?.value||"";
+      const get=n=>card.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
       const joined=get("unit_joined");
       const continuing=get("unit_continuing")==="true";
       const roleStarted=get("unit_role_started")||(!isSupervisorForm()?joined:"");
@@ -166,7 +167,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     const detailsHost=$("unitDetails"),prev={};
     document.querySelectorAll(".unit-card").forEach(card=>{
       const id=String(card.dataset.unitId);
-      const get=n=>card.querySelector('[name="'+n+'_'+CSS.escape(id)+'"]')?.value||"";
+      const get=n=>card.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
       prev[id]={
         role:get("unit_role")||"volunteer",
         roleStarted:get("unit_role_started"),
@@ -214,16 +215,16 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     detailsHost.querySelectorAll('select[name^="unit_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_continuing_","");
       const card=el.closest(".unit-card");
-      const w=detailsHost.querySelector('[data-left-wrap="'+CSS.escape(id)+'"]');
+      const w=detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]');
       if(w)w.classList.toggle("hidden",el.value!=="false");
       if(!isSupervisorForm()&&card){
-        const joined=card.querySelector('[name="unit_joined_'+CSS.escape(id)+'"]');
-        const roleStarted=card.querySelector('[name="unit_role_started_'+CSS.escape(id)+'"]');
-        const roleContinuing=card.querySelector('[name="unit_role_continuing_'+CSS.escape(id)+'"]');
-        const roleLeft=card.querySelector('[name="unit_role_left_'+CSS.escape(id)+'"]');
+        const joined=card.querySelector('[name="unit_joined_'+escSel(id)+'"]');
+        const roleStarted=card.querySelector('[name="unit_role_started_'+escSel(id)+'"]');
+        const roleContinuing=card.querySelector('[name="unit_role_continuing_'+escSel(id)+'"]');
+        const roleLeft=card.querySelector('[name="unit_role_left_'+escSel(id)+'"]');
         if(roleStarted)roleStarted.value=joined?.value||"";
         if(roleContinuing)roleContinuing.value=el.value==="true"?"true":el.value==="false"?"false":"";
-        if(roleLeft)roleLeft.value=el.value==="false"?(card.querySelector('[name="unit_left_'+CSS.escape(id)+'"]')?.value||""):"";
+        if(roleLeft)roleLeft.value=el.value==="false"?(card.querySelector('[name="unit_left_'+escSel(id)+'"]')?.value||""):"";
       }
       updateProgress();
       applyVisibility();
@@ -231,7 +232,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     detailsHost.querySelectorAll('input[name^="unit_joined_"]').forEach(el=>el.addEventListener("change",()=>{
       if(!isSupervisorForm()){
         const id=el.name.replace("unit_joined_","");
-        const roleStarted=detailsHost.querySelector('[name="unit_role_started_'+CSS.escape(id)+'"]');
+        const roleStarted=detailsHost.querySelector('[name="unit_role_started_'+escSel(id)+'"]');
         if(roleStarted)roleStarted.value=el.value;
       }
       updateProgress();
@@ -239,14 +240,14 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     detailsHost.querySelectorAll('input[name^="unit_left_"]').forEach(el=>el.addEventListener("change",()=>{
       if(!isSupervisorForm()){
         const id=el.name.replace("unit_left_","");
-        const roleLeft=detailsHost.querySelector('[name="unit_role_left_'+CSS.escape(id)+'"]');
+        const roleLeft=detailsHost.querySelector('[name="unit_role_left_'+escSel(id)+'"]');
         if(roleLeft)roleLeft.value=el.value;
       }
       updateProgress();
     }));
     detailsHost.querySelectorAll('select[name^="unit_role_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_role_continuing_","");
-      const w=detailsHost.querySelector('[data-role-left-wrap="'+CSS.escape(id)+'"]');
+      const w=detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]');
       if(w)w.classList.toggle("hidden",el.value!=="false");
       updateProgress();
     }));
@@ -296,11 +297,11 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         }
         if(!d.role_started_on)return isAdmin?"يرجى تحديد تاريخ بدء المنصب.":"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
         if(d.role_started_on<d.joined_on)return isAdmin?"تاريخ بدء المنصب لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».":"تاريخ بدء الدور لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».";
-        if(!["true","false"].includes(String(form.querySelector('[name="unit_role_continuing_'+CSS.escape(id)+'"]')?.value||"")))return"يرجى تحديد حالة استمرار الدور داخل «"+unitName+"».";
+        if(!["true","false"].includes(String(form.querySelector('[name="unit_role_continuing_'+escSel(id)+'"]')?.value||"")))return"يرجى تحديد حالة استمرار الدور داخل «"+unitName+"».";
         if(d.role_continuing===false&&!d.role_left_on)return"يرجى تحديد تاريخ انتهاء الدور داخل «"+unitName+"».";
         if(d.role_left_on&&(d.role_left_on<d.role_started_on||d.role_left_on>today))return"تاريخ انتهاء الدور داخل «"+unitName+"» غير صالح.";
       }
-      if(!["true","false"].includes(String(form.querySelector('[name="unit_continuing_'+CSS.escape(id)+'"]')?.value||"")))return"يرجى تحديد ما إذا كنت ما زلت عضواً في «"+unitName+"».";
+      if(!["true","false"].includes(String(form.querySelector('[name="unit_continuing_'+escSel(id)+'"]')?.value||"")))return"يرجى تحديد ما إذا كنت ما زلت عضواً في «"+unitName+"».";
       if(d.continuing===false&&!d.left_on)return"يرجى تحديد تاريخ مغادرة «"+unitName+"».";
       if(d.left_on&&(d.left_on<d.joined_on||d.left_on>today))return"تاريخ مغادرة «"+unitName+"» غير صالح.";
       if(isSupervisorForm()&&d.role_continuing===true&&d.continuing===false)return"لا يمكن أن يستمر الدور بعد انتهاء العضوية في «"+unitName+"».";
