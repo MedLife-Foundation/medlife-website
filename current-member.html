@@ -283,9 +283,15 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
       if(isSupervisorForm()){
-        if(!["volunteer","assistant_supervisor","supervisor","general_supervisor"].includes(d.role))return"يرجى تحديد دورك داخل «"+unitName+"».";
-        if(!d.role_started_on)return"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
-        if(d.role_started_on<d.joined_on)return"تاريخ بدء الدور لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».";
+        const unit=units.find(u=>String(u.id)===id);
+        const isAdmin=String(unit?.unit_type)==="other";
+        if(isAdmin){
+          if(!d.senior_management_position)return"يرجى تحديد المنصب في الإدارة العامة.";
+        }else if(!["volunteer","assistant_supervisor","supervisor","general_supervisor"].includes(d.role)){
+          return"يرجى تحديد دورك داخل «"+unitName+"».";
+        }
+        if(!d.role_started_on)return isAdmin?"يرجى تحديد تاريخ بدء المنصب.":"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
+        if(d.role_started_on<d.joined_on)return isAdmin?"تاريخ بدء المنصب لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».":"تاريخ بدء الدور لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».";
         if(!["true","false"].includes(String(form.querySelector('[name="unit_role_continuing_'+CSS.escape(id)+'"]')?.value||"")))return"يرجى تحديد حالة استمرار الدور داخل «"+unitName+"».";
         if(d.role_continuing===false&&!d.role_left_on)return"يرجى تحديد تاريخ انتهاء الدور داخل «"+unitName+"».";
         if(d.role_left_on&&(d.role_left_on<d.role_started_on||d.role_left_on>today))return"تاريخ انتهاء الدور داخل «"+unitName+"» غير صالح.";
