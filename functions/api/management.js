@@ -486,8 +486,11 @@ export async function onRequestPost({ request }) {
           let roleLeftOn = normalizeDate(detail.role_left_on);
           const roleContinuingProvided = Object.prototype.hasOwnProperty.call(detail, "role_continuing");
           const notes = cleanText(detail.notes, 1500);
+          const seniorManagementPosition = cleanText(detail.senior_management_position, 120);
 
-          if (!supervisorForm) {
+          if (supervisorForm && String(unit.unit_type) === "other") {
+            role = "volunteer";
+          } else if (!supervisorForm) {
             role = "volunteer";
             roleStartedOn = joinedOn;
             roleContinuing = continuing;
@@ -499,6 +502,7 @@ export async function onRequestPost({ request }) {
             name_ar: cleanText(unit.name_ar || unit.name_en, 200),
             unit_type: cleanText(unit.unit_type, 50),
             role,
+            senior_management_position: seniorManagementPosition,
             joined_on: joinedOn,
             continuing,
             left_on: leftOn,
@@ -517,6 +521,12 @@ export async function onRequestPost({ request }) {
         : ["volunteer"];
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
+      }
+      if (supervisorForm) {
+        const adminUnits = requestedUnits.filter(unit => unit.unit_type === "other");
+        if (adminUnits.some(unit => !unit.senior_management_position)) {
+          return json({ success: false, error: "يرجى تحديد المنصب في الإدارة العامة." }, 400);
+        }
       }
       const today = new Date().toISOString().slice(0, 10);
       if (requestedUnits.some(unit => !unit.joined_on)) {
@@ -614,6 +624,7 @@ export async function onRequestPost({ request }) {
         requested_unit_roles: Object.fromEntries(requestedUnits.map(unit => [unit.id, unit.role])),
         requested_unit_details: Object.fromEntries(requestedUnits.map(unit => [unit.id, {
           role: unit.role,
+          senior_management_position: unit.senior_management_position,
           role_started_on: unit.role_started_on,
           role_continuing: unit.role_continuing,
           role_left_on: unit.role_left_on,
@@ -633,7 +644,21 @@ export async function onRequestPost({ request }) {
         additional_notes: cleanText(data.additional_notes, 3000),
         declaration_accurate: true,
         privacy_consent: true,
-        form_data: {...dynamic.form_data, current_units: requestedUnits.map(unit => unit.id)},
+        form_data: {
+          ...dynamic.form_data,
+          current_units: requestedUnits.map(unit => unit.id),
+          current_unit_details: Object.fromEntries(requestedUnits.map(unit => [unit.id, {
+            role: unit.role,
+            senior_management_position: unit.senior_management_position,
+            role_started_on: unit.role_started_on,
+            role_continuing: unit.role_continuing,
+            role_left_on: unit.role_left_on,
+            joined_on: unit.joined_on,
+            continuing: unit.continuing,
+            left_on: unit.left_on,
+            notes: unit.notes
+          }]))
+        },
         form_schema: {
           ...dynamic.form_schema,
           fields: dynamic.form_schema.fields.map(field => field.field_key === "current_units"
