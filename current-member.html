@@ -6,6 +6,8 @@
 <title>تجديد عضوية عضو حالي | MedLife</title>
 <link rel="icon" href="logo.PNG">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <style>
 :root{--red:#e83255;--red2:#ff5a72;--navy:#151d36;--text:#243047;--muted:#667085;--line:#e5e9f0;--bg:#f6f8fb;--soft:#fbfcfe;--ok:#087653;--okbg:#effaf5;--err:#9f1c32;--errbg:#fff1f3}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#fff 0,#f6f8fb 55%,#fafbfc 100%);color:var(--text);font-family:Cairo,Arial,sans-serif}.wrap{width:min(1080px,calc(100% - 28px));margin:auto}
@@ -17,7 +19,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .unit-details{display:grid;gap:12px;margin-top:14px}.unit-card{border:1px solid #ffd9e1;border-radius:17px;background:#fffafb;padding:15px}.unit-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.unit-card-head strong{font-size:13px;color:var(--navy)}.unit-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.unit-card .notes{grid-column:1/-1}
 .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}button,.btn{border:0;border-radius:14px;padding:13px 22px;font:inherit;font-weight:900;cursor:pointer;text-decoration:none}.btn-primary{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;min-width:240px}.btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}button:disabled{opacity:.55;cursor:not-allowed}
 .status{display:none;margin-top:17px;padding:14px;border-radius:14px;text-align:center;font-size:12px;line-height:1.8}.status.show{display:block}.status.ok{background:var(--okbg);color:var(--ok);border:1px solid #bcebd9}.status.err{background:var(--errbg);color:var(--err);border:1px solid #ffd0d8}.hidden{display:none!important}.footer{text-align:center;color:#98a2b3;font-size:10px;padding-bottom:40px}
-.confirmation{padding:10px 0 50px}.id-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 70px rgba(21,29,54,.10);overflow:hidden}.id-card-top{padding:25px 28px;background:linear-gradient(135deg,#151d36,#263150);color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.id-brand{display:flex;align-items:center;gap:12px}.id-brand img{height:42px;width:auto;background:#fff;border-radius:10px;padding:4px}.id-brand strong{display:block;font-size:17px}.id-brand span{display:block;font-size:10px;opacity:.75;margin-top:2px}.id-status{padding:8px 12px;border-radius:999px;background:#fff3e6;color:#8b4b12;font-size:10px;font-weight:900;white-space:nowrap}.id-card-main{padding:24px 28px;display:grid;grid-template-columns:170px 1fr;gap:24px;align-items:start}.id-photo{border:1px solid var(--line);border-radius:20px;padding:18px;text-align:center;background:var(--soft)}.id-initials{width:92px;height:92px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#fff0f3;color:var(--red);font-size:28px;font-weight:900}.id-photo strong{display:block;color:var(--navy);font-size:14px;line-height:1.7}.id-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.id-meta>div,.confirm-item{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.id-meta span,.confirm-item span{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}.id-meta strong,.confirm-item strong{display:block;color:var(--navy);font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-word}.confirmation-note{margin:16px 28px 0;padding:15px 17px;border-radius:15px;background:#effaf5;color:#126047;border:1px solid #bcebd9;font-size:11px;line-height:1.9}.confirm-section{padding:22px 28px;border-top:1px solid var(--line)}.confirm-section h3{margin:0 0 5px;color:var(--navy);font-size:16px}.confirm-section>p{margin:0 0 14px;color:var(--muted);font-size:10px}.confirm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.confirm-grid .wide{grid-column:1/-1}.confirm-units{display:grid;gap:10px}.confirm-unit{border:1px solid #ffd9e1;border-radius:15px;background:#fffafb;padding:13px}.confirm-unit-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}.confirm-unit-head strong{font-size:12px;color:var(--navy)}.confirm-unit-head span{font-size:9px;color:var(--red);font-weight:900;background:#fff0f3;border-radius:999px;padding:5px 8px}.confirm-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:24px 28px 28px;border-top:1px solid var(--line)}.confirm-thanks{padding:24px 28px;border-top:1px solid var(--line);text-align:center;background:#fbfcfe}.confirm-thanks h3{margin:0 0 8px;color:var(--navy);font-size:19px}.confirm-thanks p{margin:0 auto;color:var(--muted);font-size:11px;line-height:2;max-width:760px}
+.confirmation{padding:10px 0 50px}.id-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 70px rgba(21,29,54,.10);overflow:hidden}.id-card-top{padding:25px 28px;background:linear-gradient(135deg,#151d36,#263150);color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.id-brand{display:flex;align-items:center;gap:12px}.id-brand img{height:42px;width:auto;background:#fff;border-radius:10px;padding:4px}.id-brand strong{display:block;font-size:17px}.id-brand span{display:block;font-size:10px;opacity:.75;margin-top:2px}.id-status{padding:8px 12px;border-radius:999px;background:#fff3e6;color:#8b4b12;font-size:10px;font-weight:900;white-space:nowrap}.id-card-main{padding:24px 28px;display:grid;grid-template-columns:170px 1fr;gap:24px;align-items:start}.id-photo{border:1px solid var(--line);border-radius:20px;padding:18px;text-align:center;background:var(--soft)}.id-initials{width:92px;height:92px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#fff0f3;color:var(--red);font-size:28px;font-weight:900}.id-photo strong{display:block;color:var(--navy);font-size:14px;line-height:1.7}.id-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.id-meta>div,.confirm-item{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.id-meta span,.confirm-item span{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}.id-meta strong,.confirm-item strong{display:block;color:var(--navy);font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-word}.confirmation-note{margin:16px 28px 0;padding:15px 17px;border-radius:15px;background:#effaf5;color:#126047;border:1px solid #bcebd9;font-size:11px;line-height:1.9}.confirm-section{padding:22px 28px;border-top:1px solid var(--line)}.confirm-section h3{margin:0 0 5px;color:var(--navy);font-size:16px}.confirm-section>p{margin:0 0 14px;color:var(--muted);font-size:10px}.confirm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.confirm-grid .wide{grid-column:1/-1}.confirm-units{display:grid;gap:10px}.confirm-unit{border:1px solid #ffd9e1;border-radius:15px;background:#fffafb;padding:13px}.confirm-unit-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}.confirm-unit-head strong{font-size:12px;color:var(--navy)}.confirm-unit-head span{font-size:9px;color:var(--red);font-weight:900;background:#fff0f3;border-radius:999px;padding:5px 8px}.confirm-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:24px 28px 28px;border-top:1px solid var(--line)}.download-btn{min-width:205px;background:#151d36;color:#fff}.download-btn.pdf{background:linear-gradient(135deg,#e83255,#ff7185)}.download-btn:disabled{opacity:.55;cursor:wait}.download-status{width:100%;text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.card-capture{background:#fff}.confirm-thanks{padding:24px 28px;border-top:1px solid var(--line);text-align:center;background:#fbfcfe}.confirm-thanks h3{margin:0 0 8px;color:var(--navy);font-size:19px}.confirm-thanks p{margin:0 auto;color:var(--muted);font-size:11px;line-height:2;max-width:760px}
 @media print{header,.hero,.footer,.confirmation-actions{display:none!important}body{background:#fff}.wrap{width:100%}.confirmation{padding:0}.id-card{box-shadow:none;border:1px solid #d9dde5}.id-card-top{background:#fff!important;color:#151d36!important}.id-status{border:1px solid #f0cf9d}.confirm-section,.confirmation-note,.confirm-thanks{break-inside:avoid}}
 
 @media(max-width:800px){.unit-choices{grid-template-columns:repeat(2,minmax(0,1fr)}}@media(max-width:650px){.grid,.choice-grid,.unit-card-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.unit-choices{grid-template-columns:1fr}.card{padding:19px}.nav{min-height:64px}.logo{height:42px}.hero{padding-top:36px}}
@@ -375,67 +377,173 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     return String(v??"").trim();
   }
 
+  function downloadName(name,extension){
+    const safe=String(name||"MedLife-Member").trim().replace(/[^\\p{L}\\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"MedLife-Member";
+    return "MedLife-Membership-Card-"+safe+"."+extension;
+  }
+
+  function fieldDisplayValue(field,value){
+    const options=Array.isArray(field?.options)?field.options:[];
+    const optionLabel=v=>{
+      const hit=options.find(o=>String(o.value)===String(v));
+      return hit?.label_ar||hit?.label_en||String(v);
+    };
+    if(Array.isArray(value))return value.map(optionLabel).join("، ");
+    if(field?.field_type==="boolean"||typeof value==="boolean")return value===true?"نعم":"لا";
+    return optionLabel(value);
+  }
+
+  function captureElement(){
+    return document.querySelector("[data-card-capture]");
+  }
+
+  async function makeCardCanvas(){
+    const el=captureElement();
+    if(!el)throw new Error("تعذر تجهيز بطاقة العضوية.");
+    if(typeof window.html2canvas!=="function")throw new Error("تعذر تحميل أداة الصورة. أعد تحميل الصفحة وحاول مرة أخرى.");
+    return window.html2canvas(el,{
+      backgroundColor:"#ffffff",
+      scale:2,
+      useCORS:true,
+      logging:false,
+      imageTimeout:15000
+    });
+  }
+
+  async function downloadCardImage(button){
+    const old=button.textContent;
+    button.disabled=true;
+    button.textContent="جارٍ تجهيز الصورة...";
+    try{
+      const canvas=await makeCardCanvas();
+      const link=document.createElement("a");
+      link.download=downloadName(document.querySelector("[data-card-name]")?.textContent,"png");
+      link.href=canvas.toDataURL("image/png");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }catch(e){
+      setStatus("err",e.message||"تعذر تحميل البطاقة كصورة.");
+    }finally{
+      button.disabled=false;
+      button.textContent=old;
+    }
+  }
+
+  async function downloadCardPdf(button){
+    const old=button.textContent;
+    button.disabled=true;
+    button.textContent="جارٍ تجهيز PDF...";
+    try{
+      const canvas=await makeCardCanvas();
+      const jspdfGlobal=window.jspdf;
+      if(!jspdfGlobal?.jsPDF)throw new Error("تعذر تحميل أداة PDF. أعد تحميل الصفحة وحاول مرة أخرى.");
+      const {jsPDF}=jspdfGlobal;
+      const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
+      const margin=8;
+      const pageWidth=pdf.internal.pageSize.getWidth()-margin*2;
+      const pageHeight=pdf.internal.pageSize.getHeight()-margin*2;
+      const ratio=pageWidth/canvas.width;
+      const slicePx=Math.max(1,Math.floor(pageHeight/ratio));
+      let offset=0,first=true;
+      while(offset<canvas.height){
+        const height=Math.min(slicePx,canvas.height-offset);
+        const slice=document.createElement("canvas");
+        slice.width=canvas.width;
+        slice.height=height;
+        const ctx=slice.getContext("2d");
+        if(!ctx)throw new Error("تعذر تجهيز صورة البطاقة.");
+        ctx.fillStyle="#fff";
+        ctx.fillRect(0,0,slice.width,slice.height);
+        ctx.drawImage(canvas,0,offset,canvas.width,height,0,0,canvas.width,height);
+        if(!first)pdf.addPage();
+        first=false;
+        pdf.addImage(slice.toDataURL("image/png"),"PNG",margin,margin,pageWidth,height*ratio,"FAST");
+        offset+=height;
+      }
+      pdf.save(downloadName(document.querySelector("[data-card-name]")?.textContent,"pdf"));
+    }catch(e){
+      setStatus("err",e.message||"تعذر تحميل البطاقة بصيغة PDF.");
+    }finally{
+      button.disabled=false;
+      button.textContent=old;
+    }
+  }
+
   function renderConfirmation(data,submissionId,membershipNumber){
-    const values={};
-    for(const f of schema?.fields||[])values[f.field_key]=data[f.field_key];
-    const unitsData=data.current_unit_details||{};
-    const consultationField=(schema?.fields||[]).find(f=>f.field_key==="consultation_specialty");
-    const consultationValue=values.consultation_specialty==="other"
-      ? values.consultation_specialty_other
-      : (Array.isArray(consultationField?.options)?consultationField.options.find(o=>String(o.value)===String(values.consultation_specialty))?.label_ar:values.consultation_specialty);
-    const items=[
-      ["الاسم الكامل",values.full_name],
-      ["اسم الأب",values.father_name],
-      ["اسم الأم",values.mother_name],
-      ["الرقم الوطني",values.national_id],
-      ["تاريخ الميلاد",values.date_of_birth],
-      ["الجنس",values.gender==="male"?"ذكر":values.gender==="female"?"أنثى":values.gender],
-      ["البريد الإلكتروني",values.email],
-      ["رقم الهاتف",values.phone],
-      ["المحافظة",values.governorate],
-      ["المدينة",values.city],
-      ["الوضع الأكاديمي / المهني",values.academic_status],
-      ["الجامعة",values.student_university||values.graduation_university||values.university],
-      ["الاختصاص",values.residency_specialty||values.specialist_specialty||values.specialty],
-      ["اختصاص الاستشارة",consultationValue],
-      ["ساعات التطوع الأسبوعية",values.volunteer_commitment_hours]
-    ].filter(([,v])=>v!==undefined&&String(v).trim()!=="");
-    const unitCards=selectedIds().map(id=>{
-      const u=units.find(x=>String(x.id)===id),d=unitsData[id]||{};
-      const role=isSupervisorForm()?(roleLabels[d.role]||d.role||"—"):"عضو / متطوع";
+    const values=data||{};
+    const fields=Array.isArray(schema?.fields)?schema.fields:[];
+    const unitIds=Array.isArray(values.current_units)?values.current_units:[];
+
+    const items=fields
+      .filter(f=>f.is_active!==false)
+      .filter(f=>!["current_units","current_unit_details","senior_management_position"].includes(f.field_key))
+      .map(f=>{
+        const value=values[f.field_key];
+        const empty=Array.isArray(value)?value.length===0:value===undefined||value===null||String(value).trim()==="";
+        if(empty)return null;
+        return [f.label_ar,fieldDisplayValue(f,value)];
+      })
+      .filter(Boolean);
+
+    const unitsData=values.current_unit_details&&typeof values.current_unit_details==="object"?values.current_unit_details:{};
+    const positionField=fields.find(f=>f.field_key==="senior_management_position");
+    const unitCards=unitIds.map(id=>{
+      const u=units.find(x=>String(x.id)===String(id));
+      const d=unitsData[id]||{};
       const isAdmin=String(u?.unit_type)==="other";
-      const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
-      const positionLabel=Array.isArray(positionField?.options)?positionField.options.find(o=>String(o.value)===String(d.senior_management_position))?.label_ar:d.senior_management_position;
+      const role=isSupervisorForm()?(roleLabels[d.role]||d.role||"—"):"عضو / متطوع";
+      const positionOption=(positionField?.options||[]).find(o=>String(o.value)===String(d.senior_management_position));
+      const position=positionOption?.label_ar||positionOption?.label_en||d.senior_management_position;
       const roleLine=isSupervisorForm()
         ? (isAdmin
-          ? "المنصب: "+(positionLabel||"—")+" · بدء المنصب: "+(d.role_started_on||"—")+" · "+(d.role_continuing?"مستمر":"انتهى"+(d.role_left_on?" في "+d.role_left_on:""))
-          : "الدور: "+role+" · بدء الدور: "+(d.role_started_on||"—")+" · "+(d.role_continuing?"مستمر":"انتهى"+(d.role_left_on?" في "+d.role_left_on:"")))
-        : "الانتساب: "+(d.joined_on||"—")+" · "+(d.continuing?"مستمر":"منتهٍ"+(d.left_on?" في "+d.left_on:""));
-      return'<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u?.unit_type))+'</span></div><div class="help" style="font-size:11px">'+esc(roleLine)+'</div></div>';
+          ? "المنصب: "+(position||"—")
+          : "الدور: "+role)
+        : "الصفة: عضو / متطوع";
+      const startedLine=isSupervisorForm()
+        ? (isAdmin?"بدء المنصب: ":"بدء الدور: ")+(d.role_started_on||"—")
+        : "تاريخ الانضمام: "+(d.joined_on||"—");
+      const continuationLine=isSupervisorForm()
+        ? (d.role_continuing?"الدور مستمر":"انتهى الدور"+(d.role_left_on?" في "+d.role_left_on:""))
+        : (d.continuing?"الانتساب مستمر":"انتهى الانتساب"+(d.left_on?" في "+d.left_on:""));
+      const note=d.notes?'<div class="help" style="margin-top:7px">'+esc(d.notes)+'</div>':"";
+      return'<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u?.unit_type))+'</span></div><div class="confirm-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">'+
+        '<div class="confirm-item"><span>الصفة / الدور</span><strong>'+esc(roleLine)+'</strong></div>'+
+        '<div class="confirm-item"><span>تاريخ البداية</span><strong>'+esc(startedLine)+'</strong></div>'+
+        '<div class="confirm-item"><span>الحالة</span><strong>'+esc(continuationLine)+'</strong></div>'+
+        (d.role_left_on?'<div class="confirm-item"><span>تاريخ انتهاء الدور</span><strong>'+esc(d.role_left_on)+'</strong></div>':"")+
+        (d.left_on?'<div class="confirm-item"><span>تاريخ مغادرة الوحدة</span><strong>'+esc(d.left_on)+'</strong></div>':"")+
+        '</div>'+note+'</div>';
     }).join("");
-    confirmation.innerHTML='<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>بطاقة تجديد العضوية</span></div></div><div class="id-status">تم التحديث</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(values.full_name))+'</div><strong>'+esc(values.full_name||"")+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال طلب تجديد العضوية</span></div><div class="id-meta">'+
+
+    const name=String(values.full_name||"عضو MedLife");
+    const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("");
+    confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
+      '<div class="id-card">'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم التحديث</div></div>'+
+      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال رسمي لتجديد العضوية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>حالة الطلب</span><strong>تم التحديث</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم تسجيل تجديد عضويتك بنجاح وتحديث بياناتك في قاعدة عضوية MedLife مباشرة. رقم العضوية الظاهر هو رقمك المسجل، ويمكن للفريق المخول تصحيح أي معلومة تحتاج إلى تحديث.</div>'+
-      '<section class="confirm-section"><h3>البيانات الشخصية والتواصل</h3><div class="confirm-grid">'+items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(formatValue(v)||"—")+'</strong></div>').join("")+'</div></section>'+
-      '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>البيانات الخاصة بكل خلية أو قسم أو فريق تم اختياره في الطلب.</p><div class="confirm-units">'+unitCards+'</div></section>'+
-      '<section class="confirm-section"><h3>معلومات الطوارئ</h3><div class="confirm-grid">'+[
-        ["اسم شخص الطوارئ",values.emergency_contact_name],
-        ["صلة القرابة",values.emergency_contact_relationship],
-        ["رقم هاتف الطوارئ",values.emergency_contact_phone],
-        ["رقم بديل",values.emergency_contact_alt_phone],
-        ["ملاحظات الطوارئ",values.emergency_contact_notes]
-      ].filter(([,v])=>v!==undefined&&String(v).trim()!=="").map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(formatValue(v)||"—")+'</strong></div>').join("")+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتجديد عضويتك ❤️</h3><p>تم تحديث عضويتك مباشرة في قاعدة أعضاء MedLife. في حال اكتشفت لاحقاً أي معلومة تحتاج إلى تصحيح، يمكن للمستخدمين المخولين تعديل السجل من قاعدة بيانات الفريق.</p></div>'+
-      '<div class="confirm-actions"><button type="button" class="btn btn-primary" id="printConfirmation">طباعة البطاقة</button><a class="btn btn-secondary" href="join-options.html">العودة</a></div>'+
+      '<div class="confirmation-note">تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء MedLife وتحديث البيانات التي أرسلتها في السجل الرسمي. يمكنك الاحتفاظ بهذه البطاقة كإثبات لعملية التجديد.</div>'+
+      '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
+      '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
+      '<div class="confirm-thanks"><h3>شكراً لتجديد عضويتك ❤️</h3><p>تم تحديث عضويتك مباشرة في قاعدة أعضاء MedLife. احتفظ بالبطاقة أو نزّلها كصورة أو PDF للرجوع إليها.</p></div>'+
+      '</div></div>'+
+      '<div class="confirm-actions">'+
+      '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
+      '<button type="button" class="btn download-btn" id="downloadImage">تحميل البطاقة كصورة</button>'+
+      '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة البطاقة</button>'+
+      '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
+      '<div class="download-status">البطاقة تتضمن جميع البيانات المسجلة في نموذج التجديد، بما فيها تفاصيل العضوية والطوارئ والمعلومات الإدارية.</div>'+
       '</div>';
+
     confirmation.classList.remove("hidden");
     formCard.classList.add("hidden");
     if(footerNote)footerNote.classList.add("hidden");
     $("printConfirmation")?.addEventListener("click",()=>window.print());
+    $("downloadImage")?.addEventListener("click",e=>void downloadCardImage(e.currentTarget));
+    $("downloadPdf")?.addEventListener("click",e=>void downloadCardPdf(e.currentTarget));
   }
 
   async function load(){
