@@ -150,7 +150,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
   function renderField(f){
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
-    if(f.field_key==="current_unit_details")return"";
+    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position")return"";
     const req=f.required?'<span class="req"> *</span>':"";
     const help=f.help_ar?'<div class="help">'+esc(f.help_ar)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
@@ -198,6 +198,17 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="أي معلومة مهمة عن العضوية في هذه الوحدة">'+esc(d.notes||"")+'</textarea></div>'+
         '</div></div>';
     }).join("");
+
+    const seniorHost=document.getElementById("seniorManagementPositionHost");
+    if(seniorHost){
+      const adminSelected=ids.some(id=>String(units.find(u=>String(u.id)===id)?.unit_type)==="other");
+      const seniorField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
+      const options=Array.isArray(seniorField?.options)?seniorField.options:[];
+      const previous=seniorHost.querySelector('select[name="senior_management_position"]')?.value||"";
+      seniorHost.innerHTML=adminSelected&&seniorField?'<div class="field full" data-field-wrap="senior_management_position"><label>'+esc(seniorField.label_ar)+'<span class="req"> *</span></label><select data-field="senior_management_position" name="senior_management_position"><option value="">اختر المنصب</option>'+options.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label_ar||o.label_en||o.value)+'</option>').join("")+'</select>'+(seniorField.help_ar?'<div class="help">'+esc(seniorField.help_ar)+'</div>':"")+'</div>':"";
+      const select=seniorHost.querySelector('select[name="senior_management_position"]');
+      if(select)select.value=previous;
+    }
 
     detailsHost.querySelectorAll('select[name^="unit_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_continuing_","");
