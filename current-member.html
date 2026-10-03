@@ -89,7 +89,8 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
         joined_on:joined,
         continuing,
         left_on:continuing?"":get("unit_left"),
-        notes:get("unit_notes")
+        notes:get("unit_notes"),
+        seniorPosition:card.querySelector('[name="senior_management_position"]')?.value||""
       };
     });
     out.current_unit_details=details;
@@ -188,10 +189,10 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
           '<div class="field"><label>تاريخ بدء المنصب <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(positionStarted)+'"></div>'+
           '<div class="field"><label>هل ما زلت تشغل المنصب؟ <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(positionContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا المنصب</option><option value="false"'+(positionContinuing==="false"?" selected":"")+' >لا، انتهى هذا المنصب</option></select></div>'+
           '<div class="field '+(positionContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>تاريخ انتهاء المنصب <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
-          '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(d.joined||"")+’"></div>’+
+          '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(d.joined||"")+'"></div>’+
           '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.continuing==="true"?" selected":"")+' >نعم، ما زلت مستمراً</option><option value="false"'+(d.continuing==="false"?" selected":"")+' >لا، تركتها</option></select></div>'+
-          '<div class="field '+(d.continuing==="false"?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(d.left||"")+’"></div>’+
-          '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="أي معلومة مهمة عن الانتساب أو المنصب في الإدارة العامة">'+esc(d.notes||"")+’</textarea></div>’+
+          '<div class="field '+(d.continuing==="false"?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(d.left||"")+'"></div>’+
+          '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="أي معلومة مهمة عن الانتساب أو المنصب في الإدارة العامة">'+esc(d.notes||"")+'</textarea></div>’+
           '</div></div>';
       }
       if(isSupervisorForm()){
