@@ -38,7 +38,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
-  const formKey=qs.get("form")==="supervisor"?"membership_renewal_supervisor":"membership_renewal";
+  const formKey=(qs.get("form_key")==="membership_renewal_supervisor"||qs.get("form")==="supervisor")?"membership_renewal_supervisor":"membership_renewal";
   const $=id=>document.getElementById(id);
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
@@ -140,6 +140,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
   function renderUnitPicker(){
     const groups=[["cell","الخلايا"],["department","الأقسام"],["field_team","الفرق الميدانية"]];
+    if(isSupervisorForm())groups.unshift(["other","الإدارة العامة"]);
     return'<div class="units">'+groups.map(g=>{
       const rows=units.filter(u=>u.unit_type===g[0]);
       if(!rows.length)return"";
