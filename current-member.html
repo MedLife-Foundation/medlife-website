@@ -177,9 +177,15 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
     detailsHost.innerHTML=ids.map(id=>{
       const u=units.find(x=>String(x.id)===id),d=prev[id]||{};
       if(isSupervisorForm()){
-        const options='<option value="">اختر الدور</option>'+roleOptions.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("");
+        const isAdmin=String(u?.unit_type)==="other";
+        const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
+        const positionOptions=Array.isArray(positionField?.options)?positionField.options:[];
+        const options=(isAdmin?'<option value="">اختر المنصب</option>'+positionOptions.map(o=>'<option value="'+esc(o.value)+'"'+(d.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label_ar||o.label_en||o.value)+'</option>').join(""):'<option value="">اختر الدور</option>'+roleOptions.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join(""));
+        const roleLabel=isAdmin?"المنصب في الإدارة العامة":"دورك في هذه الوحدة";
+        const roleName=isAdmin?"senior_management_position":"unit_role";
+        const roleOptionsHtml='<div class="field'+(isAdmin?" full":"")+'"><label>'+roleLabel+' <span class="req">*</span></label><select name="'+roleName+'_'+esc(id)+'">'+options+'</select></div>';
         return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u?.unit_type))+'</span></div><div class="unit-card-grid">'+
-          '<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>'+
+          roleOptionsHtml+
           '<div class="field"><label>تاريخ بدء هذا الدور <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||"")+'"></div>'+
           '<div class="field"><label>هل ما زلت تشغل هذا الدور؟ <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا الدور</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى هذا الدور</option></select></div>'+
           '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>تاريخ انتهاء الدور <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
