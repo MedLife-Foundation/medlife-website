@@ -399,6 +399,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
       schema=Array.isArray(p.data)?p.data[0]:null;
       if(!r.ok||!p.success||!schema)throw new Error("تعذر تحميل نموذج العضوية حالياً.");
       units=Array.isArray(schema.units)?schema.units:[];
+      if(isSupervisorForm() && !units.some(u=>String(u.unit_type)==="other")) units=[...units,{id:"87673bd2-5151-4f8b-95e9-dba4f2a11045",name_ar:"الإدارة العامة",name_en:"General Administration",unit_type:"other"}];
       $("title").textContent=schema.name_ar||"تجديد العضوية";
       $("description").textContent=schema.description_ar||"يرجى تحديث بيانات العضوية بدقة.";
       if(isSupervisorForm()){
