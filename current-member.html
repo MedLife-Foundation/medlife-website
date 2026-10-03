@@ -45,7 +45,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const setStatus=(type,msg)=>{status.className="status show "+type;status.textContent=msg};
-  const typeLabel=k=>({cell:"خلية",department:"قسم",field_team:"فريق ميداني"}[k]||"وحدة");
+  const typeLabel=k=>({cell:"خلية",department:"قسم",field_team:"فريق ميداني",other:"الإدارة العامة"}[k]||"وحدة");
   const roleOptions=[
     {value:"volunteer",label:"متطوع / عضو"},
     {value:"assistant_supervisor",label:"مساعد مشرف"},
