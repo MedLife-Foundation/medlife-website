@@ -1,8 +1,10 @@
 MedLife website deployment trigger
 
-Release: MedLife centralized Admin Core V3
-Timestamp: 2026-10-03T02:00:00+03:00
+Release: MedLife Supervisor Form Repair V4
+Timestamp: 2026-10-04T06:00:00+03:00
 Source: main
 
-Deploy centralized administration dashboard with roles, permissions, audit log, notifications and dedicated management sections.
-Trigger: supervisor membership administration unit fix
+Restore General Administration positions in the supervisor membership form.
+Show content cells whenever the Writing Content department is selected, regardless of the selected role.
+Harden the public API so only the supervisor form can submit supervisor roles.
+Trigger: verify and deploy supervisor membership form repair
