@@ -4,25 +4,6 @@ Release: MedLife Supervisor Form + Central Volunteer Record V15
 Timestamp: 2026-10-04T12:15:00Z
 Source: main
 
-Final supervisor renewal form:
-- unified section hierarchy and wording
-- optional membership-number reference for precise central-record matching
-- polished General Administration and content-writing assignment cards
-- repeatable multilingual language cards with independent proficiency
-- immediate-synchronization wording aligned with the actual workflow
-- numbered section hierarchy and cleaned duplicated/overlapping section presentation
-- managed current-member.html synchronized with public_site_content
-
-Central volunteer record:
-- supervisor membership-number matching is exact when a number is supplied
-- duplicate non-empty membership numbers are blocked
-- languages normalized in volunteer_languages
-- content-writing assignments normalized in volunteer_content_assignments
-- unit roles and histories normalized in volunteer_unit_members
-- General Administration positions normalized in volunteer_org_positions
-- education and emergency data normalized in their canonical tables
-- skills, talents, desired contributions and development interests stored on the central volunteer profile
-- membership cycle snapshots retained in volunteer_membership_records
-- volunteer_member_directory exposes roles, skills, languages and content assignments
-- current renewal updates replace stale skills/talent/development snapshot values instead of retaining cleared legacy values
-- consultation specialty is now available on the central volunteer profile
+Final supervisor renewal form source commit: 58484daed00499ccb1392c59f109d09ba0bfe077
+Public managed page sync: public_site_content/current-member.html
+Central sync: verified structured language, content assignments, unit roles, management positions, education, emergency, profile snapshots and membership history.
