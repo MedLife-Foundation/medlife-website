@@ -55,16 +55,16 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 </head>
 <body>
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · تحديث بيانات الفريق</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص للمشرفين الحاليين في MedLife لتحديث ملفهم الكامل، وتوثيق أدوارهم ووحداتهم ومناصبهم ومواهبهم وتوفرهم التطوعي، بحيث يبقى السجل المركزي دقيقاً وقابلاً للاستخدام الإداري.</p></div></section>
+<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · تحديث بيانات الفريق</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">نموذج مخصص للمشرفين الحاليين لتحديث ملفهم الشخصي والمهني، وتوثيق أدوارهم ووحداتهم ومناصبهم ومهاراتهم وتوفرهم التطوعي ضمن السجل المركزي لميدلايف.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً للمتطوعين الحاليين في MedLife، سواء كانوا أعضاء أو مشرفين أو مساعدين أو مشرفين عامّين. المعلومات والأدوار والخلايا والساعات والمواهب التي تسجلها هنا تُستخدم لتحديث السجل المركزي للمتطوع تلقائياً.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً لأعضاء فريق MedLife الحاليين. يُرجى تعبئة البيانات الحالية بدقة، لأن المعلومات المدخلة تُستخدم لتحديث الملف المركزي، وسجل الوحدات والأدوار، واللغات، والمواهب، وسجل العضوية المرتبط بك.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
 <div class="actions"><button class="btn btn-primary" id="submit" type="submit">حفظ وتحديث بياناتي</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">بعد الإرسال تُحفظ البيانات في سجل تحديث العضوية، وتُطبّق البيانات المنظمة على الملف المركزي للمتطوع والجداول المرتبطة به، مع الاحتفاظ بسجل دورة العضوية.</div></main>
+<div class="footer" id="footerNote">بعد الإرسال تُحفظ نسخة من التحديث كسجل عضوية، ثم تُطبّق البيانات المنظمة على الملف المركزي للمتطوع والجداول المرتبطة به، بما في ذلك الوحدات والأدوار واللغات وتكليفات كتابة المحتوى والتعليم والطوارئ والمواهب.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -302,7 +302,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية ووسائل التواصل، مع توحيد بيانات الهوية والإقامة والتواصل في قسم واحد."];
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات الشخص الذي يمكن الرجوع إليه عند الضرورة أو عند تعذر التواصل معك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة التعليمية والمهنية المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
-    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","تاريخ انضمامك العام، الوحدات الحالية والسابقة، الأدوار، المناصب الإدارية وتكليفات كتابة المحتوى."];
+    if(["membership_number","join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","مرجع العضوية، تاريخ الانضمام، الوحدات الحالية والسابقة، الأدوار، المناصب الإدارية وتكليفات كتابة المحتوى."];
     if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل MedLife."];
     if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days","continuing_as_volunteer"].includes(k))return["الالتزام والتوفر التطوعي","تقدير مشاركتك السابقة وقدرتك الحالية على التطوع، ويظهر توفر العمل الميداني تلقائياً عند اختيار فريق ميداني."];
     if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت."];
@@ -463,7 +463,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
           '<div class="unit-card-head"><strong>تفاصيل تكليفات كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
-          '<div class="help" style="margin-bottom:10px">إذا كنت تعمل ضمن كتابة المحتوى، سجّل كل تكليف بشكل مستقل. لكل تكليف خلية ومنصب وتاريخ بداية وحالة استمرار وبيانات عضوية وملاحظات خاصة به. استخدم «إضافة تكليف آخر» عند وجود تكليف إضافي.</div>'+
+          '<div class="help" style="margin-bottom:10px">لديك أكثر من تكليف في كتابة المحتوى؟ سجّل كل تكليف في بطاقة مستقلة، مع الخلية والمنصب وتواريخ البدء والانتهاء وحالة العضوية والملاحظات الخاصة به. استخدم «إضافة تكليف آخر» لإضافة تكليف جديد.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
           '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button>'+
           '</div>';
@@ -497,7 +497,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
       const roleOptionsHtml='<div class="field'+(isAdmin?" full":"")+'"><label>'+roleLabel+' <span class="req">*</span></label><select name="'+roleName+'_'+esc(id)+'">'+options+'</select></div>';
 
-      return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u.name_ar||u.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div><div class="unit-card-grid">'+
+      return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(isAdmin?"تفاصيل دورك في الإدارة العامة":(u.name_ar||u.name_en||"الوحدة"))+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div><div class="unit-card-grid">'+
         roleOptionsHtml+
         '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(previous.roleStarted||"")+'"></div>'+
         '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(previous.roleContinuing==="true"?" selected":"")+'>نعم، مستمر '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(previous.roleContinuing==="false"?" selected":"")+'>لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
