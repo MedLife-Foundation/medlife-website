@@ -411,7 +411,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.type===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
       const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+units.map(u=>'<option value="'+esc(u.id)+'"'+(String(item.issuingUnitId)===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
       return'<div class="certificate-history-card" data-certificate-index="'+index+'">'+
-        '<div class="certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
+        '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
         '<div class="grid">'+
           '<div class="field"><label>نوع الشهادة <span class="req">*</span></label><select name="certificate_history_type_'+index+'">'+typeOptions+'</select></div>'+
           '<div class="field"><label>تاريخ الحصول على الشهادة <span class="req">*</span></label><input type="date" name="certificate_history_date_'+index+'" value="'+esc(item.issuedDate||"")+'"></div>'+
