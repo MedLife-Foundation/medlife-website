@@ -51,20 +51,22 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .unit-group h3{display:flex;align-items:center;gap:8px}
 .unit-group h3:before{content:"";width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:var(--accent)}
 .content-department-card .help{font-size:10px;line-height:1.9}
+
+.section-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:900;box-shadow:inset 0 0 0 1px #ffd3dc}.section h2{align-items:center}.section h2:before{display:none}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · تحديث بيانات الفريق</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">نموذج مخصص للمشرفين الحاليين لتحديث ملفهم الشخصي والمهني، وتوثيق أدوارهم ووحداتهم ومناصبهم ومهاراتهم وتوفرهم التطوعي ضمن السجل المركزي لميدلايف.</p></div></section>
+<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · تحديث بيانات المشرفين الحاليين</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص لأعضاء فريق MedLife الحاليين لتحديث ملفهم المركزي وتوثيق أدوارهم ووحداتهم ومساهماتهم ومهاراتهم الحالية.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً لأعضاء فريق MedLife الحاليين. يُرجى تعبئة البيانات الحالية بدقة، لأن المعلومات المدخلة تُستخدم لتحديث الملف المركزي، وسجل الوحدات والأدوار، واللغات، والمواهب، وسجل العضوية المرتبط بك.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً لأعضاء فريق MedLife الحاليين، ولا ينشئ عضوية جديدة. يرجى تعبئة المعلومات الحالية بدقة؛ إذ تُحفظ نسخة من التحديث ضمن سجل العضوية، ثم تُطبَّق البيانات المنظمة على ملفك المركزي والجداول المرتبطة به.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
 <div class="actions"><button class="btn btn-primary" id="submit" type="submit">حفظ وتحديث بياناتي</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">بعد الإرسال تُحفظ نسخة من التحديث كسجل عضوية، ثم تُطبّق البيانات المنظمة على الملف المركزي للمتطوع والجداول المرتبطة به، بما في ذلك الوحدات والأدوار واللغات وتكليفات كتابة المحتوى والتعليم والطوارئ والمواهب.</div></main>
+<div class="footer" id="footerNote">بعد الإرسال تُحفظ نسخة كاملة من التحديث كسجل تاريخي، ثم تُطبَّق البيانات المنظمة على ملف المتطوع والجداول المركزية المرتبطة به، بما في ذلك الوحدات والأدوار والمناصب واللغات والتعليم والطوارئ والمواهب وتكليفات كتابة المحتوى.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -299,13 +301,13 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function sectionFor(k){
-    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية ووسائل التواصل، مع توحيد بيانات الهوية والإقامة والتواصل في قسم واحد."];
-    if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات الشخص الذي يمكن الرجوع إليه عند الضرورة أو عند تعذر التواصل معك."];
-    if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة التعليمية والمهنية المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
-    if(["membership_number","join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","مرجع العضوية، تاريخ الانضمام، الوحدات الحالية والسابقة، الأدوار، المناصب الإدارية وتكليفات كتابة المحتوى."];
-    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل MedLife."];
-    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days","continuing_as_volunteer"].includes(k))return["الالتزام والتوفر التطوعي","تقدير مشاركتك السابقة وقدرتك الحالية على التطوع، ويظهر توفر العمل الميداني تلقائياً عند اختيار فريق ميداني."];
-    if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت."];
+    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","الهوية وبيانات الإقامة ووسائل التواصل الأساسية."];
+    if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو عند تعذر الوصول إليك."];
+    if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","اختر وضعك الأكاديمي أو المهني الحالي، وستظهر فقط الحقول التعليمية والمهنية المرتبطة به."];
+    if(["membership_number","join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","تاريخك مع MedLife، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب والتكليفات المرتبطة بها. تُسجَّل تكليفات كتابة المحتوى بشكل مستقل."];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نوثّق ما تستطيع تقديمه اليوم، ومواهبك وخبراتك، وما ترغب بتطويره أو تجربته داخل MedLife."];
+    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days","continuing_as_volunteer"].includes(k))return["الالتزام والتوفر التطوعي","بيانات التفرغ والقدرة التطوعية الحالية. تظهر أسئلة العمل الميداني تلقائياً عند اختيار فريق ميداني."];
+    if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","الشهادات أو التوثيق التطوعي السابق، إن وُجد."];
     return["معلومات إضافية",""];
   }
 
@@ -353,7 +355,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         '</div>'+
       '</div>';
     }).join("");
-    return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى إتقانها</label><div class="help">يمكنك إضافة أكثر من لغة، ويُسجّل مستوى كل لغة بشكل مستقل.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
+    return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى إتقانها</label><div class="help">أضف اللغات التي تتقنها، ويُسجَّل مستوى كل لغة بشكل مستقل. يمكنك إضافة أكثر من لغة دون تكرار اللغة نفسها.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
   }
 
   function renderField(f){
@@ -463,7 +465,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
           '<div class="unit-card-head"><strong>تفاصيل تكليفات كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
-          '<div class="help" style="margin-bottom:10px">لديك أكثر من تكليف في كتابة المحتوى؟ سجّل كل تكليف في بطاقة مستقلة، مع الخلية والمنصب وتواريخ البدء والانتهاء وحالة العضوية والملاحظات الخاصة به. استخدم «إضافة تكليف آخر» لإضافة تكليف جديد.</div>'+
+          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في كتابة المحتوى كتكليف مستقل، مع تحديد الخلية والمنصب وتواريخ البداية والانتهاء وحالة العضوية والملاحظات الخاصة به. يمكنك إضافة تكليف آخر عند الحاجة.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
           '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button>'+
           '</div>';
@@ -736,14 +738,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       languageGroup.html+=renderLanguageField();
     }
 
-    for(const group of groups){
-      if(!group.html.trim())continue;
+    groups.forEach((group,index)=>{
+      if(!group.html.trim())return;
       const sectionEl=document.createElement("div");
       sectionEl.className="section form-section";
       sectionEl.dataset.sectionTitle=group.title;
-      sectionEl.innerHTML='<h2>'+esc(group.title)+'</h2><p>'+esc(group.description||"")+'</p>'+group.html;
+      sectionEl.dataset.sectionNumber=String(index+1);
+      sectionEl.innerHTML='<h2><span class="section-number" aria-hidden="true">'+(index+1)+'</span><span>'+esc(group.title)+'</span></h2><p>'+esc(group.description||"")+'</p>'+group.html;
       host.appendChild(sectionEl);
-    }
+    });
 
     host.querySelectorAll('input[name="current_units"]').forEach(x=>x.addEventListener("change",()=>{
       syncContentAssignmentsFromDom();
