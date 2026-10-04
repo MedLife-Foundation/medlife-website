@@ -45,6 +45,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .confirmation-note{margin:0 28px 0;padding:16px 18px;background:#f0faf6;border-color:#c8ebdc;color:#145f49;border-radius:14px}.confirm-section{padding:24px 28px}.confirm-section h3{font-size:15px}.confirm-grid{gap:11px}.confirm-item{min-height:62px;padding:11px 13px;border-radius:13px;background:#fcfdff}.confirm-unit{padding:14px;border-radius:14px}.confirm-thanks{padding:26px 28px;background:#fafbfd}.confirm-actions{padding:24px 28px 30px}
 @media(max-width:650px){.wrap{width:min(100% - 20px,1120px)}.content-supervision-grid{grid-template-columns:1fr}.content-supervision-box{padding:13px}.hero{padding:30px 0 16px}.hero h1{font-size:28px}.card{padding:17px;border-radius:18px}.section{padding-top:16px}.unit-card{padding:14px}.actions{margin-top:22px}.btn-primary{min-width:100%}.btn-secondary{width:100%;text-align:center}.confirmation{padding-top:8px}.id-card{border-radius:18px}.id-card-top{padding:18px 16px;flex-direction:column;gap:12px}.id-brand{align-items:flex-start}.id-brand img{height:38px}.id-brand strong{font-size:13px}.id-card-main{padding:18px 16px;grid-template-columns:1fr;gap:15px}.id-photo{display:grid;grid-template-columns:72px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:right}.id-initials{width:64px;height:64px;grid-row:1/3;margin:0}.id-photo strong{font-size:13px}.id-photo span{margin-top:0!important}.id-meta{grid-template-columns:1fr 1fr;gap:9px}.id-meta>div{min-height:68px}.confirmation-note{margin:0 16px;padding:14px}.confirm-section{padding:19px 16px}.confirm-grid{grid-template-columns:1fr}.confirm-actions{padding:20px 16px 22px}.confirm-thanks{padding:22px 16px}}
 
+.form-section{position:relative}.form-section.hidden{display:none!important}.form-section+.form-section{margin-top:4px}.form-section>p{max-width:840px}
 .section h2{display:flex;align-items:center;gap:9px}
 .section h2:before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px var(--accent-soft)}
 .unit-group h3{display:flex;align-items:center;gap:8px}
@@ -54,7 +55,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 </head>
 <body>
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Volunteer Data</div><h1 id="title">تحديث بيانات المتطوعين</h1><p id="description">هذا النموذج مخصص للمتطوعين الحاليين في MedLife لتحديث معلوماتهم، وحداتهم، أدوارهم، ساعاتهم، ومواهبهم، بحيث تبقى قاعدة المتطوعين الأساسية دقيقة ومحدثة.</p></div></section>
+<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Volunteer Data</div><h1 id="title">تحديث بيانات المتطوعين</h1><p id="description">هذا النموذج مخصص للمشرفين الحاليين في MedLife لتحديث ملفهم الكامل، وتوثيق أدوارهم ووحداتهم ومناصبهم ومواهبهم وتوفرهم التطوعي، بحيث يبقى السجل المركزي دقيقاً وقابلاً للاستخدام الإداري.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
 <div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً للمتطوعين الحاليين في MedLife، سواء كانوا أعضاء أو مشرفين أو مساعدين أو مشرفين عامّين. المعلومات والأدوار والخلايا والساعات والمواهب التي تسجلها هنا تُستخدم لتحديث السجل المركزي للمتطوع تلقائياً.</div>
 <div class="progress"><span id="progressBar"></span></div>
@@ -63,7 +64,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">بعد الإرسال تُحفظ البيانات كطلب تحديث. وبعد اعتماده تُطبَّق على السجل المركزي للمتطوع، مع الاحتفاظ بسجل التحديث ودورة العضوية.</div></main>
+<div class="footer" id="footerNote">بعد الإرسال تُحفظ البيانات في سجل تحديث العضوية، وتُطبّق البيانات المنظمة على الملف المركزي للمتطوع والجداول المرتبطة به، مع الاحتفاظ بسجل دورة العضوية.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -298,15 +299,16 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function sectionFor(k){
-    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية ووسائل التواصل."];
-    if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو في حال تعذر التواصل معك."];
-    if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
-    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","سجل الانضمام والخلايا والأقسام والأدوار والتكليفات الحالية والسابقة."];
-    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife."];
-    if(k==="field_available_days")return["التوفر للعمل الميداني","يظهر هذا القسم عند اختيار فريق ميداني."];
+    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية ووسائل التواصل، مع توحيد بيانات الهوية والإقامة والتواصل في قسم واحد."];
+    if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات الشخص الذي يمكن الرجوع إليه عند الضرورة أو عند تعذر التواصل معك."];
+    if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة التعليمية والمهنية المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","تاريخ انضمامك العام، الوحدات الحالية والسابقة، الأدوار، المناصب الإدارية وتكليفات كتابة المحتوى."];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل MedLife."];
+    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days","continuing_as_volunteer"].includes(k))return["الالتزام والتوفر التطوعي","تقدير مشاركتك السابقة وقدرتك الحالية على التطوع، ويظهر توفر العمل الميداني تلقائياً عند اختيار فريق ميداني."];
     if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت."];
     return["معلومات إضافية",""];
   }
+
 
   function generic(f){
     const k=esc(f.field_key),t=f.field_type,opts=Array.isArray(f.options)?f.options:[];
@@ -445,12 +447,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
             '<div class="field full"><label>الخلية <span class="req">*</span></label><select name="content_assignment_cell_'+index+'">'+cellOptions+'</select></div>'+
             '<div class="field"><label>المنصب في هذه الخلية <span class="req">*</span></label><select name="content_assignment_role_'+index+'">'+positionOptions+'</select></div>'+
             '<div class="field"><label>تاريخ بدء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_started_'+index+'" value="'+esc(roleStarted)+'"></div>'+
-            '<div class="field"><label>هل ما زلت تشغل المنصب؟ <span class="req">*</span></label><select name="content_assignment_role_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(roleContinuing==="true"?" selected":"")+'>نعم، ما زلت أشغله</option><option value="false"'+(roleContinuing==="false"?" selected":"")+'>لا، لم أعد أشغله</option></select></div>'+
+            '<div class="field"><label>هل ما زلت تشغل هذا المنصب؟ <span class="req">*</span></label><select name="content_assignment_role_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(roleContinuing==="true"?" selected":"")+'>نعم، ما زلت أشغله</option><option value="false"'+(roleContinuing==="false"?" selected":"")+'>لا، لم أعد أشغله</option></select></div>'+
             '<div class="field '+(roleContinuing==="false"?"":"hidden")+'" data-content-role-left-wrap="'+index+'"><label>تاريخ انتهاء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_left_'+index+'" value="'+esc(roleLeft)+'"></div>'+
             '<div class="field"><label>تاريخ الانضمام إلى هذه الخلية <span class="req">*</span></label><input type="date" name="content_assignment_joined_'+index+'" value="'+esc(joined)+'"></div>'+
             '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="content_assignment_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(continuing==="true"?" selected":"")+'>نعم، ما زلت عضواً فيها</option><option value="false"'+(continuing==="false"?" selected":"")+'>لا، لم أعد عضواً فيها</option></select></div>'+
             '<div class="field '+(continuing==="false"?"":"hidden")+'" data-content-left-wrap="'+index+'"><label>تاريخ مغادرة الخلية <span class="req">*</span></label><input type="date" name="content_assignment_left_'+index+'" value="'+esc(left)+'"></div>'+
-            '<div class="field notes"><label>ملاحظات</label><textarea name="content_assignment_notes_'+index+'" placeholder="أي معلومة مهمة عن هذا التكليف">'+esc(notes)+'</textarea></div>'+
+            '<div class="field notes"><label>ملاحظات هذا التكليف</label><textarea name="content_assignment_notes_'+index+'" placeholder="أي معلومة مهمة عن هذا التكليف">'+esc(notes)+'</textarea></div>'+
             '</div>'+
             (index>0?'<div class="actions" style="margin-top:12px;padding-top:12px"><button type="button" class="btn btn-secondary content-assignment-remove" data-index="'+index+'">حذف هذا التكليف</button></div>':"")+
             '</div>';
@@ -460,8 +462,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         const allSelected=selectedCount>=contentCells.length;
 
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
-          '<div class="unit-card-head"><strong>'+esc(u.name_ar||u.name_en||"كتابة محتوى")+'</strong><span class="unit-type">قسم</span></div>'+
-          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في قسم كتابة المحتوى بشكل مستقل؛ لكل تكليف خلية ومنصب وتواريخ وحالة عضوية وملاحظات خاصة به. يمكنك إضافة تكليف آخر عند الحاجة.</div>'+
+          '<div class="unit-card-head"><strong>تفاصيل تكليفات كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
+          '<div class="help" style="margin-bottom:10px">إذا كنت تعمل ضمن كتابة المحتوى، سجّل كل تكليف بشكل مستقل. لكل تكليف خلية ومنصب وتاريخ بداية وحالة استمرار وبيانات عضوية وملاحظات خاصة به. استخدم «إضافة تكليف آخر» عند وجود تكليف إضافي.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
           '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button>'+
           '</div>';
@@ -557,14 +559,24 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     }));
   }
 
+  function syncSectionVisibility(){
+    host.querySelectorAll(".form-section").forEach(section=>{
+      const visibleFields=Array.from(section.querySelectorAll("[data-field-wrap]"))
+        .some(wrap=>!wrap.classList.contains("hidden"));
+      section.classList.toggle("hidden",!visibleFields);
+    });
+  }
+
   function applyVisibility(){
     const data=collect();
     for(const f of schema?.fields||[]){
       const w=document.querySelector('[data-field-wrap="'+CSS.escape(f.field_key)+'"]');
       if(w)w.classList.toggle("hidden",!visible(f,data));
     }
+    syncSectionVisibility();
     updateProgress();
   }
+
 
   function contentCellSetForValidation(){
     const configured=(Array.isArray(schema?.settings?.content_cells)?schema.settings.content_cells:[])
@@ -692,31 +704,47 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
   function render(){
     host.innerHTML="";
-    let last="";
+    const groups=[];
     let languageRendered=false;
+
     for(const f of schema.fields||[]){
       if(f.is_active===false)continue;
+
+      const section=sectionFor(f.field_key);
+      let group=groups.find(g=>g.title===section[0]);
+      if(!group){
+        group={title:section[0],description:section[1],html:""};
+        groups.push(group);
+      }
+
       if(isSupervisorForm()&&f.field_key==="language"){
-        const sec=sectionFor("language");
-        if(sec[0]!==last){
-          host.insertAdjacentHTML("beforeend",'<div class="section"><h2>'+esc(sec[0])+'</h2><p>'+esc(sec[1])+"</p></div>");
-          last=sec[0];
-        }
-        host.insertAdjacentHTML("beforeend",renderLanguageField());
+        group.html+=renderLanguageField();
         languageRendered=true;
         continue;
       }
       if(isSupervisorForm()&&["language_assignments","language_level","language_other"].includes(f.field_key))continue;
-      const sec=sectionFor(f.field_key);
-      if(sec[0]!==last){
-        host.insertAdjacentHTML("beforeend",'<div class="section"><h2>'+esc(sec[0])+'</h2><p>'+esc(sec[1])+"</p></div>");
-        last=sec[0];
-      }
-      host.insertAdjacentHTML("beforeend",renderField(f));
+
+      group.html+=renderField(f);
     }
+
     if(isSupervisorForm()&&!languageRendered){
-      host.insertAdjacentHTML("beforeend",'<div class="section"><h2>مواهبك ومساهمتك القادمة</h2><p>اللغات ومستوى الإتقان</p></div>'+renderLanguageField());
+      let languageGroup=groups.find(g=>g.title==="المهارات والمواهب والمساهمة القادمة");
+      if(!languageGroup){
+        languageGroup={title:"المهارات والمواهب والمساهمة القادمة",description:"نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل MedLife.",html:""};
+        groups.push(languageGroup);
+      }
+      languageGroup.html+=renderLanguageField();
     }
+
+    for(const group of groups){
+      if(!group.html.trim())continue;
+      const sectionEl=document.createElement("div");
+      sectionEl.className="section form-section";
+      sectionEl.dataset.sectionTitle=group.title;
+      sectionEl.innerHTML='<h2>'+esc(group.title)+'</h2><p>'+esc(group.description||"")+'</p>'+group.html;
+      host.appendChild(sectionEl);
+    }
+
     host.querySelectorAll('input[name="current_units"]').forEach(x=>x.addEventListener("change",()=>{
       syncContentAssignmentsFromDom();
       renderUnitDetails();
@@ -724,11 +752,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       updateProgress();
     }));
     bindLanguageAssignmentEvents();
-    form.addEventListener("input",applyVisibility);
-    form.addEventListener("change",applyVisibility);
     renderUnitDetails();
     applyVisibility();
   }
+
 
   function bindLanguageAssignmentEvents(){
     host.querySelectorAll('select[name^="language_assignment_"]').forEach(el=>el.addEventListener("change",()=>{
@@ -961,6 +988,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     $("downloadImage")?.addEventListener("click",e=>void downloadCardImage(e.currentTarget));
     $("downloadPdf")?.addEventListener("click",e=>void downloadCardPdf(e.currentTarget));
   }
+
+  form.addEventListener("input",()=>{
+    applyVisibility();
+    updateProgress();
+  });
+  form.addEventListener("change",()=>{
+    applyVisibility();
+    updateProgress();
+  });
 
   async function load(){
     try{
