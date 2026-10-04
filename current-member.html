@@ -935,8 +935,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function downloadName(name,extension){
-    const safe=String(name||"MedLife-Member").trim().replace(/[^\\p{L}\\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"MedLife-Member";
-    return "MedLife-Membership-Card-"+safe+"."+extension;
+    const safe=String(name||"عضو-ميدلايف").trim().replace(/[^\\p{L}\\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"عضو-ميدلايف";
+    return "بطاقة-عضوية-ميدلايف-"+safe+"."+extension;
   }
 
   function fieldDisplayValue(field,value){
