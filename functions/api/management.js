@@ -889,7 +889,9 @@ export async function onRequestPost({ request }) {
         success: true,
         submission_id: submissionId,
         membership_number: receipt?.success ? receipt.membership_number : null,
-        message: "تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء ميدلايف."
+        message: supervisorForm
+          ? "تم حفظ بيانات المشرف وإصدار رقم العضوية وبطاقة العضوية بنجاح."
+          : "تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء ميدلايف."
       }, 201);
     } else {
       const recruitmentResponse = await fetch(
