@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form + Central Volunteer Record V14
-Timestamp: 2026-10-04T02:04:00Z
+Release: MedLife Supervisor Form + Central Volunteer Record V15
+Timestamp: 2026-10-04T12:15:00Z
 Source: main
 
 Final supervisor renewal form:
@@ -10,6 +10,7 @@ Final supervisor renewal form:
 - polished General Administration and content-writing assignment cards
 - repeatable multilingual language cards with independent proficiency
 - immediate-synchronization wording aligned with the actual workflow
+- numbered section hierarchy and cleaned duplicated/overlapping section presentation
 - managed current-member.html synchronized with public_site_content
 
 Central volunteer record:
@@ -23,3 +24,5 @@ Central volunteer record:
 - skills, talents, desired contributions and development interests stored on the central volunteer profile
 - membership cycle snapshots retained in volunteer_membership_records
 - volunteer_member_directory exposes roles, skills, languages and content assignments
+- current renewal updates replace stale skills/talent/development snapshot values instead of retaining cleared legacy values
+- consultation specialty is now available on the central volunteer profile
