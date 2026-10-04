@@ -186,7 +186,6 @@ input,select,textarea{font-size:12px;line-height:1.6}
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
   let contentAssignmentSelections=[];
-  let contentWritingDepartmentJoined="";
   let pendingProfileImageFile=null;
   let profileImageData=null;
   const CLOUDINARY_CLOUD_NAME="pyvrk863";
@@ -451,7 +450,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
           role_started_on:"",
           role_continuing:true,
           role_left_on:"",
-          joined_on:String(card.querySelector('[name^="content_department_joined_"]')?.value||contentWritingDepartmentJoined||""),
+          joined_on:joined,
           continuing:true,
           left_on:"",
           notes:""
@@ -682,9 +681,6 @@ input,select,textarea{font-size:12px;line-height:1.6}
 
   function renderUnitDetails(){
     const detailsHost=$("unitDetails");
-    const existingWritingDeptCard=detailsHost?.querySelector('.content-department-card');
-    const existingWritingDeptJoin=existingWritingDeptCard?.querySelector('input[name^="content_department_joined_"]');
-    if(existingWritingDeptJoin)contentWritingDepartmentJoined=String(existingWritingDeptJoin.value||"");
     const writingDeptId=writingContentUnitId();
     const writingActive=contentWritingActive();
 
@@ -781,7 +777,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
           '<div class="unit-card-head"><strong>تفاصيل العضوية في قسم كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
           '<div class="unit-card-grid">'+
-          '<div class="field full"><label>تاريخ الانضمام إلى قسم «كتابة محتوى» <span class="req">*</span></label><input type="date" name="content_department_joined_'+esc(id)+'" value="'+esc(contentWritingDepartmentJoined||"")+'"><div class="help">هذا هو تاريخ انضمامك إلى القسم نفسه. أما تاريخ الانضمام إلى كل خلية ضمن تكليف كتابة المحتوى فيُسجل بشكل مستقل أدناه.</div></div>'+
+          '<div class="field full"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc((detailsHost?.querySelector('.content-department-card input[name^="unit_joined_"]')?.value)||"")+'"><div class="help">هذا هو تاريخ انضمامك إلى قسم «كتابة محتوى». أما تاريخ الانضمام إلى كل خلية ضمن تكليف كتابة المحتوى فيُسجل بشكل مستقل أدناه.</div></div>'+
           '</div>'+
           '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في كتابة المحتوى كتكليف مستقل، مع تحديد الخلية والمنصب وتواريخ البداية والانتهاء وحالة العضوية والملاحظات الخاصة به.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
@@ -830,15 +826,6 @@ input,select,textarea{font-size:12px;line-height:1.6}
     }).join("");
 
     detailsHost.innerHTML=rendered;
-
-    detailsHost.querySelectorAll('.content-department-card input[name^="content_department_joined_"]').forEach(el=>{
-      const sync=()=>{
-        contentWritingDepartmentJoined=String(el.value||"");
-        updateProgress();
-      };
-      el.addEventListener("input",sync);
-      el.addEventListener("change",sync);
-    });
 
     detailsHost.querySelectorAll('.content-assignment-card select,.content-assignment-card input,.content-assignment-card textarea').forEach(el=>{
       const sync=()=>{
