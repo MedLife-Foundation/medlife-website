@@ -1,10 +1,11 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form Repair V4
-Timestamp: 2026-10-04T06:00:00+03:00
+Release: MedLife Supervisor Form Repair V5
+Timestamp: 2026-10-04T06:10:00+03:00
 Source: main
 
-Restore General Administration positions in the supervisor membership form.
-Show content cells whenever the Writing Content department is selected, regardless of the selected role.
-Harden the public API so only the supervisor form can submit supervisor roles.
-Trigger: verify and deploy supervisor membership form repair
+Force deploy after supervisor membership form repair.
+General Administration: canonical six management positions are rendered directly.
+Content Writing: content cells are rendered whenever the Content Writing department is selected, regardless of the selected department role.
+Managed current-member page was also synchronized into public_site_content.
+Trigger: final supervisor form repair deployment
