@@ -226,9 +226,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const ids=selectedIds();
     const writingDeptId=writingContentUnitId();
     const writingActive=Boolean(writingDeptId&&document.querySelector('input[name="current_units"][value="'+escSel(writingDeptId)+'"]')?.checked);
-    const cellUnits=units.filter(u=>String(u.unit_type)==="cell");
-    const cellNameSet=new Set(["Plasma Cell","Neuron Cell","Astrocyte Cell","Leukocyte Cell","Stem Cells","Red Blood Cell","Heart Cell","المدونة الطبية"]);
-    const contentCells=cellUnits.filter(u=>cellNameSet.has(String(u.name_ar||"").trim()));
+    const contentCells=units.filter(u=>String(u.unit_type)==="cell");
     const contentCellSet=new Set(contentCells.map(u=>String(u.id)));
 
     const rendered=ids.map(id=>{
