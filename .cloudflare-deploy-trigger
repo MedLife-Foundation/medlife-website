@@ -1,10 +1,11 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form Repair V8
-Timestamp: 2026-10-04T06:28:00+03:00
+Release: MedLife Supervisor Form Repair V9
+Timestamp: 2026-10-04T06:40:00+03:00
 Source: main
 
-Fix persistence of additional Content Writing assignment cards.
-The Add Assignment button now preserves the newly added card during rerender instead of re-reading the previous DOM and discarding it.
+Add repeatable language section to the current supervisor membership form.
+Each language has its own proficiency level, and the user can add multiple languages with the add-more button.
+The first language may be marked Other and then named explicitly.
 Managed current-member page synchronized into public_site_content.
-Trigger: final add-more assignment persistence repair
+Trigger: multiple languages with independent levels
