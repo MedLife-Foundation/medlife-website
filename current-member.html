@@ -175,6 +175,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
   let contentAssignmentSelections=[];
+  let contentWritingDepartmentJoined="";
   let pendingProfileImageFile=null;
   let profileImageData=null;
   const CLOUDINARY_CLOUD_NAME="pyvrk863";
@@ -432,6 +433,20 @@ input,select,textarea{font-size:12px;line-height:1.6}
       const roleLeft=roleContinuing?"":get("unit_role_left");
       const unit=units.find(u=>String(u.id)===id);
       const seniorPosition=get("senior_management_position");
+      if(isWritingContentUnit(unit)){
+        details[id]={
+          role:"content_writer",
+          senior_management_position:"",
+          role_started_on:"",
+          role_continuing:true,
+          role_left_on:"",
+          joined_on:String(card.querySelector('[name^="content_department_joined_"]')?.value||contentWritingDepartmentJoined||""),
+          continuing:true,
+          left_on:"",
+          notes:""
+        };
+        return;
+      }
       if(isSupervisorForm()&&String(unit?.unit_type)==="other"&&seniorPosition)out.senior_management_position=seniorPosition;
       details[id]={
         role:get("unit_role")||"volunteer",
@@ -656,6 +671,9 @@ input,select,textarea{font-size:12px;line-height:1.6}
 
   function renderUnitDetails(){
     const detailsHost=$("unitDetails");
+    const existingWritingDeptCard=detailsHost?.querySelector('.content-department-card');
+    const existingWritingDeptJoin=existingWritingDeptCard?.querySelector('input[name^="content_department_joined_"]');
+    if(existingWritingDeptJoin)contentWritingDepartmentJoined=String(existingWritingDeptJoin.value||"");
     const writingDeptId=writingContentUnitId();
     const writingActive=contentWritingActive();
 
@@ -750,8 +768,11 @@ input,select,textarea{font-size:12px;line-height:1.6}
         const allSelected=selectedCount>=contentCells.length;
 
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
-          '<div class="unit-card-head"><strong>تفاصيل تكليفات كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
-          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في كتابة المحتوى كتكليف مستقل، مع تحديد الخلية والمنصب وتواريخ البداية والانتهاء وحالة العضوية والملاحظات الخاصة به. يمكنك إضافة تكليف آخر عند الحاجة.</div>'+
+          '<div class="unit-card-head"><strong>تفاصيل العضوية في قسم كتابة المحتوى</strong><span class="unit-type">قسم</span></div>'+
+          '<div class="unit-card-grid">'+
+          '<div class="field full"><label>تاريخ الانضمام إلى قسم «كتابة محتوى» <span class="req">*</span></label><input type="date" name="content_department_joined_'+esc(id)+'" value="'+esc(contentWritingDepartmentJoined||"")+'"><div class="help">هذا هو تاريخ انضمامك إلى القسم نفسه. أما تاريخ الانضمام إلى كل خلية ضمن تكليف كتابة المحتوى فيُسجل بشكل مستقل أدناه.</div></div>'+
+          '</div>'+
+          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في كتابة المحتوى كتكليف مستقل، مع تحديد الخلية والمنصب وتواريخ البداية والانتهاء وحالة العضوية والملاحظات الخاصة به.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
           '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button>'+
           '</div>';
@@ -798,6 +819,15 @@ input,select,textarea{font-size:12px;line-height:1.6}
     }).join("");
 
     detailsHost.innerHTML=rendered;
+
+    detailsHost.querySelectorAll('.content-department-card input[name^="content_department_joined_"]').forEach(el=>{
+      const sync=()=>{
+        contentWritingDepartmentJoined=String(el.value||"");
+        updateProgress();
+      };
+      el.addEventListener("input",sync);
+      el.addEventListener("change",sync);
+    });
 
     detailsHost.querySelectorAll('.content-assignment-card select,.content-assignment-card input,.content-assignment-card textarea').forEach(el=>{
       const sync=()=>{
@@ -970,7 +1000,12 @@ input,select,textarea{font-size:12px;line-height:1.6}
       const isContentWritingUnit=isWritingContentUnit(unit);
       const unitName=String(unit?.name_ar||"").trim()||"الوحدة";
       const isContentWritingByName=unitName==="كتابة محتوى"||String(unit?.name_en||"").trim().toLowerCase()==="content writing";
-      if(String(unit?.unit_type)==="cell"||isContentWritingUnit||isContentWritingByName)continue;
+      if(String(unit?.unit_type)==="cell")continue;
+      if(isContentWritingUnit||isContentWritingByName){
+        if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «كتابة محتوى».";
+        if(d.joined_on>today)return"تاريخ الانضمام إلى «كتابة محتوى» لا يمكن أن يكون في المستقبل.";
+        continue;
+      }
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
       if(isSupervisorForm()){
