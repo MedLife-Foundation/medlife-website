@@ -1,18 +1,17 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form UX + Central Data Sync V11
-Timestamp: 2026-10-04T08:15:00+03:00
+Release: MedLife Supervisor Form + Central Data Sync V11
+Timestamp: 2026-10-04T07:20:00+03:00
 Source: main
 
-Public form:
-- organize supervisor renewal fields into unified sections
-- remove blank conditional section headers
-- improve content-writing assignment guidance
-- keep repeatable multilingual language cards and validation
-- keep the managed current-member page synchronized in public_site_content
+Final current-member/supervisor renewal form:
+- organized section hierarchy and duplicate-heading cleanup
+- independent content-writing assignment cards
+- repeatable language cards with independent proficiency
+- structured payloads preserved for server-side validation
+- receipt hides internal storage-only fields
+- managed current-member page synchronized into public_site_content
 
-Backend/data:
-- preserve structured current-unit, content-assignment and language data
-- synchronize approved renewals into canonical volunteer tables
-- keep language records normalized in volunteer_languages
-- keep content-writing assignments normalized in volunteer_content_assignments
+Central database:
+- approved supervisor renewals synchronize canonical volunteer profile, units/roles, management positions, education, emergency, languages, content assignments, and membership history
+- volunteer_member_directory exposes structured languages and content assignments to the admin database view
