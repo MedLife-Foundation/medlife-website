@@ -628,20 +628,9 @@ export async function onRequestPost({ request }) {
         unit.name_ar === "كتابة محتوى" &&
         unit.role === "content_writer"
       );
-      const contentCellNames = new Set([
-        "Plasma Cell",
-        "Neuron Cell",
-        "Astrocyte Cell",
-        "Leukocyte Cell",
-        "Stem Cells",
-        "Red Blood Cell",
-        "Heart Cell",
-        "المدونة الطبية"
-      ]);
       if (supervisorForm && contentWritingDepartmentSelected) {
         const supervisedContentCells = requestedUnits.filter(unit =>
           unit.unit_type === "cell" &&
-          contentCellNames.has(unit.name_ar) &&
           unit.role === "supervisor"
         );
         if (!supervisedContentCells.length) {
