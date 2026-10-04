@@ -270,18 +270,20 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
           '</div></div>';
       }
       return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u?.unit_type))+'</span></div><div class="unit-card-grid">'+
-        '<div class="field"><label>الصفة في هذه الوحدة</label><div class="help" style="font-size:12px;font-weight:800;color:#151d36;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff">عضو / متطوع</div><input type="hidden" name="unit_role_'+esc(id)+'" value="volunteer"></div>'+
+        '<div class="field"><label>الصفة في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'"><option value="">اختر الدور</option>'+roleOptions.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("")+'</select></div>'+
+        '<div class="field"><label>تاريخ بدء هذا الدور <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||d.joined||"")+'"></div>'+
+        '<div class="field"><label>هل ما زلت تشغل هذا الدور؟ <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر بهذا الدور</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى هذا الدور</option></select></div>'+
+        '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>تاريخ انتهاء الدور <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
         '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(d.joined||"")+'"></div>'+
         '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.continuing==="true"?" selected":"")+' >نعم، ما زلت مستمراً</option><option value="false"'+(d.continuing==="false"?" selected":"")+' >لا، تركتها</option></select></div>'+
         '<div class="field '+(d.continuing==="false"?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(d.left||"")+'"></div>'+
-        '<input type="hidden" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||d.joined||"")+'"><input type="hidden" name="unit_role_continuing_'+esc(id)+'" value="'+(d.roleContinuing||"")+'"><input type="hidden" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'">'+
         '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="أي معلومة مهمة عن العضوية في هذه الوحدة">'+esc(d.notes||"")+'</textarea></div>'+
         '</div></div>';
     }).join("");
 
     let contentPicker="";
     if(writingActive&&contentCells.length){
-      contentPicker='<div class="content-supervision-box"><h4>الخلايا التي تشرف عليها ضمن كتابة المحتوى</h4><p>بما أنك اخترت «كتابة محتوى»، اختر الخلية أو الخلايا التي تتولى الإشراف عليها. سيُسجّل دورك في كل خلية مختارة كـ<strong>مشرف</strong>.</p><div class="content-supervision-grid">'+
+      contentPicker='<div class="content-supervision-box"><h4>الخلايا المرتبطة بقسم كتابة المحتوى</h4><p>ظهرت هذه الخلايا لأنك اخترت قسم «كتابة محتوى». اختر خلية واحدة أو أكثر. عند اختيار دور «كاتب محتوى»، تُسجّل الخلايا المختارة تلقائياً كمسؤوليات إشراف مستقلة.</p><div class="content-supervision-grid">'+
         contentCells.map(u=>{
           const checked=previousContentCellIds.includes(String(u.id))||ids.includes(String(u.id));
           return'<label class="content-supervision-choice"><input class="content-supervision-cell" type="checkbox" value="'+esc(u.id)+'"'+(checked?" checked":"")+'><span>'+esc(u.name_ar||u.name_en)+'</span></label>';
@@ -306,24 +308,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       const card=el.closest(".unit-card");
       const w=detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]');
       if(w)w.classList.toggle("hidden",el.value!=="false");
-      if(!isSupervisorForm()&&card){
-        const joined=card.querySelector('[name="unit_joined_'+escSel(id)+'"]');
-        const roleStarted=card.querySelector('[name="unit_role_started_'+escSel(id)+'"]');
-        const roleContinuing=card.querySelector('[name="unit_role_continuing_'+escSel(id)+'"]');
-        const roleLeft=card.querySelector('[name="unit_role_left_'+escSel(id)+'"]');
-        if(roleStarted)roleStarted.value=joined?.value||"";
-        if(roleContinuing)roleContinuing.value=el.value==="true"?"true":el.value==="false"?"false":"";
-        if(roleLeft)roleLeft.value=el.value==="false"?(card.querySelector('[name="unit_left_'+escSel(id)+'"]')?.value||""):"";
-      }
+
       updateProgress();
       applyVisibility();
     }));
     detailsHost.querySelectorAll('input[name^="unit_joined_"]').forEach(el=>el.addEventListener("change",()=>{
-      if(!isSupervisorForm()){
-        const id=el.name.replace("unit_joined_","");
-        const roleStarted=detailsHost.querySelector('[name="unit_role_started_'+escSel(id)+'"]');
-        if(roleStarted)roleStarted.value=el.value;
-      }
+
       updateProgress();
     }));
     detailsHost.querySelectorAll('input[name^="unit_left_"]').forEach(el=>el.addEventListener("change",()=>{
