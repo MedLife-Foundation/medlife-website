@@ -968,10 +968,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم تسجيل طلب تحديث بيانات عضويتك بنجاح. تُحفظ البيانات ضمن طلب التحديث وسجل العضوية، وبعد اعتماد الطلب تُطبَّق البيانات على السجل المركزي لعضو MedLife.</div>'+
+      '<div class="confirmation-note">تم تسجيل طلب تحديث بيانات عضويتك بنجاح. تُحفظ البيانات ضمن طلب التحديث وسجل العضوية، تُطبَّق البيانات المنظمة على السجل المركزي لعضو MedLife ضمن عملية التحديث.</div>'+
       '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ طلب تحديث بياناتك بنجاح. بعد اعتماده سيُثبّت على السجل المركزي، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
+      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ طلب تحديث بياناتك بنجاح. يُطبَّق التحديث على السجل المركزي مباشرة، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
       '</div></div>'+
       '<div class="confirm-actions">'+
       '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
