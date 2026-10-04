@@ -89,7 +89,13 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
 
   function writingContentUnitId(){
-    return units.find(u=>String(u.unit_type)==="department"&&String(u.name_ar||"").trim()==="كتابة محتوى")?.id||null;
+    const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
+    return units.find(u=>{
+      const id=String(u.id||"");
+      const ar=String(u.name_ar||"").trim();
+      const en=String(u.name_en||"").trim().toLowerCase();
+      return String(u.unit_type)==="department" && (id===knownId || ar==="كتابة محتوى" || en==="content writing");
+    })?.id||knownId;
   }
 
   function contentCellIds(){
@@ -100,7 +106,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(!isSupervisorForm())return false;
     const departmentId=writingContentUnitId();
     if(!departmentId)return false;
-    const selected=form.querySelector('input[name="current_units"][value="'+escSel(departmentId)+'"]')?.checked;
+    const selected=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
+      .some(input=>String(input.value)===String(departmentId));
     return Boolean(selected);
   }
 
@@ -234,7 +241,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const ids=selectedIds();
     const writingDeptId=writingContentUnitId();
     const writingActive=Boolean(writingDeptId&&document.querySelector('input[name="current_units"][value="'+escSel(writingDeptId)+'"]')?.checked);
-    const contentCells=units.filter(u=>String(u.unit_type)==="cell");
+    const configuredContentCellIds=new Set(
+      (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
+    );
+    const contentCells=units
+      .filter(u=>String(u.unit_type)==="cell")
+      .filter(u=>!configuredContentCellIds.size || configuredContentCellIds.has(String(u.id)));
     const contentCellSet=new Set(contentCells.map(u=>String(u.id)));
 
     const rendered=ids.map(id=>{
@@ -243,10 +255,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       {
         const isAdmin=String(u?.unit_type)==="other";
         const isForcedContentCell=isContentSupervisionCell;
-        const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
-        const positionOptions=Array.isArray(positionField?.options)&&positionField.options.length
-          ? positionField.options
-          : seniorManagementOptions;
+        const positionOptions=seniorManagementOptions;
 
         let options="",roleLabel="",roleName="unit_role";
         if(isAdmin){
@@ -296,7 +305,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
     let contentPicker="";
     if(writingActive&&contentCells.length){
-      contentPicker='<div class="content-supervision-box"><h4>الخلايا المرتبطة بقسم كتابة المحتوى</h4><p>اختر خلية واحدة أو أكثر من الخلايا التي ترتبط بعملك ضمن قسم «كتابة محتوى». يظهر هذا الاختيار لكل دور تختاره داخل القسم، وتُحفظ كل خلية كتكليف إشرافي مستقل مع تواريخه.</p><div class="content-supervision-grid">'+
+      contentPicker='<div class="content-supervision-box"><h4>الخلايا التي تشرف عليها ضمن قسم كتابة المحتوى</h4><p>اختر خلية واحدة أو أكثر من الخلايا التي تشرف عليها ضمن قسم «كتابة محتوى». يظهر هذا الاختيار بمجرد اختيار القسم، بغض النظر عن الدور الذي اخترته للقسم. كل خلية مختارة تُسجّل كتكليف إشرافي مستقل مع تواريخها.</p><div class="content-supervision-grid">'+
         contentCells.map(u=>{
           const checked=previousContentCellIds.includes(String(u.id))||ids.includes(String(u.id));
           return'<label class="content-supervision-choice"><input class="content-supervision-cell" type="checkbox" value="'+esc(u.id)+'"'+(checked?" checked":"")+'><span>'+esc(u.name_ar||u.name_en)+'</span></label>';
