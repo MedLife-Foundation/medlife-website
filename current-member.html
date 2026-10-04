@@ -968,8 +968,9 @@ input,select,textarea{font-size:12px;line-height:1.6}
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
       const isContentWritingUnit=isWritingContentUnit(unit);
-      if(String(unit?.unit_type)==="cell"||isContentWritingUnit)continue;
-      const unitName=unit?.name_ar||"الوحدة";
+      const unitName=String(unit?.name_ar||"").trim()||"الوحدة";
+      const isContentWritingByName=unitName==="كتابة محتوى"||String(unit?.name_en||"").trim().toLowerCase()==="content writing";
+      if(String(unit?.unit_type)==="cell"||isContentWritingUnit||isContentWritingByName)continue;
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
       if(isSupervisorForm()){
