@@ -80,6 +80,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .id-meta span{font-size:9px;color:#7a8496;margin-bottom:6px;font-weight:800}
 .id-meta strong{font-size:11px;line-height:1.8;color:#18223b;overflow-wrap:anywhere}
 .id-meta>div:last-child strong{font-size:18px;line-height:1.45;color:#e83255;letter-spacing:.2px;word-break:break-word}
+.id-meta-supervisor{border-color:#f0c1cb!important;background:#fff7f9!important}
+.id-meta-supervisor strong{color:#a91f39!important;font-size:12px!important;line-height:1.7!important}
+.id-meta-status{border-color:#c9e9dc!important;background:#f5fcf8!important}
+.id-meta-status strong{color:#087653!important;font-size:12px!important}
 .id-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 28px;border-top:1px solid #e8ebf0;background:#f8fafc;color:#687286;font-size:9px}
 .id-card-bottom strong{color:#29334d;font-size:9px}
 .confirmation-note{width:min(860px,100%);margin:0 auto 20px;padding:15px 18px;border-radius:15px;box-shadow:0 6px 18px rgba(21,29,54,.04)}
@@ -1113,6 +1117,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
     const unitsData=values.current_unit_details&&typeof values.current_unit_details==="object"?values.current_unit_details:{};
     const positionField=fields.find(f=>f.field_key==="senior_management_position");
+    const supervisorAdminEntry=isSupervisorForm()?unitIds.map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}]).find(([u])=>String(u?.unit_type)==="other"):null;
+    const supervisorPositionValue=supervisorAdminEntry?.[1]?.senior_management_position||"";
+    const supervisorPosition=(positionField?.options||[]).find(o=>String(o.value)===String(supervisorPositionValue));
+    const supervisorPositionText=supervisorPosition?.label_ar||supervisorPosition?.label_en||supervisorPositionValue||"عضوية مشرف";
     const unitCards=unitIds.map(id=>{
       const u=units.find(x=>String(x.id)===String(id));
       const d=unitsData[id]||{};
@@ -1171,9 +1179,11 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">عضوية مسجّلة</div></div>'+
       '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
       '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
-      '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
       '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
-      '<div><span>حالة السجل</span><strong>فعّالة</strong></div>'+
+      (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>':"")+
+      '<div class="id-meta-status"><span>حالة السجل</span><strong>فعّالة</strong></div>'+
+      '<div><span>تاريخ الانضمام</span><strong>'+esc(values.join_date?fieldDisplayValue("join_date",values.join_date):"—")+'</strong></div>'+
+      '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
       '</div></div>'+
       '<div class="id-card-bottom"><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span><span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span></div>'+
       '</div></div>'+
