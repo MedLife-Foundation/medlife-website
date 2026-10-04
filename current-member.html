@@ -295,7 +295,6 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(!writingActive){
       contentAssignmentSelections=[];
     }else{
-      syncContentAssignmentsFromDom();
       if(!contentAssignmentSelections.length){
         contentAssignmentSelections=[{
           cellId:"",role:"",roleStarted:"",roleContinuing:"",roleLeft:"",
@@ -605,6 +604,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       host.insertAdjacentHTML("beforeend",renderField(f));
     }
     host.querySelectorAll('input[name="current_units"]').forEach(x=>x.addEventListener("change",()=>{
+      syncContentAssignmentsFromDom();
       renderUnitDetails();
       applyVisibility();
       updateProgress();
