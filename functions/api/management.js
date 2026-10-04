@@ -551,10 +551,6 @@ export async function onRequestPost({ request }) {
 
           if (supervisorForm && String(unit.unit_type) === "other") {
             role = "volunteer";
-          } else if (!supervisorForm) {
-            role = "volunteer";
-            roleStartedOn = joinedOn;
-            roleContinuing = continuing;
           }
 
           return {
@@ -576,9 +572,7 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
-      const allowedUnitRoles = supervisorForm
-        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
-        : ["volunteer"];
+      const allowedUnitRoles = ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"];
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
       }
@@ -628,7 +622,7 @@ export async function onRequestPost({ request }) {
         unit.name_ar === "كتابة محتوى" &&
         unit.role === "content_writer"
       );
-      if (supervisorForm && contentWritingDepartmentSelected) {
+      if (contentWritingDepartmentSelected) {
         const supervisedContentCells = requestedUnits.filter(unit =>
           unit.unit_type === "cell" &&
           unit.role === "supervisor"
