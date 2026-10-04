@@ -100,37 +100,63 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function contentCellIds(){
-    return contentAssignmentSelections.map(value=>String(value||"")).filter(Boolean);
+    return contentAssignmentSelections
+      .map(item=>String(item?.cellId||""))
+      .filter(Boolean);
   }
 
   function contentWritingActive(){
     if(!isSupervisorForm())return false;
     const departmentId=writingContentUnitId();
     if(!departmentId)return false;
-    const selected=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
+    return Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
       .some(input=>String(input.value)===String(departmentId));
-    return Boolean(selected);
   }
 
   function selectedIds(){
-    const ids=Array.from(form.querySelectorAll('input[name="current_units"]:checked')).map(x=>String(x.value));
+    const writingDeptId=writingContentUnitId();
+    const ids=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
+      .map(x=>String(x.value))
+      .filter(id=>!(isSupervisorForm()&&id===String(writingDeptId)));
     if(contentWritingActive())ids.push(...contentCellIds());
     return Array.from(new Set(ids));
+  }
+
+  function syncContentAssignmentsFromDom(){
+    const rows=Array.from(form.querySelectorAll(".content-assignment-card"));
+    if(!rows.length)return;
+    contentAssignmentSelections=rows.map(row=>({
+      cellId:String(row.querySelector('[name^="content_assignment_cell_"]')?.value||""),
+      role:String(row.querySelector('[name^="content_assignment_role_"]')?.value||""),
+      roleStarted:String(row.querySelector('[name^="content_assignment_role_started_"]')?.value||""),
+      roleContinuing:String(row.querySelector('[name^="content_assignment_role_continuing_"]')?.value||""),
+      roleLeft:String(row.querySelector('[name^="content_assignment_role_left_"]')?.value||""),
+      joined:String(row.querySelector('[name^="content_assignment_joined_"]')?.value||""),
+      continuing:String(row.querySelector('[name^="content_assignment_continuing_"]')?.value||""),
+      left:String(row.querySelector('[name^="content_assignment_left_"]')?.value||""),
+      notes:String(row.querySelector('[name^="content_assignment_notes_"]')?.value||"")
+    }));
   }
 
   function collect(){
     const out={};
     new FormData(form).forEach((value,key)=>{
-      if(/^unit_(role|role_started|role_continuing|role_left|joined|continuing|left|notes)_/.test(key)||key==="current_units")return;
+      if(/^unit_(role|role_started|role_continuing|role_left|joined|continuing|left|notes)_/.test(key)||/^content_assignment_/.test(key)||key==="current_units")return;
       if(Object.prototype.hasOwnProperty.call(out,key))out[key]=Array.isArray(out[key])?out[key].concat(value):[out[key],value];
       else out[key]=value;
     });
+
+    if(contentWritingActive())syncContentAssignmentsFromDom();
+
     const ids=selectedIds();
     if(ids.length)out.current_units=ids;
+
     for(const f of schema?.fields||[]){
       if(f.field_type==="boolean"&&typeof out[f.field_key]==="string")out[f.field_key]=out[f.field_key]==="true";
     }
+
     const details={};
+
     document.querySelectorAll(".unit-card").forEach(card=>{
       const id=String(card.dataset.unitId);
       const get=n=>card.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
@@ -156,6 +182,41 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         seniorManagementPosition:get("senior_management_position")
       };
     });
+
+    const assignments=[];
+    if(contentWritingActive()){
+      contentAssignmentSelections.forEach(item=>{
+        const cellId=String(item?.cellId||"");
+        if(!cellId)return;
+        const cell=units.find(u=>String(u.id)===cellId);
+        const assignment={
+          cell_id:cellId,
+          cell_name_ar:String(cell?.name_ar||cell?.name_en||""),
+          role:String(item?.role||""),
+          role_started_on:String(item?.roleStarted||""),
+          role_continuing:String(item?.roleContinuing||""),
+          role_left_on:String(item?.roleLeft||""),
+          joined_on:String(item?.joined||""),
+          continuing:String(item?.continuing||""),
+          left_on:String(item?.left||""),
+          notes:String(item?.notes||"")
+        };
+        assignments.push(assignment);
+        details[cellId]={
+          role:assignment.role,
+          senior_management_position:"",
+          role_started_on:assignment.role_started_on,
+          role_continuing:assignment.role_continuing==="true",
+          role_left_on:assignment.role_continuing==="true"?"":assignment.role_left_on,
+          joined_on:assignment.joined_on,
+          continuing:assignment.continuing==="true",
+          left_on:assignment.continuing==="true"?"":assignment.left_on,
+          notes:assignment.notes
+        };
+      });
+    }
+
+    out.content_assignments=assignments;
     out.current_unit_details=details;
     return out;
   }
@@ -244,16 +305,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       };
     });
 
-    const ids=selectedIds();
     const writingDeptId=writingContentUnitId();
-    const writingActive=Boolean(
-      isSupervisorForm() &&
-      writingDeptId &&
-      document.querySelector('input[name="current_units"][value="'+escSel(writingDeptId)+'"]')?.checked
-    );
+    const writingActive=contentWritingActive();
 
     if(writingActive){
-      if(!contentAssignmentSelections.length)contentAssignmentSelections=[""];
+      syncContentAssignmentsFromDom();
+      if(!contentAssignmentSelections.length)contentAssignmentSelections=[{
+        cellId:"",role:"",roleStarted:"",roleContinuing:"",roleLeft:"",
+        joined:"",continuing:"",left:"",notes:""
+      }];
     }else{
       contentAssignmentSelections=[];
     }
@@ -264,23 +324,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const contentCells=units
       .filter(u=>String(u.unit_type)==="cell")
       .filter(u=>!configuredContentCellIds.size || configuredContentCellIds.has(String(u.id)));
-
     const contentCellSet=new Set(contentCells.map(u=>String(u.id)));
 
-    // Keep only valid, unique cell selections.
-    const normalizedAssignments=[];
-    for(const raw of contentAssignmentSelections){
-      const id=String(raw||"");
-      if(!id){normalizedAssignments.push("");continue;}
-      if(contentCellSet.has(id)&&!normalizedAssignments.includes(id))normalizedAssignments.push(id);
-      else normalizedAssignments.push("");
-    }
-    while(normalizedAssignments.length>1 && normalizedAssignments[normalizedAssignments.length-1]==="")normalizedAssignments.pop();
-    contentAssignmentSelections=normalizedAssignments.length?normalizedAssignments:[""];
+    const genericIds=selectedIds().filter(id=>
+      !contentCellSet.has(String(id)) &&
+      String(id)!==String(writingDeptId)
+    );
 
-    const rendered=ids.map(id=>{
+    const rendered=genericIds.map(id=>{
       const u=units.find(x=>String(x.id)===id),d=prev[id]||{};
-      const isContentSupervisionCell=contentWritingActive()&&contentCellSet.has(String(id));
       const isAdmin=String(u?.unit_type)==="other";
 
       let options="",roleLabel="",roleName="unit_role";
@@ -288,72 +340,108 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(d.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
         roleLabel="المنصب في الإدارة العامة";
         roleName="senior_management_position";
-      }else if(isContentSupervisionCell){
-        options='<option value="supervisor" selected>مشرف</option>';
-        roleLabel="دورك في هذه الخلية";
-        roleName="unit_role";
       }else{
-        const availableRoles=isSupervisorForm()
-          ? roleOptions
-          : [{value:"volunteer",label:"متطوع / عضو"}];
+        const availableRoles=isSupervisorForm()?roleOptions:[{value:"volunteer",label:"متطوع / عضو"}];
         options='<option value="">اختر الدور</option>'+availableRoles.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("");
         roleLabel="دورك في هذه الوحدة";
         roleName="unit_role";
       }
 
-      const roleOptionsHtml='<div class="field'+(isAdmin?" full":"")+'"><label>'+roleLabel+' <span class="req">*</span></label><select name="'+roleName+'_'+esc(id)+'" '+(isContentSupervisionCell?'disabled':'')+'>'+options+'</select>'+(isContentSupervisionCell?'<input type="hidden" name="unit_role_'+esc(id)+'" value="supervisor">':"")+'</div>';
-      const joinedValue=isContentSupervisionCell?(d.joined||d.roleStarted||""):d.joined;
-      const roleStartedValue=isContentSupervisionCell?(d.roleStarted||""):d.roleStarted;
-      const roleContinuingValue=isContentSupervisionCell?(d.roleContinuing||""):d.roleContinuing;
+      const roleOptionsHtml='<div class="field'+(isAdmin?" full":"")+'"><label>'+roleLabel+' <span class="req">*</span></label><select name="'+roleName+'_'+esc(id)+'">'+options+'</select></div>';
 
       return'<div class="unit-card" data-unit-id="'+esc(id)+'"><div class="unit-card-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span class="unit-type">'+esc(typeLabel(u?.unit_type))+'</span></div><div class="unit-card-grid">'+
         roleOptionsHtml+
-        '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(roleStartedValue||"")+'"></div>'+
-        '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(roleContinuingValue==="true"?" selected":"")+' >نعم، مستمر '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(roleContinuingValue==="false"?" selected":"")+' >لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
-        '<div class="field '+(roleContinuingValue==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
-        '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(joinedValue||"")+'"></div>'+
+        '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(d.roleStarted||"")+'"></div>'+
+        '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(d.roleContinuing==="true"?" selected":"")+' >نعم، مستمر '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(d.roleContinuing==="false"?" selected":"")+' >لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
+        '<div class="field '+(d.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(d.roleLeft||"")+'"></div>'+
+        '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(d.joined||"")+'"></div>'+
         '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+((d.continuing==="true"||d.continuing===true)?" selected":"")+' >نعم، ما زلت مستمراً</option><option value="false"'+((d.continuing==="false"||d.continuing===false)?" selected":"")+' >لا، تركتها</option></select></div>'+
         '<div class="field '+((d.continuing==="false"||d.continuing===false)?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(d.left||"")+'"></div>'+
         '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="الدور، سبب الانتقال، أو أي معلومة مهمة">'+esc(d.notes||"")+'</textarea></div>'+
         '</div></div>';
     }).join("");
 
-    let contentPicker="";
+    let contentSection="";
     if(writingActive&&contentCells.length){
-      const selectedSet=new Set(contentAssignmentSelections.filter(Boolean));
-      const assignmentRows=contentAssignmentSelections.map((selectedValue,index)=>{
-        const selected=String(selectedValue||"");
-        const options='<option value="">اختر الخلية</option>'+contentCells.map(u=>{
+      const selectedSet=new Set(contentAssignmentSelections.map(x=>String(x?.cellId||"")).filter(Boolean));
+      const assignmentRows=contentAssignmentSelections.map((item,index)=>{
+        const selected=String(item?.cellId||"");
+        const role=String(item?.role||"");
+        const roleStarted=String(item?.roleStarted||"");
+        const roleContinuing=String(item?.roleContinuing||"");
+        const roleLeft=String(item?.roleLeft||"");
+        const joined=String(item?.joined||"");
+        const continuing=String(item?.continuing||"");
+        const left=String(item?.left||"");
+        const notes=String(item?.notes||"");
+
+        const cellOptions='<option value="">اختر الخلية</option>'+contentCells.map(u=>{
           const cellId=String(u.id);
-          const takenElsewhere=selectedSet.has(cellId)&&cellId!==selected;
-          return'<option value="'+esc(cellId)+'"'+(cellId===selected?" selected":"")+(takenElsewhere?" disabled":"")+'>'+esc(u.name_ar||u.name_en)+'</option>';
+          const duplicate=selectedSet.has(cellId)&&cellId!==selected;
+          return'<option value="'+esc(cellId)+'"'+(cellId===selected?" selected":"")+(duplicate?" disabled":"")+'>'+esc(u.name_ar||u.name_en)+'</option>';
         }).join("");
-        return'<div class="content-assignment-row" data-content-assignment-index="'+index+'"><label>الخلية التي تشرف عليها <span class="req">*</span><select class="content-supervision-cell-select" data-index="'+index+'">'+options+'</select></label>'+
-          (index>0?'<button type="button" class="content-assignment-remove" data-index="'+index+'">حذف</button>':"")+
+
+        const roleOptionsHtml='<option value="">اختر المنصب</option>'+roleOptions.map(o=>'<option value="'+esc(o.value)+'"'+(role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+
+        return'<div class="content-assignment-card unit-card" data-content-assignment-index="'+index+'">'+
+          '<div class="unit-card-head"><strong>تكليف كتابة محتوى '+(index+1)+'</strong><span class="unit-type">كتابة محتوى</span></div>'+
+          '<div class="unit-card-grid">'+
+          '<div class="field full"><label>الخلية <span class="req">*</span></label><select name="content_assignment_cell_'+index+'">'+cellOptions+'</select><div class="help">اختر الخلية التي تشغل فيها هذا التكليف.</div></div>'+
+          '<div class="field"><label>المنصب في هذه الخلية <span class="req">*</span></label><select name="content_assignment_role_'+index+'">'+roleOptionsHtml+'</select></div>'+
+          '<div class="field"><label>تاريخ بدء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_started_'+index+'" value="'+esc(roleStarted)+'"></div>'+
+          '<div class="field"><label>هل ما زلت تشغل المنصب؟ <span class="req">*</span></label><select name="content_assignment_role_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(roleContinuing==="true"?" selected":"")+'>نعم، ما زلت أشغله</option><option value="false"'+(roleContinuing==="false"?" selected":"")+'>لا، لم أعد أشغله</option></select></div>'+
+          '<div class="field '+(roleContinuing==="false"?"":"hidden")+'" data-content-role-left-wrap="'+index+'"><label>تاريخ انتهاء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_left_'+index+'" value="'+esc(roleLeft)+'"></div>'+
+          '<div class="field"><label>تاريخ الانضمام إلى هذه الخلية <span class="req">*</span></label><input type="date" name="content_assignment_joined_'+index+'" value="'+esc(joined)+'"></div>'+
+          '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="content_assignment_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(continuing==="true"?" selected":"")+'>نعم، ما زلت عضواً</option><option value="false"'+(continuing==="false"?" selected":"")+'>لا، لم أعد عضواً</option></select></div>'+
+          '<div class="field '+(continuing==="false"?"":"hidden")+'" data-content-left-wrap="'+index+'"><label>تاريخ مغادرة الخلية <span class="req">*</span></label><input type="date" name="content_assignment_left_'+index+'" value="'+esc(left)+'"></div>'+
+          '<div class="field notes"><label>ملاحظات</label><textarea name="content_assignment_notes_'+index+'" placeholder="أي معلومة مهمة عن هذا التكليف">'+esc(notes)+'</textarea></div>'+
+          '</div>'+
+          (index>0?'<div class="actions" style="margin-top:12px;padding-top:12px"><button type="button" class="btn btn-secondary content-assignment-remove" data-index="'+index+'">حذف هذا التكليف</button></div>':"")+
           '</div>';
       }).join("");
-      const selectedCount=contentAssignmentSelections.filter(Boolean).length;
+
+      const selectedCount=contentAssignmentSelections.filter(x=>String(x?.cellId||"")).length;
       const allSelected=selectedCount>=contentCells.length;
-      contentPicker='<div class="content-supervision-box"><h4>الخلايا التي تشرف عليها ضمن قسم «كتابة محتوى»</h4><p>لكل خلية تكليف مستقل، لذلك يُسمح باختيار خلية واحدة فقط في كل تكليف، مع تاريخ بدء وحالة استمرار وتاريخ انتهاء عند الحاجة. استخدم «إضافة تكليف آخر» لإضافة خلية أخرى.</p><div class="content-assignment-list">'+assignmentRows+'</div>'+
-        '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?'disabled':'')+'>＋ إضافة تكليف آخر</button>'+
-        '</div>';
+      contentSection='<div class="content-supervision-box"><h4>تكليفاتك ضمن قسم «كتابة محتوى»</h4><p>كل تكليف مستقل عن الآخر. لكل تكليف خلية واحدة ومنصب وتاريخ بدء وحالة استمرار، مع تاريخ انتهاء عند الحاجة، وتاريخ الانضمام إلى الخلية وحالة العضوية فيها.</p><div class="content-assignment-list">'+assignmentRows+'</div><button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button></div>';
     }
 
-    detailsHost.innerHTML=rendered+contentPicker;
+    detailsHost.innerHTML=rendered+contentSection;
 
-    detailsHost.querySelectorAll('select.content-supervision-cell-select').forEach(el=>el.addEventListener("change",()=>{
-      const index=Number(el.dataset.index||0);
-      const value=String(el.value||"");
-      const others=contentAssignmentSelections.filter((_,i)=>i!==index).filter(Boolean);
-      contentAssignmentSelections[index]=others.includes(value)?"":value;
+    detailsHost.querySelectorAll('.content-assignment-card select,.content-assignment-card input,.content-assignment-card textarea').forEach(el=>{
+      el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{
+        syncContentAssignmentsFromDom();
+        updateProgress();
+      });
+    });
+
+    detailsHost.querySelectorAll('select[name^="content_assignment_cell_"]').forEach(el=>el.addEventListener("change",()=>{
+      syncContentAssignmentsFromDom();
       renderUnitDetails();
       updateProgress();
       applyVisibility();
     }));
 
+    detailsHost.querySelectorAll('select[name^="content_assignment_role_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
+      const index=el.name.replace("content_assignment_role_continuing_","");
+      detailsHost.querySelector('[data-content-role-left-wrap="'+escSel(index)+'"]')?.classList.toggle("hidden",el.value!=="false");
+      syncContentAssignmentsFromDom();
+      updateProgress();
+    }));
+
+    detailsHost.querySelectorAll('select[name^="content_assignment_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
+      const index=el.name.replace("content_assignment_continuing_","");
+      detailsHost.querySelector('[data-content-left-wrap="'+escSel(index)+'"]')?.classList.toggle("hidden",el.value!=="false");
+      syncContentAssignmentsFromDom();
+      updateProgress();
+    }));
+
     detailsHost.querySelector("#addContentAssignment")?.addEventListener("click",()=>{
       if(contentAssignmentSelections.length<contentCells.length){
-        contentAssignmentSelections.push("");
+        syncContentAssignmentsFromDom();
+        contentAssignmentSelections.push({
+          cellId:"",role:"",roleStarted:"",roleContinuing:"",roleLeft:"",
+          joined:"",continuing:"",left:"",notes:""
+        });
         renderUnitDetails();
         updateProgress();
         applyVisibility();
@@ -361,9 +449,13 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     });
 
     detailsHost.querySelectorAll(".content-assignment-remove").forEach(el=>el.addEventListener("click",()=>{
+      syncContentAssignmentsFromDom();
       const index=Number(el.dataset.index||0);
       contentAssignmentSelections.splice(index,1);
-      if(!contentAssignmentSelections.length)contentAssignmentSelections.push("");
+      if(!contentAssignmentSelections.length)contentAssignmentSelections.push({
+        cellId:"",role:"",roleStarted:"",roleContinuing:"",roleLeft:"",
+        joined:"",continuing:"",left:"",notes:""
+      });
       renderUnitDetails();
       updateProgress();
       applyVisibility();
@@ -374,31 +466,18 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       updateProgress();
       applyVisibility();
     }));
-
     detailsHost.querySelectorAll('select[name^="unit_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_continuing_","");
-      const card=el.closest(".unit-card");
       const w=detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]');
       if(w)w.classList.toggle("hidden",el.value!=="false");
       updateProgress();
       applyVisibility();
     }));
-
     detailsHost.querySelectorAll('input[name^="unit_joined_"]').forEach(el=>el.addEventListener("change",()=>updateProgress()));
-
-    detailsHost.querySelectorAll('input[name^="unit_left_"]').forEach(el=>el.addEventListener("change",()=>{
-      if(!isSupervisorForm()){
-        const id=el.name.replace("unit_left_","");
-        const roleLeft=detailsHost.querySelector('[name="unit_role_left_'+escSel(id)+'"]');
-        if(roleLeft)roleLeft.value=el.value;
-      }
-      updateProgress();
-    }));
-
+    detailsHost.querySelectorAll('input[name^="unit_left_"]').forEach(el=>el.addEventListener("change",()=>updateProgress()));
     detailsHost.querySelectorAll('select[name^="unit_role_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_role_continuing_","");
-      const w=detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]');
-      if(w)w.classList.toggle("hidden",el.value!=="false");
+      detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]')?.classList.toggle("hidden",el.value!=="false");
       updateProgress();
     }));
   }
