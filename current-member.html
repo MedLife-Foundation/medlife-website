@@ -248,7 +248,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
           roleLabel="دورك في هذه الخلية";
           roleName="unit_role";
         }else{
-          options='<option value="">اختر الدور</option>'+roleOptions.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("");
+          const availableRoles=isSupervisorForm()
+            ? roleOptions
+            : [{value:"volunteer",label:"متطوع / عضو"}];
+          options='<option value="">اختر الدور</option>'+availableRoles.map(role=>'<option value="'+esc(role.value)+'"'+(d.role===role.value?" selected":"")+'>'+esc(role.label)+'</option>').join("");
           roleLabel="دورك في هذه الوحدة";
           roleName="unit_role";
         }
