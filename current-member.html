@@ -62,9 +62,9 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 </head>
 <body>
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · تحديث بيانات المشرفين الحاليين</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص لأعضاء فريق MedLife الحاليين لتحديث ملفهم المركزي وتوثيق أدوارهم ووحداتهم ومساهماتهم ومهاراتهم الحالية.</p></div></section>
+<section class="hero"><div class="wrap"><div class="badge" id="audienceBadge">❤️ MedLife · تحديث بيانات المتطوعين الحاليين</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص لأعضاء فريق MedLife الحاليين لتحديث ملفهم المركزي وتوثيق أدوارهم ووحداتهم ومساهماتهم ومهاراتهم الحالية.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً للمشرفين الحاليين ضمن فريق MedLife. هذا المسار معتمد لتسجيل أو تحديث العضوية مباشرة ضمن السجل المركزي لميدلايف. عند إرسال النموذج يُنشأ رقم العضوية تلقائياً (أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق)، وتُحفظ نسخة من البيانات مع توزيعها على الجداول المخصصة للأدوار والوحدات واللغات والتعليم والطوارئ والمواهب وسجل العضوية.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار معتمد لتسجيل أو تحديث العضوية مباشرة ضمن السجل المركزي لميدلايف. عند إرسال النموذج يُنشأ رقم العضوية تلقائياً (أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق)، وتُحفظ نسخة من البيانات مع توزيعها على الجداول المخصصة للأدوار والوحدات واللغات والتعليم والطوارئ والمواهب وسجل العضوية.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
 <div class="actions"><button class="btn btn-primary" id="submit" type="submit">حفظ وتحديث بياناتي</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
@@ -1021,7 +1021,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       $("description").textContent=schema.description_ar||"يرجى تحديث بيانات العضوية بدقة.";
       if(isSupervisorForm()){
         $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المشرفين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات المشرفين الموجودين ضمن فريق MedLife. عند إرسال النموذج يُسجَّل المشرف مباشرة في السجل المركزي، ويُمنح رقم عضوية تلقائياً أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق.";
+        $("audienceBadge").textContent="❤️ MedLife · تحديث وتسجيل عضوية المشرفين الحاليين";
         document.title="تحديث بيانات المشرفين الحاليين | MedLife";
+      } else {
+        $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المتطوعين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات أعضاء فريق MedLife من المتطوعين. عند إرسال النموذج تُسجَّل البيانات مباشرة في السجل المركزي، ويُمنح رقم عضوية تلقائياً أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق.";
+        $("audienceBadge").textContent="❤️ MedLife · تحديث وتسجيل عضوية المتطوعين الحاليين";
+        document.title="تحديث بيانات المتطوعين الحاليين | MedLife";
       }
       render();
     }catch(e){
