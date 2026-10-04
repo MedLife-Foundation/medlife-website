@@ -469,12 +469,46 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يرجى تأكيد صحة المعلومات والموافقة على استخدام البيانات." }, 400);
       }
 
+      const languageAssignments = Array.isArray(data.language_assignments)
+        ? data.language_assignments.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
+        : [];
+      const allowedLanguageCodes = new Set([
+        "arabic","english","french","german","turkish","kurdish",
+        "spanish","italian","russian","persian","sign_language","other"
+      ]);
+      const allowedLanguageLevels = new Set(["native","a1_a2","b1_b2","c1","c2"]);
+      const seenLanguageKeys = new Set();
+      for (const item of languageAssignments) {
+        const language = cleanText(item.language, 60).toLowerCase();
+        const other = cleanText(item.language_other, 120);
+        const level = cleanText(item.level, 30).toLowerCase();
+        if (!allowedLanguageCodes.has(language)) {
+          return json({ success: false, error: "توجد لغة غير صالحة ضمن البيانات." }, 400);
+        }
+        if (!allowedLanguageLevels.has(level)) {
+          return json({ success: false, error: "يوجد مستوى لغة غير صالح ضمن البيانات." }, 400);
+        }
+        if (language === "other" && !other) {
+          return json({ success: false, error: "يرجى كتابة اسم اللغة عند اختيار «أخرى»." }, 400);
+        }
+        const languageKey = language === "other"
+          ? "other:" + other.replace(/\s+/g, " ").trim().toLowerCase()
+          : language;
+        if (seenLanguageKeys.has(languageKey)) {
+          return json({ success: false, error: "لا يمكن تكرار اللغة نفسها أكثر من مرة." }, 400);
+        }
+        seenLanguageKeys.add(languageKey);
+      }
+
       const requestedIds = Array.isArray(data.current_units)
         ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 26)
         : [];
       const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
         ? data.current_unit_details
         : {};
+      const contentAssignments = Array.isArray(data.content_assignments)
+        ? data.content_assignments.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
+        : [];
       const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
@@ -585,55 +619,81 @@ export async function onRequestPost({ request }) {
         }
       }
       const today = new Date().toISOString().slice(0, 10);
-      if (requestedUnits.some(unit => !unit.joined_on)) {
-        return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
-      }
-      const missingRoleStart = requestedUnits.find(unit => !unit.role_started_on);
-      if (missingRoleStart) {
-        return json({ success: false, error: "يرجى تحديد تاريخ بدء الدور داخل «" + missingRoleStart.name_ar + "»." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.role_started_on > today || unit.role_started_on < unit.joined_on)) {
-        return json({ success: false, error: "تاريخ بدء الدور يجب أن يكون بعد أو في تاريخ الانضمام إلى الوحدة وألا يكون في المستقبل." }, 400);
-      }
-      if (requestedUnits.some(unit => !unit.role_continuing_provided)) {
-        return json({ success: false, error: "يرجى تحديد حالة استمرار الدور داخل كل وحدة." }, 400);
-      }
-      if (requestedUnits.some(unit => !unit.role_continuing && !unit.role_left_on)) {
-        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء الدور الذي لم تعد تشغله." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.role_continuing && !unit.continuing)) {
-        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد انتهاء العضوية في الوحدة." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.joined_on > today)) {
-        return json({ success: false, error: "تاريخ بدء الانتساب لا يمكن أن يكون في المستقبل." }, 400);
-      }
-      if (requestedUnits.some(unit => !unit.continuing && !unit.left_on)) {
-        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء كل انتساب غير مستمر." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.left_on && (unit.left_on < unit.joined_on || unit.left_on > today))) {
-        return json({ success: false, error: "تواريخ انتهاء الانتساب يجب أن تكون بعد تاريخ البدء وألا تتجاوز تاريخ اليوم." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.role_left_on && (unit.role_left_on < unit.role_started_on || unit.role_left_on > today))) {
-        return json({ success: false, error: "تواريخ انتهاء الدور يجب أن تكون بعد تاريخ بدء الدور وألا تتجاوز تاريخ اليوم." }, 400);
-      }
-      if (requestedUnits.some(unit => unit.role_left_on && unit.left_on && unit.role_left_on > unit.left_on)) {
-        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
-      }
-      const contentWritingDepartmentSelected = supervisorForm && requestedUnits.some(unit =>
+      const isContentWritingUnit = unit => Boolean(
+        unit &&
+        supervisorForm &&
         unit.unit_type === "department" &&
         unit.name_ar === "كتابة محتوى"
       );
+      const timelineUnits = requestedUnits.filter(unit => !isContentWritingUnit(unit));
+
+      if (timelineUnits.some(unit => !unit.joined_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
+      }
+      const missingRoleStart = timelineUnits.find(unit => !unit.role_started_on);
+      if (missingRoleStart) {
+        return json({ success: false, error: "يرجى تحديد تاريخ بدء الدور داخل «" + missingRoleStart.name_ar + "»." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.role_started_on > today || unit.role_started_on < unit.joined_on)) {
+        return json({ success: false, error: "تاريخ بدء الدور يجب أن يكون بعد أو في تاريخ الانضمام إلى الوحدة وألا يكون في المستقبل." }, 400);
+      }
+      if (timelineUnits.some(unit => !unit.role_continuing_provided)) {
+        return json({ success: false, error: "يرجى تحديد حالة استمرار الدور داخل كل وحدة." }, 400);
+      }
+      if (timelineUnits.some(unit => !unit.role_continuing && !unit.role_left_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء الدور الذي لم تعد تشغله." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.role_continuing && !unit.continuing)) {
+        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد انتهاء العضوية في الوحدة." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.joined_on > today)) {
+        return json({ success: false, error: "تاريخ بدء الانتساب لا يمكن أن يكون في المستقبل." }, 400);
+      }
+      if (timelineUnits.some(unit => !unit.continuing && !unit.left_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ انتهاء كل انتساب غير مستمر." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.left_on && (unit.left_on < unit.joined_on || unit.left_on > today))) {
+        return json({ success: false, error: "تواريخ انتهاء الانتساب يجب أن تكون بعد تاريخ البدء وألا تتجاوز تاريخ اليوم." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.role_left_on && (unit.role_left_on < unit.role_started_on || unit.role_left_on > today))) {
+        return json({ success: false, error: "تواريخ انتهاء الدور يجب أن تكون بعد تاريخ بدء الدور وألا تتجاوز تاريخ اليوم." }, 400);
+      }
+      if (timelineUnits.some(unit => unit.role_left_on && unit.left_on && unit.role_left_on > unit.left_on)) {
+        return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
+      }
+
+      const contentWritingDepartmentSelected = requestedUnits.some(unit => isContentWritingUnit(unit));
       if (contentWritingDepartmentSelected) {
-        const supervisedContentCells = requestedUnits.filter(unit =>
-          unit.unit_type === "cell" &&
-          unit.role === "supervisor"
-        );
-        if (!supervisedContentCells.length) {
+        if (!contentAssignments.length) {
           return json({
             success: false,
-            error: "عند اختيار «كتابة محتوى» يجب تحديد خلية محتوى واحدة على الأقل تكون مشرفاً عليها."
+            error: "عند اختيار «كتابة محتوى» يجب تسجيل تكليف واحد على الأقل."
           }, 400);
         }
+        const seenContentCells = new Set();
+        for (const assignment of contentAssignments) {
+          const cellId = cleanText(assignment.cell_id, 80);
+          const role = cleanText(assignment.role, 40).toLowerCase();
+          const matchingCell = requestedUnits.find(unit =>
+            unit.id === cellId && unit.unit_type === "cell"
+          );
+          if (!matchingCell) {
+            return json({ success: false, error: "يوجد تكليف كتابة محتوى مرتبط بخلية غير موجودة ضمن الاختيار." }, 400);
+          }
+          if (seenContentCells.has(cellId)) {
+            return json({ success: false, error: "لا يمكن تكرار الخلية نفسها في أكثر من تكليف كتابة محتوى." }, 400);
+          }
+          seenContentCells.add(cellId);
+          if (!["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"].includes(role)) {
+            return json({ success: false, error: "يوجد منصب غير صالح ضمن تكليف كتابة المحتوى." }, 400);
+          }
+          const detail = requestedUnitDetails[cellId];
+          if (!detail || String(detail.role || "").toLowerCase() !== role) {
+            return json({ success: false, error: "تفاصيل تكليف كتابة المحتوى لا تتطابق مع تفاصيل الخلية." }, 400);
+          }
+        }
+      } else if (contentAssignments.length) {
+        return json({ success: false, error: "وصلت بيانات تكليفات كتابة المحتوى من دون اختيار قسم كتابة محتوى." }, 400);
       }
 
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
@@ -712,6 +772,7 @@ export async function onRequestPost({ request }) {
         certificate_types: certificateTypes,
         certificate_other: cleanText(data.certificate_other, 500),
         availability: cleanText(data.availability, 50),
+        education_track: cleanText(data.academic_status, 60),
         interest_areas: toArray(data.interest_areas),
         continuing_as_volunteer: data.continuing_as_volunteer === true,
         additional_notes: cleanText(data.additional_notes, 3000),
