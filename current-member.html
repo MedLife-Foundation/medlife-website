@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تجديد عضوية عضو حالي | MedLife</title>
+<title>تحديث بيانات متطوع حالي | MedLife</title>
 <link rel="icon" href="logo.PNG">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -48,16 +48,16 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 </head>
 <body>
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Membership</div><h1 id="title">تجديد العضوية</h1><p id="description">نقوم بإعادة بناء قاعدة بيانات MedLife، لذلك نحتاج إلى معلومات محدثة ودقيقة تساعدنا في إدارة العضوية والخلايا والأقسام واكتشاف المواهب.</p></div></section>
+<section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Volunteer Data</div><h1 id="title">تحديث بيانات المتطوعين</h1><p id="description">هذا النموذج مخصص للمتطوعين الحاليين في MedLife لتحديث معلوماتهم، وحداتهم، أدوارهم، ساعاتهم، ومواهبهم، بحيث تبقى قاعدة المتطوعين الأساسية دقيقة ومحدثة.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لتحديث بيانات عضويتهم. عند استخدام مسار المشرفين، الهدف هو جمع وتحديث بيانات الأدوار والخلايا الحالية ضمن قاعدة بيانات الفريق، وليس تقديم طلب عضوية جديد.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص حصراً للمتطوعين الحاليين في MedLife، سواء كانوا أعضاء أو مشرفين أو مساعدين أو مشرفين عامّين. المعلومات والأدوار والخلايا والساعات والمواهب التي تسجلها هنا تُستخدم لتحديث السجل المركزي للمتطوع تلقائياً.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
-<div class="actions"><button class="btn btn-primary" id="submit" type="submit">تسجيل تجديد العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
+<div class="actions"><button class="btn btn-primary" id="submit" type="submit">حفظ وتحديث بياناتي</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">يتم تحديث بيانات العضو مباشرة بعد الإرسال الناجح، مع إمكانية التصحيح الإداري للمستخدمين المخولين.</div></main>
+<div class="footer" id="footerNote">بعد الإرسال الناجح تُطبّق البيانات على قاعدة المتطوعين الأساسية، مع الاحتفاظ بسجل التحديث ودورة العضوية.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -120,10 +120,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       const get=n=>card.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
       const joined=get("unit_joined");
       const continuing=get("unit_continuing")==="true";
-      const roleStarted=get("unit_role_started")||(!isSupervisorForm()?joined:"");
+      const roleStarted=get("unit_role_started")||"";
       const roleContinuingValue=get("unit_role_continuing");
-      const roleContinuing=isSupervisorForm()?roleContinuingValue==="true":continuing;
-      const roleLeft=isSupervisorForm()?((roleContinuingValue==="true")?"":get("unit_role_left")):(continuing?"":get("unit_left"));
+      const roleContinuing=roleContinuingValue==="true";
+      const roleLeft=roleContinuing?"":get("unit_role_left");
       const unit=units.find(u=>String(u.id)===id);
       const seniorPosition=get("senior_management_position");
       if(isSupervisorForm()&&String(unit?.unit_type)==="other"&&seniorPosition)out.senior_management_position=seniorPosition;
@@ -232,7 +232,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const rendered=ids.map(id=>{
       const u=units.find(x=>String(x.id)===id),d=prev[id]||{};
       const isContentSupervisionCell=contentWritingActive()&&contentCellSet.has(String(id));
-      if(isSupervisorForm()){
+      {
         const isAdmin=String(u?.unit_type)==="other";
         const isForcedContentCell=isContentSupervisionCell;
         const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
