@@ -871,8 +871,17 @@ export async function onRequestPost({ request }) {
       body: JSON.stringify(payload)
     });
     if (!response.ok) {
-      const text = await response.text();
-      console.error("Public management write failed", target, response.status, text);
+      const errorText = await response.text();
+      console.error("Public management write failed", target, response.status, errorText);
+      if (
+        response.status === 409 ||
+        /23505|national_id|public_volunteer_applications_national_id_active_unique|الرقم الوطني/i.test(errorText)
+      ) {
+        return json({
+          success: false,
+          error: "هذا الرقم الوطني مسجل مسبقاً. لا يمكن إنشاء سجل عضو مكرر."
+        }, 409);
+      }
       return json({ success: false, error: "تعذر تسجيل الطلب في منصة الإدارة." }, 502);
     }
     const created = body.action === "article_submission" ? await response.json().catch(() => []) : [];
