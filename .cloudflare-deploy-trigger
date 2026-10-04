@@ -1,12 +1,11 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form Repair V6
-Timestamp: 2026-10-04T06:15:00+03:00
+Release: MedLife Supervisor Form Repair V7
+Timestamp: 2026-10-04T06:20:00+03:00
 Source: main
 
-Force deploy after supervisor membership form repair.
-General Administration: canonical management positions are rendered directly.
-Content Writing: selecting the Content Writing department renders independent assignment cards inside the department: cell, position, role start, role continuity/end, cell membership start, membership continuity/end, and notes.
-Additional Content Writing assignments are added with the plus button.
-Managed current-member page is synchronized into public_site_content.
-Trigger: content writing assignment card repair
+Fix Content Writing cell dropdown.
+The supervisor form now populates Content Writing cells directly from the configured supervisor-form content_cells, with live org unit names when available.
+Each Content Writing assignment remains an independent card with cell, position, start date, continuity/end dates, membership start/continuity/end, and notes.
+Managed current-member page synchronized into public_site_content.
+Trigger: final content cell dropdown repair
