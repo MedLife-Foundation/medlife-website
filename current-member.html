@@ -130,6 +130,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   .id-card-main{print-color-adjust:exact;-webkit-print-color-adjust:exact}
   .id-card-bottom{print-color-adjust:exact;-webkit-print-color-adjust:exact}
 }
+
+.profile-photo-field{padding:16px;border:1px solid #e2e7ee;border-radius:18px;background:linear-gradient(180deg,#fbfcfe,#fff);box-shadow:0 8px 24px rgba(21,29,54,.04)}
+.profile-photo-field>label{display:block;margin-bottom:9px;color:var(--navy);font-size:12px;font-weight:900}.profile-photo-box{display:grid;grid-template-columns:92px minmax(0,1fr);gap:14px;align-items:center}.profile-photo-preview{width:92px;height:92px;border-radius:50%;overflow:hidden;border:1px solid #f0cbd3;background:#fff0f3;color:var(--red);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex:0 0 92px}.profile-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}.profile-photo-controls{display:flex;flex-direction:column;gap:7px}.profile-photo-controls input[type=file]{min-height:46px;padding:8px;border-style:dashed;background:#fcfdff}.profile-photo-help{font-size:10px;color:var(--muted);line-height:1.8}.profile-photo-error{display:none;color:var(--err);font-size:10px;line-height:1.7}.profile-photo-error.show{display:block}.id-profile-image{width:94px;height:94px;border-radius:50%;display:block;object-fit:cover;margin:0 auto 13px;border:1px solid #ffd2dc;box-shadow:0 10px 24px rgba(232,50,85,.10)}
+@media(max-width:650px){.profile-photo-box{grid-template-columns:1fr}.profile-photo-preview{margin:0 auto}.profile-photo-controls{width:100%}.id-profile-image{width:72px;height:72px;margin-bottom:9px}}
 </style>
 </head>
 <body>
@@ -153,6 +157,11 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
   let contentAssignmentSelections=[];
+  let pendingProfileImageFile=null;
+  let profileImageData=null;
+  const CLOUDINARY_CLOUD_NAME="pyvrk863";
+  const CLOUDINARY_UPLOAD_PRESET="medlife_supervisor_photo";
+  const PROFILE_IMAGE_MAX_BYTES=5*1024*1024;
   let languageAssignments=[];
   let certificateHistory=[];
 
@@ -176,6 +185,83 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     {value:"financial_director",label:"المدير المالي"}
   ];
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
+
+  function renderProfilePhotoField(){
+    if(!isSupervisorForm())return "";
+    return '<div class="field full profile-photo-field" data-field-wrap="profile_image">'+
+      '<label>الصورة الشخصية <span class="help" style="display:inline">اختياري</span></label>'+
+      '<div class="profile-photo-box">'+
+        '<div class="profile-photo-preview" id="profilePhotoPreview"><span>ML</span></div>'+
+        '<div class="profile-photo-controls">'+
+          '<input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">'+
+          '<div class="profile-photo-help">يمكنك رفع صورة شخصية واضحة بصيغة JPG أو PNG أو WebP. الحد الأقصى لحجم الملف 5 ميغابايت. سيتم تحسين الصورة تلقائياً قبل تخزينها.</div>'+
+          '<div id="profilePhotoError" class="profile-photo-error"></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function setProfilePhotoError(message){
+    const error=$("profilePhotoError");
+    if(!error)return;
+    error.textContent=message||"";
+    error.classList.toggle("show",Boolean(message));
+  }
+
+  function validateProfileImageFile(file){
+    if(!file)return "";
+    const allowed=["image/jpeg","image/png","image/webp"];
+    if(!allowed.includes(String(file.type||"").toLowerCase()))return"يرجى اختيار صورة بصيغة JPG أو PNG أو WebP.";
+    if(file.size>PROFILE_IMAGE_MAX_BYTES)return"حجم الصورة يجب ألا يتجاوز 5 ميغابايت.";
+    return "";
+  }
+
+  function bindProfilePhotoEvents(){
+    const input=$("profilePhotoInput");
+    const preview=$("profilePhotoPreview");
+    if(!input||!preview)return;
+    input.addEventListener("change",()=>{
+      const file=input.files?.[0]||null;
+      pendingProfileImageFile=null;
+      profileImageData=null;
+      setProfilePhotoError("");
+      if(!file){
+        preview.innerHTML="<span>ML</span>";
+        return;
+      }
+      const error=validateProfileImageFile(file);
+      if(error){
+        input.value="";
+        preview.innerHTML="<span>ML</span>";
+        setProfilePhotoError(error);
+        return;
+      }
+      pendingProfileImageFile=file;
+      const objectUrl=URL.createObjectURL(file);
+      preview.innerHTML='<img src="'+esc(objectUrl)+'" alt="معاينة الصورة الشخصية">';
+    });
+  }
+
+  async function uploadProfileImage(file){
+    const validationError=validateProfileImageFile(file);
+    if(validationError)throw new Error(validationError);
+    const body=new FormData();
+    body.append("file",file);
+    body.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+    const response=await fetch("https://api.cloudinary.com/v1_1/"+encodeURIComponent(CLOUDINARY_CLOUD_NAME)+"/image/upload",{
+      method:"POST",
+      body
+    });
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok||!payload.secure_url||!payload.public_id){
+      const message=payload?.error?.message||"تعذر رفع الصورة إلى Cloudinary.";
+      throw new Error(message+" تأكد من إعداد Upload Preset الخاص بميدلايف.");
+    }
+    return{
+      url:String(payload.secure_url),
+      public_id:String(payload.public_id)
+    };
+  }
 
   function writingContentUnitId(){
     const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
@@ -929,6 +1015,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       languageGroup.html+=renderLanguageField();
     }
 
+    if(isSupervisorForm()){
+      let photoGroup=groups.find(g=>g.title==="المعلومات الشخصية والتواصل");
+      if(!photoGroup){
+        photoGroup={title:"المعلومات الشخصية والتواصل",description:"البيانات الأساسية، الإقامة، ووسائل التواصل التي نعتمد عليها في ملفك المركزي.",html:""};
+        groups.unshift(photoGroup);
+      }
+      photoGroup.html=renderProfilePhotoField()+photoGroup.html;
+    }
+
     groups.sort((a,b)=>{
       const ai=sectionOrder.indexOf(a.title),bi=sectionOrder.indexOf(b.title);
       return (ai<0?999:ai)-(bi<0?999:bi);
@@ -953,6 +1048,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     bindLanguageAssignmentEvents();
     bindCertificateHistoryEvents();
     renderUnitDetails();
+    bindProfilePhotoEvents();
     applyVisibility();
   }
 
@@ -1173,11 +1269,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       ? languageItems.map((item,index)=>'<div class="confirm-item"><span>اللغة '+(index+1)+'</span><strong>'+esc(item.language==="other"?(item.language_other||"أخرى"):languageLabel(item.language))+(item.level?" — "+esc(levelLabel(item.level)):"")+'</strong></div>').join("")
       : "";
     const name=String(values.full_name||"عضو ميدلايف");
+    const profileImageUrl=String(values.profile_image_url||"").trim();
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
       '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">عضوية مسجّلة</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
+      '<div class="id-card-main"><div class="id-photo">'+(profileImageUrl?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لمستخدم ميدلايف">':'<div class="id-initials">'+esc(initials(name))+'</div>')+'<strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
       '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
       (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>':"")+
@@ -1251,9 +1348,18 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     e.preventDefault();
     const error=validate();
     if(error){setStatus("err",error);return;}
-    const data=collect();
     submit.disabled=true;
-    setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
+    try{
+      if(isSupervisorForm()&&pendingProfileImageFile){
+        setStatus("ok","جارٍ رفع الصورة الشخصية...");
+        profileImageData=await uploadProfileImage(pendingProfileImageFile);
+      }
+      const data=collect();
+      if(isSupervisorForm()&&profileImageData?.url){
+        data.profile_image_url=profileImageData.url;
+        data.profile_image_public_id=profileImageData.public_id;
+      }
+      setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
     try{
       const r=await fetch("/api/management",{
         method:"POST",
