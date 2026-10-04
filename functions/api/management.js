@@ -697,8 +697,8 @@ export async function onRequestPost({ request }) {
       }
 
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
-      const overallContinuing = data.continuing_as_volunteer === true;
-      if (overallContinuing !== hasContinuingUnit) {
+      const overallContinuing = supervisorForm ? true : data.continuing_as_volunteer === true;
+      if (!supervisorForm && overallContinuing !== hasContinuingUnit) {
         return json({ success: false, error: hasContinuingUnit
           ? "يوجد قسم ما زلت مستمراً فيه، لذلك يجب اختيار الاستمرار مع ميدلايف أيضاً."
           : "لم تعد مستمراً بأي قسم مختار، لذلك يجب اختيار عدم الاستمرار مع ميدلايف."
@@ -712,13 +712,50 @@ export async function onRequestPost({ request }) {
       const toArray = value => Array.isArray(value)
         ? value.map(item => cleanText(item, 100)).filter(Boolean).slice(0, 30)
         : [];
-      const certificateTypes = toArray(data.certificate_types).filter(value => value !== "none");
+      const allowedCertificateTypes = new Set([
+        "volunteer_service","thank_you","participation","training","appreciation","other"
+      ]);
+      const rawCertificateHistory = Array.isArray(data.certificate_history)
+        ? data.certificate_history.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
+        : [];
+      const certificateHistory = [];
+      for (const item of rawCertificateHistory) {
+        const type = cleanText(item.type, 40).toLowerCase();
+        const title = cleanText(item.title, 500);
+        const issuingOrganization = cleanText(item.issuing_organization, 500);
+        const issuedDate = normalizeDate(item.issued_date);
+        const issuingUnitId = cleanText(item.issuing_unit_id, 80);
+        const referenceCode = cleanText(item.reference_code, 120);
+        const notes = cleanText(item.notes, 1500);
+        if (!allowedCertificateTypes.has(type)) {
+          return json({ success: false, error: "يوجد نوع شهادة غير صالح ضمن البيانات." }, 400);
+        }
+        if (!title || !issuingOrganization || !issuedDate) {
+          return json({ success: false, error: "كل شهادة يجب أن تتضمن اسمها والجهة المانحة وتاريخ الحصول عليها." }, 400);
+        }
+        if (issuedDate > new Date().toISOString().slice(0,10)) {
+          return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
+        }
+        if (issuingUnitId && !validExactUnits.some(unit => String(unit.id) === issuingUnitId)) {
+          return json({ success: false, error: "يوجد فريق أو وحدة غير صالحة مرتبطة بإحدى الشهادات." }, 400);
+        }
+        certificateHistory.push({
+          type,
+          title,
+          issuing_organization: issuingOrganization,
+          issued_date: issuedDate,
+          issuing_unit_id: issuingUnitId || null,
+          reference_code: referenceCode || null,
+          notes: notes || null
+        });
+      }
+      const certificateTypes = [...new Set(certificateHistory.map(item => item.type))];
 
       const payload = {
         form_id: dynamic.form_id,
         form_version: dynamic.form_version,
         status: "pending",
-        membership_number: cleanText(data.membership_number, 80),
+        membership_number: null,
         full_name: cleanText(data.full_name, 150),
         father_name: cleanText(data.father_name, 150),
         mother_name: cleanText(data.mother_name, 150),
@@ -772,6 +809,7 @@ export async function onRequestPost({ request }) {
         volunteer_commitment_hours: numberValue(data.volunteer_commitment_hours),
         certificate_types: certificateTypes,
         certificate_other: cleanText(data.certificate_other, 500),
+        certificate_history: certificateHistory,
         availability: cleanText(data.availability, 50),
         education_track: cleanText(data.academic_status, 60),
         interest_areas: toArray(data.interest_areas),
@@ -792,7 +830,8 @@ export async function onRequestPost({ request }) {
             continuing: unit.continuing,
             left_on: unit.left_on,
             notes: unit.notes
-          }]))
+          }])),
+          certificate_history: certificateHistory
         },
         form_schema: {
           ...dynamic.form_schema,
