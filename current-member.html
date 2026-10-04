@@ -78,6 +78,14 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     {value:"content_writer",label:"كاتب محتوى"}
   ];
   const roleLabels=Object.fromEntries(roleOptions.map(x=>[x.value,x.label]));
+  const seniorManagementOptions=[
+    {value:"general_supervisor_syria",label:"المشرف العام على ميدلايف في سوريا"},
+    {value:"advisor_deputy_general_supervisor",label:"المستشار — معاون المشرف العام"},
+    {value:"executive_director",label:"المدير التنفيذي"},
+    {value:"medical_director",label:"المدير الطبي"},
+    {value:"legal_advisor",label:"المستشار القانوني"},
+    {value:"financial_director",label:"المدير المالي"}
+  ];
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
 
   function writingContentUnitId(){
@@ -89,11 +97,11 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function contentWritingActive(){
+    if(!isSupervisorForm())return false;
     const departmentId=writingContentUnitId();
     if(!departmentId)return false;
-    const role=String(form.querySelector('[name="unit_role_'+escSel(departmentId)+'"]')?.value||"");
     const selected=form.querySelector('input[name="current_units"][value="'+escSel(departmentId)+'"]')?.checked;
-    return Boolean(selected&&role==="content_writer");
+    return Boolean(selected);
   }
 
   function selectedIds(){
@@ -236,7 +244,9 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         const isAdmin=String(u?.unit_type)==="other";
         const isForcedContentCell=isContentSupervisionCell;
         const positionField=(schema?.fields||[]).find(f=>f.field_key==="senior_management_position");
-        const positionOptions=Array.isArray(positionField?.options)?positionField.options:[];
+        const positionOptions=Array.isArray(positionField?.options)&&positionField.options.length
+          ? positionField.options
+          : seniorManagementOptions;
 
         let options="",roleLabel="",roleName="unit_role";
         if(isAdmin){
@@ -286,7 +296,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
     let contentPicker="";
     if(writingActive&&contentCells.length){
-      contentPicker='<div class="content-supervision-box"><h4>الخلايا المرتبطة بقسم كتابة المحتوى</h4><p>ظهرت هذه الخلايا لأنك اخترت قسم «كتابة محتوى». اختر خلية واحدة أو أكثر. عند اختيار دور «كاتب محتوى»، تُسجّل الخلايا المختارة تلقائياً كمسؤوليات إشراف مستقلة.</p><div class="content-supervision-grid">'+
+      contentPicker='<div class="content-supervision-box"><h4>الخلايا المرتبطة بقسم كتابة المحتوى</h4><p>اختر خلية واحدة أو أكثر من الخلايا التي ترتبط بعملك ضمن قسم «كتابة محتوى». يظهر هذا الاختيار لكل دور تختاره داخل القسم، وتُحفظ كل خلية كتكليف إشرافي مستقل مع تواريخه.</p><div class="content-supervision-grid">'+
         contentCells.map(u=>{
           const checked=previousContentCellIds.includes(String(u.id))||ids.includes(String(u.id));
           return'<label class="content-supervision-choice"><input class="content-supervision-cell" type="checkbox" value="'+esc(u.id)+'"'+(checked?" checked":"")+'><span>'+esc(u.name_ar||u.name_en)+'</span></label>';
