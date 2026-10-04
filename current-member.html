@@ -58,6 +58,74 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .content-department-card .help{font-size:10px;line-height:1.9}
 
 .section-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:900;box-shadow:inset 0 0 0 1px #ffd3dc}.section h2{align-items:center}.section h2:before{display:none}
+
+/* Final membership card refinement */
+.card-capture{display:flex;justify-content:center;background:transparent;padding:8px 0 18px}
+.id-card{width:min(860px,100%);border:1px solid #dfe4ec;border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 24px 70px rgba(21,29,54,.14)}
+.id-card-top{min-height:104px;padding:22px 28px;background:linear-gradient(135deg,#111a33 0%,#202c4d 58%,#29365d 100%);position:relative;align-items:center}
+.id-card-top:after{content:"";position:absolute;inset:0 auto 0 0;width:34%;background:linear-gradient(120deg,rgba(255,255,255,.07),transparent);pointer-events:none}
+.id-brand{position:relative;z-index:1;align-items:center;gap:13px}
+.id-brand img{height:48px;width:48px;object-fit:contain;padding:5px;border-radius:12px;box-shadow:0 5px 18px rgba(0,0,0,.12)}
+.id-brand strong{font-size:15px;line-height:1.7;letter-spacing:-.15px}
+.id-brand span{font-size:10px;opacity:.78;margin-top:2px}
+.id-status{position:relative;z-index:1;padding:8px 13px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;font-size:10px;font-weight:900}
+.id-card-main{padding:28px;display:grid;grid-template-columns:190px minmax(0,1fr);gap:24px;align-items:stretch;background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%)}
+.id-photo{min-height:220px;border:1px solid #e3e7ee;border-radius:20px;padding:20px 16px;text-align:center;background:#f9fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
+.id-initials{width:94px;height:94px;border-radius:50%;margin:0 auto 13px;background:linear-gradient(135deg,#fff0f3,#ffe2e9);color:#d82f51;border:1px solid #ffd2dc;font-size:28px;box-shadow:0 10px 24px rgba(232,50,85,.10)}
+.id-photo strong{max-width:165px;font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.id-photo span{font-size:9px!important;line-height:1.7}
+.id-meta{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(76px,auto);gap:12px;align-content:stretch}
+.id-meta>div{min-width:0;border:1px solid #e3e7ee;border-radius:16px;padding:13px 15px;background:#fff;display:flex;flex-direction:column;justify-content:center;box-shadow:0 5px 18px rgba(21,29,54,.035)}
+.id-meta>div:last-child{border:1px solid #f3b6c3;background:linear-gradient(135deg,#fff7f9,#fff);box-shadow:0 7px 22px rgba(232,50,85,.07)}
+.id-meta span{font-size:9px;color:#7a8496;margin-bottom:6px;font-weight:800}
+.id-meta strong{font-size:11px;line-height:1.8;color:#18223b;overflow-wrap:anywhere}
+.id-meta>div:last-child strong{font-size:18px;line-height:1.45;color:#e83255;letter-spacing:.2px;word-break:break-word}
+.id-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 28px;border-top:1px solid #e8ebf0;background:#f8fafc;color:#687286;font-size:9px}
+.id-card-bottom strong{color:#29334d;font-size:9px}
+.confirmation-note{width:min(860px,100%);margin:0 auto 20px;padding:15px 18px;border-radius:15px;box-shadow:0 6px 18px rgba(21,29,54,.04)}
+.confirmation-details{width:min(860px,100%);margin:0 auto}
+.confirmation-details .confirm-section{background:#fff;border:1px solid #e4e8ef;border-radius:18px;margin:0 0 16px;padding:20px}
+.confirmation-details .confirm-section h3{display:flex;align-items:center;gap:9px;font-size:15px}
+.confirmation-details .confirm-section h3:before{content:"";width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#e83255;box-shadow:0 0 0 5px #fff0f3}
+.confirmation-details .confirm-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.confirmation-details .confirm-item{min-width:0;min-height:68px;padding:11px 13px;border:1px solid #e4e8ef;border-radius:13px;background:#fbfcfe;display:flex;flex-direction:column;justify-content:center}
+.confirmation-details .confirm-item span{font-size:8px;color:#7b8495;margin-bottom:4px}
+.confirmation-details .confirm-item strong{font-size:10px;line-height:1.8;overflow-wrap:anywhere}
+.confirmation-details .confirm-unit{border:1px solid #f0cbd3;border-radius:15px;background:#fffafb;padding:13px}
+.confirmation-details .confirm-unit .confirm-grid{gap:8px}
+.confirmation-details .confirm-thanks{border:1px solid #e4e8ef;border-radius:18px;margin-top:16px}
+@media(max-width:680px){
+  .id-card-top{padding:18px 17px;min-height:auto;flex-direction:row}
+  .id-brand img{width:42px;height:42px}
+  .id-brand strong{font-size:12px}
+  .id-brand span{font-size:9px}
+  .id-status{font-size:9px;padding:7px 10px}
+  .id-card-main{padding:17px;grid-template-columns:1fr;gap:13px}
+  .id-photo{min-height:150px;padding:15px}
+  .id-initials{width:72px;height:72px;font-size:23px;margin-bottom:9px}
+  .id-meta{grid-template-columns:1fr 1fr;gap:8px;grid-auto-rows:minmax(66px,auto)}
+  .id-meta>div{padding:10px 11px;border-radius:13px}
+  .id-meta>div:last-child strong{font-size:15px}
+  .id-card-bottom{padding:10px 17px;font-size:8px}
+  .confirmation-note{margin-bottom:14px}
+  .confirmation-details .confirm-section{padding:15px;margin-bottom:12px;border-radius:15px}
+  .confirmation-details .confirm-grid{grid-template-columns:1fr}
+}
+@media(max-width:430px){
+  .id-card-top{align-items:flex-start;gap:9px}
+  .id-status{white-space:normal;text-align:center;max-width:92px;line-height:1.5}
+  .id-meta{grid-template-columns:1fr}
+  .id-card-bottom{align-items:flex-start;flex-direction:column}
+}
+@media print{
+  .confirmation-details{display:none!important}
+  .confirmation-note{display:block;margin:0 auto 12px;width:min(860px,100%)}
+  .card-capture{padding:0}
+  .id-card{width:100%;box-shadow:none}
+  .id-card-top{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .id-card-main{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .id-card-bottom{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -1100,17 +1168,22 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">تم تسجيل العضوية</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">بطاقة عضوية إلكترونية</span></div><div class="id-meta">'+
-      '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
-      '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">عضوية مسجّلة</div></div>'+
+      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
+      '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
+      '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
+      '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
+      '<div><span>حالة السجل</span><strong>فعّالة</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم حفظ بياناتك بنجاح. أُضيفت البيانات مباشرة إلى السجل المركزي لميدلايف، وتم تثبيت رقم العضوية ضمن السجل.</div>'+
-      '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
+      '<div class="id-card-bottom"><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span><span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span></div>'+
+      '</div></div>'+
+      '<div class="confirmation-details">'+
+      '<div class="confirmation-note">تم حفظ بياناتك بنجاح. أُضيفت البيانات إلى السجل المركزي لميدلايف، وتم تثبيت رقم العضوية ضمن سجل العضو.</div>'+
+      '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التحديث.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
       '<section class="confirm-section"><h3>الشهادات والتكريمات السابقة</h3><p>الشهادات التي تم تسجيلها في هذا النموذج.</p><div class="confirm-grid">'+certificateHtml+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل ميدلايف</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
       '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ بيانات عضويتك بنجاح وتطبيقها مباشرة على السجل المركزي، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
-      '</div></div>'+
+      '</div>'+
       '<div class="confirm-actions">'+
       '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
       '<button type="button" class="btn download-btn" id="downloadImage">تحميل البطاقة كصورة</button>'+
