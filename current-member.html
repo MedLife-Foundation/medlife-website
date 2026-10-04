@@ -357,7 +357,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   function renderField(f){
     if(isSupervisorForm()&&["language_assignments","language","language_level","language_other"].includes(f.field_key))return"";
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
-    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position")return"";
+    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")return"";
     const req=f.required?'<span class="req"> *</span>':"";
     const help=f.help_ar?'<div class="help">'+esc(f.help_ar)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
