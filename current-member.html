@@ -359,7 +359,6 @@ input,select,textarea{font-size:12px;line-height:1.6}
 
   function syncContentAssignmentsFromDom(){
     const rows=Array.from(form.querySelectorAll(".content-assignment-card"));
-    if(!rows.length)return;
     contentAssignmentSelections=rows.map(row=>({
       cellId:String(row.querySelector('[name^="content_assignment_cell_"]')?.value||""),
       role:String(row.querySelector('[name^="content_assignment_role_"]')?.value||""),
@@ -795,10 +794,12 @@ input,select,textarea{font-size:12px;line-height:1.6}
     detailsHost.innerHTML=rendered;
 
     detailsHost.querySelectorAll('.content-assignment-card select,.content-assignment-card input,.content-assignment-card textarea').forEach(el=>{
-      el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{
+      const sync=()=>{
         syncContentAssignmentsFromDom();
         updateProgress();
-      });
+      };
+      el.addEventListener("input",sync);
+      el.addEventListener("change",sync);
     });
 
     detailsHost.querySelector("#addContentAssignment")?.addEventListener("click",()=>{
@@ -869,7 +870,9 @@ input,select,textarea{font-size:12px;line-height:1.6}
   }
 
   function validate(){
+    if(isSupervisorForm())syncContentAssignmentsFromDom();
     const data=collect();
+    if(isSupervisorForm())syncContentAssignmentsFromDom();
     if(isSupervisorForm()){
       syncLanguageAssignmentsFromDom();
       syncCertificateHistoryFromDom();
