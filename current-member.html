@@ -71,7 +71,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">بعد الإرسال تُحفظ نسخة كاملة من التحديث كسجل تاريخي، ثم تُطبَّق البيانات المنظمة على ملف المتطوع والجداول المركزية المرتبطة به، بما في ذلك الوحدات والأدوار والمناصب واللغات والتعليم والطوارئ والمواهب وتكليفات كتابة المحتوى.</div></main>
+<div class="footer" id="footerNote">بعد الحفظ تُحفظ نسخة كاملة من التحديث كسجل تاريخي، ثم تُطبَّق البيانات المنظمة على ملف المشرف والجداول المركزية المرتبطة به، بما في ذلك الوحدات والأدوار والمناصب واللغات والتعليم والطوارئ والمواهب وتكليفات كتابة المحتوى والشهادات.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -82,6 +82,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   let schema=null,units=[];
   let contentAssignmentSelections=[];
   let languageAssignments=[];
+  let certificateHistory=[];
 
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const setStatus=(type,msg)=>{status.className="status show "+type;status.textContent=msg};
@@ -134,6 +135,14 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     {value:"b1_b2",label:"متوسط (B1–B2)"},
     {value:"c1",label:"متقدم (C1)"},
     {value:"c2",label:"إتقان / طلاقة (C2)"}
+  ];
+  const certificateTypeOptions=[
+    {value:"volunteer_service",label:"شهادة تطوع من ميدلايف"},
+    {value:"participation",label:"شهادة مشاركة في نشاط"},
+    {value:"training",label:"شهادة تدريب"},
+    {value:"appreciation",label:"شهادة تقدير"},
+    {value:"thank_you",label:"شهادة تكريم / شكر"},
+    {value:"other",label:"شهادة من جهة أخرى / أخرى"}
   ];
 
   function syncLanguageAssignmentsFromDom(){
@@ -203,6 +212,16 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       language:item.language,
       language_other:item.languageOther,
       level:item.level
+    }));
+    syncCertificateHistoryFromDom();
+    out.certificate_history=certificateHistory.map(item=>({
+      type:item.type,
+      title:item.title,
+      issuing_organization:item.issuingOrganization,
+      issued_date:item.issuedDate,
+      issuing_unit_id:item.issuingUnitId||null,
+      reference_code:item.referenceCode||null,
+      notes:item.notes||null
     }));
     if(completeLanguageAssignments.length){
       out.language=completeLanguageAssignments.map(item=>item.language==="other"?(item.languageOther||"أخرى"):item.language);
@@ -308,10 +327,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية، الإقامة، ووسائل التواصل التي نعتمد عليها في ملفك المركزي."];
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو عند تعذر الوصول إليك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","اختر وضعك الأكاديمي أو المهني الحالي، وستظهر فقط المعلومات التعليمية والمهنية المرتبطة به."];
-    if(["membership_number","join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","سجل انضمامك إلى MedLife، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب والتكليفات المرتبطة بها."];
-    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days","continuing_as_volunteer"].includes(k))return["الالتزام والتوفر التطوعي","بيانات التفرغ والقدرة التطوعية الحالية، وتفاصيل المشاركة الميدانية عند اختيار فريق ميداني."];
-    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نوثّق ما تستطيع تقديمه اليوم، ومواهبك وخبراتك، والفرص التي ترغب بتطويرها أو تجربتها داخل MedLife."];
-    if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","الشهادات أو التوثيق التطوعي السابق، إن وُجد."];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في ميدلايف","سجل انضمامك إلى ميدلايف، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب والتكليفات المرتبطة بها."];
+    if(["certificate_history"].includes(k))return["الشهادات والتكريمات السابقة","سجّل الشهادات أو التكريمات التي حصلت عليها من ميدلايف أو من جهات أخرى، مع توثيق عنوان الشهادة والجهة المانحة وتاريخ الحصول عليها."];
+    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days"].includes(k))return["الالتزام والتوفر التطوعي","بيانات التفرغ والقدرة التطوعية الحالية، وتفاصيل المشاركة الميدانية عند اختيار فريق ميداني."];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نوثّق ما تستطيع تقديمه اليوم، ومواهبك وخبراتك، والفرص التي ترغب بتطويرها أو تجربتها داخل ميدلايف."];
     return["معلومات إضافية",""];
   }
 
@@ -319,10 +338,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     "المعلومات الشخصية والتواصل",
     "معلومات الطوارئ والتواصل",
     "المؤهل العلمي والمهني",
-    "عضويتك في MedLife",
+    "عضويتك في ميدلايف",
     "الالتزام والتوفر التطوعي",
     "المهارات والمواهب والمساهمة القادمة",
-    "الشهادات والتوثيق",
+    "الشهادات والتكريمات السابقة",
     "معلومات إضافية"
   ];
 
@@ -373,8 +392,79 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى إتقانها</label><div class="help">أضف اللغات التي تتقنها، ويُسجَّل مستوى كل لغة بشكل مستقل. يمكنك إضافة أكثر من لغة دون تكرار اللغة نفسها.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
   }
 
+
+  function syncCertificateHistoryFromDom(){
+    const rows=Array.from(form.querySelectorAll(".certificate-history-card"));
+    certificateHistory=rows.map(row=>({
+      type:String(row.querySelector('[name^="certificate_history_type_"]')?.value||""),
+      title:String(row.querySelector('[name^="certificate_history_title_"]')?.value||""),
+      issuingOrganization:String(row.querySelector('[name^="certificate_history_issuer_"]')?.value||""),
+      issuedDate:String(row.querySelector('[name^="certificate_history_date_"]')?.value||""),
+      issuingUnitId:String(row.querySelector('[name^="certificate_history_unit_"]')?.value||""),
+      referenceCode:String(row.querySelector('[name^="certificate_history_reference_"]')?.value||""),
+      notes:String(row.querySelector('[name^="certificate_history_notes_"]')?.value||"")
+    }));
+  }
+
+  function renderCertificateHistoryField(){
+    const rows=certificateHistory.map((item,index)=>{
+      const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.type===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+      const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+units.map(u=>'<option value="'+esc(u.id)+'"'+(String(item.issuingUnitId)===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
+      return'<div class="certificate-history-card" data-certificate-index="'+index+'">'+
+        '<div class="certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
+        '<div class="grid">'+
+          '<div class="field"><label>نوع الشهادة <span class="req">*</span></label><select name="certificate_history_type_'+index+'">'+typeOptions+'</select></div>'+
+          '<div class="field"><label>تاريخ الحصول على الشهادة <span class="req">*</span></label><input type="date" name="certificate_history_date_'+index+'" value="'+esc(item.issuedDate||"")+'"></div>'+
+          '<div class="field full"><label>اسم الشهادة / عنوانها <span class="req">*</span></label><input type="text" name="certificate_history_title_'+index+'" value="'+esc(item.title||"")+'" placeholder="مثال: شهادة تطوع متميز"></div>'+
+          '<div class="field"><label>الجهة المانحة <span class="req">*</span></label><input type="text" name="certificate_history_issuer_'+index+'" value="'+esc(item.issuingOrganization||"")+'" placeholder="اسم الجهة المانحة"></div>'+
+          '<div class="field"><label>الفريق / الوحدة المرتبطة</label><select name="certificate_history_unit_'+index+'">'+unitOptions+'</select></div>'+
+          '<div class="field"><label>رقم أو مرجع الشهادة</label><input type="text" name="certificate_history_reference_'+index+'" value="'+esc(item.referenceCode||"")+'" placeholder="اختياري"></div>'+
+          '<div class="field full"><label>ملاحظات</label><textarea name="certificate_history_notes_'+index+'" placeholder="أي معلومة إضافية عن الشهادة">'+esc(item.notes||"")+'</textarea></div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    return'<div class="field full" data-field-wrap="certificate_history">'+
+      '<label>الشهادات والتكريمات السابقة</label>'+
+      '<div class="help">سجّل الشهادات أو التكريمات التي حصلت عليها من ميدلايف أو من أي جهة أخرى. يمكنك إضافة أكثر من شهادة، وإذا لم تحصل على أي شهادة اترك هذا القسم دون إضافة.</div>'+
+      '<div class="certificate-history-list">'+rows+'</div>'+
+      '<button type="button" class="btn btn-secondary certificate-add" id="addCertificate">＋ إضافة شهادة</button>'+
+      '</div>';
+  }
+
+  function bindCertificateHistoryEvents(){
+    host.querySelectorAll(".certificate-history-card input,.certificate-history-card select,.certificate-history-card textarea").forEach(el=>{
+      el.addEventListener("input",syncCertificateHistoryFromDom);
+      el.addEventListener("change",syncCertificateHistoryFromDom);
+    });
+    host.querySelectorAll(".certificate-remove").forEach(el=>el.addEventListener("click",()=>{
+      syncCertificateHistoryFromDom();
+      certificateHistory.splice(Number(el.dataset.index||0),1);
+      renderCertificateHistoryIntoHost();
+      updateProgress();
+      applyVisibility();
+    }));
+    $("addCertificate")?.addEventListener("click",()=>{
+      syncCertificateHistoryFromDom();
+      certificateHistory.push({type:"",title:"",issuingOrganization:"",issuedDate:"",issuingUnitId:"",referenceCode:"",notes:""});
+      renderCertificateHistoryIntoHost();
+      updateProgress();
+      applyVisibility();
+    });
+  }
+
+  function renderCertificateHistoryIntoHost(){
+    const wrap=host.querySelector('[data-field-wrap="certificate_history"]');
+    if(!wrap)return;
+    const parent=wrap.parentElement;
+    const temp=document.createElement("div");
+    temp.innerHTML=renderCertificateHistoryField();
+    parent.replaceChild(temp.firstElementChild,wrap);
+    bindCertificateHistoryEvents();
+  }
+
   function renderField(f){
-    if(isSupervisorForm()&&["language_assignments","language","language_level","language_other"].includes(f.field_key))return"";
+    if(isSupervisorForm()&&["language_assignments","language","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))return"";
+    if(isSupervisorForm()&&f.field_key==="certificate_history")return renderCertificateHistoryField();
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
     if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")return"";
     const req=f.required?'<span class="req"> *</span>':"";
@@ -606,6 +696,28 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const data=collect();
     if(isSupervisorForm()){
       syncLanguageAssignmentsFromDom();
+      syncCertificateHistoryFromDom();
+      const certificateRows=certificateHistory.filter(item=>{
+        return String(item?.type||"").trim()||String(item?.title||"").trim()||String(item?.issuingOrganization||"").trim()||String(item?.issuedDate||"").trim();
+      });
+      const validCertificateTypes=new Set(certificateTypeOptions.map(item=>item.value));
+      const seenCertificates=new Set();
+      const today=new Date().toISOString().slice(0,10);
+      for(const item of certificateRows){
+        const type=String(item.type||"").trim();
+        const title=String(item.title||"").trim();
+        const issuer=String(item.issuingOrganization||"").trim();
+        const issued=String(item.issuedDate||"").trim();
+        if(!validCertificateTypes.has(type))return"يوجد نوع شهادة غير صالح.";
+        if(!title)return"يرجى كتابة اسم كل شهادة.";
+        if(!issuer)return"يرجى كتابة الجهة المانحة لكل شهادة.";
+        if(!issued)return"يرجى تحديد تاريخ الحصول على كل شهادة.";
+        if(issued>today)return"تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل.";
+        const key=[type,title.toLowerCase(),issuer.toLowerCase(),issued,String(item.issuingUnitId||"")].join("|");
+        if(seenCertificates.has(key))return"لا يمكن تكرار الشهادة نفسها أكثر من مرة.";
+        seenCertificates.add(key);
+      }
+
       const languageRows=languageAssignments.filter(item=>{
         return String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||"").trim();
       });
@@ -727,7 +839,11 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         languageRendered=true;
         continue;
       }
-      if(isSupervisorForm()&&["language_assignments","language_level","language_other"].includes(f.field_key))continue;
+      if(isSupervisorForm()&&["language_assignments","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))continue;
+      if(isSupervisorForm()&&f.field_key==="certificate_history"){
+        group.html+=renderCertificateHistoryField();
+        continue;
+      }
 
       group.html+=renderField(f);
     }
@@ -735,7 +851,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(isSupervisorForm()&&!languageRendered){
       let languageGroup=groups.find(g=>g.title==="المهارات والمواهب والمساهمة القادمة");
       if(!languageGroup){
-        languageGroup={title:"المهارات والمواهب والمساهمة القادمة",description:"نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل MedLife.",html:""};
+        languageGroup={title:"المهارات والمواهب والمساهمة القادمة",description:"نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل ميدلايف.",html:""};
         groups.push(languageGroup);
       }
       languageGroup.html+=renderLanguageField();
@@ -763,6 +879,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       updateProgress();
     }));
     bindLanguageAssignmentEvents();
+    bindCertificateHistoryEvents();
     renderUnitDetails();
     applyVisibility();
   }
@@ -956,6 +1073,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         '</div>'+note+'</div>';
     }).join("");
 
+    const certificateItems=Array.isArray(values.certificate_history)?values.certificate_history.filter(item=>item&&((item.type||"")||(item.title||"")||(item.issuing_organization||"")||(item.issued_date||""))):[];
+    const certificateTypeLabel=value=>{
+      const hit=certificateTypeOptions.find(o=>String(o.value)===String(value));
+      return hit?.label||value;
+    };
+    const certificateHtml=certificateItems.length
+      ? certificateItems.map((item,index)=>'<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+esc(certificateTypeLabel(item.type))+': '+esc(item.title||"—")+' — '+esc(item.issuing_organization||"—")+' — '+esc(item.issued_date||"—")+'</strong></div>').join("")
+      : '<div class="confirm-item"><span>الشهادات والتكريمات</span><strong>لم تُسجّل شهادات سابقة.</strong></div>';
+
     const languageItems=Array.isArray(values.language_assignments)?values.language_assignments.filter(item=>item&&((item.language||"")||(item.language_other||"")||(item.level||""))):[];
     const languageField=fields.find(f=>f.field_key==="language");
     const levelField=fields.find(f=>f.field_key==="language_level");
@@ -970,18 +1096,19 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const languageHtml=languageItems.length
       ? languageItems.map((item,index)=>'<div class="confirm-item"><span>اللغة '+(index+1)+'</span><strong>'+esc(item.language==="other"?(item.language_other||"أخرى"):languageLabel(item.language))+(item.level?" — "+esc(levelLabel(item.level)):"")+'</strong></div>').join("")
       : "";
-    const name=String(values.full_name||"عضو MedLife");
+    const name=String(values.full_name||"عضو ميدلايف");
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم تسجيل العضوية</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال رسمي لتجديد العضوية</span></div><div class="id-meta">'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">تم تسجيل العضوية</div></div>'+
+      '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">بطاقة عضوية إلكترونية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
       '<div class="confirmation-note">تم تسجيل أو تحديث عضويتك بنجاح. أُضيفت البيانات مباشرة إلى السجل المركزي لعضو MedLife، وتم تثبيت رقم العضوية ضمن السجل.</div>'+
       '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
-      '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
+      '<section class="confirm-section"><h3>الشهادات والتكريمات السابقة</h3><p>الشهادات التي تم تسجيلها في هذا النموذج.</p><div class="confirm-grid">'+certificateHtml+'</div></section>'+
+      '<section class="confirm-section"><h3>العضوية داخل ميدلايف</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
       '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ بيانات عضويتك بنجاح وتطبيقها مباشرة على السجل المركزي، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
       '</div></div>'+
       '<div class="confirm-actions">'+
@@ -1020,13 +1147,13 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       $("title").textContent=schema.name_ar||"تجديد العضوية";
       $("description").textContent=schema.description_ar||"يرجى تحديث بيانات العضوية بدقة.";
       if(isSupervisorForm()){
-        $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المشرفين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات المشرفين الموجودين ضمن فريق MedLife. عند إرسال النموذج يُسجَّل المشرف مباشرة في السجل المركزي، ويُمنح رقم عضوية تلقائياً أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق.";
+        $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المشرفين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات المشرفين النشطين في ميدلايف وبناء سجل مركزي متكامل لهم. عند حفظ النموذج تُسجَّل البيانات مباشرة في السجل المركزي، ويُصدر رقم عضوية جديد تلقائياً وتظهر بطاقة العضوية بعد اكتمال الحفظ.";
         $("audienceBadge").textContent="❤️ MedLife · تحديث وتسجيل عضوية المشرفين الحاليين";
-        document.title="تحديث بيانات المشرفين الحاليين | MedLife";
+        document.title="تحديث بيانات المشرفين الحاليين | ميدلايف";
       } else {
-        $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المتطوعين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات أعضاء فريق MedLife من المتطوعين. عند إرسال النموذج تُسجَّل البيانات مباشرة في السجل المركزي، ويُمنح رقم عضوية تلقائياً أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق.";
+        $("introNote").innerHTML="<strong>تحديث وتسجيل عضوية المتطوعين الحاليين:</strong> هذا الرابط مخصص لإعادة جمع بيانات أعضاء فريق ميدلايف من المتطوعين. عند إرسال النموذج تُسجَّل البيانات مباشرة في السجل المركزي.";
         $("audienceBadge").textContent="❤️ MedLife · تحديث وتسجيل عضوية المتطوعين الحاليين";
-        document.title="تحديث بيانات المتطوعين الحاليين | MedLife";
+        document.title="تحديث بيانات المتطوعين الحاليين | ميدلايف";
       }
       render();
     }catch(e){
@@ -1041,7 +1168,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(error){setStatus("err",error);return;}
     const data=collect();
     submit.disabled=true;
-    setStatus("ok","جارٍ تسجيل تجديد العضوية مباشرة...");
+    setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
     try{
       const r=await fetch("/api/management",{
         method:"POST",
@@ -1050,7 +1177,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       });
       const p=await r.json();
       if(!r.ok||!p.success)throw new Error(p.error||"تعذر إرسال الطلب.");
-      setStatus("ok","تم تسجيل وتجديد عضويتك بنجاح.");
+      setStatus("ok","تم حفظ بياناتك وإصدار بطاقة عضويتك بنجاح.");
       renderConfirmation(data,p.submission_id,p.membership_number);
       window.scrollTo({top:0,behavior:"smooth"});
     }catch(e){
