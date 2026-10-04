@@ -432,7 +432,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
 
     const details={};
 
-    document.querySelectorAll(".unit-card").forEach(card=>{
+    document.querySelectorAll(".unit-card[data-unit-id]").forEach(card=>{
       const id=String(card.dataset.unitId);
       const get=n=>card.querySelector('[name^="'+n+'_"]')?.value||"";
       const joined=get("unit_joined");
