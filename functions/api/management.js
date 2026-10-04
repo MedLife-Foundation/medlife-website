@@ -635,8 +635,11 @@ export async function onRequestPost({ request }) {
       const isContentWritingUnit = unit => Boolean(
         unit &&
         supervisorForm &&
-        unit.unit_type === "department" &&
-        unit.name_ar === "كتابة محتوى"
+        (
+          String(unit.id || "") === "b1ea8c52-b405-4ad9-b9f6-2768a22a7827" ||
+          String(unit.name_ar || "").trim() === "كتابة محتوى" ||
+          String(unit.name_en || "").trim().toLowerCase() === "content writing"
+        )
       );
       const timelineUnits = requestedUnits.filter(unit => !isContentWritingUnit(unit));
 
