@@ -906,7 +906,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
     const items=fields
       .filter(f=>f.is_active!==false)
-      .filter(f=>!["current_units","current_unit_details","senior_management_position"].includes(f.field_key))
+      .filter(f=>!["current_units","current_unit_details","senior_management_position","content_assignments","language_assignments","language","language_level","language_other"].includes(f.field_key))
       .map(f=>{
         const value=values[f.field_key];
         const empty=Array.isArray(value)?value.length===0:value===undefined||value===null||String(value).trim()==="";
