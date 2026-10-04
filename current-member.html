@@ -143,9 +143,20 @@ body{font-feature-settings:"kern" 1,"ss01" 1;letter-spacing:-.01em}
 .hero p,.section p,.help,.note,.status,.footer{font-weight:400}
 .card{box-shadow:0 22px 60px rgba(21,29,54,.075);border-color:#dfe5ed}
 .note{font-size:11px;line-height:2}
-.section{padding:22px 0 8px}
-.section h2{font-size:20px;letter-spacing:-.025em}
+.section{position:relative;margin:0 0 18px;padding:20px 19px 22px;border:1px solid #e2e7ee;border-radius:18px;background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%);box-shadow:0 7px 24px rgba(21,29,54,.035)}
+.section:last-child{margin-bottom:0}
+.section h2{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:19px;letter-spacing:-.025em;color:var(--navy)}
+.section h2 .section-number{width:32px;height:32px;flex:0 0 32px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff0f3;color:var(--accent);box-shadow:inset 0 0 0 1px #ffd3dc;font-size:12px;font-weight:900;line-height:1;direction:ltr}
+.section>p{margin:0 0 17px;padding-right:42px;color:var(--muted);font-size:10.5px;line-height:1.85}
+.section .grid{row-gap:14px}
+.section .field{background:transparent}
 .field label{font-size:11px}
+@media(max-width:650px){
+  .section{margin-bottom:13px;padding:16px 13px 17px;border-radius:16px}
+  .section h2{gap:8px;font-size:17px}
+  .section h2 .section-number{width:29px;height:29px;flex-basis:29px;border-radius:9px;font-size:11px}
+  .section>p{padding-right:37px;margin-bottom:14px;font-size:10px;line-height:1.8}
+}
 input,select,textarea{font-size:12px;line-height:1.6}
 .choice span,.unit-choice span{font-size:10.5px}
 .choice,.unit-choice{transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
@@ -887,6 +898,16 @@ input,select,textarea{font-size:12px;line-height:1.6}
     });
   }
 
+  function renumberVisibleSections(){
+    let number=0;
+    host.querySelectorAll(".form-section").forEach(section=>{
+      if(section.classList.contains("hidden"))return;
+      number+=1;
+      const badge=section.querySelector(".section-number");
+      if(badge)badge.textContent=String(number);
+    });
+  }
+
   function applyVisibility(){
     const data=collect();
     for(const f of schema?.fields||[]){
@@ -894,6 +915,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
       if(w)w.classList.toggle("hidden",!visible(f,data));
     }
     syncSectionVisibility();
+    renumberVisibleSections();
     updateProgress();
   }
 
