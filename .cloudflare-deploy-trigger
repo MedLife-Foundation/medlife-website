@@ -1,21 +1,25 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form + Central Volunteer Record V12
-Timestamp: 2026-10-04T08:40:00+03:00
+Release: MedLife Supervisor Form + Central Volunteer Record V13
+Timestamp: 2026-10-04T02:01:00Z
 Source: main
 
 Final supervisor renewal form:
-- unified and ordered form sections
-- removed blank conditional section headings
-- polished content-writing assignment cards
-- repeatable multilingual language cards with independent proficiency
-- Arabic presentation consistent with the form purpose
-- managed current-member.html kept byte-for-byte synchronized with public_site_content
+- unified section hierarchy and cleaner wording
+- one coherent membership section with an optional membership-number reference
+- polished General Administration and content-writing assignment cards
+- repeatable multilingual language cards with independent proficiency and custom language entry
+- mobile-friendly presentation and conditional sections kept clean
+- managed current-member.html synchronized with public_site_content
 
 Central volunteer record:
+- membership-number matching strengthened for supervisor updates
+- unique non-empty membership numbers enforced
 - languages normalized in volunteer_languages
 - content-writing assignments normalized in volunteer_content_assignments
 - unit roles and histories normalized in volunteer_unit_members
 - General Administration positions normalized in volunteer_org_positions
 - education and emergency data normalized in their canonical tables
+- talents, additional skills, contributions and development interests kept on volunteer_profiles
 - membership cycle snapshots retained in volunteer_membership_records
+- volunteer_member_directory exposes roles, languages, content assignments, skills and key membership data
