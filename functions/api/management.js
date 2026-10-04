@@ -718,6 +718,7 @@ export async function onRequestPost({ request }) {
         form_id: dynamic.form_id,
         form_version: dynamic.form_version,
         status: "pending",
+        membership_number: cleanText(data.membership_number, 80),
         full_name: cleanText(data.full_name, 150),
         father_name: cleanText(data.father_name, 150),
         mother_name: cleanText(data.mother_name, 150),
