@@ -163,6 +163,17 @@ input,select,textarea{font-size:12px;line-height:1.6}
 .choice:hover,.unit-choice:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(21,29,54,.045)}
 .unit-group{box-shadow:0 7px 22px rgba(21,29,54,.035)}
 .btn{font-size:11px}
+
+
+/* ===== Final form interface refinement ===== */
+.form-section{border-color:#e1e6ee;background:#ffffff;box-shadow:0 8px 26px rgba(21,29,54,.045)}
+.section h2 .section-number{width:auto;height:auto;min-width:34px;flex:0 0 auto;padding:0;border:0;border-radius:0;background:transparent;color:var(--accent);box-shadow:none;font-size:18px;font-weight:900;line-height:1;letter-spacing:-.02em}
+.section h2{gap:9px;margin-bottom:7px}.section>p{padding-right:0;max-width:790px}.section .field{min-width:0}.field label{font-size:11.5px;line-height:1.65}
+input,select,textarea{min-height:48px;padding:10px 13px;border-radius:12px;box-shadow:0 1px 0 rgba(21,29,54,.02)}textarea{min-height:118px}
+.choice,.unit-choice{position:relative;min-height:50px;padding:12px 13px;border-radius:13px}.choice:has(input:checked),.unit-choice:has(input:checked){border-color:#ed9baa;background:#fff4f6;box-shadow:0 6px 18px rgba(232,50,85,.065)}
+.units{gap:12px}.unit-group{padding:15px;border-radius:16px;background:#fbfcfe}.unit-group h3{font-size:12.5px}.unit-details{gap:12px}.unit-card{padding:16px;border-radius:16px;border-color:#efd1d7;box-shadow:0 7px 20px rgba(21,29,54,.04)}.unit-card-head{margin-bottom:13px;padding-bottom:10px}.content-assignment-card{background:#fff;border-color:#e5e9f0}.content-assignment-card .unit-card-head strong{font-size:12.5px}
+.actions{margin-top:24px;padding-top:18px}.status{font-weight:600}
+@media(max-width:650px){.section{padding:15px 12px 16px;margin-bottom:12px}.section h2{font-size:16.5px;gap:7px}.section h2 .section-number{min-width:29px;font-size:16px}.section>p{padding:0;margin-bottom:13px;font-size:10px}input,select,textarea{min-height:46px}.unit-group{padding:13px}.unit-card{padding:13px}}
 </style>
 </head>
 <body>
@@ -891,7 +902,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
       if(section.classList.contains("hidden"))return;
       number+=1;
       const badge=section.querySelector(".section-number");
-      if(badge)badge.textContent=String(number);
+      if(badge)badge.textContent=String(number)+"-";
     });
   }
 
@@ -1111,7 +1122,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
       sectionEl.className="section form-section";
       sectionEl.dataset.sectionTitle=group.title;
       sectionEl.dataset.sectionNumber=String(index+1);
-      sectionEl.innerHTML='<h2><span class="section-number" aria-hidden="true">'+(index+1)+'</span><span>'+esc(group.title)+'</span></h2><p>'+esc(group.description||"")+'</p>'+group.html;
+      sectionEl.innerHTML='<h2><span class="section-number" aria-hidden="true">'+(index+1)+'-</span><span>'+esc(group.title)+'</span></h2><p>'+esc(group.description||"")+'</p>'+group.html;
       host.appendChild(sectionEl);
     });
 
