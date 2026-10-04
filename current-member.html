@@ -44,6 +44,12 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .id-card-main{padding:26px 28px;grid-template-columns:160px 1fr;gap:26px}.id-photo{padding:17px;border-radius:18px;background:linear-gradient(180deg,#fafbfc,#fff);box-shadow:inset 0 0 0 1px #f0f2f5}.id-initials{width:88px;height:88px;margin-bottom:11px}.id-meta{gap:11px}.id-meta>div{min-height:72px;padding:12px 13px;border-radius:13px;background:#fcfdff}.id-meta>div:last-child{border-color:#f4b8c4;background:#fff5f7}.id-meta>div:last-child strong{color:var(--accent);font-size:14px}
 .confirmation-note{margin:0 28px 0;padding:16px 18px;background:#f0faf6;border-color:#c8ebdc;color:#145f49;border-radius:14px}.confirm-section{padding:24px 28px}.confirm-section h3{font-size:15px}.confirm-grid{gap:11px}.confirm-item{min-height:62px;padding:11px 13px;border-radius:13px;background:#fcfdff}.confirm-unit{padding:14px;border-radius:14px}.confirm-thanks{padding:26px 28px;background:#fafbfd}.confirm-actions{padding:24px 28px 30px}
 @media(max-width:650px){.wrap{width:min(100% - 20px,1120px)}.content-supervision-grid{grid-template-columns:1fr}.content-supervision-box{padding:13px}.hero{padding:30px 0 16px}.hero h1{font-size:28px}.card{padding:17px;border-radius:18px}.section{padding-top:16px}.unit-card{padding:14px}.actions{margin-top:22px}.btn-primary{min-width:100%}.btn-secondary{width:100%;text-align:center}.confirmation{padding-top:8px}.id-card{border-radius:18px}.id-card-top{padding:18px 16px;flex-direction:column;gap:12px}.id-brand{align-items:flex-start}.id-brand img{height:38px}.id-brand strong{font-size:13px}.id-card-main{padding:18px 16px;grid-template-columns:1fr;gap:15px}.id-photo{display:grid;grid-template-columns:72px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:right}.id-initials{width:64px;height:64px;grid-row:1/3;margin:0}.id-photo strong{font-size:13px}.id-photo span{margin-top:0!important}.id-meta{grid-template-columns:1fr 1fr;gap:9px}.id-meta>div{min-height:68px}.confirmation-note{margin:0 16px;padding:14px}.confirm-section{padding:19px 16px}.confirm-grid{grid-template-columns:1fr}.confirm-actions{padding:20px 16px 22px}.confirm-thanks{padding:22px 16px}}
+
+.section h2{display:flex;align-items:center;gap:9px}
+.section h2:before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px var(--accent-soft)}
+.unit-group h3{display:flex;align-items:center;gap:8px}
+.unit-group h3:before{content:"";width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:var(--accent)}
+.content-department-card .help{font-size:10px;line-height:1.9}
 </style>
 </head>
 <body>
@@ -57,7 +63,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">بعد الإرسال الناجح تُطبّق البيانات على قاعدة المتطوعين الأساسية، مع الاحتفاظ بسجل التحديث ودورة العضوية.</div></main>
+<div class="footer" id="footerNote">بعد الإرسال تُحفظ البيانات كطلب تحديث. وبعد اعتماده تُطبَّق على السجل المركزي للمتطوع، مع الاحتفاظ بسجل التحديث ودورة العضوية.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -292,13 +298,13 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function sectionFor(k){
-    if(["full_name","father_name","mother_name","national_id","country","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية","البيانات الأساسية ووسائل التواصل"];
+    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية ووسائل التواصل."];
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو في حال تعذر التواصل معك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
-    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك داخل MedLife","سجل الانضمام والخلايا والأقسام والأدوار والاختصاصات التي تقدمها."];
-    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife"];
-    if(k==="field_available_days")return["التوفر للعمل الميداني","تظهر هذه الإجابة عند اختيار فريق ميداني."];
-    if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت"];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في MedLife","سجل الانضمام والخلايا والأقسام والأدوار والتكليفات الحالية والسابقة."];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife."];
+    if(k==="field_available_days")return["التوفر للعمل الميداني","يظهر هذا القسم عند اختيار فريق ميداني."];
+    if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت."];
     return["معلومات إضافية",""];
   }
 
@@ -345,7 +351,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         '</div>'+
       '</div>';
     }).join("");
-    return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى الإتقان</label><div class="help">يمكنك إضافة أكثر من لغة، ويُسجّل مستوى كل لغة بشكل مستقل.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
+    return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى إتقانها</label><div class="help">يمكنك إضافة أكثر من لغة، ويُسجّل مستوى كل لغة بشكل مستقل.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
   }
 
   function renderField(f){
@@ -455,7 +461,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
         return'<div class="unit-card content-department-card" data-unit-id="'+esc(id)+'">'+
           '<div class="unit-card-head"><strong>'+esc(u.name_ar||u.name_en||"كتابة محتوى")+'</strong><span class="unit-type">قسم</span></div>'+
-          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف تشغله ضمن قسم كتابة المحتوى بشكل مستقل. يمكنك إضافة أكثر من خلية أو منصب، ولكل تكليف تاريخه وحالته الخاصة.</div>'+
+          '<div class="help" style="margin-bottom:10px">سجّل كل تكليف في قسم كتابة المحتوى بشكل مستقل؛ لكل تكليف خلية ومنصب وتواريخ وحالة عضوية وملاحظات خاصة به. يمكنك إضافة تكليف آخر عند الحاجة.</div>'+
           '<div class="content-assignment-list">'+assignmentRows+'</div>'+
           '<button type="button" class="btn btn-secondary content-add-assignment" id="addContentAssignment" '+(allSelected?"disabled":"")+'>＋ إضافة تكليف آخر</button>'+
           '</div>';
@@ -569,6 +575,28 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
   function validate(){
     const data=collect();
+    if(isSupervisorForm()){
+      syncLanguageAssignmentsFromDom();
+      const languageRows=languageAssignments.filter(item=>{
+        return String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||"").trim();
+      });
+      const validLanguageCodes=new Set(languageOptions.map(item=>item.value));
+      const validLanguageLevels=new Set(languageLevelOptions.map(item=>item.value));
+      const seenLanguages=new Set();
+      for(const item of languageRows){
+        const language=String(item?.language||"").trim();
+        const other=String(item?.languageOther||"").trim();
+        const level=String(item?.level||"").trim();
+        if(!language)return"يرجى تحديد اللغة في كل بطاقة لغة مستخدمة.";
+        if(!validLanguageCodes.has(language))return"اللغة المختارة غير صالحة.";
+        if(!level)return"يرجى تحديد مستوى إتقان كل لغة.";
+        if(!validLanguageLevels.has(level))return"مستوى اللغة المختار غير صالح.";
+        if(language==="other"&&!other)return"يرجى كتابة اسم اللغة عند اختيار «أخرى».";
+        const languageKey=language==="other"?"other:"+other.replace(/\s+/g," ").toLowerCase():language;
+        if(seenLanguages.has(languageKey))return"لا يمكن تكرار اللغة نفسها أكثر من مرة.";
+        seenLanguages.add(languageKey);
+      }
+    }
     for(const f of schema?.fields||[]){
       if(!visible(f,data)||f.field_key==="current_unit_details")continue;
       const v=data[f.field_key];
@@ -908,15 +936,15 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم تحديث البيانات</div></div>'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم تسجيل طلب التحديث</div></div>'+
       '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال رسمي لتجديد العضوية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم تحديث بيانات عضويتك الحالية مباشرة في قاعدة أعضاء MedLife وتوثيق المعلومات والأدوار التي أرسلتها في السجل الرسمي. يمكنك الاحتفاظ بهذه البطاقة كإثبات لعملية تحديث البيانات.</div>'+
+      '<div class="confirmation-note">تم تسجيل طلب تحديث بيانات عضويتك بنجاح. تُحفظ البيانات ضمن طلب التحديث وسجل العضوية، وبعد اعتماد الطلب تُطبَّق البيانات على السجل المركزي لعضو MedLife.</div>'+
       '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم تحديث بياناتك الحالية مباشرة في قاعدة أعضاء MedLife. احتفظ بالبطاقة أو نزّلها كصورة أو PDF للرجوع إليها.</p></div>'+
+      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ طلب تحديث بياناتك بنجاح. بعد اعتماده سيُثبّت على السجل المركزي، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
       '</div></div>'+
       '<div class="confirm-actions">'+
       '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
