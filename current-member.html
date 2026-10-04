@@ -1028,6 +1028,7 @@ input,select,textarea{min-height:48px;padding:10px 13px;border-radius:12px;box-s
       }
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
+      const unitCard=Array.from(detailsHost.querySelectorAll('.unit-card[data-unit-id]')).find(card=>String(card.dataset.unitId)===id);
       if(isSupervisorForm()){
         const isAdmin=String(unit?.unit_type)==="other";
         if(isAdmin){
@@ -1037,7 +1038,6 @@ input,select,textarea{min-height:48px;padding:10px 13px;border-radius:12px;box-s
         }
         if(!d.role_started_on)return isAdmin?"يرجى تحديد تاريخ بدء المنصب.":"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
         if(d.role_started_on<d.joined_on)return isAdmin?"تاريخ بدء المنصب لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».":"تاريخ بدء الدور لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».";
-        const unitCard=Array.from(detailsHost.querySelectorAll(".unit-card")).find(card=>String(card.dataset.unitId)===id);
         const roleContinuingRaw=String(unitCard?.querySelector('select[name^="unit_role_continuing_"]')?.value||"");
         if(!["true","false"].includes(roleContinuingRaw))return"يرجى تحديد حالة استمرار الدور داخل «"+unitName+"».";
         if(d.role_continuing===false&&!d.role_left_on)return"يرجى تحديد تاريخ انتهاء الدور داخل «"+unitName+"».";
