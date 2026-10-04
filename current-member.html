@@ -50,14 +50,14 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 <header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
 <section class="hero"><div class="wrap"><div class="badge">❤️ MedLife · Membership</div><h1 id="title">تجديد العضوية</h1><p id="description">نقوم بإعادة بناء قاعدة بيانات MedLife، لذلك نحتاج إلى معلومات محدثة ودقيقة تساعدنا في إدارة العضوية والخلايا والأقسام واكتشاف المواهب.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
-<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لتحديث بيانات عضويتهم. بعد الإرسال تُسجّل البيانات مباشرة في قاعدة العضوية الرسمية، ولا تحتاج إلى انتظار موافقة إدارية.</div>
+<div id="introNote" class="note"><strong>مهم:</strong> هذا المسار مخصص لأعضاء MedLife الحاليين لتحديث بيانات عضويتهم. عند استخدام مسار المشرفين، الهدف هو جمع وتحديث بيانات الأدوار والخلايا الحالية ضمن قاعدة بيانات الفريق، وليس تقديم طلب عضوية جديد.</div>
 <div class="progress"><span id="progressBar"></span></div>
 <form id="membershipForm"><div id="fields"></div>
 <div class="actions"><button class="btn btn-primary" id="submit" type="submit">تسجيل تجديد العضوية</button><a class="btn btn-secondary" href="join-options.html">إلغاء</a></div>
 <div id="status" class="status"></div>
 </form></div>
 <section id="confirmation" class="confirmation hidden" aria-live="polite"></section>
-<div class="footer" id="footerNote">يتم تحديث سجل العضوية مباشرة بعد الإرسال الناجح، مع إمكانية التصحيح الإداري للمستخدمين المخولين.</div></main>
+<div class="footer" id="footerNote">يتم تحديث بيانات العضو مباشرة بعد الإرسال الناجح، مع إمكانية التصحيح الإداري للمستخدمين المخولين.</div></main>
 <script>
 (()=> {
   const qs=new URLSearchParams(location.search);
@@ -599,22 +599,22 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("");
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم التحديث</div></div>'+
+      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>MedLife Medical Voluntary Charity Foundation</strong><span>'+esc(isSupervisorForm()?"بطاقة تجديد عضوية المشرف":"بطاقة تجديد العضوية")+'</span></div></div><div class="id-status">تم تحديث البيانات</div></div>'+
       '<div class="id-card-main"><div class="id-photo"><div class="id-initials">'+esc(initials(name))+'</div><strong data-card-name>'+esc(name)+'</strong><span style="display:block;color:var(--muted);font-size:9px;margin-top:5px">إيصال رسمي لتجديد العضوية</span></div><div class="id-meta">'+
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
-      '<div><span>حالة الطلب</span><strong>تم التحديث</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
+      '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء MedLife وتحديث البيانات التي أرسلتها في السجل الرسمي. يمكنك الاحتفاظ بهذه البطاقة كإثبات لعملية التجديد.</div>'+
+      '<div class="confirmation-note">تم تحديث بيانات عضويتك الحالية مباشرة في قاعدة أعضاء MedLife وتوثيق المعلومات والأدوار التي أرسلتها في السجل الرسمي. يمكنك الاحتفاظ بهذه البطاقة كإثبات لعملية تحديث البيانات.</div>'+
       '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل MedLife</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتجديد عضويتك ❤️</h3><p>تم تحديث عضويتك مباشرة في قاعدة أعضاء MedLife. احتفظ بالبطاقة أو نزّلها كصورة أو PDF للرجوع إليها.</p></div>'+
+      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم تحديث بياناتك الحالية مباشرة في قاعدة أعضاء MedLife. احتفظ بالبطاقة أو نزّلها كصورة أو PDF للرجوع إليها.</p></div>'+
       '</div></div>'+
       '<div class="confirm-actions">'+
       '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
       '<button type="button" class="btn download-btn" id="downloadImage">تحميل البطاقة كصورة</button>'+
       '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة البطاقة</button>'+
       '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
-      '<div class="download-status">البطاقة تتضمن جميع البيانات المسجلة في نموذج التجديد، بما فيها تفاصيل العضوية والطوارئ والمعلومات الإدارية.</div>'+
+      '<div class="download-status">البطاقة تتضمن جميع البيانات التي تم تسجيلها في نموذج التحديث، بما فيها تفاصيل العضوية والطوارئ والمعلومات الإدارية.</div>'+
       '</div>';
 
     confirmation.classList.remove("hidden");
@@ -636,8 +636,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       $("title").textContent=schema.name_ar||"تجديد العضوية";
       $("description").textContent=schema.description_ar||"يرجى تحديث بيانات العضوية بدقة.";
       if(isSupervisorForm()){
-        $("introNote").innerHTML="<strong>مسار المشرفين:</strong> هذا الرابط مخصص للمشرفين الحاليين، ويتضمن توثيق الأدوار الإشرافية والخلايا والأقسام والمساهمات والمواهب.";
-        document.title="تجديد عضوية المشرفين الحاليين | MedLife";
+        $("introNote").innerHTML="<strong>تحديث بيانات المشرفين الحاليين:</strong> هذا الرابط مخصص للمشرفين الموجودين أصلاً ضمن فريق MedLife، بهدف إعادة جمع وتحديث بياناتهم وتوثيق الأدوار والخلايا والأقسام والمساهمات والمواهب. لا يُنشئ هذا المسار عضوية جديدة.";
+        document.title="تحديث بيانات المشرفين الحاليين | MedLife";
       }
       render();
     }catch(e){
