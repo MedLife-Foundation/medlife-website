@@ -296,7 +296,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو في حال تعذر التواصل معك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","تظهر الأسئلة المناسبة تلقائياً بناءً على الوضع الأكاديمي أو المهني الذي تختاره."];
     if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك داخل MedLife","سجل الانضمام والخلايا والأقسام والأدوار والاختصاصات التي تقدمها."];
-    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas","language","language_level","language_other"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife"];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","reported_total_volunteer_hours","volunteer_commitment_hours","availability","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["مواهبك ومساهمتك القادمة","نريد معرفة ما تستطيع تقديمه وما ترغب بتطويره أو تجربته داخل MedLife"];
     if(k==="field_available_days")return["التوفر للعمل الميداني","تظهر هذه الإجابة عند اختيار فريق ميداني."];
     if(["certificate_types","certificate_other"].includes(k))return["الشهادات والتوثيق","معلومات عن الشهادات السابقة إن وجدت"];
     return["معلومات إضافية",""];
@@ -349,7 +349,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function renderField(f){
-    if(isSupervisorForm()&&["language","language_level","language_other"].includes(f.field_key))return"";
+    if(isSupervisorForm()&&["language_assignments","language","language_level","language_other"].includes(f.field_key))return"";
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
     if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position")return"";
     const req=f.required?'<span class="req"> *</span>':"";
@@ -678,7 +678,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         languageRendered=true;
         continue;
       }
-      if(isSupervisorForm()&&["language_level","language_other"].includes(f.field_key))continue;
+      if(isSupervisorForm()&&["language_assignments","language_level","language_other"].includes(f.field_key))continue;
       const sec=sectionFor(f.field_key);
       if(sec[0]!==last){
         host.insertAdjacentHTML("beforeend",'<div class="section"><h2>'+esc(sec[0])+'</h2><p>'+esc(sec[1])+"</p></div>");
