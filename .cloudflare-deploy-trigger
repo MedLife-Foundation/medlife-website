@@ -1,11 +1,10 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form Repair V7
-Timestamp: 2026-10-04T06:20:00+03:00
+Release: MedLife Supervisor Form Repair V8
+Timestamp: 2026-10-04T06:28:00+03:00
 Source: main
 
-Fix Content Writing cell dropdown.
-The supervisor form now populates Content Writing cells directly from the configured supervisor-form content_cells, with live org unit names when available.
-Each Content Writing assignment remains an independent card with cell, position, start date, continuity/end dates, membership start/continuity/end, and notes.
+Fix persistence of additional Content Writing assignment cards.
+The Add Assignment button now preserves the newly added card during rerender instead of re-reading the previous DOM and discarding it.
 Managed current-member page synchronized into public_site_content.
-Trigger: final content cell dropdown repair
+Trigger: final add-more assignment persistence repair
