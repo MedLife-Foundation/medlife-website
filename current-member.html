@@ -1139,7 +1139,9 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   async function load(){
     try{
       const r=await fetch("/api/management?resource=membership_renewal_form&form_key="+encodeURIComponent(formKey),{headers:{Accept:"application/json"},cache:"no-store"});
-      const p=await r.json();
+      const raw=await r.text();
+      let p={};
+      try{p=raw?JSON.parse(raw):{};}catch{throw new Error("تعذر قراءة استجابة الخادم أثناء تحميل النموذج.");}
       schema=Array.isArray(p.data)?p.data[0]:null;
       if(!r.ok||!p.success||!schema)throw new Error("تعذر تحميل نموذج العضوية حالياً.");
       units=Array.isArray(schema.units)?schema.units:[];
@@ -1175,7 +1177,9 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         headers:{"Content-Type":"application/json",Accept:"application/json"},
         body:JSON.stringify({action:"membership_renewal",form_id:schema.id,form_data:data})
       });
-      const p=await r.json();
+      const raw=await r.text();
+      let p={};
+      try{p=raw?JSON.parse(raw):{};}catch{throw new Error("تعذر قراءة استجابة الخادم. رمز الاستجابة: "+r.status);}
       if(!r.ok||!p.success)throw new Error(p.error||"تعذر إرسال الطلب.");
       setStatus("ok","تم حفظ بياناتك وإصدار بطاقة عضويتك بنجاح.");
       renderConfirmation(data,p.submission_id,p.membership_number);
