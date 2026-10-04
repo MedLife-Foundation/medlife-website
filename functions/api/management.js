@@ -581,6 +581,15 @@ export async function onRequestPost({ request }) {
         ? [{id:"87673bd2-5151-4f8b-95e9-dba4f2a11045",name_ar:"الإدارة العامة",name_en:"General Administration",unit_type:"other"}]
         : [];
       const unitsForSubmission = [...validExactUnits, ...canonicalAdmin.filter(admin => !validExactUnits.some(unit => String(unit.id) === admin.id))];
+      const isContentWritingUnit = unit => Boolean(
+        unit &&
+        supervisorForm &&
+        (
+          String(unit.id || "") === "b1ea8c52-b405-4ad9-b9f6-2768a22a7827" ||
+          String(unit.name_ar || "").trim() === "كتابة محتوى" ||
+          String(unit.name_en || "").trim().toLowerCase() === "content writing"
+        )
+      );
       const requestedUnits = unitsForSubmission
         .filter(unit => requestedIds.includes(String(unit.id)))
         .map(unit => {
@@ -588,6 +597,7 @@ export async function onRequestPost({ request }) {
           const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
           let role = cleanText(detail.role, 30).toLowerCase();
           const joinedOn = normalizeDate(detail.joined_on);
+          if (isContentWritingUnit(unit)) role = "content_writer";
           const continuing = detail.continuing === true;
           const leftOn = normalizeDate(detail.left_on);
           let roleStartedOn = normalizeDate(detail.role_started_on);
@@ -632,15 +642,13 @@ export async function onRequestPost({ request }) {
         }
       }
       const today = new Date().toISOString().slice(0, 10);
-      const isContentWritingUnit = unit => Boolean(
-        unit &&
-        supervisorForm &&
-        (
-          String(unit.id || "") === "b1ea8c52-b405-4ad9-b9f6-2768a22a7827" ||
-          String(unit.name_ar || "").trim() === "كتابة محتوى" ||
-          String(unit.name_en || "").trim().toLowerCase() === "content writing"
-        )
-      );
+      const contentWritingDepartments = requestedUnits.filter(unit => isContentWritingUnit(unit));
+      if (contentWritingDepartments.some(unit => !unit.joined_on)) {
+        return json({ success: false, error: "يرجى تحديد تاريخ الانضمام إلى «كتابة محتوى»." }, 400);
+      }
+      if (contentWritingDepartments.some(unit => unit.joined_on > today)) {
+        return json({ success: false, error: "تاريخ الانضمام إلى «كتابة محتوى» لا يمكن أن يكون في المستقبل." }, 400);
+      }
       const timelineUnits = requestedUnits.filter(unit => !isContentWritingUnit(unit));
 
       if (timelineUnits.some(unit => !unit.joined_on)) {
