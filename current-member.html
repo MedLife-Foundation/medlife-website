@@ -281,14 +281,18 @@ input,select,textarea{font-size:12px;line-height:1.6}
     };
   }
 
+  function isWritingContentUnit(unit){
+    const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
+    if(!unit)return false;
+    const id=String(unit.id||"").trim();
+    const ar=String(unit.name_ar||"").trim();
+    const en=String(unit.name_en||"").trim().toLowerCase();
+    return id===knownId || ar==="كتابة محتوى" || en==="content writing";
+  }
+
   function writingContentUnitId(){
     const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
-    return units.find(u=>{
-      const id=String(u.id||"");
-      const ar=String(u.name_ar||"").trim();
-      const en=String(u.name_en||"").trim().toLowerCase();
-      return String(u.unit_type)==="department" && (id===knownId || ar==="كتابة محتوى" || en==="content writing");
-    })?.id||knownId;
+    return units.find(isWritingContentUnit)?.id||knownId;
   }
 
   const languageOptions=[
@@ -343,10 +347,12 @@ input,select,textarea{font-size:12px;line-height:1.6}
 
   function contentWritingActive(){
     if(!isSupervisorForm())return false;
-    const departmentId=writingContentUnitId();
-    if(!departmentId)return false;
-    return Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
-      .some(input=>String(input.value)===String(departmentId));
+    const selected=Array.from(form.querySelectorAll('input[name="current_units"]:checked'));
+    return selected.some(input=>{
+      const id=String(input.value||"").trim();
+      if(id==="b1ea8c52-b405-4ad9-b9f6-2768a22a7827")return true;
+      return isWritingContentUnit(units.find(unit=>String(unit.id)===id));
+    });
   }
 
   function selectedIds(){
@@ -961,7 +967,7 @@ input,select,textarea{font-size:12px;line-height:1.6}
     for(const id of ids){
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
-      const isContentWritingUnit=String(unit?.unit_type)==="department"&&String(unit?.id)===String(writingContentUnitId());
+      const isContentWritingUnit=isWritingContentUnit(unit);
       if(String(unit?.unit_type)==="cell"||isContentWritingUnit)continue;
       const unitName=unit?.name_ar||"الوحدة";
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
