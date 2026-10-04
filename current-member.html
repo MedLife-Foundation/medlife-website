@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تحديث بيانات متطوع حالي | MedLife</title>
+<title>تحديث بيانات متطوع حالي | ميدلايف</title>
 <link rel="icon" href="logo.PNG">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -61,8 +61,8 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 </style>
 </head>
 <body>
-<header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="join-options.html">العودة</a></div></header>
-<section class="hero"><div class="wrap"><div class="badge" id="audienceBadge">❤️ MedLife · تحديث بيانات المتطوعين الحاليين</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص لأعضاء فريق MedLife الحاليين لتحديث ملفهم المركزي وتوثيق أدوارهم ووحداتهم ومساهماتهم ومهاراتهم الحالية.</p></div></section>
+<header><div class="wrap nav"><a href="index.html"><img class="logo" src="logo.PNG" alt="ميدلايف"></a><a class="back" href="join-options.html">العودة</a></div></header>
+<section class="hero"><div class="wrap"><div class="badge" id="audienceBadge">❤️ ميدلايف · تحديث بيانات المتطوعين الحاليين</div><h1 id="title">تحديث بيانات المشرفين الحاليين</h1><p id="description">هذا النموذج مخصص لأعضاء فريق ميدلايف الحاليين لتحديث ملفهم المركزي وتوثيق أدوارهم ووحداتهم ومساهماتهم ومهاراتهم الحالية.</p></div></section>
 <main class="wrap"><div class="card" id="formCard">
 <div id="introNote" class="note"><strong>مهم:</strong> هذا المسار معتمد لتسجيل أو تحديث العضوية مباشرة ضمن السجل المركزي لميدلايف. عند إرسال النموذج يُنشأ رقم العضوية تلقائياً (أو يُحافظ على الرقم الموجود عند العثور على سجل مطابق)، وتُحفظ نسخة من البيانات مع توزيعها على الجداول المخصصة للأدوار والوحدات واللغات والتعليم والطوارئ والمواهب وسجل العضوية.</div>
 <div class="progress"><span id="progressBar"></span></div>
@@ -360,7 +360,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 
   function renderUnitPicker(){
     const groups=[["cell","الخلايا","اختر الخلايا التي تعمل أو تشرف فيها حالياً أو سبق أن عملت فيها."],["department","الأقسام","اختر الأقسام التي لديك فيها دور حالياً أو سابقاً."],["field_team","الفرق الميدانية","اختر الفرق الميدانية التي شاركت أو تشارك معها." ]];
-    if(isSupervisorForm())groups.unshift(["other","الإدارة العامة","للمناصب التنظيمية العامة في قيادة MedLife."]);
+    if(isSupervisorForm())groups.unshift(["other","الإدارة العامة","للمناصب التنظيمية العامة في قيادة ميدلايف."]);
     const configuredContentCellIds=new Set(
       (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
     );
@@ -1105,7 +1105,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       '<div><span>رقم الطلب</span><strong>'+esc(submissionId||"—")+'</strong></div><div><span>تاريخ الإرسال</span><strong>'+esc(new Date().toLocaleString("ar-SY"))+'</strong></div>'+
       '<div><span>نوع العملية</span><strong>تحديث بيانات عضو حالي</strong></div><div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '</div></div>'+
-      '<div class="confirmation-note">تم تسجيل أو تحديث عضويتك بنجاح. أُضيفت البيانات مباشرة إلى السجل المركزي لعضو MedLife، وتم تثبيت رقم العضوية ضمن السجل.</div>'+
+      '<div class="confirmation-note">تم حفظ بياناتك بنجاح. أُضيفت البيانات مباشرة إلى السجل المركزي لميدلايف، وتم تثبيت رقم العضوية ضمن السجل.</div>'+
       '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التجديد، مع عرض الخيارات بشكلها العربي داخل البطاقة.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
       '<section class="confirm-section"><h3>الشهادات والتكريمات السابقة</h3><p>الشهادات التي تم تسجيلها في هذا النموذج.</p><div class="confirm-grid">'+certificateHtml+'</div></section>'+
       '<section class="confirm-section"><h3>العضوية داخل ميدلايف</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
