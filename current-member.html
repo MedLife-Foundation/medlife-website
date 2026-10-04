@@ -1360,7 +1360,6 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
         data.profile_image_public_id=profileImageData.public_id;
       }
       setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
-    try{
       const r=await fetch("/api/management",{
         method:"POST",
         headers:{"Content-Type":"application/json",Accept:"application/json"},
