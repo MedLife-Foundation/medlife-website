@@ -1,11 +1,17 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form Repair V9
-Timestamp: 2026-10-04T06:40:00+03:00
+Release: MedLife Supervisor Form UX + Central Data Sync V10
+Timestamp: 2026-10-04T07:05:00+03:00
 Source: main
 
-Add repeatable language section to the current supervisor membership form.
-Each language has its own proficiency level, and the user can add multiple languages with the add-more button.
-The first language may be marked Other and then named explicitly.
-Managed current-member page synchronized into public_site_content.
-Trigger: multiple languages with independent levels
+Polish the current supervisor renewal form:
+- merge duplicated personal/membership section headings
+- improve content-writing assignment guidance
+- improve multilingual repeatable language UX and validation
+- hide storage-only structured fields from the confirmation view
+- keep the managed current-member page synchronized in public_site_content
+
+Backend/data:
+- validate language_assignments and content_assignments server-side
+- synchronize approved renewals into canonical volunteer tables
+- expose languages and content assignments in volunteer_member_directory
