@@ -813,7 +813,7 @@ export async function onRequestPost({ request }) {
         availability: cleanText(data.availability, 50),
         education_track: cleanText(data.academic_status, 60),
         interest_areas: toArray(data.interest_areas),
-        continuing_as_volunteer: data.continuing_as_volunteer === true,
+        continuing_as_volunteer: supervisorForm ? true : data.continuing_as_volunteer === true,
         additional_notes: cleanText(data.additional_notes, 3000),
         declaration_accurate: true,
         privacy_consent: true,
