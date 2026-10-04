@@ -304,12 +304,29 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
       }
     }
 
-    const configuredContentCellIds=new Set(
-      (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
-    );
-    const contentCells=units
-      .filter(u=>String(u.unit_type)==="cell")
-      .filter(u=>!configuredContentCellIds.size || configuredContentCellIds.has(String(u.id)));
+    const configuredContentCells=Array.isArray(schema?.settings?.content_cells)
+      ? schema.settings.content_cells
+          .map(item=>({
+            id:String(item?.id||""),
+            name_ar:String(item?.name_ar||item?.name_en||""),
+            name_en:String(item?.name_en||item?.name_ar||"")
+          }))
+          .filter(item=>item.id)
+      : [];
+    const liveContentCells=units.filter(u=>String(u.unit_type)==="cell");
+    const liveContentById=new Map(liveContentCells.map(u=>[String(u.id),u]));
+    const contentCells=(configuredContentCells.length?configuredContentCells:liveContentCells.map(u=>({
+      id:String(u.id),
+      name_ar:String(u.name_ar||u.name_en||""),
+      name_en:String(u.name_en||u.name_ar||"")
+    }))).map(item=>{
+      const live=liveContentById.get(String(item.id));
+      return live?{
+        ...item,
+        name_ar:String(live.name_ar||item.name_ar||live.name_en||item.name_en||""),
+        name_en:String(live.name_en||item.name_en||live.name_ar||item.name_ar||"")
+      }:item;
+    }).filter(item=>item.id&&item.name_ar);
     const contentCellSet=new Set(contentCells.map(u=>String(u.id)));
 
     const genericUnitIds=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
@@ -474,8 +491,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
   }
 
   function contentCellSetForValidation(){
-    const configured=new Set((schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean));
-    return new Set(units.filter(u=>String(u.unit_type)==="cell").filter(u=>!configured.size||configured.has(String(u.id))).map(u=>String(u.id)));
+    const configured=(Array.isArray(schema?.settings?.content_cells)?schema.settings.content_cells:[])
+      .map(item=>String(item?.id||"")).filter(Boolean);
+    if(configured.length)return new Set(configured);
+    return new Set(units.filter(u=>String(u.unit_type)==="cell").map(u=>String(u.id)));
   }
 
   function validate(){
