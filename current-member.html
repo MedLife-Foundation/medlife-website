@@ -277,8 +277,7 @@ input,select,textarea{min-height:48px;padding:10px 13px;border-radius:12px;box-s
         return;
       }
       pendingProfileImageFile=file;
-      const objectUrl=URL.createObjectURL(file);
-      preview.innerHTML='<img src="'+esc(objectUrl)+'" alt="معاينة الصورة الشخصية">';
+      preview.innerHTML="<span>✓</span>";
     });
   }
 
@@ -1028,7 +1027,8 @@ input,select,textarea{min-height:48px;padding:10px 13px;border-radius:12px;box-s
       }
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
-      const unitCard=Array.from(detailsHost.querySelectorAll('.unit-card[data-unit-id]')).find(card=>String(card.dataset.unitId)===id);
+      const unitDetailsHost=$("unitDetails");
+      const unitCard=Array.from(unitDetailsHost?.querySelectorAll('.unit-card[data-unit-id]')||[]).find(card=>String(card.dataset.unitId)===id);
       if(isSupervisorForm()){
         const isAdmin=String(unit?.unit_type)==="other";
         if(isAdmin){
