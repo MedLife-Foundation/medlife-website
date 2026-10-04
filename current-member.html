@@ -1274,7 +1274,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
       '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">عضوية مسجّلة</div></div>'+
-      '<div class="id-card-main"><div class="id-photo">'+(profileImageUrl?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لمستخدم ميدلايف">':'<div class="id-initials">'+esc(initials(name))+'</div>')+'<strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
+      '<div class="id-card-main"><div class="id-photo">'+(profileImageUrl?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لمستخدم ميدلايف" crossorigin="anonymous">':'<div class="id-initials">'+esc(initials(name))+'</div>')+'<strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
       '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
       (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>':"")+
