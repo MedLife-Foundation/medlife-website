@@ -79,6 +79,7 @@
       requested_unit_ids:requestedUnits.map(u=>u.id),
       requested_units:requestedUnits,
       requested_unit_roles:Object.fromEntries(requestedUnits.map(u=>[u.id,u.role])),
+      content_assignments:[],
       requested_unit_details:Object.fromEntries(requestedUnits.map(u=>[u.id,{
         role:u.role,senior_management_position:u.senior_management_position,
         role_started_on:u.role_started_on,role_continuing:u.role_continuing,
