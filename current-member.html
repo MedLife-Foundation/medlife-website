@@ -551,6 +551,27 @@ textarea{min-height:108px}
   const PROFILE_IMAGE_MAX_BYTES=5*1024*1024;
   let languageAssignments=[];
   let certificateHistory=[];
+  let languageOptions=[
+    {value:"arabic",label:"العربية"},
+    {value:"english",label:"الإنكليزية"},
+    {value:"french",label:"الفرنسية"},
+    {value:"german",label:"الألمانية"},
+    {value:"turkish",label:"التركية"},
+    {value:"kurdish",label:"الكردية"},
+    {value:"spanish",label:"الإسبانية"},
+    {value:"italian",label:"الإيطالية"},
+    {value:"russian",label:"الروسية"},
+    {value:"persian",label:"الفارسية"},
+    {value:"sign_language",label:"لغة الإشارة"},
+    {value:"other",label:"أخرى"}
+  ];
+  let languageLevelOptions=[
+    {value:"native",label:"لغة أم"},
+    {value:"a1_a2",label:"أساسي (A1–A2)"},
+    {value:"b1_b2",label:"متوسط (B1–B2)"},
+    {value:"c1",label:"متقدم (C1)"},
+    {value:"c2",label:"إتقان / طلاقة (C2)"}
+  ];
 
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const setStatus=(type,msg)=>{status.className="status show "+type;status.textContent=msg};
@@ -599,6 +620,16 @@ textarea{min-height:108px}
       unit_link_enabled:cert.unit_link_enabled!==false,
       unit_link_required:cert.unit_link_required===true&&cert.unit_link_enabled!==false
     };
+  }
+
+  function syncLanguageAssignmentsFromDom(){
+    const rows=Array.from(form.querySelectorAll(".language-assignment-card"));
+    if(!rows.length)return;
+    languageAssignments=rows.map(row=>({
+      language:String(row.querySelector('[name^="language_assignment_"]')?.value||""),
+      languageOther:String(row.querySelector('[name^="language_assignment_other_"]')?.value||""),
+      level:String(row.querySelector('[name^="language_assignment_level_"]')?.value||"")
+    }));
   }
 
   function renderProfilePhotoField(){
@@ -963,6 +994,7 @@ textarea{min-height:108px}
       const u=units.find(x=>String(x.id)===id);
       if(!u)return"";
       const isAdmin=String(u.unit_type)==="other";
+      const isCell=String(u.unit_type)==="cell";
       const oldCard=document.querySelector('.unit-card[data-unit-id="'+escSel(id)+'"]');
       const previous={};
 
