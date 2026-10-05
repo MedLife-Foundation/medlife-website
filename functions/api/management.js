@@ -1,5 +1,6 @@
 const SUPABASE_URL = "https://ftvjakwogxdlxxbpfydf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0dmpha3dvZ3hkbHh4YnBmeWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3MDMxNTcsImV4cCI6MjEwNjI3OTE1N30.mu0ob9dI7yiL_0PPytvaWqRrv--ZOkwkwd-4tKspmIE";
 
 const RESOURCES = {
   content: {
@@ -897,7 +898,8 @@ export async function onRequestPost({ request }) {
       const response = await fetch(SUPABASE_URL + "/rest/v1/public_membership_renewal_submissions", {
         method: "POST",
         headers: {
-          apikey: SUPABASE_PUBLISHABLE_KEY,
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + SUPABASE_ANON_KEY,
           "Content-Type": "application/json",
           Prefer: "return=minimal"
         },
@@ -911,7 +913,8 @@ export async function onRequestPost({ request }) {
       const receiptResponse = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_membership_renewal_receipt", {
         method: "POST",
         headers: {
-          apikey: SUPABASE_PUBLISHABLE_KEY,
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: "Bearer " + SUPABASE_ANON_KEY,
           "Content-Type": "application/json",
           Accept: "application/json"
         },
