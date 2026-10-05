@@ -1120,6 +1120,7 @@ textarea{min-height:108px}
     }
 
     for(const id of ids){
+      if(contentWritingActive()&&contentCellSetForValidation().has(String(id)))continue;
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
       const isContentWritingUnit=isWritingContentUnit(unit);
