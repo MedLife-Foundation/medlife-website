@@ -36,7 +36,6 @@ const PUBLIC_HEADER_ROUTES = new Set([
   "/reset-password.html",
   "/new-member.html",
   "/member-join.html",
-  "/current-member.html",
   "/members.html",
   "/submit-article.html",
   "/submit-article-v2.html",
