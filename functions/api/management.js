@@ -252,7 +252,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   const fields = await fieldsResponse.json().catch(() => []);
   const fieldRows = Array.isArray(fields) ? fields : [];
   const allowed = new Set(fieldRows.map(field => cleanText(field.field_key, 120)).filter(Boolean));
-  const extraAllowed = form.form_key === "membership_renewal_supervisor"
+  const extraAllowed = (form.form_key === "membership_renewal" || form.form_key === "membership_renewal_supervisor")
     ? new Set(["profile_image_url", "profile_image_public_id"])
     : new Set();
   const raw = body.form_data && typeof body.form_data === "object" && !Array.isArray(body.form_data) ? body.form_data : {};
@@ -263,7 +263,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     const safeValue = sanitizeFormValue(value);
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
   }
-  if (form.form_key === "membership_renewal_supervisor" && formData.profile_image_url) {
+  if ((form.form_key === "membership_renewal" || form.form_key === "membership_renewal_supervisor") && formData.profile_image_url) {
     const imageUrl = cleanText(formData.profile_image_url, 1000);
     const imagePublicId = cleanText(formData.profile_image_public_id, 300);
     if (!/^https:\/\/res\.cloudinary\.com\/pyvrk863\/image\/upload\//.test(imageUrl)) {
