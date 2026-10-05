@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
-Release: current-member certificate unit validation fix
-Timestamp: 2026-10-06T19:15:00Z
+Release: current-member direct route + certificate validation fix
+Timestamp: 2026-10-06T19:30:00Z
 Source: main
 
 Root cause fixed:
@@ -25,3 +25,5 @@ Latest commits:
 Database:
 - certificate trigger fixed and rollback-tested.
 - public membership insert policy remains restricted to pending + public_website.
+
+- Latest direct-route fix commit: f18415a4418d70778e019dd4bfe6a59de0c472e1
