@@ -740,7 +740,18 @@ export async function onRequestPost({ request }) {
         "volunteer_service","thank_you","participation","training","appreciation","other"
       ]);
       const rawCertificateHistory = Array.isArray(data.certificate_history)
-        ? data.certificate_history.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
+        ? data.certificate_history
+            .filter(item => item && typeof item === "object" && !Array.isArray(item))
+            .filter(item => (
+              String(item.type ?? "").trim() ||
+              String(item.title ?? "").trim() ||
+              String(item.issuing_organization ?? "").trim() ||
+              String(item.issued_date ?? "").trim() ||
+              String(item.issuing_unit_id ?? "").trim() ||
+              String(item.reference_code ?? "").trim() ||
+              String(item.notes ?? "").trim()
+            ))
+            .slice(0, 30)
         : [];
       const certificateHistory = [];
       for (const item of rawCertificateHistory) {
