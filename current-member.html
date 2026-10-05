@@ -621,7 +621,7 @@ textarea{min-height:108px}
     if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية، الإقامة، ووسائل التواصل التي نعتمد عليها في ملفك المركزي."];
     if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو عند تعذر الوصول إليك."];
     if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","اختر وضعك الأكاديمي أو المهني الحالي، وستظهر فقط المعلومات التعليمية والمهنية المرتبطة به."];
-    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في ميدلايف","سجل انضمامك إلى ميدلايف، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب والتكليفات المرتبطة بها."];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في ميدلايف","سجل انضمامك إلى ميدلايف، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب المرتبطة بها."];
     if(["certificate_history"].includes(k))return["الشهادات والتكريمات السابقة","سجّل الشهادات أو التكريمات التي حصلت عليها من ميدلايف أو من جهات أخرى، مع توثيق عنوان الشهادة والجهة المانحة وتاريخ الحصول عليها."];
     if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days"].includes(k))return["الالتزام والتوفر التطوعي","بيانات التفرغ والقدرة التطوعية الحالية، وتفاصيل المشاركة الميدانية عند اختيار فريق ميداني."];
     if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نوثّق ما تستطيع تقديمه اليوم، ومواهبك وخبراتك، والفرص التي ترغب بتطويرها أو تجربتها داخل ميدلايف."];
@@ -766,7 +766,7 @@ textarea{min-height:108px}
     const req=f.required?'<span class="req"> *</span>':"";
     const defaultHelp=f.help_ar||"";
     const supervisorHelp=isSupervisorForm()&&f.field_key==="current_units"
-      ?"اختر الأقسام والفرق الميدانية التي لديك فيها دور حالياً أو سابقاً. أما الإشراف على الخلايا فيُوثق بشكل مستقل في قسم «الإشراف على الخلايا»."
+      ?"اختر كل قسم أو خلية أو فريق أو وحدة إدارية لديك فيها دور حالياً أو سابقاً، ثم حدّد دورك وتواريخه في بطاقة الوحدة."
       :defaultHelp;
     const help=supervisorHelp?'<div class="help">'+esc(supervisorHelp)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
@@ -959,9 +959,6 @@ textarea{min-height:108px}
     for(const id of ids){
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
-      const isContentWritingUnit=isWritingContentUnit(unit);
-      const unitName=String(unit?.name_ar||"").trim()||"الوحدة";
-      const isContentWritingByName=unitName==="كتابة محتوى"||String(unit?.name_en||"").trim().toLowerCase()==="content writing";
       if(String(unit?.unit_type)==="cell")continue;
       if(isContentWritingUnit||isContentWritingByName){
         if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «كتابة محتوى».";
