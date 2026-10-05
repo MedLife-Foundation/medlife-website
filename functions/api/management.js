@@ -568,6 +568,44 @@ export async function onRequestPost({ request }) {
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
       const validCertificateUnits = activeUnits;
       const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
+
+      // Certificate links are optional. When a user does provide one, verify
+      // the exact selected unit against the live org_units table as a second
+      // authoritative check. This avoids rejecting a valid active unit if the
+      // broader list response was incomplete or stale for this request.
+      const certificateUnitCheckCache = new Map();
+      const isLiveCertificateUnit = async unitId => {
+        const key = String(unitId || "").trim();
+        if (!key) return false;
+        if (certificateUnitCheckCache.has(key)) return certificateUnitCheckCache.get(key);
+
+        if (validCertificateUnits.some(unit => String(unit.id) === key)) {
+          certificateUnitCheckCache.set(key, true);
+          return true;
+        }
+
+        let valid = false;
+        try {
+          const response = await fetch(
+            SUPABASE_URL + "/rest/v1/org_units?select=id,unit_type,is_active&id=eq." +
+            encodeURIComponent(key) +
+            "&is_active=eq.true&unit_type=in.(cell,department,field_team,other)&limit=1",
+            {headers: membershipUnitReadHeaders}
+          );
+          const rows = await response.json().catch(() => []);
+          valid = Array.isArray(rows) &&
+            rows.some(unit =>
+              String(unit.id) === key &&
+              unit.is_active !== false &&
+              (String(unit.unit_type) !== "other" || supervisorForm)
+            );
+        } catch {
+          valid = false;
+        }
+
+        certificateUnitCheckCache.set(key, valid);
+        return valid;
+      };
       // Content-writing cells are subordinate assignments. Resolve every
       // assignment against the live organization tree, never against historical
       // form settings or a stale current_units array.
@@ -830,7 +868,7 @@ export async function onRequestPost({ request }) {
         if (issuedDate > new Date().toISOString().slice(0,10)) {
           return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
         }
-        if (issuingUnitId && !validCertificateUnits.some(unit => String(unit.id) === issuingUnitId)) {
+        if (issuingUnitId && !(await isLiveCertificateUnit(issuingUnitId))) {
           return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة في ميدلايف." }, 400);
         }
         certificateHistory.push({
