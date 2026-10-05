@@ -483,10 +483,20 @@ textarea{min-height:108px}
   }
 
   function selectedIds(){
+    const validUnitIds=new Set(
+      units
+        .filter(unit=>["cell","department","field_team","other"].includes(String(unit?.unit_type||"")))
+        .map(unit=>String(unit.id))
+        .filter(Boolean)
+    );
     const ids=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
       .map(x=>String(x.value))
-      .filter(Boolean);
-    if(contentWritingActive())ids.push(...contentCellIds());
+      .filter(id=>id&&validUnitIds.has(id));
+    if(contentWritingActive()){
+      contentCellIds().forEach(id=>{
+        if(validUnitIds.has(id))ids.push(id);
+      });
+    }
     return Array.from(new Set(ids));
   }
 
