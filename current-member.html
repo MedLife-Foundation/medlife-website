@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-<script src="/membership-direct-submit.js?v=20261005-direct"></script>
 <style>
 :root{--red:#e83255;--red2:#ff5a72;--navy:#151d36;--text:#243047;--muted:#667085;--line:#e5e9f0;--bg:#f6f8fb;--soft:#fbfcfe;--ok:#087653;--okbg:#effaf5;--err:#9f1c32;--errbg:#fff1f3}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#fff 0,#f6f8fb 55%,#fafbfc 100%);color:var(--text);font-family:"Tajawal","Inter",Arial,sans-serif}.wrap{width:min(1080px,calc(100% - 28px));margin:auto}
@@ -1607,7 +1606,15 @@ textarea{min-height:108px}
         data.profile_image_public_id=profileImageData.public_id;
       }
       setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
-      const p=await window.medlifeSubmitMembership(data,schema,units,formKey);
+      const r=await fetch("/api/membership-renewal",{
+        method:"POST",
+        headers:{"Content-Type":"application/json",Accept:"application/json"},
+        body:JSON.stringify({action:"membership_renewal",form_id:schema.id,form_data:data})
+      });
+      const raw=await r.text();
+      let p={};
+      try{p=raw?JSON.parse(raw):{};}catch{throw new Error("تعذر قراءة استجابة الخادم. رمز الاستجابة: "+r.status);}
+      if(!r.ok||!p.success)throw new Error(p.error||"تعذر إرسال الطلب.");
       setStatus("ok","تم حفظ بياناتك وإصدار بطاقة عضويتك بنجاح.");
       renderConfirmation(data,p.submission_id,p.membership_number);
       window.scrollTo({top:0,behavior:"smooth"});
