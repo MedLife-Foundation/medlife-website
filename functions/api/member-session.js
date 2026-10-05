@@ -144,7 +144,7 @@ async function resolveRedirect(db, memberId, accountRole) {
         const roles = await db.prepare(`SELECT role_key FROM medlife_admin_user_roles WHERE member_id=?`).bind(memberId).all();
         const keys = new Set((roles.results || []).map(r => r.role_key));
         if (keys.has("system_admin")) return "/admin-system.html";
-        if (keys.has("content_manager") || keys.has("content_editor") || keys.has("medical_reviewer")) return "https://admin.medlifesy.org/content";
+        if (keys.has("content_manager") || keys.has("content_editor") || keys.has("medical_reviewer")) return "https://admin.medlifesy.org/medical-library";
         if (keys.has("members_manager")) return "/members-admin";
         if (keys.has("support_manager")) return "/support-admin";
         if (keys.has("complaints_manager")) return "/complaints-admin";
