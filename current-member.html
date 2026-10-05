@@ -1144,7 +1144,7 @@ textarea{min-height:108px}
       }
     }
     for(const f of schema?.fields||[]){
-      if(!visible(f,data)||f.field_key==="current_unit_details")continue;
+      if(!visible(f,data)||f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")continue;
       const v=data[f.field_key];
       if(f.required){
         const missing=Array.isArray(v)?v.length===0:typeof v==="boolean"?false:v===undefined||v===null||String(v).trim()==="";
