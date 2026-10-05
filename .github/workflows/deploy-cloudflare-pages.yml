@@ -21,7 +21,7 @@ jobs:
       - name: Deploy
         uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy . --project-name=medlife-website --branch=main --commit-hash=${{ github.sha }} --commit-message="${{ github.event.head_commit.message }}"
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
