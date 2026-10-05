@@ -214,8 +214,15 @@
       form_data:data
     };
 
-    // 1) Dedicated public route, intentionally outside /api.
-    const dedicated=await submitViaServer("/membership-submit",requestBody);
+    // Try each same-origin submission route independently. A network-level
+    // failure on one route must not surface as the browser's generic
+    // "Failed to fetch" message or prevent the next fallback from running.
+    let dedicated={ok:false,status:0,body:{},networkError:null};
+    try{
+      dedicated=await submitViaServer("/membership-submit",requestBody);
+    }catch(error){
+      dedicated.networkError=error;
+    }
     if(dedicated.ok){
       return {
         submission_id:dedicated.body.submission_id,
@@ -223,8 +230,12 @@
       };
     }
 
-    // 2) Existing management route for backwards compatibility.
-    const management=await submitViaServer("/api/management",requestBody);
+    let management={ok:false,status:0,body:{},networkError:null};
+    try{
+      management=await submitViaServer("/api/management",requestBody);
+    }catch(error){
+      management.networkError=error;
+    }
     if(management.ok){
       return {
         submission_id:management.body.submission_id,
@@ -232,19 +243,16 @@
       };
     }
 
-    // 3) Last resort: the membership table explicitly exposes a restricted
-    // public insert policy (pending + public_website). This bypasses any
-    // Cloudflare path/WAF issue while keeping the write scoped by RLS.
+    // Last resort: direct Supabase insert scoped by the public RLS policy.
     try{
       return await submitViaSupabase(payload);
     }catch(fallbackError){
-      const firstDetail=str(dedicated.body?.error||dedicated.body?.message);
-      const secondDetail=str(management.body?.error||management.body?.message);
-      const detail=firstDetail||secondDetail||str(fallbackError.message);
+      const responseDetail=str(dedicated.body?.error||dedicated.body?.message)||
+        str(management.body?.error||management.body?.message);
+      const detail=responseDetail||str(fallbackError?.message);
       throw new Error(detail||"تعذر تسجيل العضوية حالياً. يرجى المحاولة مرة أخرى.");
     }
-  };
-})();
+  }})();
 </script>
 <style>
 :root{--red:#e83255;--red2:#ff5a72;--navy:#151d36;--text:#243047;--muted:#667085;--line:#e5e9f0;--bg:#f6f8fb;--soft:#fbfcfe;--ok:#087653;--okbg:#effaf5;--err:#9f1c32;--errbg:#fff1f3}
