@@ -1,26 +1,27 @@
 MedLife website deployment trigger
 
-Release: membership renewal — resilient public submission
-Timestamp: 2026-10-05T22:00:00Z
+Release: current-member submission root fix
+Timestamp: 2026-10-05T22:10:00Z
 Source: main
 
-Public form: current-member.html
-Submit API: /membership-submit -> /api/management -> direct Supabase fallback
-Implementation: membership-direct-submit.js
-Server implementation: functions/membership-submit.js -> functions/api/management.js
-Form loader: /api/management?resource=membership_renewal_form
+Root cause fixed:
+- /current-member.html was classified as a CMS-managed legacy route.
+- The middleware replaced the repository form with an old Supabase CMS snapshot.
+- That snapshot still submitted to /api/management and ignored the newer resilient submission client.
+- Repository changes to current-member.html therefore did not reach the browser.
 
-Submission now uses a three-level failover:
-1. Dedicated /membership-submit route outside /api.
-2. Existing /api/management route.
-3. Supabase public insert policy limited by RLS to pending + public_website, followed by the membership receipt RPC.
+Permanent fix:
+- Removed /current-member.html from CMS_LEGACY_ROUTES so the repository version is served directly.
+- Made current-member.html self-contained by embedding membership-direct-submit.js.
+- The submission client uses /membership-submit first, /api/management second, and the restricted public Supabase insert fallback third.
+- The managed CMS snapshot was also updated immediately with the same self-contained page as an immediate live fix.
 
-The fallback exists specifically so a Cloudflare path/WAF 403 cannot prevent a legitimate public membership update from being saved. No service_role key is exposed to the browser.
+Latest commits:
+- current-member self-contained: b6fe91b6d6afc46c343a53efbb944b798f0340f8
+- middleware root fix: af5912c2c31112809ebb1d7972f033e90647d178
+- resilient submit client: 78407b6c8aecb43772280d991ba56ee9b5752f96
+- CMS live snapshot synchronized and verified.
 
-Every public membership renewal form submission receives a NEW unique MedLife membership number. Existing volunteer profile numbers are never reused for a new submission. The issued number is authoritative for the submission, member profile, card, and email.
-
-Latest client commit: 78407b6c8aecb43772280d991ba56ee9b5752f96
-Current-member cache commit: 545031cba6c0f95cf9cbfede0de2fe26139c446e
-Database certificate-trigger fix: applied directly to production and verified with rollback test.
-
-Next verified free membership number: MLF-K7R2.
+Database:
+- certificate trigger fixed and rollback-tested.
+- public membership insert policy remains restricted to pending + public_website.
