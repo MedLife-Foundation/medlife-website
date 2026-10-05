@@ -747,9 +747,12 @@ textarea{min-height:108px}
   }
 
   function renderCertificateHistoryField(){
+    const certificateUnits=units.filter(u=>u&&u.is_active!==false&&["cell","department","field_team","other"].includes(String(u.unit_type||"")));
+    const validCertificateUnitIds=new Set(certificateUnits.map(u=>String(u.id)));
     const rows=certificateHistory.map((item,index)=>{
       const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.type===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
-      const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+units.map(u=>'<option value="'+esc(u.id)+'"'+(String(item.issuingUnitId)===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
+      const safeIssuingUnitId=validCertificateUnitIds.has(String(item.issuingUnitId||""))?String(item.issuingUnitId):"";
+      const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+certificateUnits.map(u=>'<option value="'+esc(u.id)+'"'+(safeIssuingUnitId===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
       return'<div class="certificate-history-card unit-card" data-certificate-index="'+index+'">'+
         '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
         '<div class="grid">'+
@@ -1064,19 +1067,26 @@ textarea{min-height:108px}
         return String(item?.type||"").trim()||String(item?.title||"").trim()||String(item?.issuingOrganization||"").trim()||String(item?.issuedDate||"").trim();
       });
       const validCertificateTypes=new Set(certificateTypeOptions.map(item=>item.value));
+      const validCertificateUnitIds=new Set(
+        units
+          .filter(unit=>unit&&unit.is_active!==false&&["cell","department","field_team","other"].includes(String(unit.unit_type||"")))
+          .map(unit=>String(unit.id))
+      );
       const seenCertificates=new Set();
       const today=new Date().toISOString().slice(0,10);
       for(const item of certificateRows){
         const type=String(item.type||"").trim();
-        const title=String(item.title||"").trim();
-        const issuer=String(item.issuingOrganization||"").trim();
+        const title=String(item.title||"").trim().replace(/\s+/g," ");
+        const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
         const issued=String(item.issuedDate||"").trim();
+        const issuingUnitId=String(item.issuingUnitId||"").trim();
         if(!validCertificateTypes.has(type))return"يوجد نوع شهادة غير صالح.";
         if(!title)return"يرجى كتابة اسم كل شهادة.";
         if(!issuer)return"يرجى كتابة الجهة المانحة لكل شهادة.";
         if(!issued)return"يرجى تحديد تاريخ الحصول على كل شهادة.";
         if(issued>today)return"تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل.";
-        const key=[type,title.toLowerCase(),issuer.toLowerCase(),issued,String(item.issuingUnitId||"")].join("|");
+        if(issuingUnitId&&!validCertificateUnitIds.has(issuingUnitId))return"الفريق أو الوحدة المرتبطة بالشهادة غير صالحة.";
+        const key=[type,title.toLowerCase(),issuer.toLowerCase(),issued,issuingUnitId].join("|");
         if(seenCertificates.has(key))return"لا يمكن تكرار الشهادة نفسها أكثر من مرة.";
         seenCertificates.add(key);
       }
