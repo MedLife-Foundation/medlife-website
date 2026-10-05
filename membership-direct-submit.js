@@ -1,6 +1,7 @@
-// Membership direct submit: unified unit roles / inline supervisor details — routed through the existing management API
+// Membership direct submit: unified unit roles / inline supervisor details.
+// Uses the dedicated Cloudflare endpoint first, then the existing management
+// endpoint, then the public Supabase insert policy as a last-resort fallback.
 (function(){
-  "use strict";
   "use strict";
   const SUPABASE_URL="https://ftvjakwogxdlxxbpfydf.supabase.co";
   const SUPABASE_KEY="sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
@@ -122,30 +123,113 @@
     };
   }
 
-  window.medlifeSubmitMembership=async function(data,schema,units,formKey){
-    const response=await fetch("/api/management",{
+  async function submitViaServer(path,payload){
+    const response=await fetch(path,{
       method:"POST",
       headers:{
         "Content-Type":"application/json",
         Accept:"application/json"
       },
-      body:JSON.stringify({
-        action:"membership_renewal",
-        form_id:schema.id,
-        form_version:Number(schema.version||0),
-        form_data:data
-      })
+      body:JSON.stringify(payload)
     });
     const raw=await response.text();
     let body={};
     try{body=raw?JSON.parse(raw):{}}catch(_){}
-    if(!response.ok||!body.success){
-      const detail=str(body.error||body.message);
+    return {
+      ok:Boolean(response.ok&&body.success),
+      status:response.status,
+      body,
+      raw
+    };
+  }
+
+  async function submitViaSupabase(payload){
+    const response=await fetch(SUPABASE_URL+"/rest/v1/public_membership_renewal_submissions",{
+      method:"POST",
+      headers:{
+        apikey:SUPABASE_KEY,
+        Authorization:"Bearer "+SUPABASE_KEY,
+        "Content-Type":"application/json",
+        Accept:"application/json",
+        Prefer:"return=minimal"
+      },
+      body:JSON.stringify(payload)
+    });
+    const raw=await response.text();
+    let body={};
+    try{body=raw?JSON.parse(raw):{}}catch(_){}
+    if(!response.ok){
+      const detail=str(body?.message||body?.error_description||body?.hint);
       throw new Error(detail||("تعذر تسجيل العضوية. رمز الاستجابة: "+response.status));
     }
+
+    const email=str(payload.email).toLowerCase();
+    const receiptResponse=await fetch(SUPABASE_URL+"/rest/v1/rpc/get_membership_renewal_receipt",{
+      method:"POST",
+      headers:{
+        apikey:SUPABASE_KEY,
+        Authorization:"Bearer "+SUPABASE_KEY,
+        "Content-Type":"application/json",
+        Accept:"application/json"
+      },
+      body:JSON.stringify({
+        p_submission_id:payload.id,
+        p_email:email
+      })
+    });
+    const receiptRaw=await receiptResponse.text();
+    let receipt={};
+    try{receipt=receiptRaw?JSON.parse(receiptRaw):{};}catch(_){}
+    if(receiptResponse.ok&&receipt&&receipt.success){
+      return {
+        submission_id:receipt.submission_id||payload.id,
+        membership_number:receipt.membership_number||null
+      };
+    }
+
     return {
-      submission_id:body.submission_id,
-      membership_number:body.membership_number||null
+      submission_id:payload.id,
+      membership_number:null
     };
+  }
+
+  window.medlifeSubmitMembership=async function(data,schema,units,formKey){
+    const payload=build(data,schema,units,formKey,crypto.randomUUID());
+    const requestBody={
+      action:"membership_renewal",
+      form_id:schema.id,
+      form_version:Number(schema.version||0),
+      form_data:data
+    };
+
+    // 1) Dedicated public route, intentionally outside /api.
+    const dedicated=await submitViaServer("/membership-submit",requestBody);
+    if(dedicated.ok){
+      return {
+        submission_id:dedicated.body.submission_id,
+        membership_number:dedicated.body.membership_number||null
+      };
+    }
+
+    // 2) Existing management route for backwards compatibility.
+    const management=await submitViaServer("/api/management",requestBody);
+    if(management.ok){
+      return {
+        submission_id:management.body.submission_id,
+        membership_number:management.body.membership_number||null
+      };
+    }
+
+    // 3) Last resort: the membership table explicitly exposes a restricted
+    // public insert policy (pending + public_website). This bypasses any
+    // Cloudflare path/WAF issue while keeping the write scoped by RLS.
+    try{
+      return await submitViaSupabase(payload);
+    }catch(fallbackError){
+      const firstDetail=str(dedicated.body?.error||dedicated.body?.message);
+      const secondDetail=str(management.body?.error||management.body?.message);
+      const detail=firstDetail||secondDetail||str(fallbackError.message);
+      throw new Error(detail||"تعذر تسجيل العضوية حالياً. يرجى المحاولة مرة أخرى.");
+    }
   };
 })();
