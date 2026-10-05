@@ -1467,6 +1467,9 @@ textarea{min-height:108px}
       .filter(Boolean);
 
     const unitsData=values.current_unit_details&&typeof values.current_unit_details==="object"?values.current_unit_details:{};
+    // Initialize these collections before summary counters consume them.
+    const certificateItems=Array.isArray(values.certificate_history)?values.certificate_history.filter(item=>item&&((item.type||"")||(item.title||"")||(item.issuing_organization||"")||(item.issued_date||""))):[];
+    const languageItems=Array.isArray(values.language_assignments)?values.language_assignments.filter(item=>item&&((item.language||"")||(item.language_other||"")||(item.level||""))):[];
     const positionField=fields.find(f=>f.field_key==="senior_management_position");
     const supervisorAdminEntry=isSupervisorForm()?unitIds.map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}]).find(([u])=>String(u?.unit_type)==="other"):null;
     const supervisorPositionValue=supervisorAdminEntry?.[1]?.senior_management_position||"";
@@ -1516,7 +1519,6 @@ textarea{min-height:108px}
         '</div>'+note+'</div>';
     }).join("");
 
-    const certificateItems=Array.isArray(values.certificate_history)?values.certificate_history.filter(item=>item&&((item.type||"")||(item.title||"")||(item.issuing_organization||"")||(item.issued_date||""))):[];
     const certificateTypeLabel=value=>{
       const hit=certificateTypeOptions.find(o=>String(o.value)===String(value));
       return hit?.label||value;
@@ -1530,7 +1532,6 @@ textarea{min-height:108px}
         }).join("")
       : '<div class="confirm-item"><span>الشهادات والتكريمات</span><strong>لم تُسجّل شهادات سابقة.</strong></div>';
 
-    const languageItems=Array.isArray(values.language_assignments)?values.language_assignments.filter(item=>item&&((item.language||"")||(item.language_other||"")||(item.level||""))):[];
     const languageField=fields.find(f=>f.field_key==="language");
     const levelField=fields.find(f=>f.field_key==="language_level");
     const languageLabel=value=>{
