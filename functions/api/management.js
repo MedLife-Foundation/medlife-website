@@ -350,6 +350,11 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
 
   for (const field of fieldRows) {
     if (!field.required || !fieldIsVisible(field)) continue;
+    // These supervisor fields are rendered and validated per selected unit,
+    // not as top-level form fields. Their values live in current_unit_details.
+    const dynamicSupervisorField = form.form_key === "membership_renewal_supervisor" &&
+      ["current_unit_details", "senior_management_position", "content_assignments"].includes(field.field_key);
+    if (dynamicSupervisorField) continue;
     const value = formData[field.field_key];
     const missing = Array.isArray(value)
       ? value.length === 0
