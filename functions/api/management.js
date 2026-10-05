@@ -557,11 +557,6 @@ export async function onRequestPost({ request }) {
       const configuredCertificates = membershipControls.certificates && typeof membershipControls.certificates === "object"
         ? membershipControls.certificates
         : {};
-      const configuredCertificateTypes = Array.isArray(configuredCertificates.types)
-        ? configuredCertificates.types
-            .map(item => cleanText(item?.value, 60).toLowerCase())
-            .filter(Boolean)
-        : [];
       const certificateFeatureEnabled = configuredCertificates.enabled !== false;
       const certificateUnitLinkEnabled = configuredCertificates.unit_link_enabled !== false;
       const certificateUnitLinkRequired = configuredCertificates.unit_link_required === true && certificateUnitLinkEnabled;
@@ -886,10 +881,6 @@ export async function onRequestPost({ request }) {
       const toArray = value => Array.isArray(value)
         ? value.map(item => cleanText(item, 100)).filter(Boolean).slice(0, 30)
         : [];
-      const defaultCertificateTypes = ["volunteer_service","thank_you","participation","training","appreciation","other"];
-      const allowedCertificateTypes = new Set(
-        configuredCertificateTypes.length ? configuredCertificateTypes : defaultCertificateTypes
-      );
       const rawCertificateHistory = certificateFeatureEnabled && Array.isArray(data.certificate_history)
         ? data.certificate_history
             .filter(item => item && typeof item === "object" && !Array.isArray(item))
@@ -906,7 +897,9 @@ export async function onRequestPost({ request }) {
         : [];
       const certificateHistory = [];
       for (const item of rawCertificateHistory) {
-        const type = cleanText(item.type, 40).toLowerCase();
+        // Certificate classification is intentionally not user-configured.
+        // Members enter any certificate by name; internally we store it as "other".
+        const type = "other";
         const title = cleanText(item.title, 500);
         const issuingOrganization = cleanText(item.issuing_organization, 500);
         const issuedDate = normalizeDate(item.issued_date);
@@ -914,9 +907,6 @@ export async function onRequestPost({ request }) {
         const issuingUnitName = cleanText(item.issuing_unit_name, 200);
         const referenceCode = cleanText(item.reference_code, 120);
         const notes = cleanText(item.notes, 1500);
-        if (!allowedCertificateTypes.has(type)) {
-          return json({ success: false, error: "يوجد نوع شهادة غير صالح ضمن البيانات." }, 400);
-        }
         if (!title || !issuingOrganization || !issuedDate) {
           return json({ success: false, error: "كل شهادة يجب أن تتضمن اسمها والجهة المانحة وتاريخ الحصول عليها." }, 400);
         }
