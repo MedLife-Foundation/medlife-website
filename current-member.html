@@ -884,9 +884,7 @@ textarea{min-height:108px}
   }
 
   function validate(){
-    if(isSupervisorForm())syncContentAssignmentsFromDom();
     const data=collect();
-    if(isSupervisorForm())syncContentAssignmentsFromDom();
     if(isSupervisorForm()){
       syncLanguageAssignmentsFromDom();
       syncCertificateHistoryFromDom();
@@ -959,12 +957,7 @@ textarea{min-height:108px}
     for(const id of ids){
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
-      if(String(unit?.unit_type)==="cell")continue;
-      if(isContentWritingUnit||isContentWritingByName){
-        if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «كتابة محتوى».";
-        if(d.joined_on>today)return"تاريخ الانضمام إلى «كتابة محتوى» لا يمكن أن يكون في المستقبل.";
-        continue;
-      }
+      const unitName=String(unit?.name_ar||unit?.name_en||"هذه الوحدة");
       if(!d.joined_on)return"يرجى تحديد تاريخ الانضمام إلى «"+unitName+"».";
       if(d.joined_on>today)return"تاريخ الانضمام إلى «"+unitName+"» لا يمكن أن يكون في المستقبل.";
       const unitDetailsHost=$("unitDetails");
@@ -1406,10 +1399,10 @@ textarea{min-height:108px}
 
   form.addEventListener("submit",async e=>{
     e.preventDefault();
-    const error=validate();
-    if(error){setStatus("err",error);return;}
     submit.disabled=true;
     try{
+      const error=validate();
+      if(error){setStatus("err",error);return;}
       if((formKey==="membership_renewal" || formKey==="membership_renewal_supervisor")&&pendingProfileImageFile){
         setStatus("ok","جارٍ رفع الصورة الشخصية...");
         profileImageData=await uploadProfileImage(pendingProfileImageFile);
