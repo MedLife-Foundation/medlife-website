@@ -226,7 +226,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   if (!formId) return {form_id: null, form_version: null, form_data: {}, form_schema: {}};
 
   const formResponse = await fetch(
-    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,updated_at&id=eq." + encodeURIComponent(formId) + "&form_kind=eq." + encodeURIComponent(expectedFormKind) + "&status=eq.published&is_public=eq.true&limit=1",
+    SUPABASE_URL + "/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,form_kind,status,is_public,version,settings,updated_at&id=eq." + encodeURIComponent(formId) + "&form_kind=eq." + encodeURIComponent(expectedFormKind) + "&status=eq.published&is_public=eq.true&limit=1",
     {
       headers: {
         apikey: SUPABASE_PUBLISHABLE_KEY,
