@@ -12,3 +12,7 @@ Certificate unit links are validated independently against active units, so mult
 
 Latest form commit: c34d5c8ba983f47cc9c66f9a5dfb0d4e516916b1
 Latest API commit: 33aa65acde6d3d8cbf6e68606eacb8a9739ffeeb
+
+Backend membership-unit lookup now uses the stable legacy anon key, with live-cell canonicalization and legacy form-cell alias recovery.
+Latest API commit: ba9cc414170a6a42e6effbf6104948532dba16ec
+Database migration applied: remove_content_assignment_form_cell_gate
