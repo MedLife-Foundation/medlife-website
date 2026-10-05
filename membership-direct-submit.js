@@ -127,7 +127,6 @@
       method:"POST",
       headers:{
         apikey:SUPABASE_KEY,
-        Authorization:"Bearer "+SUPABASE_KEY,
         "Content-Type":"application/json",
         Prefer:"return=minimal"
       },
@@ -145,7 +144,6 @@
       method:"POST",
       headers:{
         apikey:SUPABASE_KEY,
-        Authorization:"Bearer "+SUPABASE_KEY,
         "Content-Type":"application/json",
         Accept:"application/json"
       },
