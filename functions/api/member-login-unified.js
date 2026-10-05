@@ -188,7 +188,7 @@ function mapAdminRole(role) {
 
 function redirectForRole(role) {
   if (role === 'system_admin') return '/admin.html';
-  if (['content_manager', 'content_editor', 'medical_reviewer'].includes(role)) return '/articles-admin';
+  if (['content_manager', 'content_editor', 'medical_reviewer'].includes(role)) return 'https://admin.medlifesy.org/content';
   if (role === 'members_manager') return '/members-admin';
   if (role === 'support_manager') return '/support-admin';
   if (role === 'complaints_manager') return '/complaints-admin';
