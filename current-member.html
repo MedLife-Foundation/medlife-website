@@ -832,28 +832,17 @@ textarea{min-height:108px}
       }
     }
 
-    const liveContentCells=units.filter(u=>String(u.unit_type)==="cell"&&u.is_active!==false);
-    const liveContentById=new Map(liveContentCells.map(u=>[String(u.id),u]));
-    const configuredContentCells=Array.isArray(schema?.settings?.content_cells)
-      ? schema.settings.content_cells
-          .map(item=>{
-            const live=liveContentById.get(String(item?.id||""));
-            if(!live)return null;
-            return{
-              id:String(live.id),
-              name_ar:String(live.name_ar||live.name_en||""),
-              name_en:String(live.name_en||live.name_ar||"")
-            };
-          })
-          .filter(Boolean)
-      : [];
-    const fallbackContentCells=liveContentCells.map(u=>({
-      id:String(u.id),
-      name_ar:String(u.name_ar||u.name_en||""),
-      name_en:String(u.name_en||u.name_ar||"")
-    }));
-    const contentCells=(configuredContentCells.length?configuredContentCells:fallbackContentCells)
+    // Content-writing cells always come from the live organization tree.
+    // Do not use the form's historical content_cells setting as a source of truth.
+    const liveContentCells=units
+      .filter(u=>String(u.unit_type)==="cell"&&u.is_active!==false)
+      .map(u=>({
+        id:String(u.id),
+        name_ar:String(u.name_ar||u.name_en||""),
+        name_en:String(u.name_en||u.name_ar||"")
+      }))
       .filter(item=>item.id&&item.name_ar);
+    const contentCells=liveContentCells;
     const contentCellSet=new Set(contentCells.map(u=>String(u.id)));
 
     const genericUnitIds=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
@@ -1044,16 +1033,12 @@ textarea{min-height:108px}
 
 
   function contentCellSetForValidation(){
-    const liveIds=new Set(
+    return new Set(
       units
         .filter(u=>String(u.unit_type)==="cell"&&u.is_active!==false)
         .map(u=>String(u.id))
         .filter(Boolean)
     );
-    const configured=(Array.isArray(schema?.settings?.content_cells)?schema.settings.content_cells:[])
-      .map(item=>String(item?.id||""))
-      .filter(id=>id&&liveIds.has(id));
-    return new Set(configured.length?configured:liveIds);
   }
 
   function validate(){
