@@ -960,7 +960,6 @@ textarea{min-height:108px}
       const u=units.find(x=>String(x.id)===id);
       if(!u)return"";
       const isAdmin=String(u.unit_type)==="other";
-      const isWritingDept=isWritingContentUnit(u);
       const oldCard=document.querySelector('.unit-card[data-unit-id="'+escSel(id)+'"]');
       const previous={};
 
