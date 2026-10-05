@@ -755,11 +755,6 @@ textarea{min-height:108px}
     const ids=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
       .map(x=>String(x.value))
       .filter(id=>id&&validUnitIds.has(id));
-    if(contentWritingActive()){
-      contentCellIds().forEach(id=>{
-        if(validUnitIds.has(id))ids.push(id);
-      });
-    }
     return Array.from(new Set(ids));
   }
 
@@ -786,7 +781,6 @@ textarea{min-height:108px}
       else out[key]=value;
     });
 
-    if(contentWritingActive())syncContentAssignmentsFromDom();
     syncLanguageAssignmentsFromDom();
     const completeLanguageAssignments=languageAssignments.filter(item=>String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||""));
     out.language_assignments=completeLanguageAssignments.map(item=>({
@@ -857,7 +851,6 @@ textarea{min-height:108px}
       };
     });
 
-    out.content_assignments=[];
     out.current_unit_details=details;
     return out;
   }
@@ -1070,18 +1063,13 @@ textarea{min-height:108px}
       if(isAdmin){
         const options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(previous.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
         roleHtml='<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select name="senior_management_position_'+esc(id)+'">'+options+'</select></div>';
-      }else if(isWritingDept){
-        roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><div class="content-fixed-role">كاتب محتوى</div><input type="hidden" name="unit_role_'+esc(id)+'" value="content_writer"></div>';
       }else{
         const availableRoles=isSupervisorForm()?roleOptions:[{value:"volunteer",label:"متطوع / عضو"}];
         const options='<option value="">اختر الدور</option>'+availableRoles.map(o=>'<option value="'+esc(o.value)+'"'+(previous.role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
         roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>';
       }
 
-      const isCell=String(u.unit_type)==="cell";
-      const context=isSupervisorForm()&&isCell
-        ?'<div class="field full"><div class="help">في الخلايا، الدور يحدد مسؤوليتك مباشرةً: «متطوع / عضو» أو «كاتب محتوى» دور غير إشرافي، أما «مساعد مشرف» أو «مشرف» أو «مشرف عام» فهو دور إشرافي، وتُسجّل معلوماته ضمن بطاقة الخلية نفسها.</div></div>'
-        :"";
+      const context="";
 
       return'<div class="unit-card" data-unit-id="'+esc(id)+'">'+
         '<div class="unit-card-head"><strong>'+esc(isAdmin?"تفاصيل دورك في الإدارة العامة":(u.name_ar||u.name_en||"الوحدة"))+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div>'+
