@@ -326,14 +326,14 @@ textarea{min-height:108px}
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
 
   function renderProfilePhotoField(){
-    if(!isSupervisorForm())return "";
+    if(formKey!=="membership_renewal" && formKey!=="membership_renewal_supervisor")return "";
     return '<div class="field full profile-photo-field" data-field-wrap="profile_image">'+
       '<label>الصورة الشخصية <span class="help" style="display:inline">اختياري</span></label>'+
       '<div class="profile-photo-box">'+
         '<div class="profile-photo-preview" id="profilePhotoPreview"><span>ML</span></div>'+
         '<div class="profile-photo-controls">'+
           '<input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp">'+
-          '<div class="profile-photo-help">يمكنك رفع صورة شخصية واضحة بصيغة JPG أو PNG أو WebP. الحد الأقصى لحجم الملف 5 ميغابايت. سيتم تحسين الصورة تلقائياً قبل تخزينها.</div>'+
+          '<div class="profile-photo-help">يمكنك رفع صورة شخصية واضحة بصيغة JPG أو PNG أو WebP. الحد الأقصى لحجم الملف 5 ميغابايت. ستُستخدم الصورة في ملف العضو وبطاقة العضوية الإلكترونية.</div>'+
           '<div id="profilePhotoError" class="profile-photo-error"></div>'+
         '</div>'+
       '</div>'+
@@ -1548,12 +1548,12 @@ textarea{min-height:108px}
     if(error){setStatus("err",error);return;}
     submit.disabled=true;
     try{
-      if(isSupervisorForm()&&pendingProfileImageFile){
+      if((formKey==="membership_renewal" || formKey==="membership_renewal_supervisor")&&pendingProfileImageFile){
         setStatus("ok","جارٍ رفع الصورة الشخصية...");
         profileImageData=await uploadProfileImage(pendingProfileImageFile);
       }
       const data=collect();
-      if(isSupervisorForm()&&profileImageData?.url){
+      if((formKey==="membership_renewal" || formKey==="membership_renewal_supervisor")&&profileImageData?.url){
         data.profile_image_url=profileImageData.url;
         data.profile_image_public_id=profileImageData.public_id;
       }
