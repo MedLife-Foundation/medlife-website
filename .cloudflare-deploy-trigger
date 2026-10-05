@@ -1,20 +1,21 @@
 MedLife website deployment trigger
 
-Release: membership renewal — fresh membership number per public submission + stable management API route
-Timestamp: 2026-10-05T10:05:00Z
+Release: membership renewal — dedicated public submit route outside /api
+Timestamp: 2026-10-05T10:20:00Z
 Source: main
 
 Public form: current-member.html
-Submit API: functions/api/management.js via /api/management
+Submit API: /membership-submit
+Implementation: functions/membership-submit.js -> functions/api/management.js
 Form loader: /api/management?resource=membership_renewal_form
 
-Membership renewal submissions are used to build the central member database from scratch. Every public membership renewal form submission receives a NEW unique MedLife membership number; existing volunteer profile numbers are never reused for a new submission. The issued number is authoritative for the submission, profile, membership card, and email.
+The dedicated submit route intentionally sits outside /api to avoid any path-specific Cloudflare security rule blocking the browser POST. All existing server-side validation, Supabase writes, automatic application, membership-card data, and email behavior remain centralized in functions/api/management.js.
 
-Content-writing cells are resolved only from active org_units. Submitted assignment cell IDs are canonicalized against live cells, including a unique name fallback, and assignment cells are merged into the submitted unit set.
-Certificate unit links are validated independently against active units, so multiple current units and multiple certificate records remain isolated.
+Every public membership renewal form submission receives a NEW unique MedLife membership number. Existing volunteer profile numbers are never reused for a new submission. The issued number is authoritative for the submission, member profile, card, and email.
 
-Latest membership form endpoint fix commit: 2b3d4d0e4596a867503e030ad87ed660488cade3
-Latest API commit: cbc916200ada74639ad4b658a47b2b067b3d56f0
+Latest form route commit: 31a65890228998b688697478716b8c19b29bcc4c
+Dedicated route commit: 3bab06ca84a940fc6c468014ef79ba62be7562c6
+API commit: cbc916200ada74639ad4b658a47b2b067b3d56f0
 Database migration: 20261005150000_issue_new_membership_number_per_public_renewal
 
-The public renewal insert trigger issues the membership number before insert, skips any legacy/test collision, and the renewal submission keeps a unique membership number.
+Next verified free membership number: MLF-K7Q8.
