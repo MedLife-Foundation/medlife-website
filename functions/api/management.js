@@ -513,7 +513,7 @@ export async function onRequestPost({ request }) {
         seenLanguageKeys.add(languageKey);
       }
 
-      const requestedIds = Array.isArray(data.current_units)
+      let requestedIds = Array.isArray(data.current_units)
         ? [...new Set(data.current_units.map(item => cleanText(item, 80)).filter(Boolean))].slice(0, 26)
         : [];
       const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
@@ -523,6 +523,8 @@ export async function onRequestPost({ request }) {
         ? data.content_assignments.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
         : [];
       const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
+      const writingContentDepartmentId = "b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
+      const contentWritingSelected = supervisorForm && requestedIds.includes(writingContentDepartmentId);
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
       }
@@ -558,6 +560,15 @@ export async function onRequestPost({ request }) {
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
       }
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
+      // Cells are selectable only as assignments under the Content Writing department.
+      // Discard stale cell IDs when that department is no longer selected.
+      if (!contentWritingSelected) {
+        const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
+        requestedIds = requestedIds.filter(id => {
+          const unit = activeUnitById.get(String(id));
+          return !unit || String(unit.unit_type) !== "cell";
+        });
+      }
       // Validate the exact submitted IDs directly. This avoids rejecting a valid
       // supervisor-only unit such as General Administration because the broader
       // public unit query is filtered differently.
