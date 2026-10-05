@@ -1,9 +1,14 @@
 MedLife website deployment trigger
 
-Release: MedLife Supervisor Form + Central Volunteer Record V15
-Timestamp: 2026-10-04T12:15:00Z
+Release: supervisor membership form — live content cells + canonical content assignments + multi-unit certificate isolation
+Timestamp: 2026-10-05T11:38:00Z
 Source: main
 
-Final supervisor renewal form source commit: 58484daed00499ccb1392c59f109d09ba0bfe077
-Public managed page sync: public_site_content/current-member.html
-Central sync: verified structured language, content assignments, unit roles, management positions, education, emergency, profile snapshots and membership history.
+Public form: current-member.html
+API: functions/api/management.js
+
+Content-writing cells are resolved only from active org_units. Submitted assignment cell IDs are canonicalized against live cells, including a unique name fallback, and assignment cells are merged into the submitted unit set.
+Certificate unit links are validated independently against active units, so multiple current units and multiple certificate records remain isolated.
+
+Latest form commit: c34d5c8ba983f47cc9c66f9a5dfb0d4e516916b1
+Latest API commit: 33aa65acde6d3d8cbf6e68606eacb8a9739ffeeb
