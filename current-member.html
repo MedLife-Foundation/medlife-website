@@ -296,6 +296,7 @@ textarea{min-height:108px}
   const escSel=v=>String(v??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"');
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
+  let contentAssignmentSelections=[];
   let pendingProfileImageFile=null;
   let profileImageData=null;
   let profilePreviewObjectUrl=null;
@@ -465,6 +466,22 @@ textarea{min-height:108px}
     return languageAssignments.some(item=>String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||""));
   }
 
+  function contentCellIds(){
+    return contentAssignmentSelections
+      .map(item=>String(item?.cellId||""))
+      .filter(Boolean);
+  }
+
+  function contentWritingActive(){
+    if(!isSupervisorForm())return false;
+    const selected=Array.from(form.querySelectorAll('input[name="current_units"]:checked'));
+    return selected.some(input=>{
+      const id=String(input.value||"").trim();
+      if(id==="b1ea8c52-b405-4ad9-b9f6-2768a22a7827")return true;
+      return isWritingContentUnit(units.find(unit=>String(unit.id)===id));
+    });
+  }
+
   function selectedIds(){
     const validUnitIds=new Set(
       units
@@ -475,6 +492,470 @@ textarea{min-height:108px}
     const ids=Array.from(form.querySelectorAll('input[name="current_units"]:checked'))
       .map(x=>String(x.value))
       .filter(id=>id&&validUnitIds.has(id));
+    if(contentWritingActive()){
+      contentCellIds().forEach(id=>{
+        if(validUnitIds.has(id))ids.push(id);
+      });
+    }
+    return Array.from(new Set(ids));
+  }
+
+  function syncContentAssignmentsFromDom(){
+    const rows=Array.from(form.querySelectorAll(".content-assignment-card"));
+    contentAssignmentSelections=rows.map(row=>({
+      cellId:String(row.querySelector('[name^="content_assignment_cell_"]')?.value||""),
+      role:String(row.querySelector('[name^="content_assignment_role_"]')?.value||""),
+      roleStarted:String(row.querySelector('[name^="content_assignment_role_started_"]')?.value||""),
+      roleContinuing:String(row.querySelector('[name^="content_assignment_role_continuing_"]')?.value||""),
+      roleLeft:String(row.querySelector('[name^="content_assignment_role_left_"]')?.value||""),
+      joined:String(row.querySelector('[name^="content_assignment_joined_"]')?.value||""),
+      continuing:String(row.querySelector('[name^="content_assignment_continuing_"]')?.value||""),
+      left:String(row.querySelector('[name^="content_assignment_left_"]')?.value||""),
+      notes:String(row.querySelector('[name^="content_assignment_notes_"]')?.value||"")
+    }));
+  }
+
+  function collect(){
+    const out={};
+    new FormData(form).forEach((value,key)=>{
+      if(/^unit_(role|role_started|role_continuing|role_left|joined|continuing|left|notes)_/.test(key)||/^content_assignment_/.test(key)||key==="current_units")return;
+      if(Object.prototype.hasOwnProperty.call(out,key))out[key]=Array.isArray(out[key])?out[key].concat(value):[out[key],value];
+      else out[key]=value;
+    });
+
+    if(contentWritingActive())syncContentAssignmentsFromDom();
+    syncLanguageAssignmentsFromDom();
+    const completeLanguageAssignments=languageAssignments.filter(item=>String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||""));
+    out.language_assignments=completeLanguageAssignments.map(item=>({
+      language:item.language,
+      language_other:item.languageOther,
+      level:item.level
+    }));
+    syncCertificateHistoryFromDom();
+    const completeCertificateRows=certificateHistory.filter(item=>{
+      return String(item?.type||"").trim()
+        || String(item?.title||"").trim()
+        || String(item?.issuingOrganization||"").trim()
+        || String(item?.issuedDate||"").trim()
+        || String(item?.issuingUnitId||"").trim()
+        || String(item?.referenceCode||"").trim()
+        || String(item?.notes||"").trim();
+    });
+    out.certificate_history=completeCertificateRows.map(item=>({
+      type:item.type,
+      title:item.title,
+      issuing_organization:item.issuingOrganization,
+      issued_date:item.issuedDate,
+      issuing_unit_id:item.issuingUnitId||null,
+      reference_code:item.referenceCode||null,
+      notes:item.notes||null
+    }));
+    if(completeLanguageAssignments.length){
+      out.language=completeLanguageAssignments.map(item=>item.language==="other"?(item.languageOther||"أخرى"):item.language);
+      out.language_level=completeLanguageAssignments.map(item=>item.level).filter(Boolean);
+      out.language_other=completeLanguageAssignments.find(item=>item.language==="other")?.languageOther||"";
+    } else {
+      out.language_assignments=[];
+    }
+
+    const ids=selectedIds();
+    if(ids.length)out.current_units=ids;
+
+    for(const f of schema?.fields||[]){
+      if(f.field_type==="boolean"&&typeof out[f.field_key]==="string")out[f.field_key]=out[f.field_key]==="true";
+    }
+
+    const details={};
+
+    document.querySelectorAll(".unit-card[data-unit-id]").forEach(card=>{
+      const id=String(card.dataset.unitId);
+      const get=n=>card.querySelector('[name^="'+n+'_"]')?.value||"";
+      const joined=get("unit_joined");
+      const continuing=get("unit_continuing")==="true";
+      const roleStarted=get("unit_role_started")||"";
+      const roleContinuingValue=get("unit_role_continuing");
+      const roleContinuing=roleContinuingValue==="true";
+      const roleLeft=roleContinuing?"":get("unit_role_left");
+      const unit=units.find(u=>String(u.id)===id);
+      const seniorPosition=get("senior_management_position");
+      if(isSupervisorForm()&&String(unit?.unit_type)==="other"&&seniorPosition)out.senior_management_position=seniorPosition;
+      details[id]={
+        role:get("unit_role")||"volunteer",
+        senior_management_position:seniorPosition,
+        role_started_on:roleStarted,
+        role_continuing:roleContinuing,
+        role_left_on:roleLeft,
+        joined_on:joined,
+        continuing,
+        left_on:continuing?"":get("unit_left"),
+        notes:get("unit_notes"),
+        seniorManagementPosition:get("senior_management_position")
+      };
+    });
+
+    out.content_assignments=[];
+    out.current_unit_details=details;
+    return out;
+  }
+
+  function visible(f,data=collect()){
+    const chosen=Array.isArray(data.current_units)?data.current_units.map(String):[];
+    const targets=Array.isArray(f.target_unit_ids)?f.target_unit_ids.map(String):[];
+    if(targets.length&&!targets.some(id=>chosen.includes(id)))return false;
+    const targetTypes=Array.isArray(f.target_unit_types)?f.target_unit_types.map(String):[];
+    if(targetTypes.length&&!targetTypes.some(type=>units.some(unit=>chosen.includes(String(unit.id))&&String(unit.unit_type)===type)))return false;
+    const v=f.visibility&&typeof f.visibility==="object"?f.visibility:{};
+    if(v.mode!=="when")return true;
+    const actual=data[String(v.field_key||"")],expected=String(v.value??"");
+    const operator=String(v.operator||"equals");
+    if(operator==="contains")return Array.isArray(actual)?actual.map(String).includes(expected):String(actual??"").toLowerCase().includes(expected.toLowerCase());
+    if(operator==="in"){
+      const allowed=String(v.value??"").split(",").map(x=>x.trim()).filter(Boolean);
+      return Array.isArray(actual)?actual.some(x=>allowed.includes(String(x))):allowed.includes(String(actual??""));
+    }
+    if(operator==="not_equals")return String(actual??"")!==expected;
+    return String(actual??"")===expected;
+  }
+
+  function sectionFor(k){
+    if(["full_name","father_name","mother_name","national_id","country","country_other","nationality","nationality_other","governorate","city","full_address","date_of_birth","gender","email","phone"].includes(k))return["المعلومات الشخصية والتواصل","البيانات الأساسية، الإقامة، ووسائل التواصل التي نعتمد عليها في ملفك المركزي."];
+    if(["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone","emergency_contact_alt_phone","emergency_contact_notes"].includes(k))return["معلومات الطوارئ والتواصل","بيانات شخص يمكن الرجوع إليه عند الضرورة أو عند تعذر الوصول إليك."];
+    if(["academic_status","university","specialty","profession","workplace","academic_qualification","graduation_year","graduation_university","current_occupation","current_workplace","student_college","student_university","university_start_date","current_study_year","resident_degree","residency_specialty","residency_year","residency_start_date","residency_hospital","specialist_degree","specialist_specialty","specialist_year","other_academic_status"].includes(k))return["المؤهل العلمي والمهني","اختر وضعك الأكاديمي أو المهني الحالي، وستظهر فقط المعلومات التعليمية والمهنية المرتبطة به."];
+    if(["join_date","supervisor_start_date","current_role_in_team","current_units","current_unit_details","content_assignments","consultation_specialty","consultation_specialty_other"].includes(k))return["عضويتك في ميدلايف","سجل انضمامك إلى ميدلايف، والوحدات التي تعمل أو تشرف فيها، والأدوار والمناصب والتكليفات المرتبطة بها."];
+    if(["certificate_history"].includes(k))return["الشهادات والتكريمات السابقة","سجّل الشهادات أو التكريمات التي حصلت عليها من ميدلايف أو من جهات أخرى، مع توثيق عنوان الشهادة والجهة المانحة وتاريخ الحصول عليها."];
+    if(["reported_total_volunteer_hours","volunteer_commitment_hours","availability","field_available_days"].includes(k))return["الالتزام والتوفر التطوعي","بيانات التفرغ والقدرة التطوعية الحالية، وتفاصيل المشاركة الميدانية عند اختيار فريق ميداني."];
+    if(["skills","talent_areas","undiscovered_talents","desired_contributions","development_interests","interest_areas","language_assignments","language","language_level","language_other"].includes(k))return["المهارات والمواهب والمساهمة القادمة","نوثّق ما تستطيع تقديمه اليوم، ومواهبك وخبراتك، والفرص التي ترغب بتطويرها أو تجربتها داخل ميدلايف."];
+    return["معلومات إضافية",""];
+  }
+
+  const sectionOrder=[
+    "المعلومات الشخصية والتواصل",
+    "معلومات الطوارئ والتواصل",
+    "المؤهل العلمي والمهني",
+    "عضويتك في ميدلايف",
+    "الالتزام والتوفر التطوعي",
+    "المهارات والمواهب والمساهمة القادمة",
+    "الشهادات والتكريمات السابقة",
+    "معلومات إضافية"
+  ];
+
+
+  function generic(f){
+    const k=esc(f.field_key),t=f.field_type,opts=Array.isArray(f.options)?f.options:[];
+    if(t==="multi_select")return'<div class="choice-grid">'+opts.map(o=>'<label class="choice"><input type="checkbox" name="'+k+'" value="'+esc(o.value)+'"><span>'+esc(o.label_ar||o.label_en||o.value)+'</span></label>').join("")+"</div>";
+    if(t==="boolean")return'<select data-field="'+k+'" name="'+k+'"><option value="">اختر</option><option value="true">نعم</option><option value="false">لا</option></select>';
+    if(t==="select")return'<select data-field="'+k+'" name="'+k+'"><option value="">اختر</option>'+opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label_ar||o.label_en||o.value)+'</option>').join("")+'</select>';
+    if(t==="textarea")return'<textarea data-field="'+k+'" name="'+k+'" placeholder="'+esc(f.placeholder_ar||"")+'"></textarea>';
+    const it=["email","number","date","url","phone","datetime-local"].includes(t)?t:"text";
+    const rules=f.validation&&typeof f.validation==="object"?f.validation:{};
+    const attrs=t==="number"?((rules.min!==undefined?' min="'+esc(rules.min)+'"':"")+(rules.max!==undefined?' max="'+esc(rules.max)+'"':"")+(rules.step!==undefined?' step="'+esc(rules.step)+'"':"")):"";
+    return'<input data-field="'+k+'" name="'+k+'" type="'+it+'" placeholder="'+esc(f.placeholder_ar||"")+'"'+attrs+'>';
+  }
+
+  function renderUnitPicker(){
+    const groups=[["cell","الخلايا","اختر الخلايا التي تعمل أو تشرف فيها حالياً أو سبق أن عملت فيها."],["department","الأقسام","اختر الأقسام التي لديك فيها دور حالياً أو سابقاً."],["field_team","الفرق الميدانية","اختر الفرق الميدانية التي شاركت أو تشارك معها." ]];
+    if(isSupervisorForm())groups.unshift(["other","الإدارة العامة","للمناصب التنظيمية العامة في قيادة ميدلايف."]);
+    const configuredContentCellIds=new Set(
+      (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
+    );
+    return'<div class="units">'+groups.map(g=>{
+      const rows=units
+        .filter(u=>u.unit_type===g[0]);
+      if(!rows.length)return"";
+      return'<div class="unit-group"><h3>'+g[1]+'</h3><p class="unit-group-help">'+esc(g[2])+'</p><div class="unit-choices">'+rows.map(u=>'<label class="unit-choice"><input type="checkbox" name="current_units" value="'+esc(u.id)+'" data-unit="'+esc(u.id)+'"><span>'+esc(u.name_ar||u.name_en)+'</span></label>').join("")+'</div></div>';
+    }).join("")+'</div><div id="unitDetails" class="unit-details"></div>';
+  }
+
+  function renderLanguageField(){
+    if(!isSupervisorForm())return"";
+    if(!languageAssignments.length)languageAssignments=[{language:"",languageOther:"",level:""}];
+    const rows=languageAssignments.map((item,index)=>{
+      const langOptions='<option value="">اختر اللغة</option>'+languageOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.language===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+      const levelOptions='<option value="">اختر مستوى اللغة</option>'+languageLevelOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.level===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+      const otherHidden=item.language==="other"?"":" hidden";
+      return'<div class="language-assignment-card" data-language-index="'+index+'">'+
+        '<div class="language-assignment-head"><strong>لغة '+(index+1)+'</strong>'+(index>0?'<button type="button" class="language-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
+        '<div class="grid">'+
+          '<div class="field"><label>اللغة <span class="req">*</span></label><select name="language_assignment_'+index+'">'+langOptions+'</select></div>'+
+          '<div class="field"><label>مستوى اللغة <span class="req">*</span></label><select name="language_assignment_level_'+index+'">'+levelOptions+'</select></div>'+
+          '<div class="field full'+otherHidden+'" data-language-other-wrap="'+index+'"><label>اكتب اللغة</label><input type="text" name="language_assignment_other_'+index+'" value="'+esc(item.languageOther)+'" placeholder="اكتب اسم اللغة"></div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    return'<div class="field full" data-field-wrap="language_assignments"><label>اللغات ومستوى إتقانها</label><div class="help">أضف اللغات التي تتقنها، ويُسجَّل مستوى كل لغة بشكل مستقل. يمكنك إضافة أكثر من لغة دون تكرار اللغة نفسها.</div><div class="language-assignment-list">'+rows+'</div><button type="button" class="btn btn-secondary language-add-assignment" id="addLanguageAssignment">＋ إضافة لغة أخرى</button></div>';
+  }
+
+
+  function syncCertificateHistoryFromDom(){
+    const rows=Array.from(form.querySelectorAll(".certificate-history-card"));
+    certificateHistory=rows.map(row=>({
+      type:String(row.querySelector('[name^="certificate_history_type_"]')?.value||""),
+      title:String(row.querySelector('[name^="certificate_history_title_"]')?.value||""),
+      issuingOrganization:String(row.querySelector('[name^="certificate_history_issuer_"]')?.value||""),
+      issuedDate:String(row.querySelector('[name^="certificate_history_date_"]')?.value||""),
+      issuingUnitId:String(row.querySelector('[name^="certificate_history_unit_"]')?.value||""),
+      referenceCode:String(row.querySelector('[name^="certificate_history_reference_"]')?.value||""),
+      notes:String(row.querySelector('[name^="certificate_history_notes_"]')?.value||"")
+    }));
+  }
+
+  function renderCertificateHistoryField(){
+    const certificateUnits=units.filter(u=>u&&u.is_active!==false&&["cell","department","field_team","other"].includes(String(u.unit_type||"")));
+    const validCertificateUnitIds=new Set(certificateUnits.map(u=>String(u.id)));
+    const rows=certificateHistory.map((item,index)=>{
+      const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.type===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+      const safeIssuingUnitId=validCertificateUnitIds.has(String(item.issuingUnitId||""))?String(item.issuingUnitId):"";
+      const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+certificateUnits.map(u=>'<option value="'+esc(u.id)+'"'+(safeIssuingUnitId===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
+      return'<div class="certificate-history-card unit-card" data-certificate-index="'+index+'">'+
+        '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
+        '<div class="grid">'+
+          '<div class="field"><label>نوع الشهادة <span class="req">*</span></label><select name="certificate_history_type_'+index+'">'+typeOptions+'</select></div>'+
+          '<div class="field"><label>تاريخ الحصول على الشهادة <span class="req">*</span></label><input type="date" name="certificate_history_date_'+index+'" value="'+esc(item.issuedDate||"")+'"></div>'+
+          '<div class="field full"><label>اسم الشهادة / عنوانها <span class="req">*</span></label><input type="text" name="certificate_history_title_'+index+'" value="'+esc(item.title||"")+'" placeholder="مثال: شهادة تطوع متميز"></div>'+
+          '<div class="field"><label>الجهة المانحة <span class="req">*</span></label><input type="text" name="certificate_history_issuer_'+index+'" value="'+esc(item.issuingOrganization||"")+'" placeholder="اسم الجهة المانحة"></div>'+
+          '<div class="field"><label>الفريق / الوحدة المرتبطة</label><select name="certificate_history_unit_'+index+'">'+unitOptions+'</select></div>'+
+          '<div class="field"><label>رقم أو مرجع الشهادة</label><input type="text" name="certificate_history_reference_'+index+'" value="'+esc(item.referenceCode||"")+'" placeholder="اختياري"></div>'+
+          '<div class="field full"><label>ملاحظات</label><textarea name="certificate_history_notes_'+index+'" placeholder="أي معلومة إضافية عن الشهادة">'+esc(item.notes||"")+'</textarea></div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    return'<div class="field full" data-field-wrap="certificate_history">'+
+      '<label>الشهادات والتكريمات السابقة</label>'+
+      '<div class="help">سجّل الشهادات أو التكريمات التي حصلت عليها من ميدلايف أو من أي جهة أخرى. يمكنك إضافة أكثر من شهادة، وإذا لم تحصل على أي شهادة اترك هذا القسم دون إضافة.</div>'+
+      '<div class="certificate-history-list">'+rows+'</div>'+
+      '<button type="button" class="btn btn-secondary certificate-add" id="addCertificate">＋ إضافة شهادة</button>'+
+      '</div>';
+  }
+
+  function bindCertificateHistoryEvents(){
+    host.querySelectorAll(".certificate-history-card input,.certificate-history-card select,.certificate-history-card textarea").forEach(el=>{
+      el.addEventListener("input",syncCertificateHistoryFromDom);
+      el.addEventListener("change",syncCertificateHistoryFromDom);
+    });
+    host.querySelectorAll(".certificate-remove").forEach(el=>el.addEventListener("click",()=>{
+      syncCertificateHistoryFromDom();
+      certificateHistory.splice(Number(el.dataset.index||0),1);
+      renderCertificateHistoryIntoHost();
+      updateProgress();
+      applyVisibility();
+    }));
+    $("addCertificate")?.addEventListener("click",()=>{
+      syncCertificateHistoryFromDom();
+      certificateHistory.push({type:"",title:"",issuingOrganization:"",issuedDate:"",issuingUnitId:"",referenceCode:"",notes:""});
+      renderCertificateHistoryIntoHost();
+      updateProgress();
+      applyVisibility();
+    });
+  }
+
+  function renderCertificateHistoryIntoHost(){
+    const wrap=host.querySelector('[data-field-wrap="certificate_history"]');
+    if(!wrap)return;
+    const parent=wrap.parentElement;
+    const temp=document.createElement("div");
+    temp.innerHTML=renderCertificateHistoryField();
+    parent.replaceChild(temp.firstElementChild,wrap);
+    bindCertificateHistoryEvents();
+  }
+
+  function renderField(f){
+    if(isSupervisorForm()&&["language_assignments","language","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))return"";
+    if(isSupervisorForm()&&f.field_key==="certificate_history")return renderCertificateHistoryField();
+    const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
+    if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")return"";
+    const req=f.required?'<span class="req"> *</span>':"";
+    const defaultHelp=f.help_ar||"";
+    const supervisorHelp=isSupervisorForm()&&f.field_key==="current_units"
+      ?"اختر الأقسام والفرق الميدانية التي لديك فيها دور حالياً أو سابقاً. أما الإشراف على الخلايا فيُوثق بشكل مستقل في قسم «الإشراف على الخلايا»."
+      :defaultHelp;
+    const help=supervisorHelp?'<div class="help">'+esc(supervisorHelp)+"</div>":"";
+    const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
+    return'<div class="field '+(full?"full":"")+'" data-field-wrap="'+esc(f.field_key)+'"><label>'+esc(f.label_ar)+req+"</label>"+input+help+"</div>";
+  }
+
+  function renderUnitDetails(){
+    const detailsHost=$("unitDetails");
+    const selectedUnitIds=Array.from(form.querySelectorAll('input[name="current_units"]:checked')).map(x=>String(x.value)).filter(Boolean);
+    const rendered=selectedUnitIds.map(id=>{
+      const u=units.find(x=>String(x.id)===id);
+      if(!u)return"";
+      const isAdmin=String(u.unit_type)==="other";
+      const isWritingDept=isWritingContentUnit(u);
+      const oldCard=document.querySelector('.unit-card[data-unit-id="'+escSel(id)+'"]');
+      const previous={};
+
+      if(oldCard){
+        const get=n=>oldCard.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
+        previous.role=get("unit_role")||"volunteer";
+        previous.roleStarted=get("unit_role_started");
+        previous.roleContinuing=get("unit_role_continuing");
+        previous.roleLeft=get("unit_role_left");
+        previous.joined=get("unit_joined");
+        previous.continuing=get("unit_continuing");
+        previous.left=get("unit_left");
+        previous.notes=get("unit_notes");
+        previous.seniorManagementPosition=get("senior_management_position");
+      }
+
+      let roleHtml="";
+      if(isAdmin){
+        const options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(previous.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+        roleHtml='<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select name="senior_management_position_'+esc(id)+'">'+options+'</select></div>';
+      }else if(isWritingDept){
+        roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><div class="content-fixed-role">كاتب محتوى</div><input type="hidden" name="unit_role_'+esc(id)+'" value="content_writer"></div>';
+      }else{
+        const availableRoles=isSupervisorForm()?roleOptions:[{value:"volunteer",label:"متطوع / عضو"}];
+        const options='<option value="">اختر الدور</option>'+availableRoles.map(o=>'<option value="'+esc(o.value)+'"'+(previous.role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+        roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>';
+      }
+
+      const isCell=String(u.unit_type)==="cell";
+      const context=isSupervisorForm()&&isCell
+        ?'<div class="field full"><div class="help">في الخلايا، الدور يحدد مسؤوليتك مباشرةً: «متطوع / عضو» أو «كاتب محتوى» دور غير إشرافي، أما «مساعد مشرف» أو «مشرف» أو «مشرف عام» فهو دور إشرافي، وتُسجّل معلوماته ضمن بطاقة الخلية نفسها.</div></div>'
+        :"";
+
+      return'<div class="unit-card" data-unit-id="'+esc(id)+'">'+
+        '<div class="unit-card-head"><strong>'+esc(isAdmin?"تفاصيل دورك في الإدارة العامة":(u.name_ar||u.name_en||"الوحدة"))+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div>'+
+        '<div class="unit-card-grid">'+roleHtml+context+
+        '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(previous.roleStarted||"")+'"></div>'+
+        '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(previous.roleContinuing==="true"?" selected":"")+'>نعم، مستمر '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(previous.roleContinuing==="false"?" selected":"")+'>لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
+        '<div class="field '+(previous.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(previous.roleLeft||"")+'"></div>'+
+        '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(previous.joined||"")+'"></div>'+
+        '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+((previous.continuing==="true"||previous.continuing===true)?" selected":"")+'>نعم، ما زلت مستمراً</option><option value="false"'+((previous.continuing==="false"||previous.continuing===false)?" selected":"")+'>لا، تركتها</option></select></div>'+
+        '<div class="field '+((previous.continuing==="false"||previous.continuing===false)?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(previous.left||"")+'"></div>'+
+        '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="'+(isCell&&isSupervisorForm()?"الدور أو المسؤولية الإشرافية أو أي معلومة مهمة":"أي معلومة مهمة عن هذا الدور")+'">'+esc(previous.notes||"")+'</textarea></div>'+
+        '</div></div>';
+    }).join("");
+
+    detailsHost.innerHTML=rendered;
+
+    detailsHost.querySelectorAll('select[name^="unit_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
+      const id=el.name.replace("unit_continuing_","");
+      detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]')?.classList.toggle("hidden",el.value!=="false");
+      updateProgress();
+      applyVisibility();
+    }));
+
+    detailsHost.querySelectorAll('select[name^="unit_role_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
+      const id=el.name.replace("unit_role_continuing_","");
+      detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]')?.classList.toggle("hidden",el.value!=="false");
+      updateProgress();
+      applyVisibility();
+    }));
+  }
+
+  function syncSectionVisibility(){
+    host.querySelectorAll(".form-section").forEach(section=>{
+      const visibleFields=Array.from(section.querySelectorAll("[data-field-wrap]"))
+        .some(wrap=>!wrap.classList.contains("hidden"));
+      section.classList.toggle("hidden",!visibleFields);
+    });
+  }
+
+  function renumberVisibleSections(){
+    let number=0;
+    host.querySelectorAll(".form-section").forEach(section=>{
+      if(section.classList.contains("hidden"))return;
+      number+=1;
+      const badge=section.querySelector(".section-number");
+      if(badge)badge.textContent=String(number)+"-";
+    });
+  }
+
+  function applyVisibility(){
+    const data=collect();
+    for(const f of schema?.fields||[]){
+      const w=document.querySelector('[data-field-wrap="'+CSS.escape(f.field_key)+'"]');
+      if(w)w.classList.toggle("hidden",!visible(f,data));
+    }
+    syncSectionVisibility();
+    renumberVisibleSections();
+    updateProgress();
+  }
+
+
+  function contentCellSetForValidation(){
+    return new Set(
+      units
+        .filter(u=>String(u.unit_type)==="cell"&&u.is_active!==false)
+        .map(u=>String(u.id))
+        .filter(Boolean)
+    );
+  }
+
+  function validate(){
+    if(isSupervisorForm())syncContentAssignmentsFromDom();
+    const data=collect();
+    if(isSupervisorForm())syncContentAssignmentsFromDom();
+    if(isSupervisorForm()){
+      syncLanguageAssignmentsFromDom();
+      syncCertificateHistoryFromDom();
+      const certificateRows=certificateHistory.filter(item=>{
+        return String(item?.type||"").trim()||String(item?.title||"").trim()||String(item?.issuingOrganization||"").trim()||String(item?.issuedDate||"").trim();
+      });
+      const validCertificateTypes=new Set(certificateTypeOptions.map(item=>item.value));
+      const validCertificateUnitIds=new Set(
+        units
+          .filter(unit=>unit&&unit.is_active!==false&&["cell","department","field_team","other"].includes(String(unit.unit_type||"")))
+          .map(unit=>String(unit.id))
+      );
+      const seenCertificates=new Set();
+      const today=new Date().toISOString().slice(0,10);
+      for(const item of certificateRows){
+        const type=String(item.type||"").trim();
+        const title=String(item.title||"").trim().replace(/\s+/g," ");
+        const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
+        const issued=String(item.issuedDate||"").trim();
+        const issuingUnitId=String(item.issuingUnitId||"").trim();
+        if(!validCertificateTypes.has(type))return"يوجد نوع شهادة غير صالح.";
+        if(!title)return"يرجى كتابة اسم كل شهادة.";
+        if(!issuer)return"يرجى كتابة الجهة المانحة لكل شهادة.";
+        if(!issued)return"يرجى تحديد تاريخ الحصول على كل شهادة.";
+        if(issued>today)return"تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل.";
+        if(issuingUnitId&&!validCertificateUnitIds.has(issuingUnitId))return"الفريق أو الوحدة المرتبطة بالشهادة غير صالحة.";
+        const key=[type,title.toLowerCase(),issuer.toLowerCase(),issued,issuingUnitId].join("|");
+        if(seenCertificates.has(key))return"لا يمكن تكرار الشهادة نفسها أكثر من مرة.";
+        seenCertificates.add(key);
+      }
+
+      const languageRows=languageAssignments.filter(item=>{
+        return String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||"").trim();
+      });
+      const validLanguageCodes=new Set(languageOptions.map(item=>item.value));
+      const validLanguageLevels=new Set(languageLevelOptions.map(item=>item.value));
+      const seenLanguages=new Set();
+      for(const item of languageRows){
+        const language=String(item?.language||"").trim();
+        const other=String(item?.languageOther||"").trim();
+        const level=String(item?.level||"").trim();
+        if(!language)return"يرجى تحديد اللغة في كل بطاقة لغة مستخدمة.";
+        if(!validLanguageCodes.has(language))return"اللغة المختارة غير صالحة.";
+        if(!level)return"يرجى تحديد مستوى إتقان كل لغة.";
+        if(!validLanguageLevels.has(level))return"مستوى اللغة المختار غير صالح.";
+        if(language==="other"&&!other)return"يرجى كتابة اسم اللغة عند اختيار «أخرى».";
+        const languageKey=language==="other"?"other:"+other.replace(/\s+/g," ").toLowerCase():language;
+        if(seenLanguages.has(languageKey))return"لا يمكن تكرار اللغة نفسها أكثر من مرة.";
+        seenLanguages.add(languageKey);
+      }
+    }
+    for(const f of schema?.fields||[]){
+      if(!visible(f,data)||f.field_key==="current_unit_details")continue;
+      const v=data[f.field_key];
+      if(f.required){
+        const missing=Array.isArray(v)?v.length===0:typeof v==="boolean"?false:v===undefined||v===null||String(v).trim()==="";
+        if(missing)return"يرجى تعبئة السؤال: "+f.label_ar;
+      }
+      if(f.field_type==="number"&&v!==undefined&&v!==null&&String(v).trim()!==""){
+        const n=Number(v),r=f.validation&&typeof f.validation==="object"?f.validation:{};
+        if(!Number.isFinite(n))return"يرجى إدخال رقم صحيح في: "+f.label_ar;
+        if(r.min!==undefined&&n<Number(r.min))return"القيمة في «"+f.label_ar+"» يجب ألا تقل عن "+r.min+".";
+        if(r.max!==undefined&&n>Number(r.max))return"القيمة في «"+f.label_ar+"» يجب ألا تتجاوز "+r.max+".";
+      }
+    }
+    const ids=selectedIds();
+    if(!ids.length)return"يرجى اختيار خلية أو قسم أو فريق واحد على الأقل.";
+    const today=new Date().toISOString().slice(0,10);
+    const details=data.current_unit_details||{};
     for(const id of ids){
       const d=details[id]||{};
       const unit=units.find(u=>String(u.id)===id);
@@ -589,7 +1070,6 @@ textarea{min-height:108px}
     });
 
     host.querySelectorAll('input[name="current_units"]').forEach(x=>x.addEventListener("change",()=>{
-      syncContentAssignmentsFromDom();
       renderUnitDetails();
       applyVisibility();
       updateProgress();
