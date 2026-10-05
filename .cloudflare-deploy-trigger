@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
-Release: current-member submission root fix
-Timestamp: 2026-10-05T22:10:00Z
+Release: current-member certificate unit validation fix
+Timestamp: 2026-10-06T19:15:00Z
 Source: main
 
 Root cause fixed:
@@ -17,9 +17,9 @@ Permanent fix:
 - The managed CMS snapshot was also updated immediately with the same self-contained page as an immediate live fix.
 
 Latest commits:
-- current-member self-contained: b6fe91b6d6afc46c343a53efbb944b798f0340f8
-- middleware root fix: af5912c2c31112809ebb1d7972f033e90647d178
-- resilient submit client: 78407b6c8aecb43772280d991ba56ee9b5752f96
+- certificate confirmation initialization: faafdb7487d2ea4d70bd755353f303bc9187a004
+- current-member certificate unit name preservation: 5d642d8d7ae9aeae8012a9c136b0c8710cf518c6
+- certificate unit canonical validation: ecba8356b1afb1d0003f9a9ed5d2076f91b42c63
 - CMS live snapshot synchronized and verified.
 
 Database:
