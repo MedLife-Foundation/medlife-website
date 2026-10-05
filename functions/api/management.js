@@ -774,38 +774,9 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
       }
 
-      const contentWritingDepartmentSelected = requestedUnits.some(unit => isContentWritingUnit(unit));
-      if (contentWritingDepartmentSelected) {
-        if (!contentAssignments.length) {
-          return json({
-            success: false,
-            error: "عند اختيار «كتابة محتوى» يجب تسجيل تكليف واحد على الأقل."
-          }, 400);
-        }
-        const seenContentCells = new Set();
-        for (const assignment of contentAssignments) {
-          const cellId = cleanText(assignment.cell_id, 80);
-          const role = cleanText(assignment.role, 40).toLowerCase();
-          const matchingCell = requestedUnits.find(unit =>
-            unit.id === cellId && unit.unit_type === "cell"
-          );
-          if (!matchingCell) {
-            return json({ success: false, error: "يوجد تكليف كتابة محتوى مرتبط بخلية غير موجودة ضمن الاختيار." }, 400);
-          }
-          if (seenContentCells.has(cellId)) {
-            return json({ success: false, error: "لا يمكن تكرار الخلية نفسها في أكثر من تكليف كتابة محتوى." }, 400);
-          }
-          seenContentCells.add(cellId);
-          if (!["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"].includes(role)) {
-            return json({ success: false, error: "يوجد منصب غير صالح ضمن تكليف كتابة المحتوى." }, 400);
-          }
-          const detail = requestedUnitDetails[cellId];
-          if (!detail || String(detail.role || "").toLowerCase() !== role) {
-            return json({ success: false, error: "تفاصيل تكليف كتابة المحتوى لا تتطابق مع تفاصيل الخلية." }, 400);
-          }
-        }
-      } else if (contentAssignments.length) {
-        return json({ success: false, error: "وصلت بيانات تكليفات كتابة المحتوى من دون اختيار قسم كتابة محتوى." }, 400);
+      // كتابة المحتوى أصبحت دوراً عادياً داخل الوحدة نفسها، ولا تتطلب تكليفات منفصلة.
+      if (contentAssignments.length) {
+        return json({ success: false, error: "بيانات تكليفات كتابة المحتوى القديمة غير مدعومة. اختر «كتابة محتوى» كدور داخل الوحدة." }, 400);
       }
 
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
