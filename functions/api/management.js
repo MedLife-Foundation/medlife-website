@@ -561,6 +561,7 @@ export async function onRequestPost({ request }) {
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
       }
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
+      const validCertificateUnits = activeUnits;
       const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
       // Content-writing cells are subordinate assignments rather than top-level
       // selections. Resolve them on the server from the assignment list so adding
@@ -647,7 +648,11 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
-      const validExactUnits = requestedUnits;
+      // Certificate links are independent from the current unit selection:
+      // a member may have several current units, while a certificate belongs to
+      // one active MedLife unit at a time. This keeps certificate history isolated
+      // from multi-unit membership details.
+
       const allowedUnitRoles = supervisorForm
         ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
         : ["volunteer"];
@@ -790,8 +795,8 @@ export async function onRequestPost({ request }) {
         if (issuedDate > new Date().toISOString().slice(0,10)) {
           return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
         }
-        if (issuingUnitId && !validExactUnits.some(unit => String(unit.id) === issuingUnitId)) {
-          return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة ضمن هذا التحديث." }, 400);
+        if (issuingUnitId && !validCertificateUnits.some(unit => String(unit.id) === issuingUnitId)) {
+          return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة في ميدلايف." }, 400);
         }
         certificateHistory.push({
           type,
