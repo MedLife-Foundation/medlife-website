@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
 Release: supervisor membership form — live content cells + canonical content assignments + multi-unit certificate isolation
-Timestamp: 2026-10-05T12:10:00Z
+Timestamp: 2026-10-05T12:25:00Z
 Source: main
 
 Public form: current-member.html
@@ -11,10 +11,13 @@ Content-writing cells are resolved only from active org_units. Submitted assignm
 Certificate unit links are validated independently against active units, so multiple current units and multiple certificate records remain isolated.
 
 Latest form commit: c34d5c8ba983f47cc9c66f9a5dfb0d4e516916b1
-Latest API commit: 33aa65acde6d3d8cbf6e68606eacb8a9739ffeeb
+Latest API commit: cbc916200ada74639ad4b658a47b2b067b3d56f0
 
 Backend membership-unit lookup now uses the stable legacy anon key, with live-cell canonicalization and legacy form-cell alias recovery.
 Latest API commit: 23404129e9b2a81b1f2f50302786903cce32eedb
-Database migrations applied: remove_content_assignment_form_cell_gate + allow_public_read_active_content_cells
+Database migrations applied: remove_content_assignment_form_cell_gate + allow_public_read_active_content_cells + remove_renewal_submission_membership_unique_index
 
 Critical fix: membership renewal no longer references the out-of-scope unitReadHeaders variable; the submission path uses its own membershipUnitReadHeaders definition.
+
+
+Critical membership renewal fix: membership_number is unique on volunteer_profiles only; renewal submissions may reuse the same membership number across years.
