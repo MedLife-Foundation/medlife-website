@@ -1,4 +1,4 @@
-// Membership direct submit: unified unit roles / inline supervisor details
+// Membership direct submit: unified unit roles / inline supervisor details — routed through the existing management API
 (function(){
   "use strict";
   "use strict";
@@ -123,7 +123,7 @@
   }
 
   window.medlifeSubmitMembership=async function(data,schema,units,formKey){
-    const response=await fetch("/membership-submit",{
+    const response=await fetch("/api/management",{
       method:"POST",
       headers:{
         "Content-Type":"application/json",
