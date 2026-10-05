@@ -561,10 +561,27 @@ export async function onRequestPost({ request }) {
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
       }
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
+      const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
+      // Content-writing cells are subordinate assignments rather than top-level
+      // selections. Resolve them on the server from the assignment list so adding
+      // a new assignment never depends on a stale/missing current_units checkbox.
+      if (contentWritingSelected) {
+        const contentAssignmentCellIds = [...new Set(
+          contentAssignments
+            .map(item => cleanText(item?.cell_id, 80))
+            .filter(Boolean)
+        )];
+        for (const cellId of contentAssignmentCellIds) {
+          const cell = activeUnitById.get(cellId);
+          if (!cell || String(cell.unit_type) !== "cell") {
+            return json({ success: false, error: "يوجد تكليف كتابة محتوى مرتبط بخلية غير موجودة أو غير فعّالة." }, 400);
+          }
+        }
+        requestedIds = [...new Set([...requestedIds, ...contentAssignmentCellIds])];
+      }
       // Cells are selectable only as assignments under the Content Writing department.
       // Discard stale cell IDs when that department is no longer selected.
       if (!contentWritingSelected) {
-        const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
         requestedIds = requestedIds.filter(id => {
           const unit = activeUnitById.get(String(id));
           return !unit || String(unit.unit_type) !== "cell";
@@ -630,6 +647,7 @@ export async function onRequestPost({ request }) {
       if (requestedUnits.length !== requestedIds.length) {
         return json({ success: false, error: "يوجد قسم أو وحدة غير صالحة ضمن الاختيار." }, 400);
       }
+      const validExactUnits = requestedUnits;
       const allowedUnitRoles = supervisorForm
         ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
         : ["volunteer"];
@@ -773,7 +791,7 @@ export async function onRequestPost({ request }) {
           return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
         }
         if (issuingUnitId && !validExactUnits.some(unit => String(unit.id) === issuingUnitId)) {
-          return json({ success: false, error: "يوجد فريق أو وحدة غير صالحة مرتبطة بإحدى الشهادات." }, 400);
+          return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة ضمن هذا التحديث." }, 400);
         }
         certificateHistory.push({
           type,
