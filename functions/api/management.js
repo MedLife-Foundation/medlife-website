@@ -178,7 +178,7 @@ async function fetchResource(resource, url) {
       };
       const unitsResponse = await fetch(
         SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team,other)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
-        {headers: unitReadHeaders}
+        {headers: membershipUnitReadHeaders}
       );
       const units = await unitsResponse.json().catch(() => []);
       const liveUnits = (Array.isArray(units) ? units : []).map(unit => ({
