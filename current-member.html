@@ -1606,7 +1606,7 @@ textarea{min-height:108px}
         data.profile_image_public_id=profileImageData.public_id;
       }
       setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
-      const r=await fetch("/api/membership-renewal",{
+      const r=await fetch("/api/management",{
         method:"POST",
         headers:{"Content-Type":"application/json",Accept:"application/json"},
         body:JSON.stringify({action:"membership_renewal",form_id:schema.id,form_data:data})
