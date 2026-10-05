@@ -58,7 +58,6 @@ const CMS_LEGACY_ROUTES = new Set([
   "/login.html",
   "/new-member.html",
   "/about-medlife-foundation.html",
-  "/current-member.html",
   "/members.html",
   "/member-join.html",
   "/submit-article-v6.html",
