@@ -1494,7 +1494,12 @@ textarea{min-height:108px}
       return hit?.label||value;
     };
     const certificateHtml=certificateItems.length
-      ? certificateItems.map((item,index)=>'<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+esc(certificateTypeLabel(item.type))+': '+esc(item.title||"—")+' — '+esc(item.issuing_organization||"—")+' — '+esc(item.issued_date||"—")+'</strong></div>').join("")
+      ? certificateItems.map((item,index)=>{
+          const certificateUnitId=String(item?.issuing_unit_id||"").trim();
+          const certificateUnit=units.find(u=>String(u.id)===certificateUnitId);
+          const certificateUnitName=certificateUnit?.name_ar||certificateUnit?.name_en||"غير مرتبطة بوحدة";
+          return '<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+esc(certificateTypeLabel(item.type))+': '+esc(item.title||"—")+' — '+esc(item.issuing_organization||"—")+' — '+esc(item.issued_date||"—")+' — الوحدة: '+esc(certificateUnitName)+'</strong></div>';
+        }).join("")
       : '<div class="confirm-item"><span>الشهادات والتكريمات</span><strong>لم تُسجّل شهادات سابقة.</strong></div>';
 
     const languageItems=Array.isArray(values.language_assignments)?values.language_assignments.filter(item=>item&&((item.language||"")||(item.language_other||"")||(item.level||""))):[];
