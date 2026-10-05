@@ -123,41 +123,29 @@
   }
 
   window.medlifeSubmitMembership=async function(data,schema,units,formKey){
-    const id=crypto.randomUUID();
-    const payload=build(data,schema,units,formKey,id);
-    const response=await fetch(SUPABASE_URL+"/rest/v1/public_membership_renewal_submissions",{
+    const response=await fetch("/membership-submit",{
       method:"POST",
       headers:{
-        apikey:SUPABASE_KEY,
-        "Content-Type":"application/json",
-        Prefer:"return=minimal"
-      },
-      body:JSON.stringify(payload)
-    });
-    const raw=await response.text();
-    let body={};
-    try{body=raw?JSON.parse(raw):{}}catch(_){}
-    if(!response.ok){
-      const detail=str(body.message||body.error||body.details);
-      throw new Error(detail||("تعذر تسجيل العضوية. رمز الاستجابة: "+response.status));
-    }
-
-    const receipt=await fetch(SUPABASE_URL+"/rest/v1/rpc/get_membership_renewal_receipt",{
-      method:"POST",
-      headers:{
-        apikey:SUPABASE_KEY,
         "Content-Type":"application/json",
         Accept:"application/json"
       },
       body:JSON.stringify({
-        p_submission_id:id,
-        p_email:str(data.email).toLowerCase()
+        action:"membership_renewal",
+        form_id:schema.id,
+        form_version:Number(schema.version||0),
+        form_data:data
       })
     });
-    const receiptBody=await receipt.json().catch(()=>({}));
+    const raw=await response.text();
+    let body={};
+    try{body=raw?JSON.parse(raw):{}}catch(_){}
+    if(!response.ok||!body.success){
+      const detail=str(body.error||body.message);
+      throw new Error(detail||("تعذر تسجيل العضوية. رمز الاستجابة: "+response.status));
+    }
     return {
-      submission_id:id,
-      membership_number:receipt.ok&&receiptBody?.success?receiptBody.membership_number:null
+      submission_id:body.submission_id,
+      membership_number:body.membership_number||null
     };
   };
 })();
