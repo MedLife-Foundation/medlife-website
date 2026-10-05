@@ -532,6 +532,39 @@ export async function onRequestPost({ request }) {
         ].some(value => String(value ?? "").trim() !== "");
       });
       const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
+      const formSettings = dynamic.form_schema?.settings && typeof dynamic.form_schema.settings === "object"
+        ? dynamic.form_schema.settings
+        : {};
+      const membershipControls = formSettings.membership_controls && typeof formSettings.membership_controls === "object"
+        ? formSettings.membership_controls
+        : {};
+      const configuredRoleOptions = Array.isArray(membershipControls.role_options)
+        ? membershipControls.role_options
+            .map(item => ({
+              value: cleanText(item?.value, 60).toLowerCase(),
+              label: cleanText(item?.label_ar || item?.label_en || item?.value, 200)
+            }))
+            .filter(item => item.value && item.label)
+        : [];
+      const configuredSeniorPositions = Array.isArray(membershipControls.senior_management_positions)
+        ? membershipControls.senior_management_positions
+            .map(item => ({
+              value: cleanText(item?.value, 120),
+              label: cleanText(item?.label_ar || item?.label_en || item?.value, 250)
+            }))
+            .filter(item => item.value && item.label)
+        : [];
+      const configuredCertificates = membershipControls.certificates && typeof membershipControls.certificates === "object"
+        ? membershipControls.certificates
+        : {};
+      const configuredCertificateTypes = Array.isArray(configuredCertificates.types)
+        ? configuredCertificates.types
+            .map(item => cleanText(item?.value, 60).toLowerCase())
+            .filter(Boolean)
+        : [];
+      const certificateFeatureEnabled = configuredCertificates.enabled !== false;
+      const certificateUnitLinkEnabled = configuredCertificates.unit_link_enabled !== false;
+      const certificateUnitLinkRequired = configuredCertificates.unit_link_required === true && certificateUnitLinkEnabled;
       const writingContentDepartmentId = "b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
       const contentWritingSelected = supervisorForm && requestedIds.includes(writingContentDepartmentId);
       const membershipUnitReadHeaders = {
@@ -768,9 +801,13 @@ export async function onRequestPost({ request }) {
       // one active MedLife unit at a time. This keeps certificate history isolated
       // from multi-unit membership details.
 
+      const defaultUnitRoles = ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"];
       const allowedUnitRoles = supervisorForm
-        ? ["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"]
+        ? (configuredRoleOptions.length ? configuredRoleOptions.map(item => item.value) : defaultUnitRoles)
         : ["volunteer"];
+      const allowedSeniorPositions = configuredSeniorPositions.length
+        ? new Set(configuredSeniorPositions.map(item => item.value))
+        : new Set(["general_supervisor_syria","advisor_deputy_general_supervisor","executive_director","medical_director","legal_advisor","financial_director"]);
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
       }
@@ -778,6 +815,9 @@ export async function onRequestPost({ request }) {
         const adminUnits = requestedUnits.filter(unit => unit.unit_type === "other");
         if (adminUnits.some(unit => !unit.senior_management_position)) {
           return json({ success: false, error: "يرجى تحديد المنصب في الإدارة العامة." }, 400);
+        }
+        if (adminUnits.some(unit => unit.senior_management_position && !allowedSeniorPositions.has(unit.senior_management_position))) {
+          return json({ success: false, error: "يوجد منصب إداري غير مدعوم ضمن إعدادات نموذج العضوية." }, 400);
         }
       }
       const today = new Date().toISOString().slice(0, 10);
@@ -846,10 +886,11 @@ export async function onRequestPost({ request }) {
       const toArray = value => Array.isArray(value)
         ? value.map(item => cleanText(item, 100)).filter(Boolean).slice(0, 30)
         : [];
-      const allowedCertificateTypes = new Set([
-        "volunteer_service","thank_you","participation","training","appreciation","other"
-      ]);
-      const rawCertificateHistory = Array.isArray(data.certificate_history)
+      const defaultCertificateTypes = ["volunteer_service","thank_you","participation","training","appreciation","other"];
+      const allowedCertificateTypes = new Set(
+        configuredCertificateTypes.length ? configuredCertificateTypes : defaultCertificateTypes
+      );
+      const rawCertificateHistory = certificateFeatureEnabled && Array.isArray(data.certificate_history)
         ? data.certificate_history
             .filter(item => item && typeof item === "object" && !Array.isArray(item))
             .filter(item => (
@@ -883,7 +924,13 @@ export async function onRequestPost({ request }) {
           return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
         }
         let canonicalIssuingUnitId = issuingUnitId;
+        if (certificateUnitLinkRequired && !issuingUnitId && !issuingUnitName) {
+          return json({ success: false, error: "يرجى تحديد الفريق أو الوحدة المرتبطة بكل شهادة." }, 400);
+        }
         if (issuingUnitId || issuingUnitName) {
+          if (!certificateUnitLinkEnabled) {
+            return json({ success: false, error: "ربط الشهادة بوحدة غير مفعّل في إعدادات نموذج العضوية." }, 400);
+          }
           const liveUnit = await findLiveCertificateUnit(issuingUnitId, issuingUnitName);
           if (!liveUnit) {
             return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة في ميدلايف." }, 400);
