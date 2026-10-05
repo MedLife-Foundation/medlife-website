@@ -1468,6 +1468,28 @@ textarea{min-height:108px}
     const primaryUnitRole=isSupervisorForm()?(
       roleLabels[firstOperationalUnit?.[1]?.role]||firstOperationalUnit?.[1]?.role||"—"
     ):"عضو / متطوع";
+    const roleSummary=unitIds.map(id=>{
+      const u=units.find(x=>String(x.id)===String(id));
+      const d=unitsData[id]||{};
+      if(!u)return "";
+      const unitName=u.name_ar||u.name_en||"الوحدة";
+      const isAdmin=String(u.unit_type)==="other";
+      if(isAdmin){
+        const opt=(positionField?.options||[]).find(o=>String(o.value)===String(d.senior_management_position));
+        return unitName+" — "+(opt?.label_ar||opt?.label_en||d.senior_management_position||"منصب إداري");
+      }
+      const role=roleLabels[d.role]||d.role||"عضو / متطوع";
+      return unitName+" — "+role;
+    }).filter(Boolean).join("، ")||"—";
+    const qualificationFieldValue=values.academic_qualification||values.student_college||values.resident_degree||values.specialist_degree||"";
+    const qualificationText=qualificationFieldValue?fieldDisplayValue(
+      values.academic_qualification?"academic_qualification":
+      values.student_college?"student_college":
+      values.resident_degree?"resident_degree":"specialist_degree",
+      qualificationFieldValue
+    ):fieldDisplayValue("academic_status",values.academic_status||"—");
+    const universityValue=values.graduation_university||values.student_university||values.university||"";
+    const universityText=universityValue?String(universityValue):"—";
     const professionText=fieldDisplayValue("profession",values.profession||"—");
     const specialtyText=fieldDisplayValue("specialty",values.specialty||"—");
     const locationText=[values.city,values.governorate].filter(Boolean).join(" — ")||"—";
