@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-<script src="/membership-direct-submit.js?v=20261005-direct2"></script>
+<script src="/membership-direct-submit.js?v=20261005-supervisor3"></script>
 <style>
 :root{--red:#e83255;--red2:#ff5a72;--navy:#151d36;--text:#243047;--muted:#667085;--line:#e5e9f0;--bg:#f6f8fb;--soft:#fbfcfe;--ok:#087653;--okbg:#effaf5;--err:#9f1c32;--errbg:#fff1f3}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#fff 0,#f6f8fb 55%,#fafbfc 100%);color:var(--text);font-family:"Tajawal","Inter",Arial,sans-serif}.wrap{width:min(1080px,calc(100% - 28px));margin:auto}
@@ -626,7 +626,8 @@ textarea{min-height:108px}
           notes:String(item?.notes||"")
         };
         assignments.push(assignment);
-        details[cellId]={
+        if(!details[cellId]){
+          details[cellId]={
           role:assignment.role,
           senior_management_position:"",
           role_started_on:assignment.role_started_on,
@@ -636,7 +637,8 @@ textarea{min-height:108px}
           continuing:assignment.continuing==="true",
           left_on:assignment.continuing==="true"?"":assignment.left_on,
           notes:assignment.notes
-        };
+          };
+        }
       });
     }
 
@@ -811,7 +813,11 @@ textarea{min-height:108px}
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
     if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")return"";
     const req=f.required?'<span class="req"> *</span>':"";
-    const help=f.help_ar?'<div class="help">'+esc(f.help_ar)+"</div>":"";
+    const defaultHelp=f.help_ar||"";
+    const supervisorHelp=isSupervisorForm()&&f.field_key==="current_units"
+      ?"اختر الأقسام والفرق الميدانية التي لديك فيها دور حالياً أو سابقاً. أما الإشراف على الخلايا فيُوثق بشكل مستقل في قسم «الإشراف على الخلايا»."
+      :defaultHelp;
+    const help=supervisorHelp?'<div class="help">'+esc(supervisorHelp)+"</div>":"";
     const input=f.field_key==="current_units"?renderUnitPicker():generic(f);
     return'<div class="field '+(full?"full":"")+'" data-field-wrap="'+esc(f.field_key)+'"><label>'+esc(f.label_ar)+req+"</label>"+input+help+"</div>";
   }
@@ -875,18 +881,16 @@ textarea{min-height:108px}
             return'<option value="'+esc(cellId)+'"'+(cellId===selected?" selected":"")+(duplicate?" disabled":"")+'>'+esc(cell.name_ar||cell.name_en)+'</option>';
           }).join("");
 
-          const positionOptions='<option value="">اختر المنصب</option>'+roleOptions.map(o=>
-            '<option value="'+esc(o.value)+'"'+(role===o.value?" selected":"")+'>'+esc(o.label)+'</option>'
-          ).join("");
+          const positionOptions='<option value="">كاتب محتوى</option><option value="content_writer" selected>كاتب محتوى</option>';
 
           return'<div class="content-assignment-card unit-card" data-content-assignment-index="'+index+'">'+
             '<div class="unit-card-head"><strong>تكليف رقم '+(index+1)+'</strong><span class="unit-type">كتابة محتوى</span></div>'+
             '<div class="unit-card-grid">'+
-            '<div class="field full"><label>الخلية <span class="req">*</span></label><select name="content_assignment_cell_'+index+'">'+cellOptions+'</select></div>'+
-            '<div class="field"><label>المنصب في هذه الخلية <span class="req">*</span></label><select name="content_assignment_role_'+index+'">'+positionOptions+'</select></div>'+
-            '<div class="field"><label>تاريخ بدء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_started_'+index+'" value="'+esc(roleStarted)+'"></div>'+
-            '<div class="field"><label>هل ما زلت تشغل هذا المنصب؟ <span class="req">*</span></label><select name="content_assignment_role_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(roleContinuing==="true"?" selected":"")+'>نعم، ما زلت أشغله</option><option value="false"'+(roleContinuing==="false"?" selected":"")+'>لا، لم أعد أشغله</option></select></div>'+
-            '<div class="field '+(roleContinuing==="false"?"":"hidden")+'" data-content-role-left-wrap="'+index+'"><label>تاريخ انتهاء المنصب <span class="req">*</span></label><input type="date" name="content_assignment_role_left_'+index+'" value="'+esc(roleLeft)+'"></div>'+
+            '<div class="field full"><label>الخلية المرتبط بها هذا التكليف <span class="req">*</span></label><select name="content_assignment_cell_'+index+'">'+cellOptions+'</select></div>'+
+            '<div class="field"><label>دورك في هذا التكليف <span class="req">*</span></label><select name="content_assignment_role_'+index+'">'+positionOptions+'</select></div>'+
+            '<div class="field"><label>تاريخ بدء التكليف <span class="req">*</span></label><input type="date" name="content_assignment_role_started_'+index+'" value="'+esc(roleStarted)+'"></div>'+
+            '<div class="field"><label>هل ما زلت ضمن هذا التكليف؟ <span class="req">*</span></label><select name="content_assignment_role_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(roleContinuing==="true"?" selected":"")+'>نعم، مستمر</option><option value="false"'+(roleContinuing==="false"?" selected":"")+'>لا، انتهى</option></select></div>'+
+            '<div class="field '+(roleContinuing==="false"?"":"hidden")+'" data-content-role-left-wrap="'+index+'"><label>تاريخ انتهاء التكليف <span class="req">*</span></label><input type="date" name="content_assignment_role_left_'+index+'" value="'+esc(roleLeft)+'"></div>'+
             '<div class="field"><label>تاريخ الانضمام إلى هذه الخلية <span class="req">*</span></label><input type="date" name="content_assignment_joined_'+index+'" value="'+esc(joined)+'"></div>'+
             '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="content_assignment_continuing_'+index+'"><option value="">اختر</option><option value="true"'+(continuing==="true"?" selected":"")+'>نعم، ما زلت عضواً فيها</option><option value="false"'+(continuing==="false"?" selected":"")+'>لا، لم أعد عضواً فيها</option></select></div>'+
             '<div class="field '+(continuing==="false"?"":"hidden")+'" data-content-left-wrap="'+index+'"><label>تاريخ مغادرة الخلية <span class="req">*</span></label><input type="date" name="content_assignment_left_'+index+'" value="'+esc(left)+'"></div>'+
