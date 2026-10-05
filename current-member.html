@@ -316,10 +316,10 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 .id-status{position:relative;z-index:1;padding:8px 13px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;font-size:10px;font-weight:900}
 .id-card-main{padding:22px 24px;display:grid;grid-template-columns:155px minmax(0,1fr);gap:18px;align-items:stretch;background:linear-gradient(180deg,#fff 0%,#fbfcfe 100%)}
 .id-photo{min-height:156px;border:1px solid #e3e7ee;border-radius:16px;padding:11px 10px;text-align:center;background:linear-gradient(180deg,#f7f9fc,#fff);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}
-.id-photo-image{width:96px;height:112px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e1e6ee;box-shadow:0 8px 22px rgba(21,29,54,.08);margin:0 auto 9px}
+.id-photo-image{width:104px;height:130px;aspect-ratio:4/5;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef2f7;border:1px solid #dde3ec;box-shadow:0 8px 22px rgba(21,29,54,.08);margin:0 auto 9px;position:relative}
 .id-initials{width:72px;height:72px;border-radius:50%;margin:0 auto;background:linear-gradient(135deg,#fff0f3,#ffe2e9);color:#d82f51;border:1px solid #ffd2dc;font-size:22px;box-shadow:0 7px 18px rgba(232,50,85,.08)}
 .id-meta-wide{grid-column:1/-1}
-.id-profile-image{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+.id-profile-image{width:100%;height:100%;display:block;object-fit:cover;object-position:50% 35%;background:#eef2f7}
 .id-photo strong{max-width:135px;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
 .id-photo span{font-size:9px!important;line-height:1.7}
 .id-meta{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(76px,auto);gap:12px;align-content:stretch}
@@ -1344,6 +1344,19 @@ textarea{min-height:108px}
     return optionLabel(value);
   }
 
+  function normalizeProfileImageUrl(value){
+    const raw=String(value||"").trim();
+    if(!raw)return "";
+    try{
+      const url=new URL(raw,window.location.href);
+      if(url.hostname.endsWith("res.cloudinary.com") && url.pathname.includes("/image/upload/")){
+        url.pathname=url.pathname.replace("/image/upload/","/image/upload/c_fill,w_420,h_525,g_face,q_auto,f_auto/");
+        return url.toString();
+      }
+    }catch(_){ }
+    return raw;
+  }
+
   function captureElement(){
     return document.querySelector("[data-card-capture]");
   }
@@ -1554,7 +1567,7 @@ textarea{min-height:108px}
     const name=fatherName && !baseParts.includes(fatherName)
       ? [baseParts[0],fatherName,...baseParts.slice(1)].filter(Boolean).join(" ")
       : baseName;
-    const profileImageUrl=String(values.profile_image_url||"").trim();
+    const profileImageUrl=normalizeProfileImageUrl(values.profile_image_url);
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
       '<div class="id-card">'+
