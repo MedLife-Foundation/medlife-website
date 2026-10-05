@@ -520,217 +520,6 @@ export async function onRequestPost({ request }) {
       const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
         ? data.current_unit_details
         : {};
-      const rawContentAssignments = Array.isArray(data.content_assignments)
-        ? data.content_assignments.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
-        : [];
-      const contentAssignments = rawContentAssignments.filter(item => {
-        return [
-          item?.cell_id, item?.cell_name_ar, item?.cell_name_en,
-          item?.role, item?.role_started_on, item?.role_continuing,
-          item?.role_left_on, item?.joined_on, item?.continuing,
-          item?.left_on, item?.notes
-        ].some(value => String(value ?? "").trim() !== "");
-      });
-      const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
-      const formSettings = dynamic.form_schema?.settings && typeof dynamic.form_schema.settings === "object"
-        ? dynamic.form_schema.settings
-        : {};
-      const membershipControls = formSettings.membership_controls && typeof formSettings.membership_controls === "object"
-        ? formSettings.membership_controls
-        : {};
-      const configuredRoleOptions = Array.isArray(membershipControls.role_options)
-        ? membershipControls.role_options
-            .map(item => ({
-              value: cleanText(item?.value, 60).toLowerCase(),
-              label: cleanText(item?.label_ar || item?.label_en || item?.value, 200)
-            }))
-            .filter(item => item.value && item.label)
-        : [];
-      const configuredSeniorPositions = Array.isArray(membershipControls.senior_management_positions)
-        ? membershipControls.senior_management_positions
-            .map(item => ({
-              value: cleanText(item?.value, 120),
-              label: cleanText(item?.label_ar || item?.label_en || item?.value, 250)
-            }))
-            .filter(item => item.value && item.label)
-        : [];
-      const configuredCertificates = membershipControls.certificates && typeof membershipControls.certificates === "object"
-        ? membershipControls.certificates
-        : {};
-      const certificateFeatureEnabled = configuredCertificates.enabled !== false;
-      const certificateUnitLinkEnabled = configuredCertificates.unit_link_enabled !== false;
-      const certificateUnitLinkRequired = configuredCertificates.unit_link_required === true && certificateUnitLinkEnabled;
-      const writingContentDepartmentId = "b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
-      const contentWritingSelected = supervisorForm && requestedIds.includes(writingContentDepartmentId);
-      const membershipUnitReadHeaders = {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY,
-        Accept: "application/json"
-      };
-      if (!requestedIds.length) {
-        return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
-      }
-
-      // Public membership renewal needs the same active organization tree
-      // exposed by the form loader, including live content cells.
-      // Keep this read path on the stable anonymous JWT rather than the
-      // publishable-key compatibility path used by the rest of the API.
-      const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team,other)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
-        {headers: membershipUnitReadHeaders}
-      );
-      let unitsRows = await unitsResponse.json().catch(() => []);
-      if (!Array.isArray(unitsRows)) unitsRows = [];
-      // General Administration is valid only for the supervisor renewal form.
-      // Fetch it explicitly as a fallback so the public submission path does not
-      // reject its real unit id if the broader unit query is filtered differently.
-      if (supervisorForm && requestedIds.includes("87673bd2-5151-4f8b-95e9-dba4f2a11045") &&
-          !unitsRows.some(unit => String(unit.id) === "87673bd2-5151-4f8b-95e9-dba4f2a11045")) {
-        const adminResponse = await fetch(
-          SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&id=eq.87673bd2-5151-4f8b-95e9-dba4f2a11045&is_active=eq.true&limit=1",
-          {headers: membershipUnitReadHeaders}
-        );
-        const adminRows = await adminResponse.json().catch(() => []);
-        if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
-      }
-      const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
-      const validCertificateUnits = activeUnits;
-      const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
-
-      // Certificate links are optional. When a user does provide one, verify
-      // the exact selected unit against the live org_units table as a second
-      // authoritative check. This avoids rejecting a valid active unit if the
-      // broader list response was incomplete or stale for this request.
-      const certificateUnitCheckCache = new Map();
-      const normalizeUnitName = value => cleanText(value, 200).replace(/\\s+/g, " ").trim().toLowerCase();
-
-      const findLiveCertificateUnit = async (unitId, unitName) => {
-        const key = String(unitId || "").trim();
-        const submittedName = normalizeUnitName(unitName);
-        const cacheKey = key || "name:" + submittedName;
-        if (!key && !submittedName) return null;
-        if (certificateUnitCheckCache.has(cacheKey)) return certificateUnitCheckCache.get(cacheKey);
-
-        const matchesUnit = unit => {
-          if (!unit || unit.is_active === false) return false;
-          if (String(unit.unit_type) === "other" && !supervisorForm) return false;
-          if (!["cell","department","field_team","other"].includes(String(unit.unit_type))) return false;
-          if (key && String(unit.id) === key) return true;
-          if (submittedName) {
-            return normalizeUnitName(unit.name_ar) === submittedName ||
-              normalizeUnitName(unit.name_en) === submittedName;
-          }
-          return false;
-        };
-
-        const inMemory = validCertificateUnits.find(matchesUnit);
-        if (inMemory) {
-          certificateUnitCheckCache.set(cacheKey, inMemory);
-          return inMemory;
-        }
-
-        let liveUnit = null;
-        try {
-          const query = new URL(SUPABASE_URL + "/rest/v1/org_units");
-          query.searchParams.set("select", "id,name_ar,name_en,unit_type,is_active");
-          query.searchParams.set("is_active", "eq.true");
-          query.searchParams.set("unit_type", "in.(cell,department,field_team,other)");
-          if (key) query.searchParams.set("id", "eq." + key);
-          query.searchParams.set("limit", "1");
-          const response = await fetch(query.toString(), {headers: membershipUnitReadHeaders});
-          const rows = await response.json().catch(() => []);
-          if (Array.isArray(rows)) liveUnit = rows.find(matchesUnit) || null;
-        } catch {
-          liveUnit = null;
-        }
-
-        certificateUnitCheckCache.set(cacheKey, liveUnit);
-        return liveUnit;
-      };
-      // Content-writing cells are subordinate assignments. Resolve every
-      // assignment against the live organization tree, never against historical
-      // form settings or a stale current_units array.
-      if (contentWritingSelected) {
-        const liveContentCells = activeUnits.filter(unit => String(unit.unit_type) === "cell");
-        const normalizeCellName = value => cleanText(value, 200).replace(/\s+/g, " ").trim().toLowerCase();
-        const legacyContentCells = Array.isArray(dynamic.form_schema?.settings?.content_cells)
-          ? dynamic.form_schema.settings.content_cells
-              .map(item => ({
-                id: cleanText(item?.id, 80),
-                name_ar: cleanText(item?.name_ar || item?.name_en, 200),
-                name_en: cleanText(item?.name_en || item?.name_ar, 200)
-              }))
-              .filter(item => item.id && (item.name_ar || item.name_en))
-          : [];
-        const legacyCellById = new Map(legacyContentCells.map(item => [item.id, item]));
-        const contentAssignmentCellIds = [];
-        const resolveLiveCell = assignment => {
-          const submittedId = cleanText(assignment?.cell_id, 80);
-          const legacy = submittedId ? legacyCellById.get(submittedId) : null;
-          const submittedName = normalizeCellName(
-            assignment?.cell_name_ar ||
-            assignment?.cell_name_en ||
-            legacy?.name_ar ||
-            legacy?.name_en
-          );
-          let cell = submittedId ? activeUnitById.get(submittedId) : null;
-          if (!cell || String(cell.unit_type) !== "cell") {
-            const nameMatches = submittedName
-              ? liveContentCells.filter(unit =>
-                  normalizeCellName(unit.name_ar || unit.name_en) === submittedName
-                )
-              : [];
-            if (nameMatches.length === 1) cell = nameMatches[0];
-          }
-          return {cell,submittedId};
-        };
-
-        for (const assignment of contentAssignments) {
-          const {cell,submittedId} = resolveLiveCell(assignment);
-          if (!cell || String(cell.unit_type) !== "cell") {
-            return json({
-              success: false,
-              error: "تعذر ربط أحد تكليفات كتابة المحتوى بخلية فعّالة في ميدلايف. يرجى اختيار الخلية من القائمة الحالية."
-            }, 400);
-          }
-
-          const canonicalId = String(cell.id);
-          const submittedDetail =
-            (submittedId && requestedUnitDetails[submittedId] && typeof requestedUnitDetails[submittedId] === "object")
-              ? requestedUnitDetails[submittedId]
-              : null;
-          if (submittedDetail && !requestedUnitDetails[canonicalId]) {
-            requestedUnitDetails[canonicalId] = submittedDetail;
-          }
-          if (!requestedUnitDetails[canonicalId]) {
-            requestedUnitDetails[canonicalId] = {
-              role: cleanText(assignment.role, 40).toLowerCase(),
-              role_started_on: normalizeDate(assignment.role_started_on),
-              role_continuing: String(assignment.role_continuing) === "true",
-              role_left_on: normalizeDate(assignment.role_left_on),
-              joined_on: normalizeDate(assignment.joined_on),
-              continuing: String(assignment.continuing) === "true",
-              left_on: normalizeDate(assignment.left_on),
-              notes: cleanText(assignment.notes, 1500)
-            };
-          }
-
-          assignment.cell_id = canonicalId;
-          if (!contentAssignmentCellIds.includes(canonicalId)) {
-            contentAssignmentCellIds.push(canonicalId);
-          }
-        }
-
-        requestedIds = [...new Set([...requestedIds, ...contentAssignmentCellIds])];
-      }
-      // Cells are selectable only as assignments under the Content Writing department.
-      // Discard stale cell IDs when that department is no longer selected.
-      if (!contentWritingSelected) {
-        requestedIds = requestedIds.filter(id => {
-          const unit = activeUnitById.get(String(id));
-          return !unit || String(unit.unit_type) !== "cell";
-        });
-      }
       // Validate the exact submitted IDs directly. This avoids rejecting a valid
       // supervisor-only unit such as General Administration because the broader
       // public unit query is filtered differently.
@@ -743,15 +532,6 @@ export async function onRequestPost({ request }) {
         ...activeUnits.filter(unit => requestedIds.includes(String(unit.id))),
         ...canonicalAdmin.filter(admin => !activeUnits.some(unit => String(unit.id) === admin.id))
       ];
-      const isContentWritingUnit = unit => Boolean(
-        unit &&
-        supervisorForm &&
-        (
-          String(unit.id || "") === "b1ea8c52-b405-4ad9-b9f6-2768a22a7827" ||
-          String(unit.name_ar || "").trim() === "كتابة محتوى" ||
-          String(unit.name_en || "").trim().toLowerCase() === "content writing"
-        )
-      );
       const requestedUnits = unitsForSubmission
         .filter(unit => requestedIds.includes(String(unit.id)))
         .map(unit => {
@@ -759,7 +539,6 @@ export async function onRequestPost({ request }) {
           const detail = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
           let role = cleanText(detail.role, 30).toLowerCase();
           const joinedOn = normalizeDate(detail.joined_on);
-          if (isContentWritingUnit(unit)) role = "content_writer";
           const continuing = detail.continuing === true;
           const leftOn = normalizeDate(detail.left_on);
           let roleStartedOn = normalizeDate(detail.role_started_on);
@@ -816,14 +595,7 @@ export async function onRequestPost({ request }) {
         }
       }
       const today = new Date().toISOString().slice(0, 10);
-      const contentWritingDepartments = requestedUnits.filter(unit => isContentWritingUnit(unit));
-      if (contentWritingDepartments.some(unit => !unit.joined_on)) {
-        return json({ success: false, error: "يرجى تحديد تاريخ الانضمام إلى «كتابة محتوى»." }, 400);
-      }
-      if (contentWritingDepartments.some(unit => unit.joined_on > today)) {
-        return json({ success: false, error: "تاريخ الانضمام إلى «كتابة محتوى» لا يمكن أن يكون في المستقبل." }, 400);
-      }
-      const timelineUnits = requestedUnits.filter(unit => !isContentWritingUnit(unit));
+      const timelineUnits = requestedUnits;
 
       if (timelineUnits.some(unit => !unit.joined_on)) {
         return json({ success: false, error: "يرجى تحديد تاريخ بدء الانتساب لكل قسم أو وحدة." }, 400);
