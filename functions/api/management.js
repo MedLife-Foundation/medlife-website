@@ -632,11 +632,6 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "لا يمكن أن يستمر الدور بعد مغادرة الوحدة." }, 400);
       }
 
-      // كتابة المحتوى أصبحت دوراً عادياً داخل الوحدة نفسها، ولا تتطلب تكليفات منفصلة.
-      if (contentAssignments.length) {
-        return json({ success: false, error: "بيانات تكليفات كتابة المحتوى القديمة غير مدعومة. اختر «كتابة محتوى» كدور داخل الوحدة." }, 400);
-      }
-
       const hasContinuingUnit = requestedUnits.some(unit => unit.continuing);
       const overallContinuing = supervisorForm ? true : data.continuing_as_volunteer === true;
       if (!supervisorForm && overallContinuing !== hasContinuingUnit) {
