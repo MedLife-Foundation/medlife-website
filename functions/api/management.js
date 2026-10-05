@@ -561,26 +561,15 @@ export async function onRequestPost({ request }) {
       // Validate the exact submitted IDs directly. This avoids rejecting a valid
       // supervisor-only unit such as General Administration because the broader
       // public unit query is filtered differently.
-      const requestedUnitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&is_active=eq.true&id=in.(" + requestedIds.map(encodeURIComponent).join(",") + ")",
-        {
-          headers: {
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-            Accept: "application/json"
-          }
-        }
-      );
-      const exactUnitRows = await requestedUnitsResponse.json().catch(() => []);
-      const exactUnits = Array.isArray(exactUnitRows) ? exactUnitRows : [];
-      const validExactUnits = exactUnits.filter(unit =>
-        ["cell","department","field_team"].includes(String(unit.unit_type)) ||
-        (supervisorForm && String(unit.unit_type) === "other")
-      );
+      // Resolve submitted unit IDs from the active public unit list already loaded above.
+      // This avoids a second PostgREST lookup that can reject otherwise valid IDs.
       const canonicalAdmin = supervisorForm && requestedIds.includes("87673bd2-5151-4f8b-95e9-dba4f2a11045")
         ? [{id:"87673bd2-5151-4f8b-95e9-dba4f2a11045",name_ar:"الإدارة العامة",name_en:"General Administration",unit_type:"other"}]
         : [];
-      const unitsForSubmission = [...validExactUnits, ...canonicalAdmin.filter(admin => !validExactUnits.some(unit => String(unit.id) === admin.id))];
+      const unitsForSubmission = [
+        ...activeUnits.filter(unit => requestedIds.includes(String(unit.id))),
+        ...canonicalAdmin.filter(admin => !activeUnits.some(unit => String(unit.id) === admin.id))
+      ];
       const isContentWritingUnit = unit => Boolean(
         unit &&
         supervisorForm &&
