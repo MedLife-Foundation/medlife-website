@@ -563,20 +563,48 @@ export async function onRequestPost({ request }) {
       const activeUnits = unitsRows.filter(unit => String(unit.unit_type) !== "other" || supervisorForm);
       const validCertificateUnits = activeUnits;
       const activeUnitById = new Map(activeUnits.map(unit => [String(unit.id), unit]));
-      // Content-writing cells are subordinate assignments rather than top-level
-      // selections. Resolve them on the server from the assignment list so adding
-      // a new assignment never depends on a stale/missing current_units checkbox.
+      // Content-writing cells are subordinate assignments. Resolve every
+      // assignment against the live organization tree, never against historical
+      // form settings or a stale current_units array.
       if (contentWritingSelected) {
-        const contentAssignmentCellIds = [...new Set(
-          contentAssignments
-            .map(item => cleanText(item?.cell_id, 80))
-            .filter(Boolean)
-        )];
-        for (const cellId of contentAssignmentCellIds) {
-          const cell = activeUnitById.get(cellId);
+        const liveContentCells = activeUnits.filter(unit => String(unit.unit_type) === "cell");
+        const normalizeCellName = value => cleanText(value, 200).replace(/\s+/g, " ").trim().toLowerCase();
+        const contentAssignmentCellIds = [];
+        for (const assignment of contentAssignments) {
+          const submittedId = cleanText(assignment?.cell_id, 80);
+          const submittedName = normalizeCellName(assignment?.cell_name_ar || assignment?.cell_name_en);
+          let cell = submittedId ? activeUnitById.get(submittedId) : null;
           if (!cell || String(cell.unit_type) !== "cell") {
-            return json({ success: false, error: "يوجد تكليف كتابة محتوى مرتبط بخلية غير موجودة أو غير فعّالة." }, 400);
+            const nameMatches = submittedName
+              ? liveContentCells.filter(unit => normalizeCellName(unit.name_ar || unit.name_en) === submittedName)
+              : [];
+            if (nameMatches.length === 1) {
+              cell = nameMatches[0];
+              const canonicalId = String(cell.id);
+              if (submittedId && submittedId !== canonicalId &&
+                  requestedUnitDetails[submittedId] && !requestedUnitDetails[canonicalId]) {
+                requestedUnitDetails[canonicalId] = requestedUnitDetails[submittedId];
+              }
+              assignment.cell_id = canonicalId;
+              if (!requestedUnitDetails[canonicalId]) {
+                requestedUnitDetails[canonicalId] = {
+                  role: cleanText(assignment.role, 40).toLowerCase(),
+                  role_started_on: normalizeDate(assignment.role_started_on),
+                  role_continuing: String(assignment.role_continuing) === "true",
+                  role_left_on: normalizeDate(assignment.role_left_on),
+                  joined_on: normalizeDate(assignment.joined_on),
+                  continuing: String(assignment.continuing) === "true",
+                  left_on: normalizeDate(assignment.left_on),
+                  notes: cleanText(assignment.notes, 1500)
+                };
+              }
+            }
           }
+          if (!cell || String(cell.unit_type) !== "cell") {
+            return json({ success: false, error: "تعذر ربط أحد تكليفات كتابة المحتوى بخلية فعّالة في ميدلايف." }, 400);
+          }
+          const canonicalId = String(cell.id);
+          if (!contentAssignmentCellIds.includes(canonicalId)) contentAssignmentCellIds.push(canonicalId);
         }
         requestedIds = [...new Set([...requestedIds, ...contentAssignmentCellIds])];
       }
