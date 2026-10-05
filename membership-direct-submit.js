@@ -258,7 +258,7 @@
         }
       });
     }else{
-      syncSupervisionStorage(fieldsRoot,unitWrap,picked.cells);
+      return;
     }
 
     if(!document.getElementById("mlSupervisorCellStyle")){
