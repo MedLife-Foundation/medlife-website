@@ -219,7 +219,9 @@
     if(!panel){
       panel=document.createElement("div");
       panel.className="ml-supervision-panel content-supervision-box";
-      unitWrap.insertAdjacentElement("afterend",panel);
+      const unitDetails=unitWrap.querySelector("#unitDetails");
+      if(unitDetails)unitDetails.insertAdjacentElement("beforebegin",panel);
+      else unitWrap.insertAdjacentElement("afterend",panel);
       if(!supervisionState.initialized){
         supervisionState.initialized=true;
         supervisionState.rows=[blankSupervisionRow()];
