@@ -1430,7 +1430,23 @@ textarea{min-height:108px}
     const supervisorAdminEntry=isSupervisorForm()?unitIds.map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}]).find(([u])=>String(u?.unit_type)==="other"):null;
     const supervisorPositionValue=supervisorAdminEntry?.[1]?.senior_management_position||"";
     const supervisorPosition=(positionField?.options||[]).find(o=>String(o.value)===String(supervisorPositionValue));
-    const supervisorPositionText=supervisorPosition?.label_ar||supervisorPosition?.label_en||supervisorPositionValue||"عضوية مشرف";
+    const firstOperationalUnit=unitIds
+      .map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}])
+      .find(([u])=>u&&String(u.unit_type)!=="other");
+    const fallbackSupervisorRole=firstOperationalUnit?.[1]?.role||"";
+    const supervisorPositionText=supervisorPosition?.label_ar||supervisorPosition?.label_en||supervisorPositionValue||roleLabels[fallbackSupervisorRole]||"عضوية إشرافية";
+    const primaryUnitName=firstOperationalUnit?.[0]?.name_ar||firstOperationalUnit?.[0]?.name_en||"—";
+    const primaryUnitRole=isSupervisorForm()?(
+      roleLabels[firstOperationalUnit?.[1]?.role]||firstOperationalUnit?.[1]?.role||"—"
+    ):"عضو / متطوع";
+    const professionText=fieldDisplayValue("profession",values.profession||"—");
+    const specialtyText=fieldDisplayValue("specialty",values.specialty||"—");
+    const locationText=[values.city,values.governorate].filter(Boolean).join(" — ")||"—";
+    const totalHours=values.reported_total_volunteer_hours!==undefined&&values.reported_total_volunteer_hours!==""?String(values.reported_total_volunteer_hours):"—";
+    const weeklyHours=values.volunteer_commitment_hours!==undefined&&values.volunteer_commitment_hours!==""?String(values.volunteer_commitment_hours):"—";
+    const certificateCount=certificateItems.length;
+    const languageCount=languageItems.length;
+    const membershipStatusText="فعّالة";
     const unitCards=unitIds.map(id=>{
       const u=units.find(x=>String(x.id)===String(id));
       const d=unitsData[id]||{};
@@ -1496,10 +1512,18 @@ textarea{min-height:108px}
       '<div class="id-card-main"><div class="id-photo">'+(profileImageUrl?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لمستخدم ميدلايف" crossorigin="anonymous">':'<div class="id-initials">'+esc(initials(name))+'</div>')+'<strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
       '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
       '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
-      (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>':"")+
-      '<div class="id-meta-status"><span>حالة السجل</span><strong>فعّالة</strong></div>'+
+      (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب / الدور</span><strong>'+esc(supervisorPositionText)+'</strong></div>': '<div><span>الصفة</span><strong>عضو / متطوع</strong></div>')+
+      '<div><span>القسم / الفريق</span><strong>'+esc(primaryUnitName)+'</strong></div>'+
+      (isSupervisorForm()?'<div><span>الدور داخل الوحدة</span><strong>'+esc(primaryUnitRole)+'</strong></div>':"")+
+      '<div class="id-meta-status"><span>حالة السجل</span><strong>'+esc(membershipStatusText)+'</strong></div>'+
       '<div><span>تاريخ الانضمام</span><strong>'+esc(values.join_date?fieldDisplayValue("join_date",values.join_date):"—")+'</strong></div>'+
       '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
+      '<div><span>المحافظة / المدينة</span><strong>'+esc(locationText)+'</strong></div>'+
+      '<div><span>إجمالي ساعات التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
+      '<div><span>الساعات الأسبوعية الحالية</span><strong>'+esc(weeklyHours)+(weeklyHours!=="—"?" ساعة":"")+'</strong></div>'+
+      '<div><span>المؤهل / الاختصاص</span><strong>'+esc([professionText,specialtyText].filter(v=>v&&v!=="—").join(" — ")||"—")+'</strong></div>'+
+      '<div><span>اللغات المسجلة</span><strong>'+esc(String(languageCount))+'</strong></div>'+
+      '<div><span>الشهادات والتكريمات</span><strong>'+esc(String(certificateCount))+'</strong></div>'+
       '</div></div>'+
       '<div class="id-card-bottom"><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span><span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span></div>'+
       '</div></div>'+
