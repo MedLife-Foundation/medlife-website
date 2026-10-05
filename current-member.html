@@ -561,19 +561,10 @@ textarea{min-height:108px}
     {value:"legal_advisor",label:"المستشار القانوني"},
     {value:"financial_director",label:"المدير المالي"}
   ];
-  const DEFAULT_CERTIFICATE_TYPES=[
-    {value:"volunteer_service",label:"شهادة تطوع من ميدلايف"},
-    {value:"participation",label:"شهادة مشاركة في نشاط"},
-    {value:"training",label:"شهادة تدريب"},
-    {value:"appreciation",label:"شهادة تقدير"},
-    {value:"thank_you",label:"شهادة تكريم / شكر"},
-    {value:"other",label:"شهادة من جهة أخرى / أخرى"}
-  ];
 
   let roleOptions=[...DEFAULT_ROLE_OPTIONS];
   let roleLabels=Object.fromEntries(roleOptions.map(x=>[x.value,x.label]));
   let seniorManagementOptions=[...DEFAULT_SENIOR_MANAGEMENT_OPTIONS];
-  let certificateTypeOptions=[...DEFAULT_CERTIFICATE_TYPES];
   let certificateSettings={enabled:true,unit_link_enabled:true,unit_link_required:false};
 
   const isSupervisorForm=()=>formKey==="membership_renewal_supervisor";
@@ -593,7 +584,6 @@ textarea{min-height:108px}
     roleLabels=Object.fromEntries(roleOptions.map(x=>[x.value,x.label]));
     seniorManagementOptions=optionList(membership.senior_management_positions,DEFAULT_SENIOR_MANAGEMENT_OPTIONS);
     const cert=membership.certificates&&typeof membership.certificates==="object"?membership.certificates:{};
-    certificateTypeOptions=optionList(cert.types,DEFAULT_CERTIFICATE_TYPES);
     certificateSettings={
       enabled:cert.enabled!==false,
       unit_link_enabled:cert.unit_link_enabled!==false,
@@ -956,7 +946,7 @@ textarea{min-height:108px}
   function syncCertificateHistoryFromDom(){
     const rows=Array.from(form.querySelectorAll(".certificate-history-card"));
     certificateHistory=rows.map(row=>({
-      type:String(row.querySelector('[name^="certificate_history_type_"]')?.value||""),
+      type:"other",
       title:String(row.querySelector('[name^="certificate_history_title_"]')?.value||""),
       issuingOrganization:String(row.querySelector('[name^="certificate_history_issuer_"]')?.value||""),
       issuedDate:String(row.querySelector('[name^="certificate_history_date_"]')?.value||""),
@@ -975,7 +965,6 @@ textarea{min-height:108px}
     const certificateUnits=units.filter(u=>u&&u.is_active!==false&&["cell","department","field_team","other"].includes(String(u.unit_type||"")));
     const validCertificateUnitIds=new Set(certificateUnits.map(u=>String(u.id)));
     const rows=certificateHistory.map((item,index)=>{
-      const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.type===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
       const safeIssuingUnitId=validCertificateUnitIds.has(String(item.issuingUnitId||""))?String(item.issuingUnitId):"";
       const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+certificateUnits.map(u=>'<option value="'+esc(u.id)+'"'+(safeIssuingUnitId===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
       return'<div class="certificate-history-card unit-card" data-certificate-index="'+index+'">'+
@@ -1165,7 +1154,6 @@ textarea{min-height:108px}
       const certificateRows=certificateSettings.enabled?certificateHistory.filter(item=>{
         return String(item?.type||"").trim()||String(item?.title||"").trim()||String(item?.issuingOrganization||"").trim()||String(item?.issuedDate||"").trim();
       }):[];
-      const validCertificateTypes=new Set(certificateTypeOptions.map(item=>item.value));
       const validCertificateUnitIds=new Set(
         units
           .filter(unit=>unit&&unit.is_active!==false&&["cell","department","field_team","other"].includes(String(unit.unit_type||"")))
@@ -1179,7 +1167,6 @@ textarea{min-height:108px}
         const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
         const issued=String(item.issuedDate||"").trim();
         const issuingUnitId=String(item.issuingUnitId||"").trim();
-        if(!validCertificateTypes.has(type))return"يوجد نوع شهادة غير صالح.";
         if(!title)return"يرجى كتابة اسم كل شهادة.";
         if(!issuer)return"يرجى كتابة الجهة المانحة لكل شهادة.";
         if(!issued)return"يرجى تحديد تاريخ الحصول على كل شهادة.";
@@ -1559,9 +1546,6 @@ textarea{min-height:108px}
     }).join("");
 
     const certificateTypeLabel=value=>{
-      const hit=certificateTypeOptions.find(o=>String(o.value)===String(value));
-      return hit?.label||value;
-    };
     const certificateHtml=certificateItems.length
       ? certificateItems.map((item,index)=>{
           const certificateUnitId=String(item?.issuing_unit_id||"").trim();
