@@ -539,7 +539,6 @@ textarea{min-height:108px}
   const escSel=v=>String(v??"").replace(/\\/g,"\\\\").replace(/"/g,'\\"');
   const form=$("membershipForm"),host=$("fields"),status=$("status"),submit=$("submit"),progress=$("progressBar"),formCard=$("formCard"),confirmation=$("confirmation"),footerNote=$("footerNote");
   let schema=null,units=[];
-  let contentAssignmentSelections=[];
   let pendingProfileImageFile=null;
   let profileImageData=null;
   let profilePreviewObjectUrl=null;
@@ -679,72 +678,6 @@ textarea{min-height:108px}
     };
   }
 
-  function isWritingContentUnit(unit){
-    const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
-    if(!unit)return false;
-    const id=String(unit.id||"").trim();
-    const ar=String(unit.name_ar||"").trim();
-    const en=String(unit.name_en||"").trim().toLowerCase();
-    return id===knownId || ar==="كتابة محتوى" || en==="content writing";
-  }
-
-  function writingContentUnitId(){
-    const knownId="b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
-    return units.find(isWritingContentUnit)?.id||knownId;
-  }
-
-  let languageOptions=[
-    {value:"arabic",label:"العربية"},
-    {value:"english",label:"الإنكليزية"},
-    {value:"french",label:"الفرنسية"},
-    {value:"german",label:"الألمانية"},
-    {value:"turkish",label:"التركية"},
-    {value:"kurdish",label:"الكردية"},
-    {value:"spanish",label:"الإسبانية"},
-    {value:"italian",label:"الإيطالية"},
-    {value:"russian",label:"الروسية"},
-    {value:"persian",label:"الفارسية"},
-    {value:"sign_language",label:"لغة الإشارة"},
-    {value:"other",label:"أخرى"}
-  ];
-  let languageLevelOptions=[
-    {value:"native",label:"لغة أم"},
-    {value:"a1_a2",label:"أساسي (A1–A2)"},
-    {value:"b1_b2",label:"متوسط (B1–B2)"},
-    {value:"c1",label:"متقدم (C1)"},
-    {value:"c2",label:"إتقان / طلاقة (C2)"}
-  ];
-
-  function syncLanguageAssignmentsFromDom(){
-    const rows=Array.from(form.querySelectorAll(".language-assignment-card"));
-    if(!rows.length)return;
-    languageAssignments=rows.map(row=>({
-      language:String(row.querySelector('[name^="language_assignment_"]')?.value||""),
-      languageOther:String(row.querySelector('[name^="language_assignment_other_"]')?.value||""),
-      level:String(row.querySelector('[name^="language_assignment_level_"]')?.value||"")
-    }));
-  }
-
-  function languageAssignmentsValid(){
-    return languageAssignments.some(item=>String(item?.language||"").trim()||String(item?.languageOther||"").trim()||String(item?.level||""));
-  }
-
-  function contentCellIds(){
-    return contentAssignmentSelections
-      .map(item=>String(item?.cellId||""))
-      .filter(Boolean);
-  }
-
-  function contentWritingActive(){
-    if(!isSupervisorForm())return false;
-    const selected=Array.from(form.querySelectorAll('input[name="current_units"]:checked'));
-    return selected.some(input=>{
-      const id=String(input.value||"").trim();
-      if(id==="b1ea8c52-b405-4ad9-b9f6-2768a22a7827")return true;
-      return isWritingContentUnit(units.find(unit=>String(unit.id)===id));
-    });
-  }
-
   function selectedIds(){
     const validUnitIds=new Set(
       units
@@ -756,21 +689,6 @@ textarea{min-height:108px}
       .map(x=>String(x.value))
       .filter(id=>id&&validUnitIds.has(id));
     return Array.from(new Set(ids));
-  }
-
-  function syncContentAssignmentsFromDom(){
-    const rows=Array.from(form.querySelectorAll(".content-assignment-card"));
-    contentAssignmentSelections=rows.map(row=>({
-      cellId:String(row.querySelector('[name^="content_assignment_cell_"]')?.value||""),
-      role:String(row.querySelector('[name^="content_assignment_role_"]')?.value||""),
-      roleStarted:String(row.querySelector('[name^="content_assignment_role_started_"]')?.value||""),
-      roleContinuing:String(row.querySelector('[name^="content_assignment_role_continuing_"]')?.value||""),
-      roleLeft:String(row.querySelector('[name^="content_assignment_role_left_"]')?.value||""),
-      joined:String(row.querySelector('[name^="content_assignment_joined_"]')?.value||""),
-      continuing:String(row.querySelector('[name^="content_assignment_continuing_"]')?.value||""),
-      left:String(row.querySelector('[name^="content_assignment_left_"]')?.value||""),
-      notes:String(row.querySelector('[name^="content_assignment_notes_"]')?.value||"")
-    }));
   }
 
   function collect(){
