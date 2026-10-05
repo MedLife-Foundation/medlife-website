@@ -132,7 +132,7 @@ input,select,textarea{min-height:46px;border-radius:12px;border-color:#dfe4eb;ba
 }
 
 .profile-photo-field{width:min(100%,760px);margin:0 auto;padding:13px 15px;border:1px solid #e2e7ee;border-radius:16px;background:linear-gradient(180deg,#fbfcfe,#fff);box-shadow:0 6px 18px rgba(21,29,54,.035)}
-.profile-photo-field>label{display:block;margin-bottom:8px;color:var(--navy);font-size:12px;font-weight:900}.profile-photo-box{display:block}.profile-photo-preview{display:none;width:0;height:0;border-radius:50%;overflow:hidden;border:1px solid #f0cbd3;background:#fff0f3;color:var(--red);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;flex:0 0 76px;box-shadow:0 5px 14px rgba(232,50,85,.07)}.profile-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}.profile-photo-controls{display:flex;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}.profile-photo-controls input[type=file]{width:min(100%,340px);min-height:42px;padding:6px 8px;border-style:dashed;background:#fcfdff}.profile-photo-help{flex:1 1 220px;min-width:180px;font-size:9px;color:var(--muted);line-height:1.7}.profile-photo-error{flex-basis:100%;display:none;color:var(--err);font-size:10px;line-height:1.7}.profile-photo-error.show{display:block}.id-profile-image{width:94px;height:94px;border-radius:50%;display:block;object-fit:cover;margin:0 auto 13px;border:1px solid #ffd2dc;box-shadow:0 10px 24px rgba(232,50,85,.10)}
+.profile-photo-field>label{display:block;margin-bottom:8px;color:var(--navy);font-size:12px;font-weight:900}.profile-photo-box{display:block}.profile-photo-preview{width:72px;height:72px;border-radius:50%;overflow:hidden;border:1px solid #f0cbd3;background:#fff0f3;color:var(--red);display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;flex:0 0 72px;box-shadow:0 5px 14px rgba(232,50,85,.07)}.profile-photo-preview img{width:100%;height:100%;display:block;object-fit:cover}.profile-photo-controls{display:flex;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}.profile-photo-controls input[type=file]{width:min(100%,340px);min-height:42px;padding:6px 8px;border-style:dashed;background:#fcfdff}.profile-photo-help{flex:1 1 220px;min-width:180px;font-size:9px;color:var(--muted);line-height:1.7}.profile-photo-error{flex-basis:100%;display:none;color:var(--err);font-size:10px;line-height:1.7}.profile-photo-error.show{display:block}.id-profile-image{width:94px;height:94px;border-radius:50%;display:block;object-fit:cover;margin:0 auto 13px;border:1px solid #ffd2dc;box-shadow:0 10px 24px rgba(232,50,85,.10)}
 @media(max-width:650px){.profile-photo-field{width:100%;padding:12px}.profile-photo-box{grid-template-columns:64px minmax(0,1fr);gap:10px}.profile-photo-preview{width:64px;height:64px;flex-basis:64px;font-size:18px}.profile-photo-controls{align-items:stretch;gap:7px}.profile-photo-controls input[type=file]{width:100%;min-height:40px}.profile-photo-help{min-width:0;flex-basis:100%}.id-profile-image{width:72px;height:72px;margin-bottom:9px}}
 
 
@@ -297,6 +297,7 @@ textarea{min-height:108px}
   let contentAssignmentSelections=[];
   let pendingProfileImageFile=null;
   let profileImageData=null;
+  let profilePreviewObjectUrl=null;
   const CLOUDINARY_CLOUD_NAME="pyvrk863";
   const CLOUDINARY_UPLOAD_PRESET="medlife_supervisor_photo";
   const PROFILE_IMAGE_MAX_BYTES=5*1024*1024;
@@ -364,6 +365,11 @@ textarea{min-height:108px}
       profileImageData=null;
       setProfilePhotoError("");
       if(!file){
+        pendingProfileImageFile=null;
+        if(profilePreviewObjectUrl){
+          URL.revokeObjectURL(profilePreviewObjectUrl);
+          profilePreviewObjectUrl=null;
+        }
         preview.innerHTML="<span>ML</span>";
         return;
       }
@@ -375,7 +381,9 @@ textarea{min-height:108px}
         return;
       }
       pendingProfileImageFile=file;
-      preview.innerHTML="<span>✓</span>";
+      if(profilePreviewObjectUrl)URL.revokeObjectURL(profilePreviewObjectUrl);
+      profilePreviewObjectUrl=URL.createObjectURL(file);
+      preview.innerHTML='<img src="'+esc(profilePreviewObjectUrl)+'" alt="معاينة الصورة الشخصية">';
     });
   }
 
@@ -1453,7 +1461,12 @@ textarea{min-height:108px}
     const languageHtml=languageItems.length
       ? languageItems.map((item,index)=>'<div class="confirm-item"><span>اللغة '+(index+1)+'</span><strong>'+esc(item.language==="other"?(item.language_other||"أخرى"):languageLabel(item.language))+(item.level?" — "+esc(levelLabel(item.level)):"")+'</strong></div>').join("")
       : "";
-    const name=String(values.full_name||"عضو ميدلايف");
+    const baseName=String(values.full_name||"عضو ميدلايف").trim().replace(/\s+/g," ");
+    const fatherName=String(values.father_name||"").trim().replace(/\s+/g," ");
+    const baseParts=baseName.split(/\s+/).filter(Boolean);
+    const name=fatherName && !baseParts.includes(fatherName)
+      ? [baseParts[0],fatherName,...baseParts.slice(1)].filter(Boolean).join(" ")
+      : baseName;
     const profileImageUrl=String(values.profile_image_url||"").trim();
     const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
     confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
