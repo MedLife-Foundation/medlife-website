@@ -1,4 +1,4 @@
 MedLife deployment marker
-Website release: current-member roleSummary production fix
-Commit: 4132982e7402a4d61797d454aae4129ab2f44fa3
+Website release: membership card profile-photo normalization
+Commit: 2c09c346ee527137c8614c5055fc1dfa380b22ee
 Updated: 2026-10-06
