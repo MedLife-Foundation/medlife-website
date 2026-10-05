@@ -538,15 +538,13 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
       }
 
+      // Public membership renewal needs the same active organization tree
+      // exposed by the form loader, including live content cells.
+      // Keep this read path on the stable anonymous JWT rather than the
+      // publishable-key compatibility path used by the rest of the API.
       const unitsResponse = await fetch(
         SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team,other)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
-        {
-          headers: {
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-            Accept: "application/json"
-          }
-        }
+        {headers: unitReadHeaders}
       );
       let unitsRows = await unitsResponse.json().catch(() => []);
       if (!Array.isArray(unitsRows)) unitsRows = [];
