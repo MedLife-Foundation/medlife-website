@@ -1168,7 +1168,6 @@ textarea{min-height:108px}
       const seenCertificates=new Set();
       const today=new Date().toISOString().slice(0,10);
       for(const item of certificateRows){
-        const type=String(item.type||"").trim();
         const title=String(item.title||"").trim().replace(/\s+/g," ");
         const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
         const issued=String(item.issuedDate||"").trim();
@@ -1179,7 +1178,7 @@ textarea{min-height:108px}
         if(issued>today)return"تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل.";
         if(certificateSettings.unit_link_enabled&&issuingUnitId&&!validCertificateUnitIds.has(issuingUnitId))return"الفريق أو الوحدة المرتبطة بالشهادة غير صالحة.";
         if(certificateSettings.unit_link_required&&!issuingUnitId)return"يرجى تحديد الفريق أو الوحدة المرتبطة بكل شهادة.";
-        const key=[type,title.toLowerCase(),issuer.toLowerCase(),issued,issuingUnitId].join("|");
+        const key=[title.toLowerCase(),issuer.toLowerCase(),issued,issuingUnitId].join("|");
         if(seenCertificates.has(key))return"لا يمكن تكرار الشهادة نفسها أكثر من مرة.";
         seenCertificates.add(key);
       }
