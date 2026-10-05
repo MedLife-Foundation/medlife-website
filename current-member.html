@@ -522,7 +522,16 @@ textarea{min-height:108px}
       level:item.level
     }));
     syncCertificateHistoryFromDom();
-    out.certificate_history=certificateHistory.map(item=>({
+    const completeCertificateRows=certificateHistory.filter(item=>{
+      return String(item?.type||"").trim()
+        || String(item?.title||"").trim()
+        || String(item?.issuingOrganization||"").trim()
+        || String(item?.issuedDate||"").trim()
+        || String(item?.issuingUnitId||"").trim()
+        || String(item?.referenceCode||"").trim()
+        || String(item?.notes||"").trim();
+    });
+    out.certificate_history=completeCertificateRows.map(item=>({
       type:item.type,
       title:item.title,
       issuing_organization:item.issuingOrganization,
