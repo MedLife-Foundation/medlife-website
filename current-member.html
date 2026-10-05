@@ -707,8 +707,7 @@ textarea{min-height:108px}
     );
     return'<div class="units">'+groups.map(g=>{
       const rows=units
-        .filter(u=>u.unit_type===g[0])
-        .filter(u=>!(isSupervisorForm()&&g[0]==="cell"&&configuredContentCellIds.has(String(u.id))));
+        .filter(u=>u.unit_type===g[0]);
       if(!rows.length)return"";
       return'<div class="unit-group"><h3>'+g[1]+'</h3><p class="unit-group-help">'+esc(g[2])+'</p><div class="unit-choices">'+rows.map(u=>'<label class="unit-choice"><input type="checkbox" name="current_units" value="'+esc(u.id)+'" data-unit="'+esc(u.id)+'"><span>'+esc(u.name_ar||u.name_en)+'</span></label>').join("")+'</div></div>';
     }).join("")+'</div><div id="unitDetails" class="unit-details"></div>';
