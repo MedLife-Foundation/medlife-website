@@ -534,6 +534,11 @@ export async function onRequestPost({ request }) {
       const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
       const writingContentDepartmentId = "b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
       const contentWritingSelected = supervisorForm && requestedIds.includes(writingContentDepartmentId);
+      const membershipUnitReadHeaders = {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY,
+        Accept: "application/json"
+      };
       if (!requestedIds.length) {
         return json({ success: false, error: "يرجى اختيار قسم أو فريق واحد على الأقل." }, 400);
       }
@@ -555,7 +560,7 @@ export async function onRequestPost({ request }) {
           !unitsRows.some(unit => String(unit.id) === "87673bd2-5151-4f8b-95e9-dba4f2a11045")) {
         const adminResponse = await fetch(
           SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&id=eq.87673bd2-5151-4f8b-95e9-dba4f2a11045&is_active=eq.true&limit=1",
-          {headers: unitReadHeaders}
+          {headers: membershipUnitReadHeaders}
         );
         const adminRows = await adminResponse.json().catch(() => []);
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
