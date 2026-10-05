@@ -574,37 +574,50 @@ export async function onRequestPost({ request }) {
       // authoritative check. This avoids rejecting a valid active unit if the
       // broader list response was incomplete or stale for this request.
       const certificateUnitCheckCache = new Map();
-      const isLiveCertificateUnit = async unitId => {
+      const normalizeUnitName = value => cleanText(value, 200).replace(/\\s+/g, " ").trim().toLowerCase();
+
+      const findLiveCertificateUnit = async (unitId, unitName) => {
         const key = String(unitId || "").trim();
-        if (!key) return false;
-        if (certificateUnitCheckCache.has(key)) return certificateUnitCheckCache.get(key);
+        const submittedName = normalizeUnitName(unitName);
+        const cacheKey = key || "name:" + submittedName;
+        if (!key && !submittedName) return null;
+        if (certificateUnitCheckCache.has(cacheKey)) return certificateUnitCheckCache.get(cacheKey);
 
-        if (validCertificateUnits.some(unit => String(unit.id) === key)) {
-          certificateUnitCheckCache.set(key, true);
-          return true;
+        const matchesUnit = unit => {
+          if (!unit || unit.is_active === false) return false;
+          if (String(unit.unit_type) === "other" && !supervisorForm) return false;
+          if (!["cell","department","field_team","other"].includes(String(unit.unit_type))) return false;
+          if (key && String(unit.id) === key) return true;
+          if (submittedName) {
+            return normalizeUnitName(unit.name_ar) === submittedName ||
+              normalizeUnitName(unit.name_en) === submittedName;
+          }
+          return false;
+        };
+
+        const inMemory = validCertificateUnits.find(matchesUnit);
+        if (inMemory) {
+          certificateUnitCheckCache.set(cacheKey, inMemory);
+          return inMemory;
         }
 
-        let valid = false;
+        let liveUnit = null;
         try {
-          const response = await fetch(
-            SUPABASE_URL + "/rest/v1/org_units?select=id,unit_type,is_active&id=eq." +
-            encodeURIComponent(key) +
-            "&is_active=eq.true&unit_type=in.(cell,department,field_team,other)&limit=1",
-            {headers: membershipUnitReadHeaders}
-          );
+          const query = new URL(SUPABASE_URL + "/rest/v1/org_units");
+          query.searchParams.set("select", "id,name_ar,name_en,unit_type,is_active");
+          query.searchParams.set("is_active", "eq.true");
+          query.searchParams.set("unit_type", "in.(cell,department,field_team,other)");
+          if (key) query.searchParams.set("id", "eq." + key);
+          query.searchParams.set("limit", "1");
+          const response = await fetch(query.toString(), {headers: membershipUnitReadHeaders});
           const rows = await response.json().catch(() => []);
-          valid = Array.isArray(rows) &&
-            rows.some(unit =>
-              String(unit.id) === key &&
-              unit.is_active !== false &&
-              (String(unit.unit_type) !== "other" || supervisorForm)
-            );
+          if (Array.isArray(rows)) liveUnit = rows.find(matchesUnit) || null;
         } catch {
-          valid = false;
+          liveUnit = null;
         }
 
-        certificateUnitCheckCache.set(key, valid);
-        return valid;
+        certificateUnitCheckCache.set(cacheKey, liveUnit);
+        return liveUnit;
       };
       // Content-writing cells are subordinate assignments. Resolve every
       // assignment against the live organization tree, never against historical
@@ -857,6 +870,7 @@ export async function onRequestPost({ request }) {
         const issuingOrganization = cleanText(item.issuing_organization, 500);
         const issuedDate = normalizeDate(item.issued_date);
         const issuingUnitId = cleanText(item.issuing_unit_id, 80);
+        const issuingUnitName = cleanText(item.issuing_unit_name, 200);
         const referenceCode = cleanText(item.reference_code, 120);
         const notes = cleanText(item.notes, 1500);
         if (!allowedCertificateTypes.has(type)) {
@@ -868,15 +882,20 @@ export async function onRequestPost({ request }) {
         if (issuedDate > new Date().toISOString().slice(0,10)) {
           return json({ success: false, error: "تاريخ الحصول على الشهادة لا يمكن أن يكون في المستقبل." }, 400);
         }
-        if (issuingUnitId && !(await isLiveCertificateUnit(issuingUnitId))) {
-          return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة في ميدلايف." }, 400);
+        let canonicalIssuingUnitId = issuingUnitId;
+        if (issuingUnitId || issuingUnitName) {
+          const liveUnit = await findLiveCertificateUnit(issuingUnitId, issuingUnitName);
+          if (!liveUnit) {
+            return json({ success: false, error: "الفريق أو الوحدة المرتبطة بالشهادة يجب أن تكون وحدة فعّالة في ميدلايف." }, 400);
+          }
+          canonicalIssuingUnitId = String(liveUnit.id);
         }
         certificateHistory.push({
           type,
           title,
           issuing_organization: issuingOrganization,
           issued_date: issuedDate,
-          issuing_unit_id: issuingUnitId || null,
+          issuing_unit_id: canonicalIssuingUnitId || null,
           reference_code: referenceCode || null,
           notes: notes || null
         });
