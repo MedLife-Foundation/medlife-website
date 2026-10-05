@@ -1,23 +1,20 @@
 MedLife website deployment trigger
 
-Release: supervisor membership form — live content cells + canonical content assignments + multi-unit certificate isolation
-Timestamp: 2026-10-05T12:25:00Z
+Release: membership renewal — fresh membership number per public submission + stable management API route
+Timestamp: 2026-10-05T10:05:00Z
 Source: main
 
 Public form: current-member.html
-API: functions/api/management.js
+Submit API: functions/api/management.js via /api/management
+Form loader: /api/management?resource=membership_renewal_form
+
+Membership renewal submissions are used to build the central member database from scratch. Every public membership renewal form submission receives a NEW unique MedLife membership number; existing volunteer profile numbers are never reused for a new submission. The issued number is authoritative for the submission, profile, membership card, and email.
 
 Content-writing cells are resolved only from active org_units. Submitted assignment cell IDs are canonicalized against live cells, including a unique name fallback, and assignment cells are merged into the submitted unit set.
 Certificate unit links are validated independently against active units, so multiple current units and multiple certificate records remain isolated.
 
-Latest form commit: c34d5c8ba983f47cc9c66f9a5dfb0d4e516916b1
+Latest membership form endpoint fix commit: 2b3d4d0e4596a867503e030ad87ed660488cade3
 Latest API commit: cbc916200ada74639ad4b658a47b2b067b3d56f0
+Database migration: 20261005150000_issue_new_membership_number_per_public_renewal
 
-Backend membership-unit lookup now uses the stable legacy anon key, with live-cell canonicalization and legacy form-cell alias recovery.
-Latest API commit: 23404129e9b2a81b1f2f50302786903cce32eedb
-Database migrations applied: remove_content_assignment_form_cell_gate + allow_public_read_active_content_cells + remove_renewal_submission_membership_unique_index
-
-Critical fix: membership renewal no longer references the out-of-scope unitReadHeaders variable; the submission path uses its own membershipUnitReadHeaders definition.
-
-
-Critical membership renewal fix: membership_number is unique on volunteer_profiles only; renewal submissions may reuse the same membership number across years.
+The public renewal insert trigger issues the membership number before insert, skips any legacy/test collision, and the renewal submission keeps a unique membership number.
