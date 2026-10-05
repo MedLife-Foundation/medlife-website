@@ -27,3 +27,10 @@ Database:
 - public membership insert policy remains restricted to pending + public_website.
 
 - Latest direct-route fix commit: f18415a4418d70778e019dd4bfe6a59de0c472e1
+
+
+Release note:
+- Membership form behavioral settings are now controlled by admin_form_definitions.settings.membership_controls in medlife-management-platform.
+- Public current-member.html consumes those settings for roles, senior positions, certificate types, and optional certificate-unit linking.
+- Current release commit: 72aff36e81fbbca4a51bf6e949a5bc914a49aa9e
+- Current server validation commit: 33435ac5bdcc56b79fc82fd4102ff7cfc5799501
