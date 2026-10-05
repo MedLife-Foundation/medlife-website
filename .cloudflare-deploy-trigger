@@ -34,3 +34,11 @@ Release note:
 - Public current-member.html consumes those settings for roles, senior positions, certificate types, and optional certificate-unit linking.
 - Current release commit: 72aff36e81fbbca4a51bf6e949a5bc914a49aa9e
 - Current server validation commit: 33435ac5bdcc56b79fc82fd4102ff7cfc5799501
+
+
+Release: administrator-controlled optional certificates
+- Public users enter any certificate name, issuer, date, optional unit, reference, and notes.
+- No preset certificate-type list is exposed to users.
+- The admin controls certificate section availability through admin_form_definitions.settings.membership_controls.certificates.
+- Current website commit: 3f5e27e17f12dfa4f8c7fe25d85f198e96abc0ec
+- Current management validation commit: 9216ed5cba672d19805fea78a81c496325c6e3d2
