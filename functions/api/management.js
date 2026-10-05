@@ -705,6 +705,7 @@ export async function onRequestPost({ request }) {
           issuing_organization: issuingOrganization,
           issued_date: issuedDate,
           issuing_unit_id: canonicalIssuingUnitId || null,
+          issuing_unit_name: issuingUnitName || null,
           reference_code: referenceCode || null,
           notes: notes || null
         });
