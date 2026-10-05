@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
 Release: membership renewal — dedicated public submit route outside /api
-Timestamp: 2026-10-05T10:20:00Z
+Timestamp: 2026-10-05T20:45:00Z
 Source: main
 
 Public form: current-member.html
@@ -13,9 +13,9 @@ The dedicated submit route intentionally sits outside /api to avoid any path-spe
 
 Every public membership renewal form submission receives a NEW unique MedLife membership number. Existing volunteer profile numbers are never reused for a new submission. The issued number is authoritative for the submission, member profile, card, and email.
 
-Latest form route commit: 31a65890228998b688697478716b8c19b29bcc4c
-Dedicated route commit: 3bab06ca84a940fc6c468014ef79ba62be7562c6
-API commit: cbc916200ada74639ad4b658a47b2b067b3d56f0
+Latest form route commit: 7fcce3c0e612b11838a4193f2dd0e3eebbbd6950
+Dedicated route commit: 38f458e68ff0f2e700e5950dfb9626f2b10dc66e
+API commit: 9275c894e3da8ccd2e9877e4385b4d9bfd9714d1
 Database migration: 20261005150000_issue_new_membership_number_per_public_renewal
 
 Next verified free membership number: MLF-K7Q8.
