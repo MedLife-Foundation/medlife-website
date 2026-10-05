@@ -171,15 +171,14 @@ async function fetchResource(resource, url) {
     try { fields = JSON.parse(fieldsBody); } catch { fields = []; }
     if (!fieldsResponse.ok || !Array.isArray(fields)) throw new Error("تعذر تحميل أسئلة النموذج.");
     if (resource === "membership_renewal_form") {
+      const unitReadHeaders = {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY,
+        Accept: "application/json"
+      };
       const unitsResponse = await fetch(
         SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&unit_type=in.(cell,department,field_team,other)&is_active=eq.true&order=sort_order.asc,name_ar.asc",
-        {
-          headers: {
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-            Accept: "application/json"
-          }
-        }
+        {headers: unitReadHeaders}
       );
       const units = await unitsResponse.json().catch(() => []);
       const liveUnits = (Array.isArray(units) ? units : []).map(unit => ({
@@ -558,13 +557,7 @@ export async function onRequestPost({ request }) {
           !unitsRows.some(unit => String(unit.id) === "87673bd2-5151-4f8b-95e9-dba4f2a11045")) {
         const adminResponse = await fetch(
           SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&id=eq.87673bd2-5151-4f8b-95e9-dba4f2a11045&is_active=eq.true&limit=1",
-          {
-            headers: {
-              apikey: SUPABASE_PUBLISHABLE_KEY,
-              Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-              Accept: "application/json"
-            }
-          }
+          {headers: unitReadHeaders}
         );
         const adminRows = await adminResponse.json().catch(() => []);
         if (Array.isArray(adminRows)) unitsRows = unitsRows.concat(adminRows);
