@@ -368,6 +368,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     name_en: form.name_en,
     description_ar: form.description_ar,
     description_en: form.description_en,
+    settings: form.settings && typeof form.settings === "object" ? form.settings : {},
     captured_at: new Date().toISOString(),
     fields: fieldRows.map(field => ({
       field_key: field.field_key,
@@ -520,9 +521,17 @@ export async function onRequestPost({ request }) {
       const requestedUnitDetails = data.current_unit_details && typeof data.current_unit_details === "object" && !Array.isArray(data.current_unit_details)
         ? data.current_unit_details
         : {};
-      const contentAssignments = Array.isArray(data.content_assignments)
+      const rawContentAssignments = Array.isArray(data.content_assignments)
         ? data.content_assignments.filter(item => item && typeof item === "object" && !Array.isArray(item)).slice(0, 30)
         : [];
+      const contentAssignments = rawContentAssignments.filter(item => {
+        return [
+          item?.cell_id, item?.cell_name_ar, item?.cell_name_en,
+          item?.role, item?.role_started_on, item?.role_continuing,
+          item?.role_left_on, item?.joined_on, item?.continuing,
+          item?.left_on, item?.notes
+        ].some(value => String(value ?? "").trim() !== "");
+      });
       const supervisorForm = String(dynamic.form_schema?.form_key || "") === "membership_renewal_supervisor";
       const writingContentDepartmentId = "b1ea8c52-b405-4ad9-b9f6-2768a22a7827";
       const contentWritingSelected = supervisorForm && requestedIds.includes(writingContentDepartmentId);
@@ -569,43 +578,74 @@ export async function onRequestPost({ request }) {
       if (contentWritingSelected) {
         const liveContentCells = activeUnits.filter(unit => String(unit.unit_type) === "cell");
         const normalizeCellName = value => cleanText(value, 200).replace(/\s+/g, " ").trim().toLowerCase();
+        const legacyContentCells = Array.isArray(dynamic.form_schema?.settings?.content_cells)
+          ? dynamic.form_schema.settings.content_cells
+              .map(item => ({
+                id: cleanText(item?.id, 80),
+                name_ar: cleanText(item?.name_ar || item?.name_en, 200),
+                name_en: cleanText(item?.name_en || item?.name_ar, 200)
+              }))
+              .filter(item => item.id && (item.name_ar || item.name_en))
+          : [];
+        const legacyCellById = new Map(legacyContentCells.map(item => [item.id, item]));
         const contentAssignmentCellIds = [];
-        for (const assignment of contentAssignments) {
+        const resolveLiveCell = assignment => {
           const submittedId = cleanText(assignment?.cell_id, 80);
-          const submittedName = normalizeCellName(assignment?.cell_name_ar || assignment?.cell_name_en);
+          const legacy = submittedId ? legacyCellById.get(submittedId) : null;
+          const submittedName = normalizeCellName(
+            assignment?.cell_name_ar ||
+            assignment?.cell_name_en ||
+            legacy?.name_ar ||
+            legacy?.name_en
+          );
           let cell = submittedId ? activeUnitById.get(submittedId) : null;
           if (!cell || String(cell.unit_type) !== "cell") {
             const nameMatches = submittedName
-              ? liveContentCells.filter(unit => normalizeCellName(unit.name_ar || unit.name_en) === submittedName)
+              ? liveContentCells.filter(unit =>
+                  normalizeCellName(unit.name_ar || unit.name_en) === submittedName
+                )
               : [];
-            if (nameMatches.length === 1) {
-              cell = nameMatches[0];
-              const canonicalId = String(cell.id);
-              if (submittedId && submittedId !== canonicalId &&
-                  requestedUnitDetails[submittedId] && !requestedUnitDetails[canonicalId]) {
-                requestedUnitDetails[canonicalId] = requestedUnitDetails[submittedId];
-              }
-              assignment.cell_id = canonicalId;
-              if (!requestedUnitDetails[canonicalId]) {
-                requestedUnitDetails[canonicalId] = {
-                  role: cleanText(assignment.role, 40).toLowerCase(),
-                  role_started_on: normalizeDate(assignment.role_started_on),
-                  role_continuing: String(assignment.role_continuing) === "true",
-                  role_left_on: normalizeDate(assignment.role_left_on),
-                  joined_on: normalizeDate(assignment.joined_on),
-                  continuing: String(assignment.continuing) === "true",
-                  left_on: normalizeDate(assignment.left_on),
-                  notes: cleanText(assignment.notes, 1500)
-                };
-              }
-            }
+            if (nameMatches.length === 1) cell = nameMatches[0];
           }
+          return {cell,submittedId};
+        };
+
+        for (const assignment of contentAssignments) {
+          const {cell,submittedId} = resolveLiveCell(assignment);
           if (!cell || String(cell.unit_type) !== "cell") {
-            return json({ success: false, error: "تعذر ربط أحد تكليفات كتابة المحتوى بخلية فعّالة في ميدلايف." }, 400);
+            return json({
+              success: false,
+              error: "تعذر ربط أحد تكليفات كتابة المحتوى بخلية فعّالة في ميدلايف. يرجى اختيار الخلية من القائمة الحالية."
+            }, 400);
           }
+
           const canonicalId = String(cell.id);
-          if (!contentAssignmentCellIds.includes(canonicalId)) contentAssignmentCellIds.push(canonicalId);
+          const submittedDetail =
+            (submittedId && requestedUnitDetails[submittedId] && typeof requestedUnitDetails[submittedId] === "object")
+              ? requestedUnitDetails[submittedId]
+              : null;
+          if (submittedDetail && !requestedUnitDetails[canonicalId]) {
+            requestedUnitDetails[canonicalId] = submittedDetail;
+          }
+          if (!requestedUnitDetails[canonicalId]) {
+            requestedUnitDetails[canonicalId] = {
+              role: cleanText(assignment.role, 40).toLowerCase(),
+              role_started_on: normalizeDate(assignment.role_started_on),
+              role_continuing: String(assignment.role_continuing) === "true",
+              role_left_on: normalizeDate(assignment.role_left_on),
+              joined_on: normalizeDate(assignment.joined_on),
+              continuing: String(assignment.continuing) === "true",
+              left_on: normalizeDate(assignment.left_on),
+              notes: cleanText(assignment.notes, 1500)
+            };
+          }
+
+          assignment.cell_id = canonicalId;
+          if (!contentAssignmentCellIds.includes(canonicalId)) {
+            contentAssignmentCellIds.push(canonicalId);
+          }
         }
+
         requestedIds = [...new Set([...requestedIds, ...contentAssignmentCellIds])];
       }
       // Cells are selectable only as assignments under the Content Writing department.
