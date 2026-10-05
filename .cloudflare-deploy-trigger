@@ -1,7 +1,7 @@
 MedLife website deployment trigger
 
 Release: current-member direct route + certificate validation fix
-Timestamp: 2026-10-06T19:30:00Z
+Timestamp: 2026-10-06T22:25:00Z
 Source: main
 
 Root cause fixed:
@@ -42,3 +42,5 @@ Release: administrator-controlled optional certificates
 - The admin controls certificate section availability through admin_form_definitions.settings.membership_controls.certificates.
 - Current website commit: 3f5e27e17f12dfa4f8c7fe25d85f198e96abc0ec
 - Current management validation commit: 9216ed5cba672d19805fea78a81c496325c6e3d2
+
+Force-release marker: 030410df9c53936b363d8d351652963d52a06440
