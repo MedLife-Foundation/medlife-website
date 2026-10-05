@@ -783,6 +783,7 @@ textarea{min-height:108px}
       issuing_organization:item.issuingOrganization,
       issued_date:item.issuedDate,
       issuing_unit_id:item.issuingUnitId||null,
+      issuing_unit_name:item.issuingUnitName||null,
       reference_code:item.referenceCode||null,
       notes:item.notes||null
     }));
@@ -930,6 +931,7 @@ textarea{min-height:108px}
       issuingOrganization:String(row.querySelector('[name^="certificate_history_issuer_"]')?.value||""),
       issuedDate:String(row.querySelector('[name^="certificate_history_date_"]')?.value||""),
       issuingUnitId:String(row.querySelector('[name^="certificate_history_unit_"]')?.value||""),
+      issuingUnitName:String(row.querySelector('[name^="certificate_history_unit_"] option:checked')?.textContent||"").trim(),
       referenceCode:String(row.querySelector('[name^="certificate_history_reference_"]')?.value||""),
       notes:String(row.querySelector('[name^="certificate_history_notes_"]')?.value||"")
     }));
