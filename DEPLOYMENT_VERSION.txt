@@ -1,4 +1,5 @@
 MedLife deployment marker
-Website release: membership card profile-photo normalization
-Commit: 2c09c346ee527137c8614c5055fc1dfa380b22ee
-Updated: 2026-10-06
+Website release: membership card unified rendering + print/PDF fix
+Commit: a205a31cb031c8edd22357103b1b5928a4f2b1d7
+Email function: send-membership-update-email-v2 v14
+Updated: 2026-10-07
