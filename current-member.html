@@ -521,6 +521,62 @@ textarea{min-height:108px}
  .unit-group{padding:12px;border-radius:9px}.unit-card{padding:12px;border-radius:9px}.unit-card-head{margin-bottom:10px;padding-bottom:8px}
  .actions{margin-top:20px;padding-top:17px}.btn{width:100%;min-height:45px}.btn-primary{min-width:100%}
 }
+
+
+/* ===== Membership card final rendering fix ===== */
+.card-capture{display:flex;justify-content:center;align-items:flex-start;width:100%;padding:0!important;background:#fff!important}
+.card-capture .id-card{width:min(900px,100%);margin:0 auto;overflow:hidden;background:#fff;border:1px solid #d9dee7;border-radius:18px;box-shadow:0 14px 42px rgba(23,32,51,.10)}
+.card-capture .id-card-top{min-height:86px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(135deg,#172033 0%,#283652 100%)!important;color:#fff!important;position:relative}
+.card-capture .id-card-top:after{content:"";position:absolute;left:0;top:0;bottom:0;width:32%;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent);pointer-events:none}
+.card-capture .id-brand{display:flex;align-items:center;gap:11px;position:relative;z-index:1;min-width:0}
+.card-capture .id-brand img{width:44px!important;height:44px!important;object-fit:contain!important;padding:4px!important;background:#fff!important;border-radius:10px!important;box-shadow:0 5px 18px rgba(0,0,0,.12);flex:0 0 44px}
+.card-capture .id-brand strong{font-size:14px!important;line-height:1.55;color:#fff!important;display:block}
+.card-capture .id-brand span{font-size:9px!important;line-height:1.5;color:#dbe3f2!important;opacity:1!important;margin-top:2px}
+.card-capture .id-status{position:relative;z-index:1;white-space:nowrap;padding:7px 11px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:999px;background:rgba(255,255,255,.10)!important;color:#fff!important;font-size:9px!important}
+.card-capture .id-card-main{padding:18px 20px!important;display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px;background:#fff!important;align-items:stretch}
+.card-capture .id-photo{min-height:0;height:100%;border:1px solid #e1e6ee;border-radius:14px;padding:10px;background:#f8fafc!important;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.card-capture .id-photo-image{width:96px!important;height:116px!important;border-radius:14px!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#eef2f6!important;border:1px solid #dbe2eb!important;box-shadow:none!important;margin:0 auto 8px!important}
+.card-capture .id-profile-image{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:50% 35%!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.card-capture .id-initials{width:64px!important;height:64px!important;border-radius:50%!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff1f4!important;color:#b4233f!important;border:1px solid #ffd0da!important;font-size:22px!important;box-shadow:none!important}
+.card-capture .id-photo strong{max-width:125px!important;font-size:12px!important;line-height:1.6!important;color:#172033!important;overflow-wrap:anywhere}
+.card-capture .id-photo span{font-size:8px!important;line-height:1.6!important;color:#7b8494!important}
+.card-capture .id-meta{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-rows:minmax(56px,auto)!important;gap:8px!important;align-content:start!important}
+.card-capture .id-meta>div{min-width:0!important;min-height:0!important;border:1px solid #e2e7ee!important;border-radius:11px!important;padding:9px 10px!important;background:#fff!important;display:flex!important;flex-direction:column!important;justify-content:center!important;box-shadow:none!important}
+.card-capture .id-meta span{font-size:8px!important;line-height:1.45!important;color:#7b8495!important;margin-bottom:3px!important;font-weight:800!important}
+.card-capture .id-meta strong{font-size:10px!important;line-height:1.6!important;color:#172033!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+.card-capture .id-meta>div:first-child{border-color:#efb5c1!important;background:#fff7f8!important}
+.card-capture .id-meta>div:first-child strong{font-size:16px!important;line-height:1.35!important;color:#b4233f!important;letter-spacing:.2px}
+.card-capture .id-meta-supervisor{border-color:#efc8d0!important;background:#fff8f9!important}
+.card-capture .id-meta-supervisor strong{color:#9f213b!important;font-size:10px!important}
+.card-capture .id-meta-status{border-color:#c8e8da!important;background:#f4fbf7!important}
+.card-capture .id-meta-status strong{color:#087653!important;font-size:10px!important}
+.card-capture .id-meta-wide{grid-column:1/-1!important}
+.card-capture .id-card-bottom{min-height:34px;padding:9px 20px!important;border-top:1px solid #e8ebf0!important;background:#f7f9fb!important;color:#667085!important;font-size:8px!important;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.card-capture .id-card-bottom strong{font-size:8px!important;color:#243047!important}
+@media(max-width:760px){
+  .card-capture .id-card-main{grid-template-columns:1fr!important}
+  .card-capture .id-photo{height:auto;min-height:146px}
+  .card-capture .id-meta{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:430px){
+  .card-capture .id-card-top{padding:15px 14px!important;gap:9px}
+  .card-capture .id-brand strong{font-size:11px!important}
+  .card-capture .id-brand span{font-size:8px!important}
+  .card-capture .id-status{font-size:8px!important;padding:6px 8px!important;white-space:normal;text-align:center}
+  .card-capture .id-card-main{padding:13px!important}
+  .card-capture .id-meta{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .card-capture .id-card-bottom{padding:8px 13px!important;font-size:7px!important}
+}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  header,.hero,.footer,.confirm-actions,.confirmation-note,.confirmation-details{display:none!important}
+  body{background:#fff!important}
+  .wrap{width:100%!important}
+  .confirmation{padding:0!important}
+  .card-capture{display:block!important;padding:0!important}
+  .card-capture .id-card{width:100%!important;max-width:260mm!important;margin:0 auto!important;box-shadow:none!important;border:1px solid #d9dee7!important}
+  .card-capture .id-card-top,.card-capture .id-card-main,.card-capture .id-card-bottom{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -1358,13 +1414,14 @@ textarea{min-height:108px}
   }
 
   function captureElement(){
-    return document.querySelector("[data-card-capture]");
+    return document.querySelector("[data-card-capture] .id-card") || document.querySelector(".id-card");
   }
 
   async function makeCardCanvas(){
     const el=captureElement();
     if(!el)throw new Error("تعذر تجهيز بطاقة العضوية.");
     if(typeof window.html2canvas!=="function")throw new Error("تعذر تحميل أداة الصورة. أعد تحميل الصفحة وحاول مرة أخرى.");
+    if(document.fonts?.ready)await document.fonts.ready;
     const images=Array.from(el.querySelectorAll("img"));
     await Promise.all(images.map(async img=>{
       if(!img.complete){
@@ -1384,15 +1441,17 @@ textarea{min-height:108px}
       useCORS:true,
       allowTaint:false,
       logging:false,
-      imageTimeout:15000
+      imageTimeout:15000,
+      removeContainer:true
     });
   }
 
   async function downloadCardImage(button){
     const old=button.textContent;
     button.disabled=true;
-    button.textContent="جارٍ تجهيز الصورة...";
+    button.textContent="جارٍ تجهيز البطاقة...";
     try{
+      await document.fonts?.ready;
       const canvas=await makeCardCanvas();
       const link=document.createElement("a");
       link.download=downloadName(document.querySelector("[data-card-name]")?.textContent,"png");
@@ -1413,32 +1472,25 @@ textarea{min-height:108px}
     button.disabled=true;
     button.textContent="جارٍ تجهيز PDF...";
     try{
+      await document.fonts?.ready;
       const canvas=await makeCardCanvas();
       const jspdfGlobal=window.jspdf;
       if(!jspdfGlobal?.jsPDF)throw new Error("تعذر تحميل أداة PDF. أعد تحميل الصفحة وحاول مرة أخرى.");
       const {jsPDF}=jspdfGlobal;
-      const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
-      const margin=8;
-      const pageWidth=pdf.internal.pageSize.getWidth()-margin*2;
-      const pageHeight=pdf.internal.pageSize.getHeight()-margin*2;
-      const ratio=pageWidth/canvas.width;
-      const slicePx=Math.max(1,Math.floor(pageHeight/ratio));
-      let offset=0,first=true;
-      while(offset<canvas.height){
-        const height=Math.min(slicePx,canvas.height-offset);
-        const slice=document.createElement("canvas");
-        slice.width=canvas.width;
-        slice.height=height;
-        const ctx=slice.getContext("2d");
-        if(!ctx)throw new Error("تعذر تجهيز صورة البطاقة.");
-        ctx.fillStyle="#fff";
-        ctx.fillRect(0,0,slice.width,slice.height);
-        ctx.drawImage(canvas,0,offset,canvas.width,height,0,0,canvas.width,height);
-        if(!first)pdf.addPage();
-        first=false;
-        pdf.addImage(slice.toDataURL("image/png"),"PNG",margin,margin,pageWidth,height*ratio,"FAST");
-        offset+=height;
-      }
+      const pdf=new jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
+      const margin=12;
+      const pageWidth=pdf.internal.pageSize.getWidth();
+      const pageHeight=pdf.internal.pageSize.getHeight();
+      const maxWidth=pageWidth-margin*2;
+      const maxHeight=pageHeight-margin*2;
+      const scale=Math.min(maxWidth/canvas.width,maxHeight/canvas.height);
+      const renderWidth=canvas.width*scale;
+      const renderHeight=canvas.height*scale;
+      const x=(pageWidth-renderWidth)/2;
+      const y=(pageHeight-renderHeight)/2;
+      pdf.setFillColor(255,255,255);
+      pdf.rect(0,0,pageWidth,pageHeight,"F");
+      pdf.addImage(canvas.toDataURL("image/png"),"PNG",x,y,renderWidth,renderHeight,"FAST");
       pdf.save(downloadName(document.querySelector("[data-card-name]")?.textContent,"pdf"));
     }catch(e){
       setStatus("err",e.message||"تعذر تحميل البطاقة بصيغة PDF.");
@@ -1447,7 +1499,6 @@ textarea{min-height:108px}
       button.textContent=old;
     }
   }
-
   function renderConfirmation(data,submissionId,membershipNumber){
     const values=data||{};
     const fields=Array.isArray(schema?.fields)?schema.fields:[];
