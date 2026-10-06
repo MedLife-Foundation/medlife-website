@@ -484,6 +484,70 @@ export async function onRequestPost({ request }) {
       }
 
       const data = dynamic.form_data;
+      const formSettings = dynamic.form_schema?.settings && typeof dynamic.form_schema.settings === "object"
+        ? dynamic.form_schema.settings
+        : {};
+      const supervisorForm = dynamic.form_schema?.form_key === "membership_renewal_supervisor";
+      const membershipControls = formSettings.membership_controls && typeof formSettings.membership_controls === "object"
+        ? formSettings.membership_controls
+        : {};
+      const configuredRoleOptions = Array.isArray(membershipControls.role_options)
+        ? membershipControls.role_options
+            .filter(item => item && typeof item === "object")
+            .map(item => ({
+              value: cleanText(item.value, 60).toLowerCase(),
+              label_ar: cleanText(item.label_ar || item.label_en, 120)
+            }))
+            .filter(item => item.value)
+        : [];
+      const configuredSeniorPositions = Array.isArray(membershipControls.senior_management_positions)
+        ? membershipControls.senior_management_positions
+            .filter(item => item && typeof item === "object")
+            .map(item => ({
+              value: cleanText(item.value, 100),
+              label_ar: cleanText(item.label_ar || item.label_en, 180)
+            }))
+            .filter(item => item.value)
+        : [];
+      const certificateControls = membershipControls.certificates && typeof membershipControls.certificates === "object"
+        ? membershipControls.certificates
+        : {};
+      const certificateFeatureEnabled = certificateControls.enabled !== false;
+      const certificateUnitLinkEnabled = certificateControls.unit_link_enabled !== false;
+      const certificateUnitLinkRequired = certificateControls.unit_link_required === true;
+
+      const unitsResponse = await fetch(
+        SUPABASE_URL + "/rest/v1/org_units?select=id,name_ar,name_en,unit_type&is_active=eq.true&unit_type=in.(cell,department,field_team)&order=sort_order.asc,name_ar.asc",
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + SUPABASE_ANON_KEY,
+            Accept: "application/json"
+          }
+        }
+      );
+      const activeUnitsPayload = await unitsResponse.json().catch(() => []);
+      const activeUnits = Array.isArray(activeUnitsPayload)
+        ? activeUnitsPayload.map(unit => ({
+            id: String(unit.id || ""),
+            name_ar: cleanText(unit.name_ar || unit.name_en, 200),
+            name_en: cleanText(unit.name_en || unit.name_ar, 200),
+            unit_type: cleanText(unit.unit_type, 50)
+          })).filter(unit => unit.id && unit.name_ar)
+        : [];
+
+      const findLiveCertificateUnit = async (unitId, unitName) => {
+        const normalizedId = cleanText(unitId, 80);
+        const normalizedName = cleanText(unitName, 200).replace(/\\s+/g, " ").toLowerCase();
+        const candidate = activeUnits.find(unit =>
+          (normalizedId && unit.id === normalizedId) ||
+          (normalizedName && [unit.name_ar, unit.name_en].some(name =>
+            cleanText(name, 200).replace(/\\s+/g, " ").toLowerCase() === normalizedName
+          ))
+        );
+        return candidate || null;
+      };
+
       if (data.declaration_accurate !== true || data.privacy_consent !== true) {
         return json({ success: false, error: "يرجى تأكيد صحة المعلومات والموافقة على استخدام البيانات." }, 400);
       }
