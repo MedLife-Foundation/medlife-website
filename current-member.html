@@ -925,7 +925,8 @@ textarea{min-height:108px}
     );
     return'<div class="units">'+groups.map(g=>{
       const rows=units
-        .filter(u=>u.unit_type===g[0]);
+        .filter(u=>u.unit_type===g[0])
+        .filter(u=>!(isSupervisorForm() && g[0]==="department" && String(u.name_ar||u.name_en||"") === "كتابة محتوى"));
       if(!rows.length)return"";
       return'<div class="unit-group"><h3>'+g[1]+'</h3><p class="unit-group-help">'+esc(g[2])+'</p><div class="unit-choices">'+rows.map(u=>'<label class="unit-choice"><input type="checkbox" name="current_units" value="'+esc(u.id)+'" data-unit="'+esc(u.id)+'"><span>'+esc(u.name_ar||u.name_en)+'</span></label>').join("")+'</div></div>';
     }).join("")+'</div><div id="unitDetails" class="unit-details"></div>';
@@ -1072,7 +1073,15 @@ textarea{min-height:108px}
         const options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(previous.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
         roleHtml='<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select name="senior_management_position_'+esc(id)+'">'+options+'</select></div>';
       }else{
-        const availableRoles=isSupervisorForm()?roleOptions:[{value:"volunteer",label:"متطوع / عضو"}];
+        const configuredContentCellIds=new Set(
+          (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
+        );
+        const availableRoles=isSupervisorForm()
+          ? roleOptions.filter(role =>
+              role.value!=="content_writer"
+              || (String(u.unit_type)==="cell" && configuredContentCellIds.has(String(u.id)))
+            )
+          : [{value:"volunteer",label:"متطوع / عضو"}];
         const options='<option value="">اختر الدور</option>'+availableRoles.map(o=>'<option value="'+esc(o.value)+'"'+(previous.role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
         roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>';
       }
@@ -1231,6 +1240,14 @@ textarea{min-height:108px}
           if(!d.senior_management_position)return"يرجى تحديد المنصب في الإدارة العامة.";
         }else if(!["volunteer","assistant_supervisor","supervisor","general_supervisor","content_writer"].includes(d.role)){
           return"يرجى تحديد دورك داخل «"+unitName+"».";
+        }
+        if(d.role==="content_writer"){
+          const configuredContentCellIds=new Set(
+            (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
+          );
+          if(String(unit?.unit_type)!=="cell" || !configuredContentCellIds.has(id)){
+            return"دور «كاتب محتوى» يجب أن يكون مرتبطاً بإحدى خلايا المحتوى المعرّفة في النموذج.";
+          }
         }
         if(!d.role_started_on)return isAdmin?"يرجى تحديد تاريخ بدء المنصب.":"يرجى تحديد تاريخ بدء الدور داخل «"+unitName+"».";
         if(d.role_started_on<d.joined_on)return isAdmin?"تاريخ بدء المنصب لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».":"تاريخ بدء الدور لا يمكن أن يسبق تاريخ الانضمام إلى «"+unitName+"».";
