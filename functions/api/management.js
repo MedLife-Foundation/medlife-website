@@ -868,10 +868,14 @@ export async function onRequestPost({ request }) {
       };
 
       const requiredCore = [
-        "full_name","father_name","mother_name","national_id","country","governorate",
+        "full_name","father_name","mother_name","national_id","country",
         "full_address","date_of_birth","gender","email","phone","academic_status","join_date"
       ];
-      if (requiredCore.some(key => !String(payload[key] ?? "").trim())) {
+      const missingRequiredCore = requiredCore.some(key => !String(payload[key] ?? "").trim())
+        || (payload.country === "سوريا" && !String(payload.governorate ?? "").trim())
+        || (payload.country === "أخرى" && !String(payload.country_other ?? "").trim())
+        || (payload.nationality === "أخرى" && !String(payload.nationality_other ?? "").trim());
+      if (missingRequiredCore) {
         return json({ success: false, error: "يرجى إكمال جميع المعلومات الأساسية المطلوبة." }, 400);
       }
       const requiredEmergency = ["emergency_contact_name","emergency_contact_relationship","emergency_contact_phone"];
