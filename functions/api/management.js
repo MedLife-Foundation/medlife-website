@@ -601,6 +601,14 @@ export async function onRequestPost({ request }) {
         ...activeUnits.filter(unit => requestedIds.includes(String(unit.id))),
         ...canonicalAdmin.filter(admin => !activeUnits.some(unit => String(unit.id) === admin.id))
       ];
+      if (supervisorForm && unitsForSubmission.some(unit =>
+        String(unit.unit_type) === "department" && cleanText(unit.name_ar, 200) === "كتابة محتوى"
+      )) {
+        return json({
+          success: false,
+          error: "قسم «كتابة محتوى» يُدار عبر خلايا المحتوى. اختر خلية المحتوى المرتبطة بدلاً من اختيار القسم نفسه."
+        }, 400);
+      }
       const requestedUnits = unitsForSubmission
         .filter(unit => requestedIds.includes(String(unit.id)))
         .map(unit => {
@@ -651,6 +659,23 @@ export async function onRequestPost({ request }) {
       const allowedSeniorPositions = configuredSeniorPositions.length
         ? new Set(configuredSeniorPositions.map(item => item.value))
         : new Set(["general_supervisor_syria","advisor_deputy_general_supervisor","executive_director","medical_director","legal_advisor","financial_director"]);
+      const configuredContentCellIds = new Set(
+        Array.isArray(formSettings.content_cells)
+          ? formSettings.content_cells
+              .filter(item => item && typeof item === "object")
+              .map(item => cleanText(item.id, 80))
+              .filter(Boolean)
+          : []
+      );
+      if (supervisorForm && requestedUnits.some(unit =>
+        unit.role === "content_writer" &&
+        (String(unit.unit_type) !== "cell" || !configuredContentCellIds.has(String(unit.id)))
+      )) {
+        return json({
+          success: false,
+          error: "دور «كاتب محتوى» يجب أن يكون مرتبطاً بإحدى خلايا المحتوى المعرّفة في إعدادات النموذج."
+        }, 400);
+      }
       if (requestedUnits.some(unit => !allowedUnitRoles.includes(unit.role))) {
         return json({ success: false, error: "يوجد دور غير صالح ضمن أحد الأقسام أو الوحدات." }, 400);
       }
