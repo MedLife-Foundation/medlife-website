@@ -523,59 +523,417 @@ textarea{min-height:108px}
 }
 
 
-/* ===== Membership card final rendering fix ===== */
-.card-capture{display:flex;justify-content:center;align-items:flex-start;width:100%;padding:0!important;background:#fff!important}
-.card-capture .id-card{width:min(900px,100%);margin:0 auto;overflow:hidden;background:#fff;border:1px solid #d9dee7;border-radius:18px;box-shadow:0 14px 42px rgba(23,32,51,.10)}
-.card-capture .id-card-top{min-height:86px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(135deg,#172033 0%,#283652 100%)!important;color:#fff!important;position:relative}
-.card-capture .id-card-top:after{content:"";position:absolute;left:0;top:0;bottom:0;width:32%;background:linear-gradient(115deg,rgba(255,255,255,.08),transparent);pointer-events:none}
-.card-capture .id-brand{display:flex;align-items:center;gap:11px;position:relative;z-index:1;min-width:0}
-.card-capture .id-brand img{width:44px!important;height:44px!important;object-fit:contain!important;padding:4px!important;background:#fff!important;border-radius:10px!important;box-shadow:0 5px 18px rgba(0,0,0,.12);flex:0 0 44px}
-.card-capture .id-brand strong{font-size:14px!important;line-height:1.55;color:#fff!important;display:block}
-.card-capture .id-brand span{font-size:9px!important;line-height:1.5;color:#dbe3f2!important;opacity:1!important;margin-top:2px}
-.card-capture .id-status{position:relative;z-index:1;white-space:nowrap;padding:7px 11px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:999px;background:rgba(255,255,255,.10)!important;color:#fff!important;font-size:9px!important}
-.card-capture .id-card-main{padding:18px 20px!important;display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px;background:#fff!important;align-items:stretch}
-.card-capture .id-photo{min-height:0;height:100%;border:1px solid #e1e6ee;border-radius:14px;padding:10px;background:#f8fafc!important;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.card-capture .id-photo-image{width:96px!important;height:116px!important;border-radius:14px!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#eef2f6!important;border:1px solid #dbe2eb!important;box-shadow:none!important;margin:0 auto 8px!important}
-.card-capture .id-profile-image{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:50% 35%!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-.card-capture .id-initials{width:64px!important;height:64px!important;border-radius:50%!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff1f4!important;color:#b4233f!important;border:1px solid #ffd0da!important;font-size:22px!important;box-shadow:none!important}
-.card-capture .id-photo strong{max-width:125px!important;font-size:12px!important;line-height:1.6!important;color:#172033!important;overflow-wrap:anywhere}
-.card-capture .id-photo span{font-size:8px!important;line-height:1.6!important;color:#7b8494!important}
-.card-capture .id-meta{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-auto-rows:minmax(56px,auto)!important;gap:8px!important;align-content:start!important}
-.card-capture .id-meta>div{min-width:0!important;min-height:0!important;border:1px solid #e2e7ee!important;border-radius:11px!important;padding:9px 10px!important;background:#fff!important;display:flex!important;flex-direction:column!important;justify-content:center!important;box-shadow:none!important}
-.card-capture .id-meta span{font-size:8px!important;line-height:1.45!important;color:#7b8495!important;margin-bottom:3px!important;font-weight:800!important}
-.card-capture .id-meta strong{font-size:10px!important;line-height:1.6!important;color:#172033!important;overflow-wrap:anywhere!important;word-break:break-word!important}
-.card-capture .id-meta>div:first-child{border-color:#efb5c1!important;background:#fff7f8!important}
-.card-capture .id-meta>div:first-child strong{font-size:16px!important;line-height:1.35!important;color:#b4233f!important;letter-spacing:.2px}
-.card-capture .id-meta-supervisor{border-color:#efc8d0!important;background:#fff8f9!important}
-.card-capture .id-meta-supervisor strong{color:#9f213b!important;font-size:10px!important}
-.card-capture .id-meta-status{border-color:#c8e8da!important;background:#f4fbf7!important}
-.card-capture .id-meta-status strong{color:#087653!important;font-size:10px!important}
-.card-capture .id-meta-wide{grid-column:1/-1!important}
-.card-capture .id-card-bottom{min-height:34px;padding:9px 20px!important;border-top:1px solid #e8ebf0!important;background:#f7f9fb!important;color:#667085!important;font-size:8px!important;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.card-capture .id-card-bottom strong{font-size:8px!important;color:#243047!important}
-@media(max-width:760px){
-  .card-capture .id-card-main{grid-template-columns:1fr!important}
-  .card-capture .id-photo{height:auto;min-height:146px}
-  .card-capture .id-meta{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+/* ===== Premium membership card ===== */
+.card-capture{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:12px 0!important;
+  background:transparent!important;
 }
-@media(max-width:430px){
-  .card-capture .id-card-top{padding:15px 14px!important;gap:9px}
-  .card-capture .id-brand strong{font-size:11px!important}
-  .card-capture .id-brand span{font-size:8px!important}
-  .card-capture .id-status{font-size:8px!important;padding:6px 8px!important;white-space:normal;text-align:center}
-  .card-capture .id-card-main{padding:13px!important}
-  .card-capture .id-meta{grid-template-columns:1fr 1fr!important;gap:7px!important}
-  .card-capture .id-card-bottom{padding:8px 13px!important;font-size:7px!important}
+.card-capture .id-card{
+  position:relative;
+  width:min(856px,100%);
+  aspect-ratio:85.6/54;
+  min-height:0!important;
+  overflow:hidden!important;
+  border:1px solid #cdd5df!important;
+  border-radius:20px!important;
+  background:#fff!important;
+  box-shadow:0 22px 60px rgba(23,32,51,.14)!important;
+  color:#172033!important;
+  isolation:isolate;
+}
+.card-capture .id-card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background:
+    radial-gradient(circle at 12% 12%,rgba(180,35,63,.10),transparent 28%),
+    radial-gradient(circle at 92% 88%,rgba(23,32,51,.08),transparent 30%),
+    linear-gradient(135deg,#ffffff 0%,#fbfcfe 58%,#f6f8fb 100%);
+}
+.card-capture .id-card:after{
+  content:"";
+  position:absolute;
+  width:360px;
+  height:360px;
+  left:-150px;
+  bottom:-190px;
+  border:1px solid rgba(180,35,63,.08);
+  border-radius:50%;
+  box-shadow:0 0 0 38px rgba(180,35,63,.025),0 0 0 76px rgba(180,35,63,.016);
+  z-index:-1;
+}
+.card-capture .id-card-top{
+  min-height:92px!important;
+  padding:17px 22px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:18px!important;
+  background:linear-gradient(135deg,#151d36 0%,#202b49 68%,#3b1830 100%)!important;
+  color:#fff!important;
+  position:relative!important;
+  overflow:hidden;
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+.card-capture .id-card-top:before{
+  content:"";
+  position:absolute;
+  width:250px;
+  height:250px;
+  left:-110px;
+  top:-170px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 0 0 28px rgba(255,255,255,.025),0 0 0 56px rgba(255,255,255,.018);
+}
+.card-capture .id-card-top:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.05) 45%,transparent 72%);
+  pointer-events:none;
+}
+.card-capture .id-brand{
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  position:relative!important;
+  z-index:1!important;
+  min-width:0!important;
+}
+.card-capture .id-brand img{
+  width:48px!important;
+  height:48px!important;
+  flex:0 0 48px!important;
+  object-fit:contain!important;
+  padding:5px!important;
+  background:#fff!important;
+  border-radius:12px!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
+}
+.card-capture .id-brand strong{
+  display:block!important;
+  color:#fff!important;
+  font-size:14px!important;
+  line-height:1.5!important;
+  font-weight:800!important;
+}
+.card-capture .id-brand span{
+  display:block!important;
+  margin-top:2px!important;
+  color:#dbe3f2!important;
+  font-size:8.5px!important;
+  line-height:1.5!important;
+}
+.card-capture .id-card-number{
+  position:relative;
+  z-index:1;
+  text-align:left;
+  direction:ltr;
+}
+.card-capture .id-card-number span{
+  display:block;
+  color:#c9d2e1;
+  font-size:7.5px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin-bottom:2px;
+}
+.card-capture .id-card-number strong{
+  display:block;
+  color:#fff;
+  font-family:"Inter","Tajawal",Arial,sans-serif;
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.card-capture .id-status{
+  position:relative!important;
+  z-index:1!important;
+  margin-top:4px;
+  display:inline-flex!important;
+  align-items:center;
+  gap:5px;
+  padding:5px 9px!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  font-size:7.5px!important;
+  font-weight:800!important;
+}
+.card-capture .id-status:before{
+  content:"";
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#9ee7c5;
+  box-shadow:0 0 0 3px rgba(158,231,197,.12);
+}
+.card-capture .id-card-main{
+  height:calc(100% - 126px);
+  min-height:0;
+  padding:16px 20px 13px!important;
+  display:grid!important;
+  grid-template-columns:170px minmax(0,1fr)!important;
+  gap:18px!important;
+  align-items:stretch!important;
+  background:transparent!important;
+}
+.card-capture .id-photo{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  border:1px solid #d9e0e9!important;
+  border-radius:15px!important;
+  padding:9px!important;
+  background:rgba(255,255,255,.84)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+}
+.card-capture .id-photo:before{
+  content:"MEMBER";
+  position:absolute;
+  top:8px;
+  left:10px;
+  color:#b5becb;
+  font:700 6px "Inter",Arial,sans-serif;
+  letter-spacing:.16em;
+}
+.card-capture .id-photo-image{
+  width:126px!important;
+  height:158px!important;
+  flex:0 0 158px!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#eef2f6!important;
+  border:1px solid #d8dee8!important;
+  margin:0 auto 8px!important;
+  box-shadow:0 7px 20px rgba(23,32,51,.10)!important;
+}
+.card-capture .id-profile-image{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  object-fit:cover!important;
+  object-position:50% 38%!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.card-capture .id-initials{
+  width:68px!important;
+  height:68px!important;
+  border-radius:50%!important;
+  margin:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#fff1f4!important;
+  color:#b4233f!important;
+  border:1px solid #ffd0da!important;
+  font-size:23px!important;
+  font-weight:800!important;
+}
+.card-capture .id-photo strong{
+  display:block!important;
+  max-width:145px!important;
+  color:#172033!important;
+  font-size:13px!important;
+  line-height:1.55!important;
+  font-weight:800!important;
+  overflow-wrap:anywhere;
+}
+.card-capture .id-photo span{
+  display:block!important;
+  margin-top:2px!important;
+  color:#7d8796!important;
+  font-size:7.5px!important;
+  line-height:1.6!important;
+}
+.card-capture .id-meta{
+  min-width:0;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(0,1fr)!important;
+  gap:7px!important;
+  align-content:stretch!important;
+}
+.card-capture .id-meta>div{
+  min-width:0!important;
+  min-height:0!important;
+  border:1px solid #e0e5ec!important;
+  border-radius:10px!important;
+  padding:7px 9px!important;
+  background:rgba(255,255,255,.88)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+.card-capture .id-meta span{
+  display:block!important;
+  color:#7b8495!important;
+  font-size:7px!important;
+  line-height:1.35!important;
+  margin-bottom:2px!important;
+  font-weight:800!important;
+}
+.card-capture .id-meta strong{
+  display:block!important;
+  color:#172033!important;
+  font-size:8.6px!important;
+  line-height:1.55!important;
+  font-weight:800!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+}
+.card-capture .id-meta>div:first-child{
+  border-color:#e8a9b7!important;
+  background:#fff6f8!important;
+}
+.card-capture .id-meta>div:first-child strong{
+  color:#a51f3e!important;
+  font-size:12px!important;
+  letter-spacing:.05em!important;
+}
+.card-capture .id-meta-supervisor{
+  border-color:#edc5cf!important;
+  background:#fff8fa!important;
+}
+.card-capture .id-meta-supervisor strong{
+  color:#9d2440!important;
+  font-size:9.2px!important;
+}
+.card-capture .id-meta-status{
+  background:#f2faf6!important;
+  border-color:#c5e8d8!important;
+}
+.card-capture .id-meta-status strong{color:#087653!important}
+.card-capture .id-meta-wide{grid-column:1/-1!important}
+.card-capture .id-card-bottom{
+  min-height:34px!important;
+  padding:8px 20px!important;
+  border-top:1px solid #e3e8ee!important;
+  background:#f6f8fa!important;
+  color:#667085!important;
+  font-size:7px!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:10px!important;
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+.card-capture .id-card-bottom strong{
+  color:#243047!important;
+  font-family:"Inter","Tajawal",Arial,sans-serif!important;
+  letter-spacing:.04em!important;
+}
+.id-card-full-record{display:none!important}
+
+.confirmation-details{margin-top:18px}
+.confirmation-details .confirm-section{
+  background:#fff;
+  border:1px solid #dfe5ed;
+  border-radius:16px;
+  box-shadow:0 8px 28px rgba(23,32,51,.045);
+  margin-bottom:14px;
+}
+.confirm-thanks{
+  background:linear-gradient(135deg,#172033,#293551);
+  border-radius:16px;
+  color:#fff;
+  padding:22px 24px;
+  box-shadow:0 12px 30px rgba(23,32,51,.10);
+}
+.confirm-thanks h3{color:#fff!important}
+.confirm-thanks p{color:#dbe3f2!important}
+.confirm-actions{
+  background:#fff;
+  border:1px solid #dfe5ed;
+  border-radius:16px;
+  padding:18px!important;
+  box-shadow:0 8px 28px rgba(23,32,51,.04);
+}
+.download-status{
+  width:100%;
+  text-align:center;
+  color:#7b8494;
+  font-size:9px;
+  line-height:1.8;
+}
+.download-btn{min-width:190px!important}
+
+@media(max-width:760px){
+  .card-capture .id-card{
+    width:min(620px,100%);
+    aspect-ratio:auto;
+  }
+  .card-capture .id-card-top{min-height:82px!important;padding:14px 16px!important}
+  .card-capture .id-card-number strong{font-size:16px!important}
+  .card-capture .id-card-main{
+    height:auto!important;
+    padding:13px 15px 12px!important;
+    grid-template-columns:118px minmax(0,1fr)!important;
+    gap:12px!important;
+  }
+  .card-capture .id-photo-image{
+    width:92px!important;
+    height:115px!important;
+    flex-basis:115px!important;
+  }
+  .card-capture .id-meta{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:minmax(58px,auto)!important}
+  .card-capture .id-card-bottom{min-height:31px!important;padding:7px 15px!important}
+}
+@media(max-width:520px){
+  .card-capture{padding:4px 0!important}
+  .card-capture .id-card-top{flex-direction:column;align-items:stretch!important;gap:7px!important}
+  .card-capture .id-card-number{text-align:right}
+  .card-capture .id-card-main{grid-template-columns:1fr!important}
+  .card-capture .id-photo{padding:10px!important}
+  .card-capture .id-photo-image{width:112px!important;height:140px!important;flex-basis:140px!important}
+  .card-capture .id-meta{grid-template-columns:1fr 1fr!important}
+  .card-capture .id-card-bottom{align-items:flex-start!important;flex-direction:column!important}
 }
 @media print{
-  @page{size:A4 landscape;margin:12mm}
+  @page{size:85.6mm 54mm;margin:0}
+  html,body{
+    width:85.6mm!important;
+    min-height:54mm!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+  }
   header,.hero,.footer,.confirm-actions,.confirmation-note,.confirmation-details{display:none!important}
-  body{background:#fff!important}
-  .wrap{width:100%!important}
-  .confirmation{padding:0!important}
-  .card-capture{display:block!important;padding:0!important}
-  .card-capture .id-card{width:100%!important;max-width:260mm!important;margin:0 auto!important;box-shadow:none!important;border:1px solid #d9dee7!important}
-  .card-capture .id-card-top,.card-capture .id-card-main,.card-capture .id-card-bottom{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .wrap{width:85.6mm!important;max-width:none!important;margin:0!important}
+  .confirmation{padding:0!important;margin:0!important}
+  .card-capture{display:block!important;width:85.6mm!important;padding:0!important;margin:0!important}
+  .card-capture .id-card{
+    width:85.6mm!important;
+    height:54mm!important;
+    aspect-ratio:auto!important;
+    margin:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    border:0.25mm solid #cdd5df!important;
+  }
+  .card-capture .id-card-top,.card-capture .id-card-main,.card-capture .id-card-bottom{
+    print-color-adjust:exact!important;
+    -webkit-print-color-adjust:exact!important;
+  }
 }
 </style>
 </head>
@@ -1507,36 +1865,19 @@ textarea{min-height:108px}
     button.disabled=true;
     button.textContent="جارٍ تجهيز PDF...";
     try{
-      await document.fonts?.ready;
       const canvas=await makeCardCanvas();
       const jspdfGlobal=window.jspdf;
       if(!jspdfGlobal?.jsPDF)throw new Error("تعذر تحميل أداة PDF. أعد تحميل الصفحة وحاول مرة أخرى.");
       const {jsPDF}=jspdfGlobal;
-      const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
-      const margin=8;
-      const pageWidth=pdf.internal.pageSize.getWidth();
-      const pageHeight=pdf.internal.pageSize.getHeight();
-      const renderWidth=pageWidth-margin*2;
-      const pixelsPerMm=canvas.width/renderWidth;
-      const pageSliceHeight=Math.max(1,Math.floor((pageHeight-margin*2)*pixelsPerMm));
-      let offset=0;
-      let pageIndex=0;
-      while(offset<canvas.height){
-        const sliceHeight=Math.min(pageSliceHeight,canvas.height-offset);
-        const slice=document.createElement("canvas");
-        slice.width=canvas.width;
-        slice.height=sliceHeight;
-        const context=slice.getContext("2d");
-        if(!context)throw new Error("تعذر تجهيز صفحات PDF.");
-        context.drawImage(canvas,0,offset,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
-        const renderHeight=sliceHeight/pixelsPerMm;
-        if(pageIndex>0)pdf.addPage();
-        pdf.setFillColor(255,255,255);
-        pdf.rect(0,0,pageWidth,pageHeight,"F");
-        pdf.addImage(slice.toDataURL("image/png"),"PNG",margin,margin,renderWidth,renderHeight,"FAST");
-        offset+=sliceHeight;
-        pageIndex+=1;
-      }
+      const cardWidthMm=85.6;
+      const cardHeightMm=54;
+      const pdf=new jsPDF({
+        orientation:"landscape",
+        unit:"mm",
+        format:[cardWidthMm,cardHeightMm],
+        compress:true
+      });
+      pdf.addImage(canvas.toDataURL("image/png"),"PNG",0,0,cardWidthMm,cardHeightMm,"FAST");
       pdf.save(downloadName(document.querySelector("[data-card-name]")?.textContent,"pdf"));
     }catch(e){
       setStatus("err",e.message||"تعذر تحميل البطاقة بصيغة PDF.");
@@ -1549,86 +1890,194 @@ textarea{min-height:108px}
   function renderConfirmation(data,submissionId,membershipNumber){
     const values=data||{};
     const fields=Array.isArray(schema?.fields)?schema.fields:[];
-    const unitIds=Array.isArray(values.current_units)?values.current_units:[];
+    const unitIds=Array.isArray(values.current_units)?values.current_units.map(String):[];
+    const unitsData=values.current_unit_details&&typeof values.current_unit_details==="object"?values.current_unit_details:{};
+
+    const hiddenFieldKeys=new Set([
+      "current_units","current_unit_details","senior_management_position",
+      "language_assignments","language","language_level","language_other"
+    ]);
 
     const items=fields
       .filter(f=>f.is_active!==false)
-      .filter(f=>!["current_units","current_unit_details","senior_management_position","language_assignments","language","language_level","language_other"].includes(f.field_key))
+      .filter(f=>!hiddenFieldKeys.has(f.field_key))
       .map(f=>{
         const value=values[f.field_key];
-        const empty=Array.isArray(value)?value.length===0:value===undefined||value===null||String(value).trim()==="";
+        const empty=Array.isArray(value)
+          ?value.length===0
+          :value===undefined||value===null||String(value).trim()==="";
         if(empty)return null;
         return [f.label_ar,fieldDisplayValue(f,value)];
       })
       .filter(Boolean);
 
-    const unitsData=values.current_unit_details&&typeof values.current_unit_details==="object"?values.current_unit_details:{};
-    // Initialize these collections before summary counters consume them.
-    const certificateItems=Array.isArray(values.certificate_history)?values.certificate_history.filter(item=>item&&((item.type||"")||(item.title||"")||(item.issuing_organization||"")||(item.issued_date||""))):[];
-    const languageItems=Array.isArray(values.language_assignments)?values.language_assignments.filter(item=>item&&((item.language||"")||(item.language_other||"")||(item.level||""))):[];
+    const certificateItems=Array.isArray(values.certificate_history)
+      ?values.certificate_history.filter(item=>item&&(
+        item.type||item.title||item.issuing_organization||item.issued_date||
+        item.issuing_unit_id||item.reference_code||item.notes
+      ))
+      :[];
+
+    const languageItems=Array.isArray(values.language_assignments)
+      ?values.language_assignments.filter(item=>item&&(
+        item.language||item.language_other||item.level
+      ))
+      :[];
+
     const positionField=fields.find(f=>f.field_key==="senior_management_position");
-    const supervisorAdminEntry=isSupervisorForm()?unitIds.map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}]).find(([u])=>String(u?.unit_type)==="other"):null;
-    const supervisorPositionValue=supervisorAdminEntry?.[1]?.senior_management_position||"";
-    const supervisorPosition=(positionField?.options||[]).find(o=>String(o.value)===String(supervisorPositionValue));
-    const firstOperationalUnit=unitIds
-      .map(id=>[units.find(x=>String(x.id)===String(id)),unitsData[id]||{}])
-      .find(([u])=>u&&String(u.unit_type)!=="other");
-    const fallbackSupervisorRole=firstOperationalUnit?.[1]?.role||"";
-    const supervisorPositionText=supervisorPosition?.label_ar||supervisorPosition?.label_en||supervisorPositionValue||roleLabels[fallbackSupervisorRole]||"عضوية إشرافية";
-    const primaryUnitName=firstOperationalUnit?.[0]?.name_ar||firstOperationalUnit?.[0]?.name_en||"—";
-    const primaryUnitRole=isSupervisorForm()?(
-      roleLabels[firstOperationalUnit?.[1]?.role]||firstOperationalUnit?.[1]?.role||"—"
-    ):"عضو / متطوع";
-    const roleSummary=unitIds.map(id=>{
-      const u=units.find(x=>String(x.id)===String(id));
-      const d=unitsData[id]||{};
-      if(!u)return "";
-      const unitName=u.name_ar||u.name_en||"الوحدة";
-      const isAdmin=String(u.unit_type)==="other";
-      if(isAdmin){
-        const opt=(positionField?.options||[]).find(o=>String(o.value)===String(d.senior_management_position));
-        return unitName+" — "+(opt?.label_ar||opt?.label_en||d.senior_management_position||"منصب إداري");
-      }
-      const role=roleLabels[d.role]||d.role||"عضو / متطوع";
-      return unitName+" — "+role;
-    }).filter(Boolean).join("، ")||"—";
-    const qualificationFieldValue=values.academic_qualification||values.student_college||values.resident_degree||values.specialist_degree||"";
-    const qualificationText=qualificationFieldValue?fieldDisplayValue(
-      values.academic_qualification?"academic_qualification":
-      values.student_college?"student_college":
-      values.resident_degree?"resident_degree":"specialist_degree",
-      qualificationFieldValue
-    ):fieldDisplayValue("academic_status",values.academic_status||"—");
-    const universityValue=values.graduation_university||values.student_university||values.university||"";
-    const universityText=universityValue?String(universityValue):"—";
-    const professionText=fieldDisplayValue("profession",values.profession||"—");
-    const specialtyText=fieldDisplayValue("specialty",values.specialty||"—");
-    const locationText=[values.city,values.governorate].filter(Boolean).join(" — ")||"—";
-    const totalHours=values.reported_total_volunteer_hours!==undefined&&values.reported_total_volunteer_hours!==""?String(values.reported_total_volunteer_hours):"—";
-    const weeklyHours=values.volunteer_commitment_hours!==undefined&&values.volunteer_commitment_hours!==""?String(values.volunteer_commitment_hours):"—";
+    const roleTextByValue=Object.fromEntries(roleOptions.map(x=>[x.value,x.label]));
+
+    const unitRows=unitIds.map(id=>{
+      const u=units.find(x=>String(x.id)===id);
+      if(!u)return null;
+      return {u,d:unitsData[id]||{}};
+    }).filter(Boolean);
+
+    const adminRows=unitRows.filter(x=>String(x.u.unit_type)==="other");
+    const operationalRows=unitRows.filter(x=>String(x.u.unit_type)!=="other");
+
+    const positionTextFor=d=>{
+      const value=String(d?.senior_management_position||"").trim();
+      const hit=(positionField?.options||[]).find(o=>String(o.value)===value);
+      return hit?.label_ar||hit?.label_en||value||"منصب إداري";
+    };
+
+    const supervisorPositionText=adminRows.length
+      ?positionTextFor(adminRows[0].d)
+      :"عضوية إشرافية";
+
+    const supervisorStartDate=adminRows
+      .map(x=>String(x.d.role_started_on||"").trim())
+      .find(Boolean)||String(values.supervisor_start_date||"").trim();
+
+    const operationalSummary=operationalRows.map(({u,d})=>{
+      const name=u.name_ar||u.name_en||"الوحدة";
+      const role=roleTextByValue[d.role]||d.role||"متطوع / عضو";
+      return name+" — "+role;
+    });
+
+    const managementSummary=adminRows.map(({u,d})=>{
+      const name=u.name_ar||u.name_en||"الإدارة العامة";
+      return name+" — "+positionTextFor(d);
+    });
+
+    const roleSummary=[...managementSummary,...operationalSummary].filter(Boolean).join("، ")||"—";
+    const unitSummary=unitRows.map(({u})=>u.name_ar||u.name_en).filter(Boolean).join("، ")||"—";
+
+    const trackLabel=fieldDisplayValue("academic_status",values.academic_status||"");
+    const qualificationPairs=[
+      ["academic_qualification",values.academic_qualification],
+      ["student_college",values.student_college],
+      ["resident_degree",values.resident_degree],
+      ["specialist_degree",values.specialist_degree]
+    ];
+    const qualificationEntry=qualificationPairs.find(([,v])=>String(v||"").trim()!=="");
+    const qualificationText=qualificationEntry
+      ?fieldDisplayValue(qualificationEntry[0],qualificationEntry[1])
+      :(trackLabel||"—");
+
+    const universityText=String(
+      values.graduation_university||values.student_university||values.university||""
+    ).trim()||"—";
+
+    const professionValue=String(values.current_occupation||values.profession||"").trim();
+    const specialtyValue=String(
+      values.residency_specialty||
+      values.specialist_specialty||
+      values.specialty||
+      values.consultation_specialty||
+      values.consultation_specialty_other||""
+    ).trim();
+
+    const professionText=professionValue
+      ?fieldDisplayValue(values.current_occupation?"current_occupation":"profession",professionValue)
+      :"—";
+
+    const specialtyKey=values.residency_specialty?"residency_specialty"
+      :values.specialist_specialty?"specialist_specialty"
+      :values.specialty?"specialty"
+      :values.consultation_specialty?"consultation_specialty"
+      :"consultation_specialty_other";
+
+    const specialtyText=specialtyValue
+      ?fieldDisplayValue(specialtyKey,specialtyValue)
+      :"—";
+
+    const professionAndSpecialty=[professionText,specialtyText]
+      .filter(v=>v&&v!=="—").join(" — ")||"—";
+
+    const educationSummary=[qualificationText,universityText]
+      .filter(v=>v&&v!=="—").join(" · ")||"—";
+
+    const locationText=[
+      values.city,
+      values.governorate,
+      values.country==="سوريا"?"":values.country_other||values.country
+    ].filter(Boolean).join(" — ")||"—";
+
+    const totalHours=values.reported_total_volunteer_hours!==undefined&&values.reported_total_volunteer_hours!==""
+      ?String(values.reported_total_volunteer_hours):"—";
+
+    const weeklyHours=values.volunteer_commitment_hours!==undefined&&values.volunteer_commitment_hours!==""
+      ?String(values.volunteer_commitment_hours):"—";
+
     const certificateCount=certificateItems.length;
     const languageCount=languageItems.length;
-    const membershipStatusText="فعّالة";
-    const unitCards=unitIds.map(id=>{
-      const u=units.find(x=>String(x.id)===String(id));
-      const d=unitsData[id]||{};
-      const isAdmin=String(u?.unit_type)==="other";
-      const role=isSupervisorForm()?(roleLabels[d.role]||d.role||"—"):"عضو / متطوع";
-      const positionOption=(positionField?.options||[]).find(o=>String(o.value)===String(d.senior_management_position));
-      const position=positionOption?.label_ar||positionOption?.label_en||d.senior_management_position;
-      const roleLine=isSupervisorForm()
-        ? (isAdmin
-          ? "المنصب: "+(position||"—")
-          : "الدور: "+role)
-        : "الصفة: عضو / متطوع";
-      const startedLine=isSupervisorForm()
-        ? (isAdmin?"بدء المنصب: ":"بدء الدور: ")+(d.role_started_on||"—")
-        : "تاريخ الانضمام: "+(d.joined_on||"—");
-      const continuationLine=isSupervisorForm()
-        ? (d.role_continuing?"الدور مستمر":"انتهى الدور"+(d.role_left_on?" في "+d.role_left_on:""))
-        : (d.continuing?"الانتساب مستمر":"انتهى الانتساب"+(d.left_on?" في "+d.left_on:""));
-      const note=d.notes?'<div class="help" style="margin-top:7px">'+esc(d.notes)+'</div>':"";
-      return'<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u?.name_ar||u?.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u?.unit_type))+'</span></div><div class="confirm-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">'+
+
+    const languageField=fields.find(f=>f.field_key==="language");
+    const levelField=fields.find(f=>f.field_key==="language_level");
+
+    const languageLabel=value=>{
+      const hit=(Array.isArray(languageField?.options)?languageField.options:[])
+        .find(o=>String(o.value)===String(value));
+      return hit?.label_ar||hit?.label_en||value;
+    };
+
+    const levelLabel=value=>{
+      const hit=(Array.isArray(levelField?.options)?levelField.options:[])
+        .find(o=>String(o.value)===String(value));
+      return hit?.label_ar||hit?.label_en||value;
+    };
+
+    const languageHtml=languageItems.length
+      ?languageItems.map((item,index)=>
+        '<div class="confirm-item"><span>اللغة '+(index+1)+'</span><strong>'+
+        esc(item.language==="other"?(item.language_other||"أخرى"):languageLabel(item.language))+
+        (item.level?" — "+esc(levelLabel(item.level)):"")+
+        '</strong></div>'
+      ).join("")
+      :"";
+
+    const certificateHtml=certificateItems.length
+      ?certificateItems.map((item,index)=>{
+        const certificateUnitId=String(item?.issuing_unit_id||"").trim();
+        const certificateUnit=units.find(u=>String(u.id)===certificateUnitId);
+        const certificateUnitName=certificateUnit?.name_ar||certificateUnit?.name_en||"غير مرتبطة بوحدة";
+        return '<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+
+          esc(item.title||"—")+" — "+esc(item.issuing_organization||"—")+" — "+
+          esc(item.issued_date||"—")+" — الوحدة: "+esc(certificateUnitName)+
+          (item.reference_code?" — المرجع: "+esc(item.reference_code):"")+
+          '</strong></div>';
+      }).join("")
+      :'<div class="confirm-item"><span>الشهادات والتكريمات</span><strong>لم تُسجّل شهادات سابقة.</strong></div>';
+
+    const unitCards=unitRows.map(({u,d})=>{
+      const isAdmin=String(u.unit_type)==="other";
+      const role=roleTextByValue[d.role]||d.role||"عضو / متطوع";
+      const position=positionTextFor(d);
+      const roleLine=isAdmin?"المنصب: "+position:"الدور: "+role;
+      const startedLine=(isAdmin?"بدء المنصب: ":"بدء الدور: ")+(d.role_started_on||"—");
+      const continuationLine=d.role_continuing
+        ?"الدور مستمر"
+        :"انتهى الدور"+(d.role_left_on?" في "+d.role_left_on:"");
+      const note=d.notes
+        ?'<div class="help" style="margin-top:7px">'+esc(d.notes)+'</div>'
+        :"";
+
+      return '<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+
+        esc(u.name_ar||u.name_en||"الوحدة")+
+        '</strong><span>'+esc(typeLabel(u.unit_type))+'</span></div>'+
+        '<div class="confirm-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">'+
         '<div class="confirm-item"><span>الصفة / الدور</span><strong>'+esc(roleLine)+'</strong></div>'+
         '<div class="confirm-item"><span>تاريخ البداية</span><strong>'+esc(startedLine)+'</strong></div>'+
         '<div class="confirm-item"><span>الحالة</span><strong>'+esc(continuationLine)+'</strong></div>'+
@@ -1637,80 +2086,157 @@ textarea{min-height:108px}
         '</div>'+note+'</div>';
     }).join("");
 
-    const certificateHtml=certificateItems.length
-      ? certificateItems.map((item,index)=>{
-          const certificateUnitId=String(item?.issuing_unit_id||"").trim();
-          const certificateUnit=units.find(u=>String(u.id)===certificateUnitId);
-          const certificateUnitName=certificateUnit?.name_ar||certificateUnit?.name_en||"غير مرتبطة بوحدة";
-          return '<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+esc(item.title||"—")+' — '+esc(item.issuing_organization||"—")+' — '+esc(item.issued_date||"—")+' — الوحدة: '+esc(certificateUnitName)+'</strong></div>';
-        }).join("")
-      : '<div class="confirm-item"><span>الشهادات والتكريمات</span><strong>لم تُسجّل شهادات سابقة.</strong></div>';
-
-    const languageField=fields.find(f=>f.field_key==="language");
-    const levelField=fields.find(f=>f.field_key==="language_level");
-    const languageLabel=value=>{
-      const hit=(Array.isArray(languageField?.options)?languageField.options:[]).find(o=>String(o.value)===String(value));
-      return hit?.label_ar||hit?.label_en||value;
-    };
-    const levelLabel=value=>{
-      const hit=(Array.isArray(levelField?.options)?levelField.options:[]).find(o=>String(o.value)===String(value));
-      return hit?.label_ar||hit?.label_en||value;
-    };
-    const languageHtml=languageItems.length
-      ? languageItems.map((item,index)=>'<div class="confirm-item"><span>اللغة '+(index+1)+'</span><strong>'+esc(item.language==="other"?(item.language_other||"أخرى"):languageLabel(item.language))+(item.level?" — "+esc(levelLabel(item.level)):"")+'</strong></div>').join("")
-      : "";
     const baseName=String(values.full_name||"عضو ميدلايف").trim().replace(/\s+/g," ");
     const fatherName=String(values.father_name||"").trim().replace(/\s+/g," ");
     const baseParts=baseName.split(/\s+/).filter(Boolean);
-    const name=fatherName && !baseParts.includes(fatherName)
-      ? [baseParts[0],fatherName,...baseParts.slice(1)].filter(Boolean).join(" ")
-      : baseName;
+    const cardName=fatherName&&!baseParts.includes(fatherName)
+      ?[baseParts[0],fatherName,...baseParts.slice(1)].filter(Boolean).join(" ")
+      :baseName;
+
     const profileImageUrl=normalizeProfileImageUrl(values.profile_image_url);
-    const itemsHtml=items.map(([k,v])=>'<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>').join("")+languageHtml;
-    confirmation.innerHTML='<div class="card-capture" data-card-capture>'+
-      '<div class="id-card">'+
-      '<div class="id-card-top"><div class="id-brand"><img src="logo.PNG" alt="MedLife"><div><strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong><span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span></div></div><div class="id-status">عضوية مسجّلة</div></div>'+
-      '<div class="id-card-main"><div class="id-photo"><div class="id-photo-image">'+(profileImageUrl?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لمستخدم ميدلايف" crossorigin="anonymous">':'<div class="id-initials">'+esc(initials(name))+'</div>')+'</div><strong data-card-name>'+esc(name)+'</strong><span>عضو في ميدلايف · بطاقة إلكترونية</span></div><div class="id-meta">'+
-      '<div><span>رقم العضوية</span><strong>'+esc(membershipNumber||"—")+'</strong></div>'+
-      '<div><span>نوع العضوية</span><strong>'+esc(isSupervisorForm()?"عضوية مشرف":"عضوية متطوع")+'</strong></div>'+
-      (isSupervisorForm()?'<div class="id-meta-supervisor"><span>المنصب / الدور</span><strong>'+esc(supervisorPositionText)+'</strong></div>': '<div><span>الصفة</span><strong>عضو / متطوع</strong></div>')+
-      '<div><span>القسم / الفريق</span><strong>'+esc(primaryUnitName)+'</strong></div>'+
-      (isSupervisorForm()?'<div><span>الدور داخل الوحدة</span><strong>'+esc(primaryUnitRole)+'</strong></div>':"")+
-      '<div class="id-meta-status"><span>حالة السجل</span><strong>'+esc(membershipStatusText)+'</strong></div>'+
-      '<div><span>تاريخ الانضمام</span><strong>'+esc(values.join_date?fieldDisplayValue("join_date",values.join_date):"—")+'</strong></div>'+
-      '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
-      '<div><span>المحافظة / المدينة</span><strong>'+esc(locationText)+'</strong></div>'+
-      '<div><span>إجمالي ساعات التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
-      '<div><span>الساعات الأسبوعية الحالية</span><strong>'+esc(weeklyHours)+(weeklyHours!=="—"?" ساعة":"")+'</strong></div>'+
-      '<div class="id-meta-wide"><span>الأدوار والوحدات</span><strong>'+esc(roleSummary)+'</strong></div>'+
-      '<div><span>المؤهل العلمي</span><strong>'+esc(qualificationText||"—")+'</strong></div>'+
-      '<div><span>الجامعة</span><strong>'+esc(universityText)+'</strong></div>'+
-      '<div><span>المهنة / الاختصاص</span><strong>'+esc([professionText,specialtyText].filter(v=>v&&v!=="—").join(" — ")||"—")+'</strong></div>'+
-      '<div><span>اللغات المسجلة</span><strong>'+esc(String(languageCount))+'</strong></div>'+
-      '<div><span>الشهادات والتكريمات</span><strong>'+esc(String(certificateCount))+'</strong></div>'+
-      '</div></div>'+
-      '<div class="id-card-bottom"><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span><span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span></div>'+
-      '<section class="confirm-section id-card-full-record">'+
-        '<h3>سجل العضوية الكامل</h3><p>جميع الإجابات التي تم إرسالها في هذا النموذج، مع التفاصيل التنظيمية المرتبطة بها.</p>'+
-        '<div class="confirm-grid">'+itemsHtml+'</div>'+
-        '<div style="margin-top:12px"><h3 style="font-size:13px;margin:0 0 8px">الشهادات والتكريمات</h3><div class="confirm-grid">'+certificateHtml+'</div></div>'+
-        '<div style="margin-top:12px"><h3 style="font-size:13px;margin:0 0 8px">اللغات</h3><div class="confirm-grid">'+(languageHtml||'<div class="confirm-item"><strong>لا توجد لغات مسجلة.</strong></div>')+'</div></div>'+
-        '<div style="margin-top:12px"><h3 style="font-size:13px;margin:0 0 8px">الوحدات والأدوار</h3><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></div>'+
-      '</section>'+
-      '</div></div>'+
+
+    const detailItems=[
+      ["الاسم الكامل",cardName],
+      ["اسم الأب",values.father_name],
+      ["اسم الأم",values.mother_name],
+      ["الرقم الوطني",values.national_id],
+      ["البلد",values.country==="أخرى"?(values.country_other||"أخرى"):values.country],
+      ["المحافظة",values.governorate],
+      ["الجنسية",values.nationality==="أخرى"?(values.nationality_other||"أخرى"):values.nationality],
+      ["المدينة",values.city],
+      ["العنوان الكامل",values.full_address],
+      ["تاريخ الميلاد",values.date_of_birth],
+      ["الجنس",fieldDisplayValue(fields.find(f=>f.field_key==="gender")||{},values.gender||"")],
+      ["البريد الإلكتروني",values.email],
+      ["رقم الهاتف",values.phone],
+      ["اسم شخص الطوارئ",values.emergency_contact_name],
+      ["صلة شخص الطوارئ",values.emergency_contact_relationship],
+      ["هاتف الطوارئ",values.emergency_contact_phone],
+      ["الوضع الأكاديمي / المهني",trackLabel],
+      ["المؤهل العلمي",qualificationText],
+      ["الجامعة",universityText],
+      ["المهنة",professionText],
+      ["الاختصاص",specialtyText],
+      ["مكان العمل",values.residency_hospital||values.current_workplace||values.workplace],
+      ["سنة التخرج",values.graduation_year],
+      ["سنة الإقامة الحالية",values.residency_year],
+      ["بدء الإقامة / الاختصاص",values.residency_start_date],
+      ["تاريخ أول انضمام إلى ميدلايف",values.join_date],
+      ["تاريخ بدء الإشراف",supervisorStartDate],
+      ["إجمالي ساعات التطوع",values.reported_total_volunteer_hours],
+      ["الساعات الأسبوعية الحالية",values.volunteer_commitment_hours],
+      ["نمط التفرغ للتطوع",fieldDisplayValue(fields.find(f=>f.field_key==="availability")||{},values.availability||"")],
+      ["المواهب والمهارات",Array.isArray(values.talent_areas)?values.talent_areas.join("، "):values.talent_areas],
+      ["ما ترغب بتطويره أو القيام به",Array.isArray(values.desired_contributions)?values.desired_contributions.join("، "):values.desired_contributions],
+      ["اهتمامات التطوير",Array.isArray(values.development_interests)?values.development_interests.join("، "):values.development_interests]
+    ];
+
+    const detailItemsHtml=detailItems.map(([label,value])=>{
+      const empty=Array.isArray(value)
+        ?value.length===0
+        :value===undefined||value===null||String(value).trim()==="";
+      return empty?null:
+        '<div class="confirm-item"><span>'+esc(label)+'</span><strong>'+
+        esc(String(value))+
+        '</strong></div>';
+    }).filter(Boolean).join("");
+
+    const profileRecordHtml=items.map(([k,v])=>
+      '<div class="confirm-item"><span>'+esc(k)+'</span><strong>'+esc(v||"—")+'</strong></div>'
+    ).join("");
+
+    const cardMeta=
+      '<div class="id-card-number">'+
+        '<span>MEMBERSHIP NUMBER</span>'+
+        '<strong>'+esc(membershipNumber||"—")+'</strong>'+
+        '<div class="id-status">عضوية فعّالة</div>'+
+      '</div>';
+
+    confirmation.innerHTML=
+      '<div class="card-capture" data-card-capture>'+
+        '<div class="id-card">'+
+          '<div class="id-card-top">'+
+            '<div class="id-brand">'+
+              '<img src="logo.PNG" alt="MedLife">'+
+              '<div>'+
+                '<strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong>'+
+                '<span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span>'+
+              '</div>'+
+            '</div>'+
+            cardMeta+
+          '</div>'+
+          '<div class="id-card-main">'+
+            '<div class="id-photo">'+
+              '<div class="id-photo-image">'+
+                (profileImageUrl
+                  ?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous">'
+                  :'<div class="id-initials">'+esc(initials(cardName))+'</div>')+
+              '</div>'+
+              '<strong data-card-name>'+esc(cardName)+'</strong>'+
+              '<span>بطاقة عضوية رسمية</span>'+
+            '</div>'+
+            '<div class="id-meta">'+
+              (isSupervisorForm()
+                ?'<div class="id-meta-supervisor"><span>المنصب / الدور</span><strong>'+esc(supervisorPositionText)+'</strong></div>'
+                :'<div><span>الصفة</span><strong>عضو / متطوع</strong></div>')+
+              '<div class="id-meta-wide"><span>الوحدات والأدوار</span><strong>'+esc(roleSummary)+'</strong></div>'+
+              '<div><span>المؤهل والجامعة</span><strong>'+esc(educationSummary)+'</strong></div>'+
+              '<div><span>المهنة والاختصاص</span><strong>'+esc(professionAndSpecialty)+'</strong></div>'+
+              '<div><span>المحافظة / المدينة</span><strong>'+esc(locationText)+'</strong></div>'+
+              '<div><span>تاريخ الانضمام</span><strong>'+esc(values.join_date||"—")+'</strong></div>'+
+              (supervisorStartDate?'<div><span>بداية الإشراف</span><strong>'+esc(supervisorStartDate)+'</strong></div>':"")+
+              '<div class="id-meta-status"><span>حالة العضوية</span><strong>سارية وفعّالة</strong></div>'+
+              '<div><span>إجمالي التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
+              '<div><span>الالتزام الأسبوعي</span><strong>'+esc(weeklyHours)+(weeklyHours!=="—"?" ساعة":"")+'</strong></div>'+
+              '<div><span>اللغات</span><strong>'+esc(String(languageCount))+'</strong></div>'+
+              '<div><span>الشهادات</span><strong>'+esc(String(certificateCount))+'</strong></div>'+
+              '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="id-card-bottom">'+
+            '<span>MedLife Medical Voluntary Charity Foundation · www.medlifesy.org</span>'+
+            '<span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
       '<div class="confirmation-details">'+
-      '<div class="confirmation-note">تم حفظ بياناتك بنجاح. أُضيفت البيانات إلى السجل المركزي لميدلايف، وتم تثبيت رقم العضوية ضمن سجل العضو.</div>'+
-      '<section class="confirm-section"><h3>كامل البيانات التي تم تسجيلها</h3><p>فيما يلي المعلومات التي أرسلتها في نموذج التحديث.</p><div class="confirm-grid">'+itemsHtml+'</div></section>'+
-      '<section class="confirm-section"><h3>الشهادات والتكريمات السابقة</h3><p>الشهادات التي تم تسجيلها في هذا النموذج.</p><div class="confirm-grid">'+certificateHtml+'</div></section>'+
-      '<section class="confirm-section"><h3>العضوية داخل ميدلايف</h3><p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p><div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div></section>'+
-      '<div class="confirm-thanks"><h3>شكراً لتحديث بياناتك ❤️</h3><p>تم حفظ بيانات عضويتك بنجاح وتطبيقها مباشرة على السجل المركزي، مع الاحتفاظ بسجل العضوية والتحديث.</p></div>'+
+        '<div class="confirmation-note">تم حفظ بياناتك بنجاح، وتطبيق البيانات على السجل المركزي، وإصدار رقم العضوية الخاص بك.</div>'+
+        '<section class="confirm-section">'+
+          '<h3>بيانات العضوية الأساسية</h3>'+
+          '<p>هذه هي المعلومات الأساسية المعتمدة لملف العضو وبطاقة العضوية.</p>'+
+          '<div class="confirm-grid">'+detailItemsHtml+'</div>'+
+        '</section>'+
+        '<section class="confirm-section">'+
+          '<h3>كامل البيانات التي تم تسجيلها</h3>'+
+          '<p>جميع الإجابات المرسلة في نموذج التحديث.</p>'+
+          '<div class="confirm-grid">'+profileRecordHtml+'</div>'+
+        '</section>'+
+        '<section class="confirm-section">'+
+          '<h3>اللغات</h3>'+
+          '<p>اللغات ومستوى الإتقان المسجل لكل لغة.</p>'+
+          '<div class="confirm-grid">'+(languageHtml||'<div class="confirm-item"><strong>لا توجد لغات مسجلة.</strong></div>')+'</div>'+
+        '</section>'+
+        '<section class="confirm-section">'+
+          '<h3>الشهادات والتكريمات السابقة</h3>'+
+          '<p>الشهادات التي تم تسجيلها في هذا النموذج.</p>'+
+          '<div class="confirm-grid">'+certificateHtml+'</div>'+
+        '</section>'+
+        '<section class="confirm-section">'+
+          '<h3>العضوية داخل ميدلايف</h3>'+
+          '<p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p>'+
+          '<div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div>'+
+        '</section>'+
+        '<div class="confirm-thanks">'+
+          '<h3>أهلًا بك في ميدلايف ❤️</h3>'+
+          '<p>تم تثبيت عضويتك وتحديث سجلك المركزي بنجاح. بطاقة العضوية أعلاه تمثل هويتك العضوية الرسمية لدى ميدلايف.</p>'+
+        '</div>'+
       '</div>'+
       '<div class="confirm-actions">'+
-      '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل البطاقة PDF</button>'+
-      '<button type="button" class="btn download-btn" id="downloadImage">تحميل البطاقة كصورة</button>'+
-      '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة البطاقة</button>'+
-      '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
-      '<div class="download-status">البطاقة تتضمن جميع البيانات التي تم تسجيلها في نموذج التحديث، بما فيها تفاصيل العضوية والطوارئ والمعلومات الإدارية.</div>'+
+        '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل بطاقة العضوية PDF</button>'+
+        '<button type="button" class="btn download-btn" id="downloadImage">حفظ بطاقة العضوية كصورة</button>'+
+        '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة بطاقة العضوية</button>'+
+        '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
+        '<div class="download-status">بطاقة العضوية مصممة للطباعة بحجم 85.6 × 54 مم، بينما يظهر سجل البيانات الكامل أسفلها.</div>'+
       '</div>';
 
     confirmation.classList.remove("hidden");
