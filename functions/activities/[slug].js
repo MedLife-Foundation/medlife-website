@@ -12,6 +12,24 @@ const formatDate = (value) => {
 };
 const typeMap = { medical:"طبي", awareness:"توعية", training:"تدريب", humanitarian:"إنساني", community:"مجتمعي", school:"مدارس", other:"أخرى" };
 
+function formatInlineMarkdown(value) {
+  let output = esc(value);
+  const codeTokens = [];
+
+  output = output.replace(/`([^`\\n]+)`/g, (_, code) => {
+    const token = "\\uE000" + codeTokens.length + "\\uE001";
+    codeTokens.push("<code>" + code + "</code>");
+    return token;
+  });
+  output = output.replace(/\\*\\*([^*\\n]+)\\*\\*/g, "<strong>$1</strong>");
+  output = output.replace(/~~([^~\\n]+)~~/g, "<del>$1</del>");
+  output = output.replace(/==([^=\\n]+)==/g, '<mark class="story-highlight">$1</mark>');
+  output = output.replace(/(^|[^*])\\*([^*\\n]+)\\*(?!\\*)/g, "$1<em>$2</em>");
+  output = output.replace(/(^|[^_])_([^_\\n]+)_(?!_)/g, "$1<em>$2</em>");
+
+  return output.replace(/\\uE000(\\d+)\\uE001/g, (_, index) => codeTokens[Number(index)] || "");
+}
+
 function formatDetailBlocks(value) {
   const normalized = String(value || "").replace(/\r\n?/g, "\n").trim();
   if (!normalized) return ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
@@ -48,10 +66,10 @@ function formatDetailBlocks(value) {
     // two-sentence paragraphs automatically without changing its wording.
     if (text.length > 460 && sentences.length >= 4) {
       for (let i = 0; i < sentences.length; i += 2) {
-        output.push("<p>" + sentences.slice(i, i + 2).map(esc).join(" ") + "</p>");
+        output.push("<p>" + sentences.slice(i, i + 2).map(formatInlineMarkdown).join(" ") + "</p>");
       }
     } else {
-      output.push("<p>" + esc(text) + "</p>");
+      output.push("<p>" + formatInlineMarkdown(text) + "</p>");
     }
   }
   return output.length ? output : ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
@@ -218,6 +236,15 @@ export async function onRequestGet({ params, request }) {
 .activity-story-body{color:#46536a}
 .activity-story-body p{margin:0 auto 24px;color:#46536a;font-size:15px;line-height:2.25;max-width:760px;text-wrap:pretty}
 .activity-story-body p:first-child{color:#26364f;font-size:17px;line-height:2.15;font-weight:600}
+.activity-story-body strong{font-weight:900;color:#1e2e49}
+.activity-story-body em{font-style:italic;color:#354660}
+.activity-story-body del{color:#7b8798;text-decoration-thickness:1px}
+.activity-story-body mark.story-highlight{background:#fff0bd;color:#6d4c00;padding:.08em .3em;border-radius:.3em}
+.activity-story-body code{background:#f1f4f8;color:#34435b;padding:.12em .38em;border-radius:.35em;font:600 .9em/1.6 ui-monospace,monospace;direction:ltr;unicode-bidi:plaintext}
+.activity-story-body blockquote{margin:28px auto;padding:15px 20px;max-width:760px;border-inline-start:4px solid var(--ml-red);background:#fff6f8;border-radius:0 14px 14px 0;color:#354660}
+.activity-story-body blockquote p{margin:0;font-weight:700;color:#354660}
+.activity-story-body blockquote p+p{margin-top:8px}
+
 .activity-story-body h3{margin:32px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8}
 .activity-story-body ul{max-width:760px;margin:0 auto 24px;padding-inline-start:25px;color:#46536a}
 .activity-story-body li{padding-inline-start:6px;margin-bottom:9px;line-height:2.1}
