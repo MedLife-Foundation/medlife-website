@@ -40,7 +40,8 @@ function normalizeCmsArticle(row) {
     canonical_path: row.slug,
     published_at: row.published_at,
     created_at: row.created_at,
-    updated_at: row.updated_at
+    updated_at: row.updated_at,
+    references: Array.isArray(metadata.references) ? metadata.references : []
   };
 }
 
