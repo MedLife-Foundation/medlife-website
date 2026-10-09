@@ -13,21 +13,14 @@ const formatDate = (value) => {
 const typeMap = { medical:"طبي", awareness:"توعية", training:"تدريب", humanitarian:"إنساني", community:"مجتمعي", school:"مدارس", other:"أخرى" };
 
 function formatInlineMarkdown(value) {
+  // Escape user-authored HTML first; only the markup generated below is trusted.
   let output = esc(value);
-  const codeTokens = [];
-
-  output = output.replace(/`([^`\\n]+)`/g, (_, code) => {
-    const token = "\\uE000" + codeTokens.length + "\\uE001";
-    codeTokens.push("<code>" + code + "</code>");
-    return token;
-  });
-  output = output.replace(/\\*\\*([^*\\n]+)\\*\\*/g, "<strong>$1</strong>");
-  output = output.replace(/~~([^~\\n]+)~~/g, "<del>$1</del>");
-  output = output.replace(/==([^=\\n]+)==/g, '<mark class="story-highlight">$1</mark>');
-  output = output.replace(/(^|[^*])\\*([^*\\n]+)\\*(?!\\*)/g, "$1<em>$2</em>");
-  output = output.replace(/(^|[^_])_([^_\\n]+)_(?!_)/g, "$1<em>$2</em>");
-
-  return output.replace(/\\uE000(\\d+)\\uE001/g, (_, index) => codeTokens[Number(index)] || "");
+  output = output.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+  output = output.replace(/~~([^~\n]+)~~/g, "<del>$1</del>");
+  output = output.replace(/==([^=\n]+)==/g, '<mark class="story-highlight">$1</mark>');
+  output = output.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?؟]|$)/g, "$1<em>$2</em>");
+  output = output.replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?؟]|$)/g, "$1<em>$2</em>");
+  return output;
 }
 
 function formatDetailBlocks(value) {
@@ -41,29 +34,43 @@ function formatDetailBlocks(value) {
   }
 
   const output = [];
-  const isBullet = line => /^(?:[-*•▪]|\d+[.)])\s+/.test(line);
+  const isBullet = line => /^[-*•▪]\s+/.test(line);
+  const isNumbered = line => /^\d+[.)]\s+/.test(line);
 
   for (const raw of rawBlocks) {
     const lines = raw.split("\n").map(line => line.trim()).filter(Boolean);
     if (!lines.length) continue;
 
+    if (lines.every(isNumbered)) {
+      output.push("<ol>" + lines.map(line =>
+        "<li>" + formatInlineMarkdown(line.replace(/^\d+[.)]\s+/, "")) + "</li>"
+      ).join("") + "</ol>");
+      continue;
+    }
+
     if (lines.every(isBullet)) {
       output.push("<ul>" + lines.map(line =>
-        "<li>" + esc(line.replace(/^(?:[-*•▪]|\d+[.)])\s+/, "")) + "</li>"
+        "<li>" + formatInlineMarkdown(line.replace(/^[-*•▪]\s+/, "")) + "</li>"
       ).join("") + "</ul>");
       continue;
     }
 
+    if (lines.every(line => /^>\s?/.test(line))) {
+      output.push("<blockquote>" + lines.map(line =>
+        "<p>" + formatInlineMarkdown(line.replace(/^>\s?/, "")) + "</p>"
+      ).join("") + "</blockquote>");
+      continue;
+    }
+
     if (lines.length === 1 && /^#{1,3}\s+/.test(lines[0])) {
-      output.push("<h3>" + esc(lines[0].replace(/^#{1,3}\s+/, "")) + "</h3>");
+      output.push("<h3>" + formatInlineMarkdown(lines[0].replace(/^#{1,3}\s+/, "")) + "</h3>");
       continue;
     }
 
     const text = lines.join(" ").replace(/\s+/g, " ").trim();
     const sentences = text.match(/[^.!؟…]+(?:[.!؟…]+|$)/g)?.map(sentence => sentence.trim()).filter(Boolean) || [text];
 
-    // If an editor pasted a very long, single paragraph, break it into readable
-    // two-sentence paragraphs automatically without changing its wording.
+    // Break a long single paragraph into readable blocks without changing wording.
     if (text.length > 460 && sentences.length >= 4) {
       for (let i = 0; i < sentences.length; i += 2) {
         output.push("<p>" + sentences.slice(i, i + 2).map(formatInlineMarkdown).join(" ") + "</p>");
