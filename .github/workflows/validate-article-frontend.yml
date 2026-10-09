@@ -1,5 +1,15 @@
 name: Validate article frontend
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - "articles.html"
+      - "article-reader-v8.html"
+      - "submit-article-v6.html"
+      - "submit-article-v6.js"
+      - "functions/articles/**"
+      - "functions/api/management.js"
+      - ".github/workflows/validate-article-frontend.yml"
   pull_request:
     branches: ["main"]
     paths:
