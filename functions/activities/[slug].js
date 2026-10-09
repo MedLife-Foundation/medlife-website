@@ -94,36 +94,80 @@ export async function onRequestGet({ params, request }) {
     galleryUrl ? '<a class="btn secondary" href="' + galleryUrl + '" target="_blank" rel="noopener noreferrer">ألبوم الصور الخارجي</a>' : ""
   ].filter(Boolean).join("");
 
+  const placementLabels = {
+    intro_side: "بجانب المقدمة",
+    after_intro: "بعد المقدمة",
+    middle: "منتصف الخبر",
+    full_width: "بعرض المقال",
+    bottom: "أسفل المقال"
+  };
   const editorialImages = gallery.map((item, index) => {
     const url = item.url;
     const altText = String(item.alt_text || activity.title || "صورة النشاط");
     const alt = esc(altText);
-    const caption = item.caption ? '<figcaption>' + esc(item.caption) + '</figcaption>' : "";
-    const layout = ["wide", "side-right", "medium", "side-left"][index % 4];
-    return '<figure class="editorial-image editorial-image-' + layout + '">' +
+    const placement = Object.prototype.hasOwnProperty.call(placementLabels, item.placement)
+      ? item.placement
+      : "bottom";
+    const layoutClass = placement === "intro_side"
+      ? "editorial-image-side"
+      : placement === "full_width"
+        ? "editorial-image-wide"
+        : "editorial-image-medium";
+    const captionText = String(item.caption || "").trim();
+    const caption = captionText ? '<figcaption>' + esc(captionText) + '</figcaption>' : "";
+    const html = '<figure class="editorial-image ' + layoutClass + '">' +
       '<button type="button" class="editorial-image-button" data-image="' + esc(url) + '" data-alt="' + alt + '" aria-label="عرض الصورة ' + (index + 1) + '">' +
         '<img src="' + esc(url) + '" alt="' + alt + '" loading="lazy" decoding="async">' +
         '<span class="editorial-image-zoom" aria-hidden="true">تكبير الصورة ↗</span>' +
       '</button>' + caption +
     '</figure>';
+    return { ...item, placement, html, index };
   });
 
   const detailBlocks = formatDetailBlocks(details);
+  const inlineImages = editorialImages.filter(item => item.placement !== "bottom");
+  const bottomImages = editorialImages.filter(item => item.placement === "bottom");
   const storyParts = [];
   const imageInsertions = new Map();
   const blockCount = detailBlocks.length;
-  editorialImages.forEach((imageHtml, imageIndex) => {
-    const afterBlock = Math.max(1, Math.min(blockCount, Math.round(((imageIndex + 1) * blockCount) / (editorialImages.length + 1))));
+  inlineImages.forEach(item => {
+    let afterBlock;
+    if (item.placement === "intro_side") afterBlock = 0;
+    else if (item.placement === "after_intro") afterBlock = 1;
+    else afterBlock = Math.max(1, Math.ceil(blockCount / 2));
+
     const bucket = imageInsertions.get(afterBlock) || [];
-    bucket.push(imageHtml);
+    bucket.push(item);
     imageInsertions.set(afterBlock, bucket);
   });
+  const addImagesAt = blockIndex => {
+    const images = imageInsertions.get(blockIndex) || [];
+    storyParts.push(...images.map(item => item.html));
+  };
+  addImagesAt(0);
   detailBlocks.forEach((block, blockIndex) => {
     storyParts.push(block);
-    const imagesAfter = imageInsertions.get(blockIndex + 1) || [];
-    storyParts.push(...imagesAfter);
+    addImagesAt(blockIndex + 1);
   });
   const storyHtml = storyParts.join("");
+
+  const bottomGalleryHtml = bottomImages.length
+    ? '<section class="activity-bottom-gallery" aria-label="صور النشاط">' +
+        '<header class="activity-bottom-gallery-heading"><span class="activity-section-kicker">التوثيق المصوّر</span><h2>صور من النشاط</h2><p>لقطات إضافية من الفعالية.</p></header>' +
+        '<div class="activity-bottom-gallery-grid">' +
+        bottomImages.map((item, index) => {
+          const alt = esc(item.alt_text || activity.title || "صورة النشاط");
+          const caption = String(item.caption || "").trim();
+          return '<figure class="activity-bottom-photo">' +
+            '<button type="button" class="activity-bottom-photo-button" data-image="' + esc(item.url) + '" data-alt="' + alt + '" aria-label="عرض صورة النشاط ' + (index + 1) + '">' +
+              '<img src="' + esc(item.url) + '" alt="' + alt + '" loading="lazy" decoding="async">' +
+              '<span class="editorial-image-zoom" aria-hidden="true">تكبير الصورة ↗</span>' +
+            '</button>' +
+            (caption ? '<figcaption>' + esc(caption) + '</figcaption>' : '') +
+          '</figure>';
+        }).join("") +
+        '</div></section>'
+    : "";
 
   const meta = [
     date ? '<span><strong>التاريخ</strong>' + esc(date) + '</span>' : "",
@@ -177,30 +221,44 @@ export async function onRequestGet({ params, request }) {
 .activity-story-body h3{margin:32px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8}
 .activity-story-body ul{max-width:760px;margin:0 auto 24px;padding-inline-start:25px;color:#46536a}
 .activity-story-body li{padding-inline-start:6px;margin-bottom:9px;line-height:2.1}
-/* Magazine-style photos are placed between story paragraphs. */
+/* Manual placements selected in the management platform. Unplaced/default images stay below the story. */
 .activity-story-body{display:flow-root;color:#46536a}
-.editorial-image{position:relative;margin:34px auto 38px;max-width:100%;text-align:center;clear:none}
-.editorial-image-wide{width:100%;max-width:820px}
-.editorial-image-medium{width:78%;max-width:660px}
-.editorial-image-side-right{float:inline-start;width:43%;max-width:330px;margin:8px 0 22px 28px}
-.editorial-image-side-left{float:inline-end;width:40%;max-width:310px;margin:8px 28px 22px 0}
-.editorial-image-button{position:relative;display:block;width:100%;aspect-ratio:16/10;padding:0;border:0;border-radius:17px;overflow:hidden;background:#edf1f5;box-shadow:0 15px 38px rgba(18,32,58,.12);cursor:zoom-in;isolation:isolate}
+.editorial-image{position:relative;margin:28px auto 32px;max-width:100%;text-align:center}
+.editorial-image-wide{width:100%;max-width:820px;clear:both}
+.editorial-image-medium{width:76%;max-width:660px;clear:both}
+.editorial-image-side{float:inline-start;width:40%;max-width:320px;margin:7px 0 22px 26px}
+.editorial-image-button,.activity-bottom-photo-button{position:relative;display:block;width:100%;aspect-ratio:16/10;padding:0;border:0;border-radius:16px;overflow:hidden;background:#edf1f5;box-shadow:0 13px 32px rgba(18,32,58,.1);cursor:zoom-in;isolation:isolate}
 .editorial-image-medium .editorial-image-button{aspect-ratio:5/4}
-.editorial-image-side-right .editorial-image-button,.editorial-image-side-left .editorial-image-button{aspect-ratio:4/5;border-radius:15px}
-.editorial-image-button img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s cubic-bezier(.2,.75,.25,1)}
-.editorial-image-button:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(7,15,31,.42));opacity:.55;transition:opacity .2s}
-.editorial-image-button:hover img{transform:scale(1.045)}
-.editorial-image-button:hover:after,.editorial-image-button:focus-visible:after{opacity:1}
-.editorial-image-zoom{position:absolute;z-index:2;bottom:11px;inset-inline-start:12px;padding:5px 10px;border-radius:999px;color:#fff;background:rgba(7,15,31,.55);font:700 10px Cairo,sans-serif;opacity:0;transform:translateY(4px);transition:.2s}
-.editorial-image-button:hover .editorial-image-zoom,.editorial-image-button:focus-visible .editorial-image-zoom{opacity:1;transform:translateY(0)}
-.editorial-image figcaption{margin-top:9px;color:#7b8798;font:600 11px/1.9 Cairo,sans-serif;text-align:center}
-@media(max-width:900px){.editorial-image-medium{width:88%}.editorial-image-side-right{width:42%;margin-inline-end:22px}.editorial-image-side-left{width:40%;margin-inline-start:22px}}
+.editorial-image-side .editorial-image-button{aspect-ratio:4/5;border-radius:14px}
+.editorial-image-button img,.activity-bottom-photo-button img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+.editorial-image-button:after,.activity-bottom-photo-button:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(7,15,31,.42));opacity:.48;transition:opacity .2s}
+.editorial-image-button:hover img,.activity-bottom-photo-button:hover img{transform:scale(1.04)}
+.editorial-image-button:hover:after,.activity-bottom-photo-button:hover:after{opacity:.9}
+.editorial-image-zoom{position:absolute;z-index:2;bottom:10px;inset-inline-start:11px;padding:5px 9px;border-radius:999px;color:#fff;background:rgba(7,15,31,.5);font:700 10px Cairo,sans-serif;opacity:0;transform:translateY(4px);transition:.2s}
+.editorial-image-button:hover .editorial-image-zoom,.editorial-image-button:focus-visible .editorial-image-zoom,.activity-bottom-photo-button:hover .editorial-image-zoom,.activity-bottom-photo-button:focus-visible .editorial-image-zoom{opacity:1;transform:translateY(0)}
+.editorial-image figcaption,.activity-bottom-photo figcaption{margin-top:8px;color:#7b8798;font:600 11px/1.9 Cairo,sans-serif;text-align:center}
+.activity-bottom-gallery{margin:30px auto 0;padding:clamp(18px,3vw,30px);border:1px solid #e8edf3;border-radius:24px;background:linear-gradient(145deg,#fbfcfe,#fff);box-shadow:0 14px 42px rgba(18,32,58,.05)}
+.activity-bottom-gallery-heading{margin-bottom:18px}
+.activity-bottom-gallery-heading .activity-section-kicker{color:var(--ml-red);font-size:11px;font-weight:900}
+.activity-bottom-gallery-heading h2{margin:5px 0;color:var(--ml-navy);font-size:24px;line-height:1.6}
+.activity-bottom-gallery-heading p{margin:0;color:var(--ml-muted);font-size:12px;line-height:1.9}
+.activity-bottom-gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.activity-bottom-photo{min-width:0;margin:0;padding:9px;border:1px solid #edf0f4;border-radius:17px;background:#fff}
+.activity-bottom-photo-button{aspect-ratio:4/3;border-radius:12px;box-shadow:none}
+.activity-story-body h3{margin:32px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8}
+.activity-story-body ul{max-width:760px;margin:0 auto 24px;padding-inline-start:25px;color:#46536a}
+.activity-story-body li{padding-inline-start:6px;margin-bottom:9px;line-height:2.1}
+@media(max-width:900px){.editorial-image-medium{width:88%}.editorial-image-side{width:42%;margin-inline-end:20px}.activity-bottom-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){
-  .editorial-image{margin:26px auto 30px;clear:both}
-  .editorial-image-wide,.editorial-image-medium,.editorial-image-side-right,.editorial-image-side-left{float:none;width:100%;max-width:100%}
-  .editorial-image-button,.editorial-image-medium .editorial-image-button{aspect-ratio:16/10;border-radius:13px}
-  .editorial-image-side-right .editorial-image-button,.editorial-image-side-left .editorial-image-button{aspect-ratio:16/10}
-  .editorial-image-zoom{opacity:1;transform:none;bottom:8px;inset-inline-start:9px}
+  .editorial-image{margin:23px auto 28px;clear:both}
+  .editorial-image-wide,.editorial-image-medium,.editorial-image-side{float:none;width:100%;max-width:100%}
+  .editorial-image-button,.editorial-image-medium .editorial-image-button,.editorial-image-side .editorial-image-button{aspect-ratio:16/10;border-radius:12px}
+  .editorial-image-zoom{opacity:1;transform:none;bottom:7px;inset-inline-start:8px}
+  .activity-bottom-gallery{padding:14px;border-radius:18px}
+  .activity-bottom-gallery-heading h2{font-size:21px}
+  .activity-bottom-gallery-grid{grid-template-columns:1fr;gap:10px}
+  .activity-bottom-photo{padding:7px;border-radius:13px}
+  .activity-bottom-photo-button{aspect-ratio:16/10}
 }
 .activity-story-footer{display:flex;justify-content:center;margin-top:34px;padding-top:25px;border-top:1px solid #edf0f4}
 .activity-story-footer a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 17px;border:1px solid #e1e6ed;border-radius:12px;background:#fff;color:var(--ml-navy);font:800 12px Cairo,sans-serif;text-decoration:none;transition:.2s}
@@ -244,6 +302,7 @@ ${storyHtml}
   <a href="/initiatives-gallery.html">← العودة إلى جميع الأنشطة</a>
 </div>
 </article>
+${bottomGalleryHtml}
 </div>
 </section>
 </main>
@@ -254,7 +313,7 @@ ${storyHtml}
 (() => {
  const box=document.getElementById("activityLightbox"), image=document.getElementById("activityLightboxImage");
  const close=()=>{box.classList.remove("open");box.setAttribute("aria-hidden","true");image.src="";};
- document.querySelectorAll(".editorial-image-button").forEach(item=>item.addEventListener("click",()=>{image.src=item.dataset.image||"";image.alt=item.dataset.alt||item.querySelector("img")?.alt||"MedLife";box.classList.add("open");box.setAttribute("aria-hidden","false");}));
+ document.querySelectorAll(".editorial-image-button,.activity-bottom-photo-button").forEach(item=>item.addEventListener("click",()=>{image.src=item.dataset.image||"";image.alt=item.dataset.alt||item.querySelector("img")?.alt||"MedLife";box.classList.add("open");box.setAttribute("aria-hidden","false");}));
  document.getElementById("activityLightboxClose")?.addEventListener("click",close);
  box?.addEventListener("click",e=>{if(e.target===box)close();});
  document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
