@@ -48,7 +48,7 @@ function formatDetailBlocks(value) {
     // two-sentence paragraphs automatically without changing its wording.
     if (text.length > 460 && sentences.length >= 4) {
       for (let i = 0; i < sentences.length; i += 2) {
-        output.push("<p>" + sentences.slice(i, i + 2).join(" ") + "</p>");
+        output.push("<p>" + sentences.slice(i, i + 2).map(esc).join(" ") + "</p>");
       }
     } else {
       output.push("<p>" + esc(text) + "</p>");
@@ -111,7 +111,7 @@ export async function onRequestGet({ params, request }) {
     : "";
 
   const detailBlocks = formatDetailBlocks(details);
-  const galleryAfter = detailBlocks.length >= 3 ? 2 : detailBlocks.length;
+  const galleryAfter = detailBlocks.length >= 3 ? 2 : 1;
   const storyParts = detailBlocks.slice();
   if (galleryHtml) storyParts.splice(galleryAfter, 0, galleryHtml);
   const storyHtml = storyParts.join("");
