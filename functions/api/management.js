@@ -475,7 +475,7 @@ export async function onRequestPost({ request }) {
       if (!payload.title_ar || !payload.author_name || !payload.content_ar) {
         return json({ success: false, error: "يرجى إكمال عنوان المقال واسم الكاتب والمحتوى." }, 400);
       }
-      if (!payload.author_email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(payload.author_email)) {
+      if (!payload.author_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.author_email)) {
         return json({ success: false, error: "أدخل بريداً إلكترونياً صالحاً لتلقي ملاحظات المراجعة وإشعار النشر." }, 400);
       }
       // Generate the receipt ID on the server because the public insert intentionally uses return=minimal.
