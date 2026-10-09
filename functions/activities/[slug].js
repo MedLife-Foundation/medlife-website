@@ -27,50 +27,66 @@ function formatDetailBlocks(value) {
   const normalized = String(value || "").replace(/\r\n?/g, "\n").trim();
   if (!normalized) return ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
 
-  let rawBlocks = normalized.split(/\n\s*\n+/).map(part => part.trim()).filter(Boolean);
-  if (rawBlocks.length === 1) {
-    const lines = normalized.split("\n").map(line => line.trim()).filter(Boolean);
-    if (lines.length > 1) rawBlocks = lines;
+  const classify = line => {
+    if (/^#{1,3}\s+/.test(line)) return "heading";
+    if (/^>\s?/.test(line)) return "quote";
+    if (/^\d+[.)]\s+/.test(line)) return "numbered";
+    if (/^[-*•▪]\s+/.test(line)) return "bullet";
+    return "paragraph";
+  };
+
+  // Split on blank lines and on changes between paragraphs, headings, quotes,
+  // and list types. Consecutive list items remain one semantic list.
+  const rawBlocks = [];
+  let currentLines = [];
+  let currentType = null;
+  const flush = () => {
+    if (currentLines.length) rawBlocks.push({ type: currentType, lines: currentLines });
+    currentLines = [];
+    currentType = null;
+  };
+
+  for (const sourceLine of normalized.split("\n")) {
+    const line = sourceLine.trim();
+    if (!line) {
+      flush();
+      continue;
+    }
+    const type = classify(line);
+    if (currentLines.length && type !== currentType) flush();
+    currentType = type;
+    currentLines.push(line);
   }
+  flush();
 
   const output = [];
-  const isBullet = line => /^[-*•▪]\s+/.test(line);
-  const isNumbered = line => /^\d+[.)]\s+/.test(line);
-
-  for (const raw of rawBlocks) {
-    const lines = raw.split("\n").map(line => line.trim()).filter(Boolean);
-    if (!lines.length) continue;
-
-    if (lines.every(isNumbered)) {
+  for (const block of rawBlocks) {
+    const { type, lines } = block;
+    if (type === "heading") {
+      output.push("<h3>" + formatInlineMarkdown(lines[0].replace(/^#{1,3}\s+/, "")) + "</h3>");
+      continue;
+    }
+    if (type === "numbered") {
       output.push("<ol>" + lines.map(line =>
         "<li>" + formatInlineMarkdown(line.replace(/^\d+[.)]\s+/, "")) + "</li>"
       ).join("") + "</ol>");
       continue;
     }
-
-    if (lines.every(isBullet)) {
+    if (type === "bullet") {
       output.push("<ul>" + lines.map(line =>
         "<li>" + formatInlineMarkdown(line.replace(/^[-*•▪]\s+/, "")) + "</li>"
       ).join("") + "</ul>");
       continue;
     }
-
-    if (lines.every(line => /^>\s?/.test(line))) {
+    if (type === "quote") {
       output.push("<blockquote>" + lines.map(line =>
         "<p>" + formatInlineMarkdown(line.replace(/^>\s?/, "")) + "</p>"
       ).join("") + "</blockquote>");
       continue;
     }
 
-    if (lines.length === 1 && /^#{1,3}\s+/.test(lines[0])) {
-      output.push("<h3>" + formatInlineMarkdown(lines[0].replace(/^#{1,3}\s+/, "")) + "</h3>");
-      continue;
-    }
-
     const text = lines.join(" ").replace(/\s+/g, " ").trim();
     const sentences = text.match(/[^.!؟…]+(?:[.!؟…]+|$)/g)?.map(sentence => sentence.trim()).filter(Boolean) || [text];
-
-    // Break a long single paragraph into readable blocks without changing wording.
     if (text.length > 460 && sentences.length >= 4) {
       for (let i = 0; i < sentences.length; i += 2) {
         output.push("<p>" + sentences.slice(i, i + 2).map(formatInlineMarkdown).join(" ") + "</p>");
@@ -79,6 +95,7 @@ function formatDetailBlocks(value) {
       output.push("<p>" + formatInlineMarkdown(text) + "</p>");
     }
   }
+
   return output.length ? output : ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
 }
 
