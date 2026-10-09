@@ -475,6 +475,11 @@ export async function onRequestPost({ request }) {
       if (!payload.title_ar || !payload.author_name || !payload.content_ar) {
         return json({ success: false, error: "يرجى إكمال عنوان المقال واسم الكاتب والمحتوى." }, 400);
       }
+      if (!payload.author_email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(payload.author_email)) {
+        return json({ success: false, error: "أدخل بريداً إلكترونياً صالحاً لتلقي ملاحظات المراجعة وإشعار النشر." }, 400);
+      }
+      // Generate the receipt ID on the server because the public insert intentionally uses return=minimal.
+      payload.id = crypto.randomUUID();
     } else if (body.action === "membership_renewal") {
       let dynamic;
       try {
@@ -1000,7 +1005,7 @@ export async function onRequestPost({ request }) {
       payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
     }
 
-    const writeUrl = SUPABASE_URL + "/rest/v1/" + target + (body.action === "article_submission" ? "?select=id" : "");
+    const writeUrl = SUPABASE_URL + "/rest/v1/" + target;
     const response = await fetch(writeUrl, {
       method: "POST",
       headers: {
@@ -1025,8 +1030,7 @@ export async function onRequestPost({ request }) {
       }
       return json({ success: false, error: "تعذر تسجيل الطلب في منصة الإدارة." }, 502);
     }
-    const created = body.action === "article_submission" ? await response.json().catch(() => []) : [];
-    const submissionId = Array.isArray(created) ? created[0]?.id || null : null;
+    const submissionId = body.action === "article_submission" ? payload.id || null : null;
     return json({ success: true, submission_id: submissionId, message: "تم تسجيل الطلب في منصة الإدارة." }, 201);
   } catch (error) {
     console.error("Management API POST error", error);

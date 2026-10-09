@@ -26,6 +26,67 @@ function setupImageUpload(){
 }
 setupImageUpload();
 
+async function handleRichPaste(event){
+  const editor=$('editor');if(!editor)return;
+  const clipboard=event.clipboardData;const html=clipboard.getData('text/html');const plain=clipboard.getData('text/plain');
+  if(!html&&!plain)return;
+  event.preventDefault();
+  const selection=window.getSelection();let savedRange=null;
+  if(selection&&selection.rangeCount)savedRange=selection.getRangeAt(0).cloneRange();
+  const holder=document.createElement('div');
+  if(html)holder.innerHTML=html;
+  else holder.innerHTML=plain.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
+  holder.querySelectorAll('script,style,iframe,object,embed,form,meta,link,xml').forEach(n=>n.remove());
+  holder.querySelectorAll('p[class],div[class]').forEach(node=>{
+    const cls=String(node.getAttribute('class')||'').toLowerCase(),match=cls.match(/msoheading([1-6])/);
+    if(match){const tag=Number(match[1])<=2?'h2':'h3',replacement=document.createElement(tag);replacement.innerHTML=node.innerHTML;node.replaceWith(replacement)}
+  });
+  const embedded=[...holder.querySelectorAll('img')].filter(img=>/^data:image\//i.test(img.getAttribute('src')||''));
+  if(embedded.length){
+    if(!$('title_ar').value.trim()||!$('author_name').value.trim()){
+      embedded.forEach(img=>img.remove());
+      $('msg').className='error';$('msg').textContent='اكتب عنوان المقال واسم الكاتب قبل لصق صور مضمّنة. تم الاحتفاظ بالنص وبقية التنسيق.';
+    }else{
+      let failed=0,uploaded=0;
+      for(let offset=0;offset<embedded.length;offset+=5){
+        const batch=embedded.slice(offset,offset+5),form=new FormData();
+        try{
+          for(let i=0;i<batch.length;i++){
+            const blob=await fetch(batch[i].getAttribute('src')).then(r=>r.blob());
+            if(!blob.type.startsWith('image/')||blob.size>8*1024*1024)throw Error('إحدى الصور غير مدعومة أو يتجاوز حجمها 8MB.');
+            const ext=blob.type.split('/')[1]==='jpeg'?'jpg':(blob.type.split('/')[1]||'png');
+            form.append('images',new File([blob],'pasted-image-'+(offset+i+1)+'.'+ext,{type:blob.type}));
+          }
+          form.append('title_ar',$('title_ar').value.trim());form.append('author_name',$('author_name').value.trim());
+          const response=await fetch('/api/article-images',{method:'POST',body:form,credentials:'include'});
+          const result=await response.json().catch(()=>({}));
+          if(!response.ok||!result.success||!Array.isArray(result.images)||result.images.length!==batch.length)throw Error(result.error||'تعذر رفع الصور الملصقة.');
+          batch.forEach((img,i)=>{img.setAttribute('src',result.images[i].url);img.setAttribute('alt',img.getAttribute('alt')||result.images[i].name||'صورة مرتبطة بالمقال');img.removeAttribute('style');img.removeAttribute('class')});
+          uploaded+=batch.length;
+        }catch(error){batch.forEach(img=>img.remove());failed+=batch.length;console.error('MedLife pasted image upload failed:',error)}
+      }
+      if(uploaded||failed){$('msg').className=failed?'error':'success';$('msg').textContent=failed?('تم رفع '+uploaded+' صورة، وتعذر نقل '+failed+' صورة.'):('تم رفع '+uploaded+' صورة ملصقة إلى مكتبة الوسائط.')}
+    }
+  }
+  holder.querySelectorAll('img').forEach(img=>{
+    const src=(img.getAttribute('src')||'').trim();
+    if(!/^https?:\/\//i.test(src)){img.remove();return}
+    img.removeAttribute('style');img.removeAttribute('class');img.setAttribute('loading','lazy');img.setAttribute('decoding','async');
+  });
+  holder.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(attr=>{
+    const name=attr.name.toLowerCase(),value=attr.value.trim();
+    if(el.tagName==='A'&&name==='href'&&/^https?:\/\//i.test(value))return;
+    if(el.tagName==='IMG'&&['src','alt','title','loading','decoding'].includes(name))return;
+    if(['TD','TH'].includes(el.tagName)&&['colspan','rowspan'].includes(name)&&/^\d{1,2}$/.test(value))return;
+    if(el.tagName==='TH'&&name==='scope'&&['row','col'].includes(value))return;
+    el.removeAttribute(attr.name);
+  }));
+  editor.focus();
+  if(savedRange&&editor.contains(savedRange.commonAncestorContainer)){selection.removeAllRanges();selection.addRange(savedRange)}
+  document.execCommand('insertHTML',false,holder.innerHTML);
+}
+$('editor').addEventListener('paste',event=>{void handleRichPaste(event)});
+
 function setupImageDownloads(){
   const editor=$('editor');if(!editor||editor.dataset.medlifeDownloadControls==='1')return;
   editor.dataset.medlifeDownloadControls='1';
@@ -45,4 +106,4 @@ function refs(){return [...document.querySelectorAll('.ref')].map(r=>({title:r.q
 function brief(){return {article_type:$('article_type').value,intended_audience:$('audience').value,goal:$('goal').value,suggested_sections:$('sections').value,key_questions:$('questions').value,desired_tone:$('tone').value,visual_preferences:$('presentation').value,source_types:[...document.querySelectorAll('.source input:checked')].map(x=>x.value),required_sources:$('required_sources').value,medical_safety:$('medical_safety').value,safety_focus:$('safety_focus').value,notes:$('notes').value}}
 $('image_url').oninput=()=>{const u=$('image_url').value.trim();$('cover').innerHTML=u?'<img src="'+esc(u)+'" alt="غلاف المقال" onerror="this.parentElement.textContent=\'تعذر تحميل الصورة\'">':'معاينة الغلاف'};
 function preview(){const b=brief(),r=refs();$('preview').innerHTML='<h1>'+esc($('title_ar').value||'بدون عنوان')+'</h1>'+( $('excerpt_ar').value?'<p>'+esc($('excerpt_ar').value)+'</p>':'')+($('image_url').value?'<img src="'+esc($('image_url').value)+'" alt="غلاف المقال">':'')+($('editor').innerHTML||'<p>لا يوجد محتوى.</p>')+'<h2>Editorial Brief</h2><ul><li>النوع: '+esc(b.article_type)+'</li><li>الجمهور: '+esc(b.intended_audience)+'</li><li>النبرة: '+esc(b.desired_tone)+'</li><li>العرض: '+esc(b.visual_preferences)+'</li><li>السلامة: '+esc(b.medical_safety)+'</li></ul>'+(r.length?'<h2>المراجع</h2><ol>'+r.map(x=>'<li>'+esc(x.title)+' — '+esc(x.organization)+(x.year?' ('+esc(x.year)+')':'')+(x.url?' — <a href="'+esc(x.url)+'" target="_blank" rel="noopener">الرابط</a>':'')+'</li>').join('')+'</ol>':'');$('modal').classList.add('show')}$('previewBtn').onclick=preview;$('close').onclick=()=>$('modal').classList.remove('show');
-$('form').onsubmit=async e=>{e.preventDefault();const m=$('msg');m.className='';m.textContent='جاري إرسال المقال وحفظ المعلومات التحريرية…';try{if(!$('title_ar').value.trim()||!$('author_name').value.trim()||!$('editor').innerText.trim())throw Error('يرجى إكمال العنوان واسم الكاتب ومحتوى المقال.');const payload={title_ar:$('title_ar').value.trim(),title_en:$('title_en').value.trim(),excerpt_ar:$('excerpt_ar').value.trim(),author_name:$('author_name').value.trim(),author_email:$('author_email').value.trim(),category:$('category').value,author_member_id:Number($('member_id').value)||undefined,content_ar:$('editor').innerHTML,image_url:$('image_url').value.trim(),status:'pending',references:refs(),editorial_brief:brief()};let r=await fetch('/api/articles',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(payload)}),d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw Error(d.error||`تعذر إرسال المقال (HTTP ${r.status}).`);m.className='success';m.textContent='✅ تم إرسال المقال للمراجعة بنجاح. رقم المقال: '+(d.id||'—');$('form').reset();$('editor').innerHTML='';$('refs').innerHTML='';addRef();$('cover').textContent='معاينة الغلاف'}catch(err){m.className='error';m.textContent='❌ '+(err&&err.message?err.message:'تعذر إرسال المقال.');console.error('MedLife article submission failed:',err)}};
+$('form').onsubmit=async e=>{e.preventDefault();const m=$('msg');m.className='';m.textContent='جارٍ إرسال المقال إلى فريق المدونة الطبية في ميدلايف…';try{if(!$('title_ar').value.trim()||!$('author_name').value.trim()||!$('editor').innerText.trim())throw Error('يرجى إكمال العنوان واسم الكاتب ومحتوى المقال.');const payload={action:'article_submission',title_ar:$('title_ar').value.trim(),title_en:$('title_en').value.trim(),excerpt_ar:$('excerpt_ar').value.trim(),author_name:$('author_name').value.trim(),author_email:$('author_email').value.trim(),category:$('category').value,author_member_id:$('member_id').value.trim()||undefined,content_ar:$('editor').innerHTML,image_url:$('image_url').value.trim(),reference_data:refs(),editorial_brief:brief()};const r=await fetch('/api/management',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},credentials:'same-origin',body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw Error(d.error||'تعذر إرسال المقال إلى لوحة تحكم ميدلايف.');m.className='success';m.textContent='✅ تم إرسال المقال إلى فريق المدونة الطبية للمراجعة. رقم الطلب: '+(d.submission_id||'—');$('form').reset();$('editor').innerHTML='';$('refs').innerHTML='';addRef();$('cover').textContent='معاينة الغلاف'}catch(err){m.className='error';m.textContent='❌ '+(err&&err.message?err.message:'تعذر إرسال المقال.');console.error('MedLife article submission failed:',err)}};
