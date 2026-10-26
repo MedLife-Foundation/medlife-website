@@ -77,6 +77,43 @@
     .oc-state button{margin-inline-start:auto;flex:0 0 auto;padding:8px 11px;border:1px solid #dfe6ef;border-radius:9px;background:#fff;color:var(--oc-navy);font-size:10px;font-weight:850;cursor:pointer}
 
 
+
+    .oc-birthday-feature-list{display:grid;grid-template-columns:1fr;gap:18px}
+    .oc-birthday-spotlight{display:grid;grid-template-columns:minmax(290px,.85fr) minmax(0,1.15fr);min-width:0;overflow:hidden;border:1px solid #e1e7ef;border-radius:22px;background:#fff;box-shadow:0 16px 42px rgba(18,32,58,.09)}
+    .oc-birthday-spotlight-media{position:relative;min-height:360px;overflow:hidden;background:linear-gradient(145deg,#e9eef5,#dce7ed)}
+    .oc-birthday-spotlight-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+    .oc-birthday-spotlight-media:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(0deg,rgba(18,32,58,.46),transparent);pointer-events:none}
+    .oc-birthday-spotlight-brand{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:30px;background:radial-gradient(circle at 25% 20%,rgba(255,255,255,.7),transparent 33%),linear-gradient(150deg,#f9fbfd,#e8eff5 55%,#dfe9ef);color:var(--oc-navy);text-align:center}
+    .oc-birthday-spotlight-brand img{width:112px;height:112px;padding:12px;border:1px solid rgba(255,255,255,.85);border-radius:28px;background:#fff;box-shadow:0 12px 32px rgba(18,32,58,.12);object-fit:contain}
+    .oc-birthday-spotlight-brand strong{font-size:14px;font-weight:900}
+    .oc-birthday-spotlight-brand span{color:#64748b;font-size:11px}
+    .oc-birthday-photo-caption{position:absolute;z-index:2;right:18px;bottom:17px;left:18px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border:1px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(18,32,58,.76);color:#fff;backdrop-filter:blur(10px)}
+    .oc-birthday-photo-caption strong{font-size:11px;font-weight:900}
+    .oc-birthday-photo-caption span{color:#e4eaf2;font-size:9px}
+    .oc-birthday-spotlight-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;padding:clamp(22px,3.6vw,43px)}
+    .oc-birthday-spotlight-kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #f0d8df;border-radius:999px;background:#fff3f5;color:#b51f3e;font-size:10px;font-weight:900}
+    .oc-birthday-spotlight-copy h3{margin:17px 0 0;color:var(--oc-navy);font-size:clamp(24px,3vw,34px);font-weight:900;line-height:1.5;overflow-wrap:anywhere}
+    .oc-birthday-tenure-pill{display:inline-flex;align-items:center;gap:7px;margin-top:9px;color:var(--oc-teal);font-size:11px;font-weight:850}
+    .oc-birthday-greeting{margin:17px 0 0;color:#506178;font-size:13px;line-height:2.15;white-space:normal;overflow-wrap:anywhere}
+    .oc-birthday-greeting-secondary{margin:13px 0 0;color:#6e7d90;font-size:12px;line-height:2.05;white-space:normal;overflow-wrap:anywhere}
+    .oc-birthday-spotlight-signoff{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:15px;border-top:1px solid #edf0f5;width:100%;color:#4f6076;font-size:11px;font-weight:850}
+    .oc-birthday-spotlight-signoff img{width:38px;height:38px;padding:4px;border:1px solid #e8edf3;border-radius:11px;background:#fff;object-fit:contain}
+    .oc-nearest-birthday-card{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:17px;padding:20px;border:1px solid #e1e7ef;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(18,32,58,.05)}
+    .oc-nearest-birthday-photo,.oc-nearest-birthday-brand{display:grid;place-items:center;width:96px;height:96px;overflow:hidden;border:1px solid #e4eaf1;border-radius:16px;background:#f1f5f9;object-fit:cover}
+    .oc-nearest-birthday-brand{background:linear-gradient(145deg,#fff,#eaf0f6)}
+    .oc-nearest-birthday-brand img{width:58px;height:58px;object-fit:contain}
+    .oc-nearest-birthday-copy{min-width:0}
+    .oc-nearest-birthday-copy h3{margin:0;color:var(--oc-navy);font-size:17px;font-weight:900;line-height:1.6;overflow-wrap:anywhere}
+    .oc-nearest-birthday-copy p{margin:5px 0 0;color:#6a7a8e;font-size:11px;line-height:1.85}
+    .oc-nearest-birthday-label{display:inline-flex;align-items:center;gap:7px;margin-bottom:7px;color:#b51f3e;font-size:10px;font-weight:900}
+    .oc-nearest-birthday-label:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--oc-red)}
+    .oc-nearest-birthday-date{display:grid;justify-items:center;align-content:center;min-width:92px;padding:10px 9px;border:1px solid #f0d8df;border-radius:13px;background:#fff4f6;color:var(--oc-red);text-align:center}
+    .oc-nearest-birthday-date strong{font-size:24px;font-weight:900;line-height:1.3}
+    .oc-nearest-birthday-date span{font-size:11px;font-weight:900}
+    .oc-nearest-birthday-date small{margin-top:5px;color:#68768b;font-size:10px}
+    .oc-number-latin{font-variant-numeric:tabular-nums}
+    @media(max-width:780px){.oc-birthday-spotlight{grid-template-columns:1fr}.oc-birthday-spotlight-media{min-height:320px;height:320px}.oc-birthday-spotlight-copy{padding:23px}.oc-nearest-birthday-card{grid-template-columns:80px minmax(0,1fr) auto;gap:12px;padding:13px}.oc-nearest-birthday-photo,.oc-nearest-birthday-brand{width:80px;height:80px}}
+    @media(max-width:520px){.oc-birthday-spotlight-media{min-height:260px;height:260px}.oc-birthday-spotlight-copy h3{font-size:24px}.oc-birthday-greeting{font-size:12px}.oc-nearest-birthday-card{grid-template-columns:64px minmax(0,1fr);gap:12px}.oc-nearest-birthday-photo,.oc-nearest-birthday-brand{grid-row:1;width:64px;height:64px;border-radius:12px}.oc-nearest-birthday-date{grid-column:1 / -1;display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;padding:8px}.oc-nearest-birthday-date strong{font-size:16px}.oc-nearest-birthday-date small{margin:0}.oc-nearest-birthday-brand img{width:43px;height:43px}}
     .oc-upcoming-members-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
     .oc-upcoming-member-card{display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;padding:13px;border:1px solid var(--oc-line);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(18,32,58,.035)}
     .oc-upcoming-member-photo,.oc-upcoming-member-avatar{display:grid;place-items:center;width:54px;height:54px;overflow:hidden;border:1px solid #e5ebf2;border-radius:50%;background:#f1f5f9;color:var(--oc-navy);object-fit:cover;font-size:16px;font-weight:900}
@@ -134,6 +171,19 @@
       </div>
     </section>
 
+    <section class="oc-section" aria-labelledby="oc-upcoming-birthdays-title">
+      <div class="oc-section-head">
+        <div class="oc-section-title">
+          <span class="oc-section-icon" aria-hidden="true">♡</span>
+          <div><h2 id="oc-upcoming-birthdays-title">أقرب المناسبات</h2><p>أقرب عيد ميلاد في عائلة ميدلايف؛ وفي يوم المناسبة نحتفل بصاحبها بصورة كبيرة وكلمات خاصة.</p></div>
+        </div>
+        <span class="oc-date-pill"><i></i><span id="oc-upcoming-birthday-count">أقرب عيد ميلاد</span></span>
+      </div>
+      <div id="oc-upcoming-birthdays" aria-live="polite">
+        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد القادمة</strong><p>نرتّب المناسبات بحسب أقرب تاريخ.</p></div></div>
+      </div>
+    </section>
+
     <section class="oc-section" aria-labelledby="oc-upcoming-title">
       <div class="oc-section-head">
         <div class="oc-section-title">
@@ -146,32 +196,6 @@
         <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ ترتيب الأجندة القادمة</strong><p>نجهّز قائمة الأيام الصحية والتوعوية التالية.</p></div></div>
       </div>
       <div class="oc-agenda-note"><span aria-hidden="true">ℹ</span><span>هذه أجندة إرشادية للأيام الدولية والصحية المتداولة. يمكن إضافة المناسبات الخاصة بميدلايف، مثل الأنشطة المحلية والتخرج والتكريم، من لوحة إدارة المناسبات.</span></div>
-    </section>
-
-    <section class="oc-section" aria-labelledby="oc-upcoming-birthdays-title">
-      <div class="oc-section-head">
-        <div class="oc-section-title">
-          <span class="oc-section-icon" aria-hidden="true">♡</span>
-          <div><h2 id="oc-upcoming-birthdays-title">أعياد ميلاد المتطوعين القادمة</h2><p>نحتفل بأعضاء عائلة ميدلايف ونستعدّ لمشاركتهم فرحتهم في يومهم المميّز.</p></div>
-        </div>
-        <span class="oc-date-pill"><i></i><span id="oc-upcoming-birthday-count">أعياد ميلاد الفريق</span></span>
-      </div>
-      <div id="oc-upcoming-birthdays" aria-live="polite">
-        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد القادمة</strong><p>نرتّب المناسبات بحسب أقرب تاريخ.</p></div></div>
-      </div>
-    </section>
-
-    <section class="oc-section" aria-labelledby="oc-birthday-title">
-      <div class="oc-section-head">
-        <div class="oc-section-title">
-          <span class="oc-section-icon" aria-hidden="true">✦</span>
-          <div><h2 id="oc-birthday-title">أعياد ميلاد أعضاء الفريق</h2><p>أطيب التهاني من مؤسسة ميدلايف الطبية الخيرية التطوعية.</p></div>
-        </div>
-        <span class="oc-date-pill"><i></i><span id="oc-today-label">مناسبات اليوم</span></span>
-      </div>
-      <div id="oc-birthdays" aria-live="polite">
-        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>
-      </div>
     </section>
 
     <section class="oc-section" aria-labelledby="oc-manual-title">
@@ -210,12 +234,11 @@
         const url = String(value || "").trim();
         return url.startsWith("/") || /^https:\/\//i.test(url) ? url : "";
       };
-      const initials = name => String(name || "ميدلايف").trim().split(/\s+/).slice(0,2).map(part => part[0] || "").join("");
       const monthsWithTeam = value => {
         const total = Math.max(0, Math.trunc(Number(value) || 0));
         if (!total) return "عضو في عائلة ميدلايف";
         const years = Math.floor(total/12), months = total%12;
-        const n = value => Number(value).toLocaleString("ar-SY");
+        const n = value => Number(value).toLocaleString("en-US");
         const parts = [];
         if (years === 1) parts.push("سنة واحدة");
         else if (years === 2) parts.push("سنتان");
@@ -232,26 +255,12 @@
         const parts = String(value).slice(0,10).split("-");
         if (parts.length !== 3) return String(value);
         const date = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]), 12);
-        return new Intl.DateTimeFormat("ar-SY",{day:"numeric",month:"long",year:"numeric",timeZone:"Asia/Damascus"}).format(date);
+        return new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", day:"numeric",month:"long",year:"numeric",timeZone:"Asia/Damascus"}).format(date);
       };
       const state = (root, title, message, retry) => {
         root.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">✦</span><div><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(message) + '</p></div>' +
           (retry ? '<button type="button">إعادة المحاولة</button>' : '') + '</div>';
         if (retry) root.querySelector("button")?.addEventListener("click", retry);
-      };
-      const birthdayCard = member => {
-        const id = /^[a-f0-9-]{20,40}$/i.test(String(member.volunteer_id || "")) ? String(member.volunteer_id) : "";
-        const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
-        const image = safeImage(member.profile_image_url);
-        const avatar = escapeHtml(initials(name));
-        const imageHtml = image
-          ? '<img class="oc-birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="oc-avatar-fallback" hidden>' + avatar + '</div>'
-          : '<div class="oc-avatar-fallback">' + avatar + '</div>';
-        return '<article class="oc-birthday-card" ' + (id ? 'id="birthday-' + id + '"' : '') + '>' +
-          '<div>' + imageHtml + '</div><div class="oc-birthday-info"><span class="oc-birthday-tag">تهنئة عيد ميلاد</span>' +
-          '<h3>' + escapeHtml(name) + '</h3><div class="oc-tenure">' + escapeHtml(monthsWithTeam(member.team_months)) + '</div>' +
-          '<p class="oc-birthday-message">تتقدّم مؤسسة ميدلايف بأطيب الأمنيات، متمنّيةً لك عاماً جديداً مليئاً بالصحة والنجاح والإنجاز، ومزيداً من العطاء والأثر الجميل.</p>' +
-          '<div class="oc-signoff"><img src="/logo.PNG" alt="MedLife"><span>بكل التقدير، مؤسسة ميدلايف</span></div></div></article>';
       };
       const occasionCard = event => {
         const id = /^[a-f0-9-]{20,40}$/i.test(String(event.id || "")) ? String(event.id) : "";
@@ -289,7 +298,7 @@
         return new Date(Date.UTC(value("year"), value("month") - 1, value("day"), 12));
       };
       const agendaDate = (year, month, day) => new Date(Date.UTC(year, month - 1, day, 12));
-      const formatAgendaDate = date => new Intl.DateTimeFormat("ar-SY", {day:"numeric", month:"long", timeZone:"UTC"}).format(date);
+      const formatAgendaDate = date => new Intl.DateTimeFormat("ar-SY", {numberingSystem:"latn", day:"numeric", month:"long", timeZone:"UTC"}).format(date);
       function renderUpcomingObservances() {
         const root = document.getElementById("oc-upcoming");
         const today = damascusToday();
@@ -309,17 +318,17 @@
           return { ...item, start, end, days, isRunningThisYear };
         }).sort((a,b) => a.start - b.start);
         const nextYear = upcoming.filter(item => item.start.getUTCFullYear() === year);
-        document.getElementById("oc-upcoming-count").textContent = nextYear.length.toLocaleString("ar-SY") + " مناسبة قادمة";
+        document.getElementById("oc-upcoming-count").textContent = nextYear.length.toLocaleString("en-US") + " مناسبة قادمة";
         if (!upcoming.length) {
           state(root, "لا توجد مناسبات قريبة", "سيتم تحديث الأجندة مع اقتراب الأيام الدولية والصحية.");
           return;
         }
         root.innerHTML = '<div class="oc-upcoming-grid">' + upcoming.map(item => {
           const currentlyRunning = item.end < today ? false : item.start <= today && item.end >= today;
-          const countdown = item.isRunningThisYear ? "مستمر الآن" : item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("ar-SY") + " يوم";
+          const countdown = item.isRunningThisYear ? "مستمر الآن" : item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("en-US") + " يوم";
           const range = item.end > item.start ? formatAgendaDate(item.start) + " – " + formatAgendaDate(item.end) : formatAgendaDate(item.start);
           return '<article class="oc-upcoming-card">' +
-            '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("ar-SY") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
+            '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("en-US") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
             '<div class="oc-upcoming-copy"><h3>' + escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.description) + '</p>' +
             '<div class="oc-upcoming-meta"><span class="oc-upcoming-kind">' + escapeHtml(item.type) + '</span>' +
             '<span class="oc-upcoming-countdown' + (item.days === 0 ? ' is-today' : currentlyRunning ? ' is-current' : '') + '">' + escapeHtml(countdown) + '</span></div></div></article>';
@@ -342,15 +351,15 @@
         const avatar = escapeHtml(initials(name));
         const dateInfo = nextBirthdayOccurrence(member, today);
         if (!dateInfo) return "";
-        const dateLabel = new Intl.DateTimeFormat("ar-SY", {day:"numeric",month:"long",timeZone:"UTC"}).format(dateInfo.date);
-        const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("ar-SY") + " يوم";
+        const dateLabel = new Intl.DateTimeFormat("ar-SY", {numberingSystem:"latn", day:"numeric",month:"long",timeZone:"UTC"}).format(dateInfo.date);
+        const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("en-US") + " يوم";
         const photo = image
           ? '<img class="oc-upcoming-member-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="oc-upcoming-member-avatar" hidden>' + avatar + '</span>'
           : '<span class="oc-upcoming-member-avatar">' + avatar + '</span>';
         return '<article class="oc-upcoming-member-card">' +
           photo +
           '<div class="oc-upcoming-member-copy"><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
-          '<div class="oc-upcoming-member-date"><strong>' + dateInfo.date.getUTCDate().toLocaleString("ar-SY") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{month:"long",timeZone:"UTC"}).format(dateInfo.date)) + '</span><small>' + escapeHtml(countdown) + '</small></div>' +
+          '<div class="oc-upcoming-member-date"><strong>' + dateInfo.date.getUTCDate().toLocaleString("en-US") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", month:"long",timeZone:"UTC"}).format(dateInfo.date)) + '</span><small>' + escapeHtml(countdown) + '</small></div>' +
           '</article>';
       }
       async function loadUpcomingBirthdays() {
@@ -369,7 +378,7 @@
             .sort((a,b) => a.occurrence.date - b.occurrence.date)
             .slice(0,12);
           document.getElementById("oc-upcoming-birthday-count").textContent =
-            birthdays.length.toLocaleString("ar-SY") + " عيد ميلاد قريب";
+            birthdays.length.toLocaleString("en-US") + " عيد ميلاد قريب";
           if (!birthdays.length) {
             state(root,"لا توجد أعياد ميلاد قادمة ضمن السجلات","ستظهر هنا أعياد ميلاد المتطوعين النشطين التي يتوفر لها تاريخ ميلاد مسجّل.");
             return;
@@ -415,7 +424,7 @@
           state(manualRoot,"تعذر تحميل المناسبات","لم نتمكن من الاتصال ببيانات المناسبات. يمكنك إعادة المحاولة.",loadOccasions);
         }
       }
-      document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
+      document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
       renderUpcomingObservances();
       document.getElementById("oc-year").textContent = String(new Date().getFullYear());
       void loadBirthdays();
