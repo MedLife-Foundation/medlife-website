@@ -14,6 +14,7 @@
     ['forum-v3.html', 'المنتدى', 'forum', 40],
     ['gallery.html', 'الصور', 'gallery', 50],
     ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60],
+    ['occasions.html', 'المناسبات', 'occasions', 65],
     ['support.html', 'صندوق الدعم', 'support', 70],
     ['contact.html', 'تواصل معنا', 'contact', 80]
   ];
