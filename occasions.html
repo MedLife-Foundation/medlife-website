@@ -140,6 +140,12 @@
     .oc-upcoming-countdown{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f5f6f8;color:#69788d;font-size:9px;font-weight:850}
     .oc-upcoming-countdown.is-today{background:#fff0f3;color:#b61e3b}
     .oc-upcoming-countdown.is-current{background:#edf8f2;color:#267450}
+    .oc-month-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;padding:8px;border:1px solid #e7ecf3;border-radius:12px;background:#fff}
+    .oc-month-controls button,.oc-month-all{border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:var(--oc-navy);font:inherit;font-size:10px;font-weight:850;padding:7px 9px;cursor:pointer}
+    .oc-month-controls button:hover,.oc-month-all:hover{border-color:#c6d4e4;background:#f8fafc}
+    .oc-month-label{color:var(--oc-navy);font-size:11px;font-weight:900;text-align:center}
+    .oc-month-all{display:block;width:100%;margin-top:10px;background:#f8fafc}
+    .oc-month-controls button:focus-visible,.oc-month-all:focus-visible{outline:2px solid var(--oc-red);outline-offset:2px}
     .oc-agenda-note{display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:11px 13px;border:1px solid #e3e9f1;border-radius:12px;background:#fafbfd;color:#7a8798;font-size:10px;line-height:1.9}
     @media(max-width:960px){.oc-upcoming-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:680px){.oc-upcoming-grid{grid-template-columns:1fr}.oc-upcoming-card{padding:13px}.oc-upcoming-date{min-height:62px}}
@@ -254,6 +260,11 @@
                 </div>
                 <span class="oc-date-pill"><i></i><span id="oc-upcoming-count">أجندة التوعية</span></span>
               </div>
+              <div class="oc-month-controls" aria-label="التنقل بين أشهر الأجندة">
+                <button id="oc-month-prev" type="button" aria-label="الشهر السابق">السابق ‹</button>
+                <span class="oc-month-label" id="oc-month-label">الشهر الحالي</span>
+                <button id="oc-month-next" type="button" aria-label="الشهر التالي">› التالي</button>
+              </div>
               <div id="oc-upcoming" aria-live="polite">
                 <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ ترتيب الأجندة القادمة</strong><p>نجهّز قائمة الأيام الصحية والتوعوية التالية.</p></div></div>
               </div>
@@ -355,40 +366,62 @@
       };
       const agendaDate = (year, month, day) => new Date(Date.UTC(year, month - 1, day, 12));
       const formatAgendaDate = date => new Intl.DateTimeFormat("ar-SY", {numberingSystem:"latn", day:"numeric", month:"long", timeZone:"UTC"}).format(date);
+      let selectedAgendaMonth = null;
+      let showAllAgendaItems = false;
+      const agendaMonthName = date => new Intl.DateTimeFormat("ar-SY", {month:"long",year:"numeric",timeZone:"UTC"}).format(date);
       function renderUpcomingObservances() {
         const root = document.getElementById("oc-upcoming");
         const today = damascusToday();
-        const year = today.getUTCFullYear();
-        const tomorrowBoundary = agendaDate(year, today.getUTCMonth() + 1, today.getUTCDate());
-        const upcoming = upcomingObservances.map(item => {
-          const startThisYear = agendaDate(year, item.month, item.day);
-          const endThisYear = item.endMonth ? agendaDate(year, item.endMonth, item.endDay) : startThisYear;
-          const isRunningThisYear = Boolean(item.endMonth) && startThisYear <= today && endThisYear >= today;
-          const start = isRunningThisYear
-            ? startThisYear
-            : startThisYear < today
-              ? agendaDate(year + 1, item.month, item.day)
-              : startThisYear;
-          const end = item.endMonth ? agendaDate(start.getUTCFullYear(), item.endMonth, item.endDay) : start;
-          const days = isRunningThisYear ? 0 : Math.round((start - today) / 86400000);
-          return { ...item, start, end, days, isRunningThisYear };
-        }).sort((a,b) => a.start - b.start);
-        const nextYear = upcoming.filter(item => item.start.getUTCFullYear() === year);
-        document.getElementById("oc-upcoming-count").textContent = nextYear.length.toLocaleString("en-US") + " مناسبة قادمة";
-        if (!upcoming.length) {
-          state(root, "لا توجد مناسبات قريبة", "سيتم تحديث الأجندة مع اقتراب الأيام الدولية والصحية.");
+        const currentMonth = today.getUTCMonth() + 1;
+        const currentYear = today.getUTCFullYear();
+        if (!selectedAgendaMonth) selectedAgendaMonth = {year:currentYear, month:currentMonth};
+        const selectedDate = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month, 1);
+        document.getElementById("oc-month-label").textContent = agendaMonthName(selectedDate);
+        const isCurrentMonth = selectedAgendaMonth.year === currentYear && selectedAgendaMonth.month === currentMonth;
+        const inMonth = upcomingObservances.filter(item => item.month === selectedAgendaMonth.month);
+        const monthly = inMonth.map(item => {
+          const start = agendaDate(selectedAgendaMonth.year, item.month, item.day);
+          const end = item.endMonth ? agendaDate(selectedAgendaMonth.year, item.endMonth, item.endDay) : start;
+          const running = Boolean(item.endMonth) && start <= today && end >= today;
+          const days = Math.round((start - today) / 86400000);
+          return {...item, start, end, day:item.day, days:running ? 0 : days, isRunningThisYear:running};
+        }).filter(item => !isCurrentMonth || item.end >= today)
+          .sort((a,b) => a.start - b.start);
+        document.getElementById("oc-upcoming-count").textContent =
+          monthly.length.toLocaleString("en-US") + " مناسبات";
+        if (!monthly.length) {
+          state(root, "لا توجد مناسبات متبقية هذا الشهر", "يمكنك الانتقال إلى شهر آخر للاطلاع على أبرز الأيام الصحية والمجتمعية.");
           return;
         }
-        root.innerHTML = '<div class="oc-upcoming-grid">' + upcoming.map(item => {
-          const currentlyRunning = item.end < today ? false : item.start <= today && item.end >= today;
-          const countdown = item.isRunningThisYear ? "مستمر الآن" : item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("en-US") + " يوم";
-          const range = item.end > item.start ? formatAgendaDate(item.start) + " – " + formatAgendaDate(item.end) : formatAgendaDate(item.start);
+        const visible = showAllAgendaItems ? monthly : monthly.slice(0, 6);
+        root.innerHTML = '<div class="oc-upcoming-grid">' + visible.map(item => {
+          const currentlyRunning = item.end >= today && item.start <= today;
+          const countdown = item.isRunningThisYear ? "مستمر الآن" : item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : item.days > 1 ? "بعد " + item.days.toLocaleString("en-US") + " يوم" : formatAgendaDate(item.start);
           return '<article class="oc-upcoming-card">' +
-            '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("en-US") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
+            '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("en-US") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn",month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
             '<div class="oc-upcoming-copy"><h3>' + escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.description) + '</p>' +
             '<div class="oc-upcoming-meta"><span class="oc-upcoming-kind">' + escapeHtml(item.type) + '</span>' +
             '<span class="oc-upcoming-countdown' + (item.days === 0 ? ' is-today' : currentlyRunning ? ' is-current' : '') + '">' + escapeHtml(countdown) + '</span></div></div></article>';
-        }).join("") + '</div>';
+        }).join("") + '</div>' +
+          (monthly.length > 6 ? '<button type="button" class="oc-month-all" id="oc-month-all">' + (showAllAgendaItems ? 'عرض أقل' : 'عرض كل مناسبات الشهر (' + monthly.length.toLocaleString("en-US") + ')') + '</button>' : '');
+        const prev = document.getElementById("oc-month-prev");
+        const next = document.getElementById("oc-month-next");
+        prev.onclick = () => {
+          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month - 1, 1);
+          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
+          showAllAgendaItems = false;
+          renderUpcomingObservances();
+        };
+        next.onclick = () => {
+          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month + 1, 1);
+          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
+          showAllAgendaItems = false;
+          renderUpcomingObservances();
+        };
+        document.getElementById("oc-month-all")?.addEventListener("click", () => {
+          showAllAgendaItems = !showAllAgendaItems;
+          renderUpcomingObservances();
+        });
       }
 
       const birthdayOpenings = [
