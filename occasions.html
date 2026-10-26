@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172b48">
+  <meta name="description" content="نحتفل بأعضاء عائلة ميدلايف ونشاركهم المناسبات الجميلة واللحظات التي تستحق التقدير.">
+  <title>المناسبات | مؤسسة ميدلايف</title>
+  <link rel="icon" href="/logo.PNG">
+  <style>
+    :root{color-scheme:light;--navy:#172b48;--navy2:#243f61;--teal:#2e7079;--red:#b82443;--rose:#fff2f4;--ink:#25384e;--muted:#6c7c90;--line:#e5ebf2;--paper:#fff;--bg:#f4f7fb;--gold:#d8b36d}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:1.8}
+    button,a{font:inherit}
+    a{color:inherit}
+    .occasions-main{width:min(1180px,calc(100% - 34px));margin:0 auto;padding:32px 0 70px}
+    .occasions-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(210px,.6fr);align-items:center;gap:28px;min-height:275px;padding:clamp(25px,5vw,56px);border-radius:26px;background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.16),transparent 26%),linear-gradient(120deg,#152641 0%,#244666 54%,#2e6f79 100%);color:#fff;box-shadow:0 20px 48px rgba(26,48,76,.14)}
+    .occasions-hero:before,.occasions-hero:after{content:"";position:absolute;z-index:-1;border:1px solid rgba(255,255,255,.13);border-radius:50%;pointer-events:none}
+    .occasions-hero:before{width:350px;height:350px;left:-105px;top:-200px}
+    .occasions-hero:after{width:480px;height:480px;left:-170px;top:-245px}
+    .hero-copy{max-width:700px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 13px;padding:6px 12px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.08);color:#f8e7c6;font-size:12px;font-weight:800}
+    .hero-copy h1{margin:0;color:#fff;font-size:clamp(30px,5vw,48px);line-height:1.35;letter-spacing:-.5px}
+    .hero-copy p{max-width:670px;margin:13px 0 0;color:rgba(255,255,255,.82);font-size:clamp(13px,1.6vw,15px);line-height:2.1}
+    .hero-stamp{display:grid;place-items:center;justify-self:center;width:160px;height:160px;border:1px solid rgba(255,255,255,.26);border-radius:50%;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 10px rgba(255,255,255,.035),0 15px 40px rgba(0,0,0,.08);text-align:center}
+    .hero-stamp span{display:block;font-size:52px;line-height:1.1}
+    .hero-stamp strong{display:block;margin-top:8px;color:#fff;font-size:13px}
+    .section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:34px 2px 16px}
+    .section-heading h2{margin:0;color:var(--navy);font-size:clamp(21px,2.5vw,27px);font-weight:900}
+    .section-heading p{margin:4px 0 0;color:var(--muted);font-size:12px}
+    .today-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid #f1d9de;border-radius:999px;background:#fff;color:var(--red);font-size:11px;font-weight:800;white-space:nowrap}
+    .today-pill .dot{width:7px;height:7px;border-radius:50%;background:#d93655;box-shadow:0 0 0 4px #fde8ed}
+    .birthday-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+    .birthday-card{position:relative;display:grid;grid-template-columns:130px minmax(0,1fr);gap:19px;min-width:0;overflow:hidden;padding:20px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 9px 28px rgba(24,45,71,.045);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+    .birthday-card:hover{transform:translateY(-3px);border-color:#d5e0ee;box-shadow:0 16px 34px rgba(24,45,71,.09)}
+    .birthday-card:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--red),#e7a9b5,var(--gold))}
+    .birthday-photo-wrap{position:relative;align-self:start;margin-top:3px}
+    .birthday-photo,.birthday-avatar{display:grid;place-items:center;width:130px;height:148px;overflow:hidden;border:1px solid #e7edf3;border-radius:17px;background:linear-gradient(145deg,#fff0f3,#e9f4f5);color:var(--red);object-fit:cover}
+    .birthday-avatar{font-size:31px;font-weight:900}
+    .birthday-cake{position:absolute;display:grid;place-items:center;right:-8px;bottom:-8px;width:37px;height:37px;border:3px solid #fff;border-radius:50%;background:var(--rose);font-size:18px;box-shadow:0 4px 12px rgba(28,42,64,.12)}
+    .birthday-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+    .birthday-label{display:inline-flex;align-items:center;gap:6px;margin:2px 0 9px;padding:5px 9px;border-radius:999px;background:var(--rose);color:var(--red);font-size:10px;font-weight:850}
+    .birthday-copy h3{margin:0;color:var(--navy);font-size:clamp(17px,1.9vw,21px);font-weight:900;line-height:1.5;overflow-wrap:anywhere}
+    .birthday-tenure{display:flex;align-items:flex-start;gap:7px;margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.8}
+    .birthday-tenure svg{flex:0 0 15px;margin-top:3px;color:var(--teal)}
+    .birthday-message{margin:12px 0 0;color:#53657b;font-size:12px;line-height:2.05}
+    .birthday-signoff{margin-top:auto;padding-top:14px;color:#9b3148;font-size:11px;font-weight:850}
+    .occasions-state{display:grid;justify-items:center;gap:9px;padding:42px 20px;border:1px dashed #d8e1ec;border-radius:20px;background:rgba(255,255,255,.72);text-align:center}
+    .state-icon{display:grid;place-items:center;width:58px;height:58px;border:1px solid #f2dce1;border-radius:18px;background:var(--rose);font-size:28px}
+    .occasions-state h3{margin:3px 0 0;color:var(--navy);font-size:18px}
+    .occasions-state p{max-width:500px;margin:0;color:var(--muted);font-size:12px;line-height:2}
+    .state-action{margin-top:8px;padding:9px 15px;border:1px solid #d9e5f1;border-radius:11px;background:#fff;color:var(--navy2);font-size:11px;font-weight:800;cursor:pointer}
+    .privacy-note{display:flex;align-items:flex-start;gap:10px;margin-top:20px;padding:13px 15px;border:1px solid #e3eaf2;border-radius:13px;background:#f9fbfd;color:#708096;font-size:10px;line-height:1.9}
+    .privacy-note .lock{flex:0 0 18px;color:#52789c}
+    .occasions-footer{padding:22px 12px;text-align:center;color:#8793a4;font-size:10px}
+    .hidden{display:none!important}
+    @media(max-width:920px){.birthday-grid{grid-template-columns:1fr}.birthday-card{grid-template-columns:120px minmax(0,1fr)}.birthday-photo,.birthday-avatar{width:120px;height:135px}}
+    @media(max-width:620px){.occasions-main{width:calc(100% - 22px);padding:18px 0 44px}.occasions-hero{grid-template-columns:1fr;gap:20px;min-height:0;padding:25px 21px;border-radius:20px}.hero-stamp{grid-row:1;width:82px;height:82px;justify-self:start}.hero-stamp span{font-size:30px}.hero-stamp strong{display:none}.hero-copy h1{font-size:30px}.hero-copy p{font-size:12px}.section-heading{align-items:flex-start;flex-direction:column;margin-top:26px}.today-pill{font-size:10px}.birthday-card{grid-template-columns:90px minmax(0,1fr);gap:13px;padding:15px;border-radius:16px}.birthday-photo,.birthday-avatar{width:90px;height:112px;border-radius:13px}.birthday-avatar{font-size:25px}.birthday-cake{width:31px;height:31px;font-size:15px}.birthday-label{font-size:9px}.birthday-copy h3{font-size:16px}.birthday-message{font-size:11px;margin-top:9px}.birthday-signoff{font-size:10px;padding-top:10px}.occasions-state{padding:30px 16px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.birthday-card{transition:none}.birthday-card:hover{transform:none}}
+  </style>
+  <script src="/site-nav.js?v=20261026-occasions" defer></script>
+</head>
+<body>
+  <main class="occasions-main">
+    <section class="occasions-hero" aria-labelledby="occasions-title">
+      <div class="hero-copy">
+        <div class="eyebrow">❤️ عائلة ميدلايف · لحظات تستحق الاحتفال</div>
+        <h1 id="occasions-title">المناسبات</h1>
+        <p>لأن الأثر لا تصنعه الأعمال وحدها، بل يصنعه الأشخاص الذين يمنحونها روحها. هنا نحتفل بأعضاء فريق ميدلايف ونشاركهم الأمنيات الجميلة في يومهم المميز.</p>
+      </div>
+      <div class="hero-stamp" aria-hidden="true"><div><span>🎂</span><strong>كل عام وأنتم بخير</strong></div></div>
+    </section>
+
+    <div class="section-heading">
+      <div><h2>أعياد ميلاد اليوم</h2><p>رسالة محبة وتقدير من مؤسسة ميدلايف الطبية الخيرية التطوعية.</p></div>
+      <span class="today-pill"><i class="dot"></i><span id="today-label">مناسبات اليوم</span></span>
+    </div>
+
+    <section id="birthday-results" aria-live="polite">
+      <div class="occasions-state">
+        <div class="state-icon">🎈</div>
+        <h3>نجهّز التهاني الجميلة</h3>
+        <p>جارٍ تحميل مناسبات اليوم من قاعدة بيانات أعضاء ميدلايف.</p>
+      </div>
+    </section>
+
+    <div class="privacy-note">
+      <span class="lock">🔒</span>
+      <span>تُنشر تهنئة عيد الميلاد والصورة الشخصية للأعضاء الذين سُمح بعرض مناسبتهم على الموقع. لا نعرض تاريخ الميلاد الكامل أو سنة الميلاد حفاظاً على الخصوصية.</span>
+    </div>
+  </main>
+  <footer class="occasions-footer">© <span id="year"></span> مؤسسة ميدلايف الطبية الخيرية التطوعية · بالعمل التطوعي نصنع الأثر.</footer>
+
+  <script>
+    (() => {
+      const target = document.getElementById('birthday-results');
+      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+      }[char]));
+      const safeImage = value => {
+        const url = String(value || '').trim();
+        return /^https:\/\/res\.cloudinary\.com\/pyvrk863\/image\/upload\//i.test(url) ? url : '';
+      };
+      const tenureText = raw => {
+        const total = Math.max(0, Math.trunc(Number(raw) || 0));
+        if (total === 0) return 'عضو جديد في عائلة ميدلايف';
+        const years = Math.floor(total / 12);
+        const months = total % 12;
+        const num = value => value.toLocaleString('ar-SY');
+        let parts = [];
+        if (years === 1) parts.push('سنة واحدة');
+        else if (years === 2) parts.push('سنتين');
+        else if (years >= 3 && years <= 10) parts.push(num(years) + ' سنوات');
+        else if (years > 10) parts.push(num(years) + ' سنة');
+        if (months === 1) parts.push('شهر واحد');
+        else if (months === 2) parts.push('شهرين');
+        else if (months >= 3 && months <= 10) parts.push(num(months) + ' أشهر');
+        else if (months > 10) parts.push(num(months) + ' شهراً');
+        if (parts.length === 1) return 'معنا منذ ' + parts[0];
+        return 'معنا منذ ' + parts[0] + ' و' + parts[1];
+      };
+      const initials = name => String(name || 'ميدلايف').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('');
+      const renderCard = member => {
+        const id = /^[a-f0-9-]{20,40}$/i.test(String(member.volunteer_id || '')) ? String(member.volunteer_id) : '';
+        const name = String(member.display_name || 'أحد أعضاء ميدلايف').trim();
+        const image = safeImage(member.profile_image_url);
+        const photo = image
+          ? '<img class="birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'birthday-avatar\',textContent:' + JSON.stringify(initials(name)) + '}))">'
+          : '<div class="birthday-avatar" aria-label="صورة غير متوفرة">' + escapeHtml(initials(name)) + '</div>';
+        return '<article class="birthday-card" ' + (id ? 'id="birthday-' + id + '"' : '') + '>' +
+          '<div class="birthday-photo-wrap">' + photo + '<span class="birthday-cake" aria-hidden="true">🎂</span></div>' +
+          '<div class="birthday-copy"><div class="birthday-label">🎉 عيد ميلاد سعيد</div>' +
+          '<h3>' + escapeHtml(name) + '</h3>' +
+          '<div class="birthday-tenure"><span aria-hidden="true">✦</span><span>' + escapeHtml(tenureText(member.team_months)) + '</span></div>' +
+          '<p class="birthday-message">كل عام وأنت بخير! وجودك معنا مصدر فخر وإلهام، ونتمنى لك عاماً جديداً مليئاً بالصحة والسعادة والنجاح ومزيداً من الأثر الجميل.</p>' +
+          '<div class="birthday-signoff">بكل محبة، مؤسسة ميدلايف ❤️</div></div></article>';
+      };
+      const showState = (title, message, canRetry = false) => {
+        target.innerHTML = '<div class="occasions-state"><div class="state-icon">🎈</div><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(message) + '</p>' +
+          (canRetry ? '<button class="state-action" type="button" id="retry-birthdays">إعادة المحاولة</button>' : '') + '</div>';
+        document.getElementById('retry-birthdays')?.addEventListener('click', loadBirthdays);
+      };
+      async function loadBirthdays() {
+        target.innerHTML = '<div class="occasions-state"><div class="state-icon">🎂</div><h3>جارٍ تحميل المناسبات</h3><p>نبحث عن أعضاء يحتفلون اليوم بمناسبتهم الجميلة.</p></div>';
+        try {
+          const response = await fetch('/api/management?resource=birthdays&limit=20', {headers:{Accept:'application/json'},cache:'no-store'});
+          if (!response.ok) throw new Error('request');
+          const payload = await response.json();
+          if (!payload?.success || !Array.isArray(payload.data)) throw new Error('data');
+          const members = payload.data.filter(member => member && member.volunteer_id && member.display_name);
+          if (!members.length) {
+            showState('لا توجد أعياد ميلاد منشورة اليوم', 'قد يكون اليوم هادئاً على صفحة المناسبات، لكن عائلة ميدلايف تحتفل دائماً بأعضائها وبكل إنجاز جميل يحققونه.');
+            return;
+          }
+          target.innerHTML = '<div class="birthday-grid">' + members.map(renderCard).join('') + '</div>';
+          if (location.hash) {
+            const id = decodeURIComponent(location.hash.slice(1));
+            const targetElement = document.getElementById(id);
+            if (targetElement) setTimeout(() => targetElement.scrollIntoView({behavior:'smooth',block:'center'}), 150);
+          }
+        } catch {
+          showState('تعذر تحميل المناسبات حالياً', 'لم نتمكن من الاتصال ببيانات المناسبات. تحقق من اتصال الإنترنت وأعد المحاولة.', true);
+        }
+      }
+      const today = new Intl.DateTimeFormat('ar-SY', {timeZone:'Asia/Damascus',weekday:'long',day:'numeric',month:'long'}).format(new Date());
+      document.getElementById('today-label').textContent = today;
+      document.getElementById('year').textContent = new Date().getFullYear().toLocaleString('ar-SY');
+      void loadBirthdays();
+    })();
+  </script>
+</body>
+</html>
