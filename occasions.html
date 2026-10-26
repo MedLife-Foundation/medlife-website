@@ -389,6 +389,18 @@
           .sort((a,b) => a.start - b.start);
         document.getElementById("oc-upcoming-count").textContent =
           monthly.length.toLocaleString("en-US") + " مناسبات";
+        document.getElementById("oc-month-prev").onclick = () => {
+          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month - 1, 1);
+          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
+          showAllAgendaItems = false;
+          renderUpcomingObservances();
+        };
+        document.getElementById("oc-month-next").onclick = () => {
+          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month + 1, 1);
+          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
+          showAllAgendaItems = false;
+          renderUpcomingObservances();
+        };
         if (!monthly.length) {
           state(root, "لا توجد مناسبات متبقية هذا الشهر", "يمكنك الانتقال إلى شهر آخر للاطلاع على أبرز الأيام الصحية والمجتمعية.");
           return;
@@ -404,20 +416,6 @@
             '<span class="oc-upcoming-countdown' + (item.days === 0 ? ' is-today' : currentlyRunning ? ' is-current' : '') + '">' + escapeHtml(countdown) + '</span></div></div></article>';
         }).join("") + '</div>' +
           (monthly.length > 6 ? '<button type="button" class="oc-month-all" id="oc-month-all">' + (showAllAgendaItems ? 'عرض أقل' : 'عرض كل مناسبات الشهر (' + monthly.length.toLocaleString("en-US") + ')') + '</button>' : '');
-        const prev = document.getElementById("oc-month-prev");
-        const next = document.getElementById("oc-month-next");
-        prev.onclick = () => {
-          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month - 1, 1);
-          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
-          showAllAgendaItems = false;
-          renderUpcomingObservances();
-        };
-        next.onclick = () => {
-          const date = agendaDate(selectedAgendaMonth.year, selectedAgendaMonth.month + 1, 1);
-          selectedAgendaMonth = {year:date.getUTCFullYear(),month:date.getUTCMonth()+1};
-          showAllAgendaItems = false;
-          renderUpcomingObservances();
-        };
         document.getElementById("oc-month-all")?.addEventListener("click", () => {
           showAllAgendaItems = !showAllAgendaItems;
           renderUpcomingObservances();
