@@ -268,12 +268,10 @@
               <div id="oc-upcoming" aria-live="polite">
                 <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ ترتيب الأجندة القادمة</strong><p>نجهّز قائمة الأيام الصحية والتوعوية التالية.</p></div></div>
               </div>
-              <div class="oc-agenda-note"><span aria-hidden="true">ℹ</span><span>هذه أجندة إرشادية للأيام الدولية والصحية المتداولة. يمكن إضافة المناسبات الخاصة بميدلايف، مثل الأنشطة المحلية والتخرج والتكريم، من لوحة إدارة المناسبات.</span></div>
             </section>
       </aside>
     </div>
 
-    <div class="oc-privacy"><span aria-hidden="true">🔒</span><span><b>احترام خصوصية أعضاء ميدلايف:</b> تُنشر تهنئة عيد الميلاد تلقائياً للأعضاء النشطين، مع إخفاء تاريخ الميلاد الكامل وسنة الميلاد. أما الصورة الشخصية فلا تُعرض إلا بعد موافقة العضو، ويمكنه سحب الموافقة في أي وقت.</span></div>
     <footer class="oc-footer">© <span id="oc-year"></span> مؤسسة ميدلايف الطبية الخيرية التطوعية · بالعمل التطوعي نصنع الأثر.</footer>
   </main>
 
@@ -564,7 +562,7 @@
           const payload = await response.json();
           if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
           if (!payload.data.length) {
-            state(manualRoot,"ستُعرض المناسبات المنشورة هنا","تُضاف مناسبات التخرّج والإنجازات والتكريمات من لوحة إدارة ميدلايف بعد اعتمادها للنشر.");
+            state(manualRoot,"لا توجد مناسبات منشورة حالياً","تابعونا للاطلاع على جديد عائلة ميدلايف ومناسباتها.");
             return;
           }
           manualRoot.innerHTML = '<div class="oc-occasions-grid">' + payload.data.map(occasionCard).join("") + '</div>';
