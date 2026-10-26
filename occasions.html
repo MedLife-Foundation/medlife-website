@@ -395,7 +395,7 @@
         const image = safeImage(member.profile_image_url);
         const greeting = buildBirthdayGreeting(member, ordinal);
         const media = image
-          ? '<div class="oc-birthday-spotlight-media"><img class="oc-birthday-spotlight-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="eager" onerror="this.hidden=true;this.nextElementSibling.hidden=false;this.nextElementSibling.nextElementSibling.hidden=true">' + brandBirthdayPlaceholder(true) + '<div class="oc-birthday-photo-caption"><strong>عيد ميلاد سعيد</strong><span>عائلة ميدلايف تحتفل بك</span></div></div>'
+          ? '<div class="oc-birthday-spotlight-media"><img class="oc-birthday-spotlight-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="eager" onerror="this.hidden=true;this.nextElementSibling.hidden=false;this.nextElementSibling.nextElementSibling.hidden=true">' + brandBirthdayPlaceholder(true).replace('<div class="oc-birthday-spotlight-brand">', '<div class="oc-birthday-spotlight-brand" hidden>') + '<div class="oc-birthday-photo-caption"><strong>عيد ميلاد سعيد</strong><span>عائلة ميدلايف تحتفل بك</span></div></div>'
           : '<div class="oc-birthday-spotlight-media">' + brandBirthdayPlaceholder(true) + '</div>';
         return '<article class="oc-birthday-spotlight"' + (id ? ' id="birthday-' + id + '"' : '') + '>' +
           media +
