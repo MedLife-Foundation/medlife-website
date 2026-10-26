@@ -3,170 +3,251 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#172b48">
-  <meta name="description" content="نحتفل بأعضاء عائلة ميدلايف ونشاركهم المناسبات الجميلة واللحظات التي تستحق التقدير.">
-  <title>المناسبات | مؤسسة ميدلايف</title>
+  <meta name="theme-color" content="#12203a">
+  <meta name="description" content="مناسبات وتهاني مؤسسة ميدلايف الطبية الخيرية التطوعية؛ نحتفي بأعضاء فريقنا وإنجازاتهم ومحطاتهم المميزة.">
+  <title>المناسبات والتهاني | مؤسسة ميدلايف</title>
   <link rel="icon" href="/logo.PNG">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/homepage-redesign.css">
   <style>
-    :root{color-scheme:light;--navy:#172b48;--navy2:#243f61;--teal:#2e7079;--red:#b82443;--rose:#fff2f4;--ink:#25384e;--muted:#6c7c90;--line:#e5ebf2;--paper:#fff;--bg:#f4f7fb;--gold:#d8b36d}
+    :root{--oc-navy:#12203a;--oc-red:#e51f45;--oc-muted:#68768b;--oc-line:#e4eaf1;--oc-bg:#f5f7fb;--oc-teal:#176a79}
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:1.8}
-    button,a{font:inherit}
-    a{color:inherit}
-    .occasions-main{width:min(1180px,calc(100% - 34px));margin:0 auto;padding:32px 0 70px}
-    .occasions-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(210px,.6fr);align-items:center;gap:28px;min-height:275px;padding:clamp(25px,5vw,56px);border-radius:26px;background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.16),transparent 26%),linear-gradient(120deg,#152641 0%,#244666 54%,#2e6f79 100%);color:#fff;box-shadow:0 20px 48px rgba(26,48,76,.14)}
-    .occasions-hero:before,.occasions-hero:after{content:"";position:absolute;z-index:-1;border:1px solid rgba(255,255,255,.13);border-radius:50%;pointer-events:none}
-    .occasions-hero:before{width:350px;height:350px;left:-105px;top:-200px}
-    .occasions-hero:after{width:480px;height:480px;left:-170px;top:-245px}
-    .hero-copy{max-width:700px}
-    .eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 13px;padding:6px 12px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.08);color:#f8e7c6;font-size:12px;font-weight:800}
-    .hero-copy h1{margin:0;color:#fff;font-size:clamp(30px,5vw,48px);line-height:1.35;letter-spacing:-.5px}
-    .hero-copy p{max-width:670px;margin:13px 0 0;color:rgba(255,255,255,.82);font-size:clamp(13px,1.6vw,15px);line-height:2.1}
-    .hero-stamp{display:grid;place-items:center;justify-self:center;width:160px;height:160px;border:1px solid rgba(255,255,255,.26);border-radius:50%;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 10px rgba(255,255,255,.035),0 15px 40px rgba(0,0,0,.08);text-align:center}
-    .hero-stamp span{display:block;font-size:52px;line-height:1.1}
-    .hero-stamp strong{display:block;margin-top:8px;color:#fff;font-size:13px}
-    .section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:34px 2px 16px}
-    .section-heading h2{margin:0;color:var(--navy);font-size:clamp(21px,2.5vw,27px);font-weight:900}
-    .section-heading p{margin:4px 0 0;color:var(--muted);font-size:12px}
-    .today-pill{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid #f1d9de;border-radius:999px;background:#fff;color:var(--red);font-size:11px;font-weight:800;white-space:nowrap}
-    .today-pill .dot{width:7px;height:7px;border-radius:50%;background:#d93655;box-shadow:0 0 0 4px #fde8ed}
-    .birthday-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
-    .birthday-card{position:relative;display:grid;grid-template-columns:130px minmax(0,1fr);gap:19px;min-width:0;overflow:hidden;padding:20px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 9px 28px rgba(24,45,71,.045);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-    .birthday-card:hover{transform:translateY(-3px);border-color:#d5e0ee;box-shadow:0 16px 34px rgba(24,45,71,.09)}
-    .birthday-card:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--red),#e7a9b5,var(--gold))}
-    .birthday-photo-wrap{position:relative;align-self:start;margin-top:3px}
-    .birthday-photo,.birthday-avatar{display:grid;place-items:center;width:130px;height:148px;overflow:hidden;border:1px solid #e7edf3;border-radius:17px;background:linear-gradient(145deg,#fff0f3,#e9f4f5);color:var(--red);object-fit:cover}
-    .birthday-avatar{font-size:31px;font-weight:900}
-    .birthday-cake{position:absolute;display:grid;place-items:center;right:-8px;bottom:-8px;width:37px;height:37px;border:3px solid #fff;border-radius:50%;background:var(--rose);font-size:18px;box-shadow:0 4px 12px rgba(28,42,64,.12)}
-    .birthday-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
-    .birthday-label{display:inline-flex;align-items:center;gap:6px;margin:2px 0 9px;padding:5px 9px;border-radius:999px;background:var(--rose);color:var(--red);font-size:10px;font-weight:850}
-    .birthday-copy h3{margin:0;color:var(--navy);font-size:clamp(17px,1.9vw,21px);font-weight:900;line-height:1.5;overflow-wrap:anywhere}
-    .birthday-tenure{display:flex;align-items:flex-start;gap:7px;margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.8}
-    .birthday-tenure svg{flex:0 0 15px;margin-top:3px;color:var(--teal)}
-    .birthday-message{margin:12px 0 0;color:#53657b;font-size:12px;line-height:2.05}
-    .birthday-signoff{margin-top:auto;padding-top:14px;color:#9b3148;font-size:11px;font-weight:850}
-    .occasions-state{display:grid;justify-items:center;gap:9px;padding:42px 20px;border:1px dashed #d8e1ec;border-radius:20px;background:rgba(255,255,255,.72);text-align:center}
-    .state-icon{display:grid;place-items:center;width:58px;height:58px;border:1px solid #f2dce1;border-radius:18px;background:var(--rose);font-size:28px}
-    .occasions-state h3{margin:3px 0 0;color:var(--navy);font-size:18px}
-    .occasions-state p{max-width:500px;margin:0;color:var(--muted);font-size:12px;line-height:2}
-    .state-action{margin-top:8px;padding:9px 15px;border:1px solid #d9e5f1;border-radius:11px;background:#fff;color:var(--navy2);font-size:11px;font-weight:800;cursor:pointer}
-    .privacy-note{display:flex;align-items:flex-start;gap:10px;margin-top:20px;padding:13px 15px;border:1px solid #e3eaf2;border-radius:13px;background:#f9fbfd;color:#708096;font-size:10px;line-height:1.9}
-    .privacy-note .lock{flex:0 0 18px;color:#52789c}
-    .occasions-footer{padding:22px 12px;text-align:center;color:#8793a4;font-size:10px}
-    .hidden{display:none!important}
-    @media(max-width:920px){.birthday-grid{grid-template-columns:1fr}.birthday-card{grid-template-columns:120px minmax(0,1fr)}.birthday-photo,.birthday-avatar{width:120px;height:135px}}
-    @media(max-width:620px){.occasions-main{width:calc(100% - 22px);padding:18px 0 44px}.occasions-hero{grid-template-columns:1fr;gap:20px;min-height:0;padding:25px 21px;border-radius:20px}.hero-stamp{grid-row:1;width:82px;height:82px;justify-self:start}.hero-stamp span{font-size:30px}.hero-stamp strong{display:none}.hero-copy h1{font-size:30px}.hero-copy p{font-size:12px}.section-heading{align-items:flex-start;flex-direction:column;margin-top:26px}.today-pill{font-size:10px}.birthday-card{grid-template-columns:90px minmax(0,1fr);gap:13px;padding:15px;border-radius:16px}.birthday-photo,.birthday-avatar{width:90px;height:112px;border-radius:13px}.birthday-avatar{font-size:25px}.birthday-cake{width:31px;height:31px;font-size:15px}.birthday-label{font-size:9px}.birthday-copy h3{font-size:16px}.birthday-message{font-size:11px;margin-top:9px}.birthday-signoff{font-size:10px;padding-top:10px}.occasions-state{padding:30px 16px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.birthday-card{transition:none}.birthday-card:hover{transform:none}}
+    body{margin:0;background:var(--oc-bg);font-family:Cairo,Tahoma,Arial,sans-serif;color:#26344d}
+    .oc-page{width:min(1190px,calc(100% - 34px));margin:0 auto;padding:30px 0 64px}
+    .oc-hero{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(320px,.96fr);min-height:340px;overflow:hidden;border:1px solid #e3e9f1;border-radius:26px;background:#fff;box-shadow:0 18px 52px rgba(18,32,58,.09)}
+    .oc-hero-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(25px,4vw,48px)}
+    .oc-brand-lockup{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+    .oc-logo-box{display:grid;place-items:center;width:64px;height:64px;padding:6px;border:1px solid #e7ecf3;border-radius:17px;background:#fff;box-shadow:0 6px 18px rgba(18,32,58,.07)}
+    .oc-logo-box img{width:100%;height:100%;object-fit:contain}
+    .oc-brand-name{display:grid;gap:2px}
+    .oc-brand-name strong{color:var(--oc-navy);font-size:13px;font-weight:900}
+    .oc-brand-name span{color:var(--oc-muted);font-size:10px;font-weight:600}
+    .oc-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:9px;color:var(--oc-red);font-size:12px;font-weight:900}
+    .oc-kicker:before{content:"";width:24px;height:2px;border-radius:2px;background:var(--oc-red)}
+    .oc-hero h1{margin:0;color:var(--oc-navy);font-size:clamp(29px,3.5vw,43px);font-weight:900;line-height:1.45}
+    .oc-hero h1 span{color:var(--oc-red)}
+    .oc-hero-copy>p{max-width:540px;margin:13px 0 0;color:#68768b;font-size:13px;line-height:2.15}
+    .oc-hero-rule{width:68px;height:4px;margin-top:23px;border-radius:3px;background:linear-gradient(90deg,var(--oc-red),#ef9eae)}
+    .oc-hero-photo{position:relative;min-height:340px;overflow:hidden;background:#dce4eb}
+    .oc-hero-photo img{display:block;width:100%;height:100%;min-height:340px;position:absolute;inset:0;object-fit:cover}
+    .oc-hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,32,58,.06),rgba(18,32,58,.1) 56%,rgba(18,32,58,.34))}
+    .oc-photo-caption{position:absolute;z-index:2;right:22px;bottom:20px;left:22px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border:1px solid rgba(255,255,255,.3);border-radius:13px;background:rgba(18,32,58,.77);color:#fff;backdrop-filter:blur(10px)}
+    .oc-photo-caption strong{font-size:12px;font-weight:850}
+    .oc-photo-caption span{font-size:10px;color:#e7edf4}
+    .oc-section{margin-top:34px}
+    .oc-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 2px 16px}
+    .oc-section-title{display:flex;align-items:flex-start;gap:12px}
+    .oc-section-icon{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border:1px solid #f2d4dc;border-radius:13px;background:#fff3f5;color:var(--oc-red);font-size:20px}
+    .oc-section-title h2{margin:0;color:var(--oc-navy);font-size:clamp(19px,2.4vw,25px);font-weight:900;line-height:1.55}
+    .oc-section-title p{margin:4px 0 0;color:var(--oc-muted);font-size:11px;line-height:1.8}
+    .oc-date-pill{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:8px 11px;border:1px solid #e1e7ef;border-radius:999px;background:#fff;color:#53657b;font-size:10px;font-weight:800}
+    .oc-date-pill i{display:inline-block;width:7px;height:7px;border-radius:100%;background:var(--oc-red)}
+    .oc-birthdays-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .oc-birthday-card{display:grid;grid-template-columns:128px minmax(0,1fr);gap:18px;min-width:0;min-height:205px;padding:17px;border:1px solid var(--oc-line);border-radius:18px;background:#fff;box-shadow:0 8px 28px rgba(18,32,58,.045);transition:transform .18s ease,box-shadow .18s ease}
+    .oc-birthday-card:hover{transform:translateY(-3px);box-shadow:0 15px 34px rgba(18,32,58,.09)}
+    .oc-birthday-photo{width:128px;height:158px;overflow:hidden;border:1px solid #e7edf4;border-radius:13px;background:#eef2f6;object-fit:cover}
+    .oc-avatar-fallback{display:grid;place-items:center;width:128px;height:158px;border:1px solid #e7edf4;border-radius:13px;background:linear-gradient(150deg,#f7f9fc,#e9eef5);color:var(--oc-navy);font-size:26px;font-weight:900}
+    .oc-birthday-info{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+    .oc-birthday-tag{display:inline-flex;padding:4px 9px;border-radius:999px;background:#fff1f4;color:#b61e3b;font-size:9px;font-weight:900}
+    .oc-birthday-info h3{margin:9px 0 0;color:var(--oc-navy);font-size:18px;font-weight:900;line-height:1.6;overflow-wrap:anywhere}
+    .oc-tenure{margin:5px 0 0;color:var(--oc-teal);font-size:10px;font-weight:800;line-height:1.8}
+    .oc-birthday-message{margin:9px 0 0;color:#66758a;font-size:11px;line-height:2}
+    .oc-signoff{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:11px;color:#516177;font-size:10px;font-weight:850}
+    .oc-signoff img{width:26px;height:26px;object-fit:contain;border:1px solid #edf0f5;border-radius:8px;padding:2px;background:#fff}
+    .oc-occasions-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+    .oc-occasion-card{min-width:0;overflow:hidden;border:1px solid var(--oc-line);border-radius:18px;background:#fff;box-shadow:0 8px 28px rgba(18,32,58,.045);transition:transform .18s ease,box-shadow .18s ease}
+    .oc-occasion-card:hover{transform:translateY(-3px);box-shadow:0 15px 34px rgba(18,32,58,.09)}
+    .oc-occasion-cover{position:relative;height:185px;overflow:hidden;background:#e9eef4}
+    .oc-occasion-cover img{display:block;width:100%;height:100%;object-fit:cover}
+    .oc-occasion-cover:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(0deg,rgba(18,32,58,.55),transparent)}
+    .oc-occasion-type{position:absolute;z-index:2;top:12px;right:12px;padding:5px 10px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:rgba(18,32,58,.74);color:#fff;font-size:10px;font-weight:850}
+    .oc-occasion-body{padding:17px}
+    .oc-occasion-date{display:flex;align-items:center;gap:7px;color:#8a95a6;font-size:10px;font-weight:750}
+    .oc-occasion-body h3{margin:9px 0 6px;color:var(--oc-navy);font-size:16px;font-weight:900;line-height:1.65;overflow-wrap:anywhere}
+    .oc-occasion-person{margin:0 0 8px;color:var(--oc-red);font-size:11px;font-weight:850}
+    .oc-occasion-description{margin:0;color:#69778b;font-size:11px;line-height:2.1;white-space:normal;overflow-wrap:anywhere}
+    .oc-occasion-signature{display:flex;align-items:center;gap:7px;margin-top:14px;padding-top:12px;border-top:1px solid #edf0f5;color:#52637a;font-size:10px;font-weight:800}
+    .oc-occasion-signature img{width:26px;height:26px;object-fit:contain;padding:2px;border:1px solid #edf0f5;border-radius:7px}
+    .oc-state{display:flex;align-items:center;gap:14px;padding:22px 24px;border:1px solid var(--oc-line);border-radius:15px;background:#fff}
+    .oc-state-symbol{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid #e6ebf2;border-radius:12px;background:#f7f9fc;color:var(--oc-navy);font-size:19px}
+    .oc-state strong{display:block;color:var(--oc-navy);font-size:13px;font-weight:900}
+    .oc-state p{margin:4px 0 0;color:var(--oc-muted);font-size:11px;line-height:1.9}
+    .oc-state button{margin-inline-start:auto;flex:0 0 auto;padding:8px 11px;border:1px solid #dfe6ef;border-radius:9px;background:#fff;color:var(--oc-navy);font-size:10px;font-weight:850;cursor:pointer}
+    .oc-privacy{display:flex;align-items:flex-start;gap:10px;margin-top:25px;padding:13px 15px;border:1px solid #e3e9f1;border-radius:13px;background:#fafbfd;color:#7b8798;font-size:10px;line-height:1.9}
+    .oc-privacy b{color:#475a71}
+    .oc-footer{padding:23px 0 0;text-align:center;color:#8994a4;font-size:10px}
+    @media(max-width:960px){.oc-birthdays-grid{grid-template-columns:1fr}.oc-occasions-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.oc-hero{grid-template-columns:minmax(0,1fr) minmax(260px,.85fr)}}
+    @media(max-width:680px){.oc-page{width:calc(100% - 22px);padding:17px 0 42px}.oc-hero{grid-template-columns:1fr;border-radius:19px}.oc-hero-copy{padding:23px}.oc-brand-lockup{margin-bottom:19px}.oc-logo-box{width:55px;height:55px}.oc-hero h1{font-size:30px}.oc-hero-copy>p{font-size:12px}.oc-hero-photo,.oc-hero-photo img{min-height:205px;height:205px}.oc-photo-caption{right:12px;left:12px;bottom:12px;padding:10px 12px}.oc-photo-caption strong{font-size:11px}.oc-section{margin-top:27px}.oc-section-head{align-items:flex-start;flex-direction:column}.oc-date-pill{margin-right:55px}.oc-birthdays-grid,.oc-occasions-grid{grid-template-columns:1fr}.oc-birthday-card{grid-template-columns:94px minmax(0,1fr);gap:13px;padding:13px;min-height:0}.oc-birthday-photo,.oc-avatar-fallback{width:94px;height:123px}.oc-birthday-info h3{font-size:16px;margin-top:7px}.oc-birthday-message{font-size:10px;margin-top:7px}.oc-signoff{font-size:9px}.oc-occasion-cover{height:190px}.oc-state{padding:16px;align-items:flex-start}.oc-state button{margin-top:3px}}
+    @media(prefers-reduced-motion:reduce){.oc-birthday-card,.oc-occasion-card{transition:none}.oc-birthday-card:hover,.oc-occasion-card:hover{transform:none}}
   </style>
   <script src="/site-nav.js?v=20261026-occasions" defer></script>
 </head>
 <body>
-  <main class="occasions-main">
-    <section class="occasions-hero" aria-labelledby="occasions-title">
-      <div class="hero-copy">
-        <div class="eyebrow">❤️ عائلة ميدلايف · لحظات تستحق الاحتفال</div>
-        <h1 id="occasions-title">المناسبات</h1>
-        <p>لأن الأثر لا تصنعه الأعمال وحدها، بل يصنعه الأشخاص الذين يمنحونها روحها. هنا نحتفل بأعضاء فريق ميدلايف ونشاركهم الأمنيات الجميلة في يومهم المميز.</p>
+  <main class="oc-page">
+    <section class="oc-hero" aria-labelledby="oc-title">
+      <div class="oc-hero-copy">
+        <div class="oc-brand-lockup">
+          <span class="oc-logo-box"><img src="/logo.PNG" alt="شعار مؤسسة ميدلايف"></span>
+          <span class="oc-brand-name"><strong>مؤسسة ميدلايف الطبية</strong><span>الخيرية · التطوعية · المجتمعية</span></span>
+        </div>
+        <div class="oc-kicker">عائلة ميدلايف · محطات نعتز بها</div>
+        <h1 id="oc-title">المناسبات <span>والتهاني</span></h1>
+        <p>نحتفي بالأشخاص الذين يصنعون أثر ميدلايف، ونشاركهم أعياد الميلاد والتخرّج والإنجازات واللحظات التي تستحق التقدير؛ تقديراً لعطائهم وانتمائهم إلى عائلة واحدة.</p>
+        <div class="oc-hero-rule" aria-hidden="true"></div>
       </div>
-      <div class="hero-stamp" aria-hidden="true"><div><span>🎂</span><strong>كل عام وأنتم بخير</strong></div></div>
-    </section>
-
-    <div class="section-heading">
-      <div><h2>أعياد ميلاد اليوم</h2><p>رسالة محبة وتقدير من مؤسسة ميدلايف الطبية الخيرية التطوعية.</p></div>
-      <span class="today-pill"><i class="dot"></i><span id="today-label">مناسبات اليوم</span></span>
-    </div>
-
-    <section id="birthday-results" aria-live="polite">
-      <div class="occasions-state">
-        <div class="state-icon">🎈</div>
-        <h3>نجهّز التهاني الجميلة</h3>
-        <p>جارٍ تحميل مناسبات اليوم من قاعدة بيانات أعضاء ميدلايف.</p>
+      <div class="oc-hero-photo">
+        <img src="https://res.cloudinary.com/pyvrk863/image/upload/v1792010969/vcg4ozasic2zutw5pknl.jpg" alt="من مشاركة فريق ميدلايف في أنشطة ومؤتمرات الرعاية الصحية" fetchpriority="high">
+        <div class="oc-photo-caption"><strong>معاً نصنع الأثر</strong><span>كل عضو… قصة تستحق التقدير</span></div>
       </div>
     </section>
 
-    <div class="privacy-note">
-      <span class="lock">🔒</span>
-      <span>تُنشر تهنئة عيد الميلاد والصورة الشخصية للأعضاء الذين سُمح بعرض مناسبتهم على الموقع. لا نعرض تاريخ الميلاد الكامل أو سنة الميلاد حفاظاً على الخصوصية.</span>
-    </div>
+    <section class="oc-section" aria-labelledby="oc-birthday-title">
+      <div class="oc-section-head">
+        <div class="oc-section-title">
+          <span class="oc-section-icon" aria-hidden="true">✦</span>
+          <div><h2 id="oc-birthday-title">أعياد ميلاد أعضاء الفريق</h2><p>أطيب التهاني من مؤسسة ميدلايف الطبية الخيرية التطوعية.</p></div>
+        </div>
+        <span class="oc-date-pill"><i></i><span id="oc-today-label">مناسبات اليوم</span></span>
+      </div>
+      <div id="oc-birthdays" aria-live="polite">
+        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>
+      </div>
+    </section>
+
+    <section class="oc-section" aria-labelledby="oc-manual-title">
+      <div class="oc-section-head">
+        <div class="oc-section-title">
+          <span class="oc-section-icon" aria-hidden="true">✧</span>
+          <div><h2 id="oc-manual-title">مناسبات وتهاني ميدلايف</h2><p>تخرّج، إنجازات، تكريمات ومحطات نشارك فيها أعضاءنا الفرحة.</p></div>
+        </div>
+      </div>
+      <div id="oc-manual" aria-live="polite">
+        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل المناسبات</strong><p>نستعرض أحدث المناسبات المنشورة من فريق ميدلايف.</p></div></div>
+      </div>
+    </section>
+
+    <div class="oc-privacy"><span aria-hidden="true">🔒</span><span><b>احترام خصوصية أعضاء ميدلايف:</b> لا يُعرض تاريخ الميلاد الكامل أو سنة الميلاد. تُنشر تهنئة عيد الميلاد والصورة المرتبطة بها عند تفعيل إعداد النشر في ملف العضو، ويمكن إيقاف النشر في أي وقت.</span></div>
+    <footer class="oc-footer">© <span id="oc-year"></span> مؤسسة ميدلايف الطبية الخيرية التطوعية · بالعمل التطوعي نصنع الأثر.</footer>
   </main>
-  <footer class="occasions-footer">© <span id="year"></span> مؤسسة ميدلايف الطبية الخيرية التطوعية · بالعمل التطوعي نصنع الأثر.</footer>
 
   <script>
     (() => {
-      const target = document.getElementById('birthday-results');
-      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+      const birthdayRoot = document.getElementById("oc-birthdays");
+      const manualRoot = document.getElementById("oc-manual");
+      const defaultEventImage = "https://res.cloudinary.com/pyvrk863/image/upload/v1792010969/vcg4ozasic2zutw5pknl.jpg";
+      const eventTypes = {
+        graduation: "تخرّج",
+        achievement: "إنجاز",
+        congratulations: "تهنئة",
+        community: "مناسبة مجتمعية",
+        event: "فعالية وذكرى",
+        other: "مناسبة مميزة"
+      };
+      const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
       }[char]));
       const safeImage = value => {
-        const url = String(value || '').trim();
-        return /^https:\/\/res\.cloudinary\.com\/pyvrk863\/image\/upload\//i.test(url) ? url : '';
+        const url = String(value || "").trim();
+        return url.startsWith("/") || /^https:\/\//i.test(url) ? url : "";
       };
-      const tenureText = raw => {
-        const total = Math.max(0, Math.trunc(Number(raw) || 0));
-        if (total === 0) return 'عضو جديد في عائلة ميدلايف';
-        const years = Math.floor(total / 12);
-        const months = total % 12;
-        const num = value => value.toLocaleString('ar-SY');
-        let parts = [];
-        if (years === 1) parts.push('سنة واحدة');
-        else if (years === 2) parts.push('سنتين');
-        else if (years >= 3 && years <= 10) parts.push(num(years) + ' سنوات');
-        else if (years > 10) parts.push(num(years) + ' سنة');
-        if (months === 1) parts.push('شهر واحد');
-        else if (months === 2) parts.push('شهرين');
-        else if (months >= 3 && months <= 10) parts.push(num(months) + ' أشهر');
-        else if (months > 10) parts.push(num(months) + ' شهراً');
-        if (parts.length === 1) return 'معنا منذ ' + parts[0];
-        return 'معنا منذ ' + parts[0] + ' و' + parts[1];
+      const initials = name => String(name || "ميدلايف").trim().split(/\s+/).slice(0,2).map(part => part[0] || "").join("");
+      const monthsWithTeam = value => {
+        const total = Math.max(0, Math.trunc(Number(value) || 0));
+        if (!total) return "عضو في عائلة ميدلايف";
+        const years = Math.floor(total/12), months = total%12;
+        const n = value => Number(value).toLocaleString("ar-SY");
+        const parts = [];
+        if (years === 1) parts.push("سنة واحدة");
+        else if (years === 2) parts.push("سنتان");
+        else if (years >= 3 && years <= 10) parts.push(n(years) + " سنوات");
+        else if (years > 10) parts.push(n(years) + " سنة");
+        if (months === 1) parts.push("شهر واحد");
+        else if (months === 2) parts.push("شهران");
+        else if (months >= 3 && months <= 10) parts.push(n(months) + " أشهر");
+        else if (months > 10) parts.push(n(months) + " شهراً");
+        return "معنا منذ " + parts.join(" و");
       };
-      const initials = name => String(name || 'ميدلايف').trim().split(/\s+/).slice(0,2).map(part => part[0] || '').join('');
-      const renderCard = member => {
-        const id = /^[a-f0-9-]{20,40}$/i.test(String(member.volunteer_id || '')) ? String(member.volunteer_id) : '';
-        const name = String(member.display_name || 'أحد أعضاء ميدلايف').trim();
+      const formatDate = value => {
+        if (!value) return "";
+        const parts = String(value).slice(0,10).split("-");
+        if (parts.length !== 3) return String(value);
+        const date = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]), 12);
+        return new Intl.DateTimeFormat("ar-SY",{day:"numeric",month:"long",year:"numeric",timeZone:"Asia/Damascus"}).format(date);
+      };
+      const state = (root, title, message, retry) => {
+        root.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">✦</span><div><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(message) + '</p></div>' +
+          (retry ? '<button type="button">إعادة المحاولة</button>' : '') + '</div>';
+        if (retry) root.querySelector("button")?.addEventListener("click", retry);
+      };
+      const birthdayCard = member => {
+        const id = /^[a-f0-9-]{20,40}$/i.test(String(member.volunteer_id || "")) ? String(member.volunteer_id) : "";
+        const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
         const image = safeImage(member.profile_image_url);
-        const photo = image
-          ? '<img class="birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="birthday-avatar hidden" aria-label="الصورة غير متوفرة">' + escapeHtml(initials(name)) + '</div>'
-          : '<div class="birthday-avatar" aria-label="صورة غير متوفرة">' + escapeHtml(initials(name)) + '</div>';
-        return '<article class="birthday-card" ' + (id ? 'id="birthday-' + id + '"' : '') + '>' +
-          '<div class="birthday-photo-wrap">' + photo + '<span class="birthday-cake" aria-hidden="true">🎂</span></div>' +
-          '<div class="birthday-copy"><div class="birthday-label">🎉 عيد ميلاد سعيد</div>' +
-          '<h3>' + escapeHtml(name) + '</h3>' +
-          '<div class="birthday-tenure"><span aria-hidden="true">✦</span><span>' + escapeHtml(tenureText(member.team_months)) + '</span></div>' +
-          '<p class="birthday-message">كل عام وأنت بخير! وجودك معنا مصدر فخر وإلهام، ونتمنى لك عاماً جديداً مليئاً بالصحة والسعادة والنجاح ومزيداً من الأثر الجميل.</p>' +
-          '<div class="birthday-signoff">بكل محبة، مؤسسة ميدلايف ❤️</div></div></article>';
+        const avatar = escapeHtml(initials(name));
+        const imageHtml = image
+          ? '<img class="oc-birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="oc-avatar-fallback" hidden>' + avatar + '</div>'
+          : '<div class="oc-avatar-fallback">' + avatar + '</div>';
+        return '<article class="oc-birthday-card" ' + (id ? 'id="birthday-' + id + '"' : '') + '>' +
+          '<div>' + imageHtml + '</div><div class="oc-birthday-info"><span class="oc-birthday-tag">تهنئة عيد ميلاد</span>' +
+          '<h3>' + escapeHtml(name) + '</h3><div class="oc-tenure">' + escapeHtml(monthsWithTeam(member.team_months)) + '</div>' +
+          '<p class="oc-birthday-message">تتقدّم مؤسسة ميدلايف بأطيب الأمنيات، متمنّيةً لك عاماً جديداً مليئاً بالصحة والنجاح والإنجاز، ومزيداً من العطاء والأثر الجميل.</p>' +
+          '<div class="oc-signoff"><img src="/logo.PNG" alt="MedLife"><span>بكل التقدير، مؤسسة ميدلايف</span></div></div></article>';
       };
-      const showState = (title, message, canRetry = false) => {
-        target.innerHTML = '<div class="occasions-state"><div class="state-icon">🎈</div><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(message) + '</p>' +
-          (canRetry ? '<button class="state-action" type="button" id="retry-birthdays">إعادة المحاولة</button>' : '') + '</div>';
-        document.getElementById('retry-birthdays')?.addEventListener('click', loadBirthdays);
+      const occasionCard = event => {
+        const id = /^[a-f0-9-]{20,40}$/i.test(String(event.id || "")) ? String(event.id) : "";
+        const image = safeImage(event.image_url) || defaultEventImage;
+        const title = String(event.title || "مناسبة من ميدلايف");
+        const description = escapeHtml(event.description || "").replace(/\r?\n/g,"<br>");
+        const person = String(event.person_name || "").trim();
+        const type = eventTypes[String(event.occasion_type || "")] || "مناسبة مميزة";
+        return '<article class="oc-occasion-card" ' + (id ? 'id="occasion-' + id + '"' : '') + '>' +
+          '<div class="oc-occasion-cover"><img src="' + escapeHtml(image) + '" alt="' + escapeHtml(title) + '" loading="lazy" onerror="this.onerror=null;this.src=\'/logo.PNG\'"><span class="oc-occasion-type">' + escapeHtml(type) + '</span></div>' +
+          '<div class="oc-occasion-body"><div class="oc-occasion-date">◷ <span>' + escapeHtml(formatDate(event.occasion_date)) + '</span></div>' +
+          '<h3>' + escapeHtml(title) + '</h3>' + (person ? '<p class="oc-occasion-person">' + escapeHtml(person) + '</p>' : '') +
+          '<p class="oc-occasion-description">' + description + '</p>' +
+          '<div class="oc-occasion-signature"><img src="/logo.PNG" alt=""><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span></div></div></article>';
       };
       async function loadBirthdays() {
-        target.innerHTML = '<div class="occasions-state"><div class="state-icon">🎂</div><h3>جارٍ تحميل المناسبات</h3><p>نبحث عن أعضاء يحتفلون اليوم بمناسبتهم الجميلة.</p></div>';
+        birthdayRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>';
         try {
-          const response = await fetch('/api/management?resource=birthdays&limit=20', {headers:{Accept:'application/json'},cache:'no-store'});
-          if (!response.ok) throw new Error('request');
+          const response = await fetch("/api/management?resource=birthdays&limit=20",{headers:{Accept:"application/json"},cache:"no-store"});
+          if (!response.ok) throw new Error("request");
           const payload = await response.json();
-          if (!payload?.success || !Array.isArray(payload.data)) throw new Error('data');
-          const members = payload.data.filter(member => member && member.volunteer_id && member.display_name);
+          if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
+          const members = payload.data.filter(item => item && item.volunteer_id && item.display_name);
           if (!members.length) {
-            showState('لا توجد أعياد ميلاد منشورة اليوم', 'قد يكون اليوم هادئاً على صفحة المناسبات، لكن عائلة ميدلايف تحتفل دائماً بأعضائها وبكل إنجاز جميل يحققونه.');
+            state(birthdayRoot,"لا توجد أعياد ميلاد منشورة اليوم","سيظهر هنا أعضاء الفريق الذين يوافقون على مشاركة تهنئتهم في يوم المناسبة.");
             return;
           }
-          target.innerHTML = '<div class="birthday-grid">' + members.map(renderCard).join('') + '</div>';
-          if (location.hash) {
-            const id = decodeURIComponent(location.hash.slice(1));
-            const targetElement = document.getElementById(id);
-            if (targetElement) setTimeout(() => targetElement.scrollIntoView({behavior:'smooth',block:'center'}), 150);
-          }
+          birthdayRoot.innerHTML = '<div class="oc-birthdays-grid">' + members.map(birthdayCard).join("") + '</div>';
+          if (location.hash.startsWith("#birthday-")) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({behavior:"smooth",block:"center"});
         } catch {
-          showState('تعذر تحميل المناسبات حالياً', 'لم نتمكن من الاتصال ببيانات المناسبات. تحقق من اتصال الإنترنت وأعد المحاولة.', true);
+          state(birthdayRoot,"تعذر تحميل أعياد الميلاد","لم نتمكن من تحميل هذه البيانات حالياً. يمكنك إعادة المحاولة.",loadBirthdays);
         }
       }
-      const today = new Intl.DateTimeFormat('ar-SY', {timeZone:'Asia/Damascus',weekday:'long',day:'numeric',month:'long'}).format(new Date());
-      document.getElementById('today-label').textContent = today;
-      document.getElementById('year').textContent = new Date().getFullYear().toLocaleString('ar-SY');
+      async function loadOccasions() {
+        manualRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل المناسبات</strong><p>نستعرض أحدث المناسبات المنشورة من فريق ميدلايف.</p></div></div>';
+        try {
+          const response = await fetch("/api/management?resource=occasions&limit=30",{headers:{Accept:"application/json"},cache:"no-store"});
+          if (!response.ok) throw new Error("request");
+          const payload = await response.json();
+          if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
+          if (!payload.data.length) {
+            state(manualRoot,"ستُعرض المناسبات المنشورة هنا","تُضاف مناسبات التخرّج والإنجازات والتكريمات من لوحة إدارة ميدلايف بعد اعتمادها للنشر.");
+            return;
+          }
+          manualRoot.innerHTML = '<div class="oc-occasions-grid">' + payload.data.map(occasionCard).join("") + '</div>';
+          if (location.hash.startsWith("#occasion-")) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({behavior:"smooth",block:"center"});
+        } catch {
+          state(manualRoot,"تعذر تحميل المناسبات","لم نتمكن من الاتصال ببيانات المناسبات. يمكنك إعادة المحاولة.",loadOccasions);
+        }
+      }
+      document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
+      document.getElementById("oc-year").textContent = String(new Date().getFullYear());
       void loadBirthdays();
+      void loadOccasions();
     })();
   </script>
 </body>
