@@ -58,6 +58,11 @@ const RESOURCES = {
     select: "volunteer_id,display_name,birth_month,birth_day,profile_image_url,team_months",
     order: "display_name.asc"
   },
+  upcoming_birthdays: {
+    table: "public_site_birthdays",
+    select: "volunteer_id,display_name,birth_month,birth_day,profile_image_url,team_months",
+    order: "display_name.asc"
+  },
   occasions: {
     table: "public_site_occasions",
     select: "id,title,occasion_type,person_name,description,image_url,occasion_date,created_at",
@@ -137,6 +142,10 @@ async function fetchResource(resource, url) {
       query.set("birth_day", "eq." + day);
     }
     query.set("limit", "20");
+  }
+  if (resource === "upcoming_birthdays") {
+    // Month and day only: the public view never exposes birth year or full DOB.
+    query.set("limit", "100");
   }
   if (resource === "membership_renewal_form") {
     query.set("form_kind", "eq.membership_renewal");
