@@ -271,10 +271,16 @@
         const tomorrowBoundary = agendaDate(year, today.getUTCMonth() + 1, today.getUTCDate());
         const upcoming = upcomingObservances.map(item => {
           const startThisYear = agendaDate(year, item.month, item.day);
-          const start = startThisYear < today ? agendaDate(year + 1, item.month, item.day) : startThisYear;
+          const endThisYear = item.endMonth ? agendaDate(year, item.endMonth, item.endDay) : startThisYear;
+          const isRunningThisYear = Boolean(item.endMonth) && startThisYear <= today && endThisYear >= today;
+          const start = isRunningThisYear
+            ? startThisYear
+            : startThisYear < today
+              ? agendaDate(year + 1, item.month, item.day)
+              : startThisYear;
           const end = item.endMonth ? agendaDate(start.getUTCFullYear(), item.endMonth, item.endDay) : start;
-          const days = Math.round((start - today) / 86400000);
-          return { ...item, start, end, days };
+          const days = isRunningThisYear ? 0 : Math.round((start - today) / 86400000);
+          return { ...item, start, end, days, isRunningThisYear };
         }).sort((a,b) => a.start - b.start);
         const nextYear = upcoming.filter(item => item.start.getUTCFullYear() === year);
         document.getElementById("oc-upcoming-count").textContent = nextYear.length.toLocaleString("ar-SY") + " مناسبة قادمة";
@@ -284,7 +290,7 @@
         }
         root.innerHTML = '<div class="oc-upcoming-grid">' + upcoming.map(item => {
           const currentlyRunning = item.end < today ? false : item.start <= today && item.end >= today;
-          const countdown = item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("ar-SY") + " يوم";
+          const countdown = item.isRunningThisYear ? "مستمر الآن" : item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("ar-SY") + " يوم";
           const range = item.end > item.start ? formatAgendaDate(item.start) + " – " + formatAgendaDate(item.end) : formatAgendaDate(item.start);
           return '<article class="oc-upcoming-card">' +
             '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("ar-SY") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
