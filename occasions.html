@@ -126,7 +126,7 @@
         const name = String(member.display_name || 'أحد أعضاء ميدلايف').trim();
         const image = safeImage(member.profile_image_url);
         const photo = image
-          ? '<img class="birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'birthday-avatar\',textContent:' + JSON.stringify(initials(name)) + '}))">'
+          ? '<img class="birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><div class="birthday-avatar hidden" aria-label="الصورة غير متوفرة">' + escapeHtml(initials(name)) + '</div>'
           : '<div class="birthday-avatar" aria-label="صورة غير متوفرة">' + escapeHtml(initials(name)) + '</div>';
         return '<article class="birthday-card" ' + (id ? 'id="birthday-' + id + '"' : '') + '>' +
           '<div class="birthday-photo-wrap">' + photo + '<span class="birthday-cake" aria-hidden="true">🎂</span></div>' +
