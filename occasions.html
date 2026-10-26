@@ -486,7 +486,6 @@
           state(manualRoot,"تعذر تحميل المناسبات","لم نتمكن من الاتصال ببيانات المناسبات. يمكنك إعادة المحاولة.",loadOccasions);
         }
       }
-      document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
       renderUpcomingObservances();
       document.getElementById("oc-year").textContent = String(new Date().getFullYear());
       void loadBirthdayFeature();
