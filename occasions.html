@@ -76,6 +76,19 @@
     .oc-state p{margin:4px 0 0;color:var(--oc-muted);font-size:11px;line-height:1.9}
     .oc-state button{margin-inline-start:auto;flex:0 0 auto;padding:8px 11px;border:1px solid #dfe6ef;border-radius:9px;background:#fff;color:var(--oc-navy);font-size:10px;font-weight:850;cursor:pointer}
 
+
+    .oc-upcoming-members-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .oc-upcoming-member-card{display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;padding:13px;border:1px solid var(--oc-line);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(18,32,58,.035)}
+    .oc-upcoming-member-photo,.oc-upcoming-member-avatar{display:grid;place-items:center;width:54px;height:54px;overflow:hidden;border:1px solid #e5ebf2;border-radius:50%;background:#f1f5f9;color:var(--oc-navy);object-fit:cover;font-size:16px;font-weight:900}
+    .oc-upcoming-member-copy{min-width:0}
+    .oc-upcoming-member-copy h3{margin:0;color:var(--oc-navy);font-size:12px;font-weight:900;line-height:1.65;overflow-wrap:anywhere}
+    .oc-upcoming-member-copy p{margin:3px 0 0;color:var(--oc-muted);font-size:10px;line-height:1.7}
+    .oc-upcoming-member-date{display:grid;justify-items:center;align-content:center;min-width:62px;padding:7px 6px;border:1px solid #f0d8df;border-radius:11px;background:#fff4f6;color:var(--oc-red);text-align:center}
+    .oc-upcoming-member-date strong{font-size:15px;font-weight:900;line-height:1.4}
+    .oc-upcoming-member-date span{font-size:9px;font-weight:850}
+    .oc-upcoming-member-date small{margin-top:3px;color:#68768b;font-size:9px}
+    @media(max-width:960px){.oc-upcoming-members-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:680px){.oc-upcoming-members-grid{grid-template-columns:1fr}.oc-upcoming-member-card{grid-template-columns:48px minmax(0,1fr) auto;gap:10px;padding:11px}.oc-upcoming-member-photo,.oc-upcoming-member-avatar{width:48px;height:48px}.oc-upcoming-member-date{min-width:58px}}
     .oc-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
     .oc-upcoming-card{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:start;gap:12px;min-width:0;padding:15px;border:1px solid var(--oc-line);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(18,32,58,.035);transition:border-color .16s ease,transform .16s ease}
     .oc-upcoming-card:hover{transform:translateY(-2px);border-color:#d3deeb}
@@ -133,6 +146,19 @@
         <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ ترتيب الأجندة القادمة</strong><p>نجهّز قائمة الأيام الصحية والتوعوية التالية.</p></div></div>
       </div>
       <div class="oc-agenda-note"><span aria-hidden="true">ℹ</span><span>هذه أجندة إرشادية للأيام الدولية والصحية المتداولة. يمكن إضافة المناسبات الخاصة بميدلايف، مثل الأنشطة المحلية والتخرج والتكريم، من لوحة إدارة المناسبات.</span></div>
+    </section>
+
+    <section class="oc-section" aria-labelledby="oc-upcoming-birthdays-title">
+      <div class="oc-section-head">
+        <div class="oc-section-title">
+          <span class="oc-section-icon" aria-hidden="true">♡</span>
+          <div><h2 id="oc-upcoming-birthdays-title">أعياد ميلاد المتطوعين القادمة</h2><p>نحتفل بأعضاء عائلة ميدلايف ونستعدّ لمشاركتهم فرحتهم في يومهم المميّز.</p></div>
+        </div>
+        <span class="oc-date-pill"><i></i><span id="oc-upcoming-birthday-count">أعياد ميلاد الفريق</span></span>
+      </div>
+      <div id="oc-upcoming-birthdays" aria-live="polite">
+        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد القادمة</strong><p>نرتّب المناسبات بحسب أقرب تاريخ.</p></div></div>
+      </div>
     </section>
 
     <section class="oc-section" aria-labelledby="oc-birthday-title">
@@ -300,6 +326,60 @@
         }).join("") + '</div>';
       }
 
+      function nextBirthdayOccurrence(member, today) {
+        const month = Number(member.birth_month);
+        const day = Number(member.birth_day);
+        if (!(month >= 1 && month <= 12 && day >= 1 && day <= 31)) return null;
+        const year = today.getUTCFullYear();
+        let date = agendaDate(year, month, day);
+        if (date <= today) date = agendaDate(year + 1, month, day);
+        const days = Math.round((date - today) / 86400000);
+        return { date, days };
+      }
+      function upcomingBirthdayCard(member, today) {
+        const name = String(member.display_name || "أحد متطوعي ميدلايف").trim();
+        const image = safeImage(member.profile_image_url);
+        const avatar = escapeHtml(initials(name));
+        const dateInfo = nextBirthdayOccurrence(member, today);
+        if (!dateInfo) return "";
+        const dateLabel = new Intl.DateTimeFormat("ar-SY", {day:"numeric",month:"long",timeZone:"UTC"}).format(dateInfo.date);
+        const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("ar-SY") + " يوم";
+        const photo = image
+          ? '<img class="oc-upcoming-member-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="oc-upcoming-member-avatar" hidden>' + avatar + '</span>'
+          : '<span class="oc-upcoming-member-avatar">' + avatar + '</span>';
+        return '<article class="oc-upcoming-member-card">' +
+          photo +
+          '<div class="oc-upcoming-member-copy"><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
+          '<div class="oc-upcoming-member-date"><strong>' + dateInfo.date.getUTCDate().toLocaleString("ar-SY") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{month:"long",timeZone:"UTC"}).format(dateInfo.date)) + '</span><small>' + escapeHtml(countdown) + '</small></div>' +
+          '</article>';
+      }
+      async function loadUpcomingBirthdays() {
+        const root = document.getElementById("oc-upcoming-birthdays");
+        root.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد القادمة</strong><p>نرتّب المناسبات بحسب أقرب تاريخ.</p></div></div>';
+        try {
+          const response = await fetch("/api/management?resource=upcoming_birthdays&limit=100", {headers:{Accept:"application/json"},cache:"no-store"});
+          if (!response.ok) throw new Error("request");
+          const payload = await response.json();
+          if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
+          const today = damascusToday();
+          const birthdays = payload.data
+            .filter(member => member && member.volunteer_id && member.display_name)
+            .map(member => ({member, occurrence:nextBirthdayOccurrence(member,today)}))
+            .filter(item => item.occurrence && item.occurrence.days > 0)
+            .sort((a,b) => a.occurrence.date - b.occurrence.date)
+            .slice(0,12);
+          document.getElementById("oc-upcoming-birthday-count").textContent =
+            birthdays.length.toLocaleString("ar-SY") + " عيد ميلاد قريب";
+          if (!birthdays.length) {
+            state(root,"لا توجد أعياد ميلاد قادمة ضمن السجلات","ستظهر هنا أعياد ميلاد المتطوعين النشطين التي يتوفر لها تاريخ ميلاد مسجّل.");
+            return;
+          }
+          root.innerHTML = '<div class="oc-upcoming-members-grid">' + birthdays.map(item => upcomingBirthdayCard(item.member,today)).join("") + '</div>';
+        } catch {
+          state(root,"تعذّر تحميل أعياد الميلاد القادمة","لم نتمكن من تحميل قائمة الأعضاء حالياً. يمكنك إعادة المحاولة.",loadUpcomingBirthdays);
+        }
+      }
+
       async function loadBirthdays() {
         birthdayRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>';
         try {
@@ -339,6 +419,7 @@
       renderUpcomingObservances();
       document.getElementById("oc-year").textContent = String(new Date().getFullYear());
       void loadBirthdays();
+      void loadUpcomingBirthdays();
       void loadOccasions();
     })();
   </script>
