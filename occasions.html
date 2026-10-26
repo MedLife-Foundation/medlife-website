@@ -216,7 +216,6 @@
 
   <script>
     (() => {
-      const birthdayRoot = document.getElementById("oc-birthdays");
       const manualRoot = document.getElementById("oc-manual");
       const defaultEventImage = "https://res.cloudinary.com/pyvrk863/image/upload/v1792010969/vcg4ozasic2zutw5pknl.jpg";
       const eventTypes = {
@@ -292,6 +291,11 @@
         { month: 12, day: 12, title: "اليوم الدولي للتغطية الصحية الشاملة", type: "أنظمة صحية", description: "الدعوة إلى خدمات صحية جيدة ومتاحة دون مشقة مالية." },
         { month: 12, day: 18, title: "اليوم العالمي للغة العربية", type: "ثقافة ولغة", description: "الاحتفاء باللغة العربية ودورها في التواصل والمعرفة." }
       ];
+      const compareVolunteerIds = (a, b) => {
+        const left = String(a ?? "").toLowerCase();
+        const right = String(b ?? "").toLowerCase();
+        return left < right ? -1 : left > right ? 1 : 0;
+      };
       const damascusToday = () => {
         const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Damascus", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
         const value = key => Number(parts.find(part => part.type === key)?.value || 0);
@@ -430,7 +434,7 @@
           if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
           const allMembers = payload.data
             .filter(member => member && member.volunteer_id && member.display_name)
-            .sort((a,b) => String(a.volunteer_id).localeCompare(String(b.volunteer_id)));
+            .sort((a,b) => compareVolunteerIds(a.volunteer_id,b.volunteer_id));
           if (!allMembers.length) {
             document.getElementById("oc-upcoming-birthday-count").textContent = "أقرب المناسبات";
             state(root,"لا توجد تواريخ ميلاد مسجّلة حالياً","ستظهر هنا أقرب مناسبة من أعضاء فريق ميدلايف عند توفر تاريخ ميلاد ضمن سجل العضوية.");
@@ -457,7 +461,7 @@
           const next = allMembers
             .map(member => ({member, occurrence:nextBirthdayOccurrence(member,today)}))
             .filter(item => item.occurrence && item.occurrence.days > 0)
-            .sort((a,b) => a.occurrence.date - b.occurrence.date || String(a.member.volunteer_id).localeCompare(String(b.member.volunteer_id)))[0];
+            .sort((a,b) => a.occurrence.date - b.occurrence.date || compareVolunteerIds(a.member.volunteer_id,b.member.volunteer_id))[0];
           document.getElementById("oc-upcoming-birthday-count").textContent = "أقرب عيد ميلاد";
           if (!next) {
             state(root,"لا توجد مناسبة قريبة","لا يوجد عيد ميلاد قادم ضمن سجلات الأعضاء النشطين حالياً.");
