@@ -55,7 +55,7 @@ const RESOURCES = {
   },
   birthdays: {
     table: "public_site_birthdays",
-    select: "volunteer_id,display_name,birth_month,birth_day",
+    select: "volunteer_id,display_name,birth_month,birth_day,profile_image_url,team_months",
     order: "display_name.asc"
   }
 };
