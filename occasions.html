@@ -335,6 +335,46 @@
         }).join("") + '</div>';
       }
 
+      const birthdayOpenings = [
+        "في يوم ميلادك، {name}، نحتفي بروحك وبالأثر الجميل الذي تتركه في عائلة ميدلايف.",
+        "عيد ميلادك مناسبة لنقول لك، {name}، إن حضورك بيننا محل تقدير واعتزاز.",
+        "إلى {name}، في يومك المميّز نرسل لك امتناننا على ما تضيفه من إنسانية وعطاء.",
+        "اليوم نحتفل بك يا {name}، وبكل لحظة تجعل فيها رسالة ميدلايف أقرب إلى الناس.",
+        "في هذه المناسبة السعيدة، {name}، نذكّرك بأنك جزء عزيز من قصة ميدلايف.",
+        "كل عام وأنت بخير يا {name}؛ وجودك ضمن عائلتنا يمنح رحلتنا معنى أجمل.",
+        "يا {name}، في عيد ميلادك نحتفل بالشخص الذي يقف خلف كل مساهمة وكل أثر طيب.",
+        "إلى زميلنا العزيز {name}، لك اليوم مساحة خاصة من المحبة والتقدير من عائلة ميدلايف."
+      ];
+      const birthdayMiddles = [
+        "وجودك معنا {duration} ليس مجرد وقت مضى، بل صفحات من العمل المشترك والتجارب التي نفخر بها.",
+        "خلال رحلتك معنا {duration}، أصبح عطاؤك جزءاً من حكاية إنسانية نواصل بناءها معاً.",
+        "نعتز بأنك اخترت أن تكون معنا {duration} في رسالة تقوم على الرحمة والمسؤولية وخدمة المجتمع.",
+        "ما يجمعنا بك {duration} أكبر من الأيام؛ إنه إيمان بأن العمل التطوعي يصنع فرقاً حقيقياً.",
+        "لكل جهد بذلته معنا {duration} قيمة نراها في أثرنا وفي الأشخاص الذين نصل إليهم.",
+        "رحلتك معنا {duration} تذكير جميل بأن الفريق يقوى بأفراده، وباختلاف ما يقدمه كل واحد منهم.",
+        "نقدّر حضورك ومشاركتك {duration}، ونتطلع إلى محطات جديدة نصنع فيها الخير معاً.",
+        "في كل يوم جمعنا بك {duration}، أضفت شيئاً إلى مسيرتنا؛ ونتمنى أن تحمل لك السنة الجديدة ما يفرح قلبك."
+      ];
+      const birthdayClosings = [
+        "نتمنى لك عاماً يفيض بالصحة والطمأنينة والفرص الجميلة، وتبقى فيه قريباً من كل ما تحب.",
+        "ليكن عامك الجديد مليئاً بالنجاح والراحة واللحظات التي تذكّرك بقيمة ما تصنعه.",
+        "نتمنى أن ترافقك السعادة في خطواتك، وأن تجد في كل يوم سبباً جديداً للأمل.",
+        "نسأل لك سنة تحمل إنجازات تليق بطموحك، وأياماً جميلة بقدر ما تمنح الآخرين.",
+        "كل عام وأنت أقرب إلى أحلامك، وأكثر اعتزازاً بنفسك وبالأثر الذي تتركه.",
+        "نتمنى لك بداية عام جديد مليئة بالمحبة والنجاحات والتجارب التي توسّع آفاقك.",
+        "دمت بخير وأمل، ولتكن أيامك القادمة أجمل وأخفّ وأكثر إشراقاً.",
+        "مع أصدق الأمنيات بسنة سعيدة، وبمزيد من العطاء الذي يضيف للحياة معنى."
+      ];
+      function buildBirthdayGreeting(member, ordinal) {
+        const sequence = Math.max(0, Math.trunc(Number(ordinal) || 0)) % 512;
+        const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
+        const duration = monthsWithTeam(member.team_months);
+        return {
+          opening: birthdayOpenings[sequence % 8].replace("{name}", name),
+          middle: birthdayMiddles[Math.floor(sequence / 8) % 8].replace("{duration}", duration),
+          closing: birthdayClosings[Math.floor(sequence / 64) % 8]
+        };
+      }
       function nextBirthdayOccurrence(member, today) {
         const month = Number(member.birth_month);
         const day = Number(member.birth_day);
@@ -342,71 +382,93 @@
         const year = today.getUTCFullYear();
         let date = agendaDate(year, month, day);
         if (date <= today) date = agendaDate(year + 1, month, day);
-        const days = Math.round((date - today) / 86400000);
-        return { date, days };
+        return { date, days: Math.round((date - today) / 86400000) };
       }
-      function upcomingBirthdayCard(member, today) {
-        const name = String(member.display_name || "أحد متطوعي ميدلايف").trim();
+      function brandBirthdayPlaceholder(feature = false) {
+        return feature
+          ? '<div class="oc-birthday-spotlight-brand"><img src="/logo.PNG" alt="شعار مؤسسة ميدلايف"><strong>ميدلايف تحتفل بك</strong><span>كل عضو جزء عزيز من عائلتنا</span></div>'
+          : '<div class="oc-nearest-birthday-brand"><img src="/logo.PNG" alt="شعار ميدلايف"></div>';
+      }
+      function spotlightBirthdayCard(member, ordinal) {
+        const id = /^[a-f0-9-]{20,40}$/i.test(String(member.volunteer_id || "")) ? String(member.volunteer_id) : "";
+        const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
         const image = safeImage(member.profile_image_url);
-        const avatar = escapeHtml(initials(name));
-        const dateInfo = nextBirthdayOccurrence(member, today);
-        if (!dateInfo) return "";
-        const dateLabel = new Intl.DateTimeFormat("ar-SY", {numberingSystem:"latn", day:"numeric",month:"long",timeZone:"UTC"}).format(dateInfo.date);
-        const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("en-US") + " يوم";
-        const photo = image
-          ? '<img class="oc-upcoming-member-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="oc-upcoming-member-avatar" hidden>' + avatar + '</span>'
-          : '<span class="oc-upcoming-member-avatar">' + avatar + '</span>';
-        return '<article class="oc-upcoming-member-card">' +
-          photo +
-          '<div class="oc-upcoming-member-copy"><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
-          '<div class="oc-upcoming-member-date"><strong>' + dateInfo.date.getUTCDate().toLocaleString("en-US") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", month:"long",timeZone:"UTC"}).format(dateInfo.date)) + '</span><small>' + escapeHtml(countdown) + '</small></div>' +
-          '</article>';
+        const greeting = buildBirthdayGreeting(member, ordinal);
+        const media = image
+          ? '<div class="oc-birthday-spotlight-media"><img class="oc-birthday-spotlight-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="eager" onerror="this.hidden=true;this.nextElementSibling.hidden=false;this.nextElementSibling.nextElementSibling.hidden=true">' + brandBirthdayPlaceholder(true) + '<div class="oc-birthday-photo-caption"><strong>عيد ميلاد سعيد</strong><span>عائلة ميدلايف تحتفل بك</span></div></div>'
+          : '<div class="oc-birthday-spotlight-media">' + brandBirthdayPlaceholder(true) + '</div>';
+        return '<article class="oc-birthday-spotlight"' + (id ? ' id="birthday-' + id + '"' : '') + '>' +
+          media +
+          '<div class="oc-birthday-spotlight-copy"><span class="oc-birthday-spotlight-kicker">🎂 اليوم يومك المميّز</span>' +
+          '<h3>كل عام وأنت بخير، ' + escapeHtml(name) + '</h3>' +
+          '<div class="oc-birthday-tenure-pill">✦ ' + escapeHtml(monthsWithTeam(member.team_months)) + ' مع ميدلايف</div>' +
+          '<p class="oc-birthday-greeting">' + escapeHtml(greeting.opening) + '</p>' +
+          '<p class="oc-birthday-greeting-secondary">' + escapeHtml(greeting.middle) + '</p>' +
+          '<p class="oc-birthday-greeting-secondary">' + escapeHtml(greeting.closing) + '</p>' +
+          '<div class="oc-birthday-spotlight-signoff"><img src="/logo.PNG" alt="شعار ميدلايف"><span>بمحبة وتقدير، مؤسسة ميدلايف الطبية الخيرية التطوعية</span></div></div></article>';
       }
-      async function loadUpcomingBirthdays() {
+      function nearestBirthdayCard(member, dateInfo) {
+        const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
+        const image = safeImage(member.profile_image_url);
+        const photo = image
+          ? '<img class="oc-nearest-birthday-photo" src="' + escapeHtml(image) + '" alt="صورة ' + escapeHtml(name) + '" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">' + '<span class="oc-nearest-birthday-brand" hidden><img src="/logo.PNG" alt="ميدلايف"></span>'
+          : brandBirthdayPlaceholder(false);
+        const monthName = new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn",month:"long",timeZone:"UTC"}).format(dateInfo.date);
+        const day = dateInfo.date.getUTCDate().toLocaleString("en-US");
+        const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("en-US") + " يوم";
+        return '<article class="oc-nearest-birthday-card">' + photo +
+          '<div class="oc-nearest-birthday-copy"><span class="oc-nearest-birthday-label">أقرب عيد ميلاد</span><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
+          '<div class="oc-nearest-birthday-date"><strong>' + day + '</strong><span>' + escapeHtml(monthName) + '</span><small>' + escapeHtml(countdown) + '</small></div></article>';
+      }
+      async function loadBirthdayFeature() {
         const root = document.getElementById("oc-upcoming-birthdays");
-        root.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد القادمة</strong><p>نرتّب المناسبات بحسب أقرب تاريخ.</p></div></div>';
+        root.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تجهيز أقرب مناسبة</strong><p>نرتّب احتفال ميدلايف بحسب تواريخ أعضاء الفريق.</p></div></div>';
         try {
           const response = await fetch("/api/management?resource=upcoming_birthdays&limit=100", {headers:{Accept:"application/json"},cache:"no-store"});
           if (!response.ok) throw new Error("request");
           const payload = await response.json();
           if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
-          const today = damascusToday();
-          const birthdays = payload.data
+          const allMembers = payload.data
             .filter(member => member && member.volunteer_id && member.display_name)
-            .map(member => ({member, occurrence:nextBirthdayOccurrence(member,today)}))
-            .filter(item => item.occurrence && item.occurrence.days > 0)
-            .sort((a,b) => a.occurrence.date - b.occurrence.date)
-            .slice(0,12);
-          document.getElementById("oc-upcoming-birthday-count").textContent =
-            birthdays.length.toLocaleString("en-US") + " عيد ميلاد قريب";
-          if (!birthdays.length) {
-            state(root,"لا توجد أعياد ميلاد قادمة ضمن السجلات","ستظهر هنا أعياد ميلاد المتطوعين النشطين التي يتوفر لها تاريخ ميلاد مسجّل.");
+            .sort((a,b) => String(a.volunteer_id).localeCompare(String(b.volunteer_id)));
+          if (!allMembers.length) {
+            document.getElementById("oc-upcoming-birthday-count").textContent = "أقرب المناسبات";
+            state(root,"لا توجد تواريخ ميلاد مسجّلة حالياً","ستظهر هنا أقرب مناسبة من أعضاء فريق ميدلايف عند توفر تاريخ ميلاد ضمن سجل العضوية.");
             return;
           }
-          root.innerHTML = '<div class="oc-upcoming-members-grid">' + birthdays.map(item => upcomingBirthdayCard(item.member,today)).join("") + '</div>';
+          const today = damascusToday();
+          const ordinalById = new Map(allMembers.map((member,index) => [String(member.volunteer_id), index]));
+          const todaysBirthdays = allMembers.filter(member =>
+            Number(member.birth_month) === today.getUTCMonth() + 1 &&
+            Number(member.birth_day) === today.getUTCDate()
+          );
+          if (todaysBirthdays.length) {
+            document.getElementById("oc-upcoming-birthday-count").textContent =
+              todaysBirthdays.length === 1 ? "احتفال اليوم" : "احتفالات اليوم";
+            root.innerHTML = '<div class="oc-birthday-feature-list">' + todaysBirthdays
+              .map(member => spotlightBirthdayCard(member, ordinalById.get(String(member.volunteer_id)) || 0))
+              .join("") + '</div>';
+            if (location.hash.startsWith("#birthday-")) {
+              const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+              if (target) setTimeout(() => target.scrollIntoView({behavior:"smooth",block:"center"}),150);
+            }
+            return;
+          }
+          const next = allMembers
+            .map(member => ({member, occurrence:nextBirthdayOccurrence(member,today)}))
+            .filter(item => item.occurrence && item.occurrence.days > 0)
+            .sort((a,b) => a.occurrence.date - b.occurrence.date || String(a.member.volunteer_id).localeCompare(String(b.member.volunteer_id)))[0];
+          document.getElementById("oc-upcoming-birthday-count").textContent = "أقرب عيد ميلاد";
+          if (!next) {
+            state(root,"لا توجد مناسبة قريبة","لا يوجد عيد ميلاد قادم ضمن سجلات الأعضاء النشطين حالياً.");
+            return;
+          }
+          root.innerHTML = nearestBirthdayCard(next.member,next.occurrence);
         } catch {
-          state(root,"تعذّر تحميل أعياد الميلاد القادمة","لم نتمكن من تحميل قائمة الأعضاء حالياً. يمكنك إعادة المحاولة.",loadUpcomingBirthdays);
+          state(root,"تعذّر تحميل أقرب المناسبات","لم نتمكن من تحميل أعياد الميلاد حالياً. يمكنك إعادة المحاولة.",loadBirthdayFeature);
         }
       }
 
-      async function loadBirthdays() {
-        birthdayRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>';
-        try {
-          const response = await fetch("/api/management?resource=birthdays&limit=20",{headers:{Accept:"application/json"},cache:"no-store"});
-          if (!response.ok) throw new Error("request");
-          const payload = await response.json();
-          if (!payload?.success || !Array.isArray(payload.data)) throw new Error("data");
-          const members = payload.data.filter(item => item && item.volunteer_id && item.display_name);
-          if (!members.length) {
-            state(birthdayRoot,"لا توجد أعياد ميلاد منشورة اليوم","تظهر هنا تهاني أعياد ميلاد جميع الأعضاء النشطين الذين لديهم تاريخ ميلاد مسجّل، وتُعرض الصورة فقط عند موافقة صاحبها.");
-            return;
-          }
-          birthdayRoot.innerHTML = '<div class="oc-birthdays-grid">' + members.map(birthdayCard).join("") + '</div>';
-          if (location.hash.startsWith("#birthday-")) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({behavior:"smooth",block:"center"});
-        } catch {
-          state(birthdayRoot,"تعذر تحميل أعياد الميلاد","لم نتمكن من تحميل هذه البيانات حالياً. يمكنك إعادة المحاولة.",loadBirthdays);
-        }
-      }
       async function loadOccasions() {
         manualRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل المناسبات</strong><p>نستعرض أحدث المناسبات المنشورة من فريق ميدلايف.</p></div></div>';
         try {
@@ -427,8 +489,7 @@
       document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn", timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
       renderUpcomingObservances();
       document.getElementById("oc-year").textContent = String(new Date().getFullYear());
-      void loadBirthdays();
-      void loadUpcomingBirthdays();
+      void loadBirthdayFeature();
       void loadOccasions();
     })();
   </script>
