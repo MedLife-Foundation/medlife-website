@@ -75,6 +75,24 @@
     .oc-state strong{display:block;color:var(--oc-navy);font-size:13px;font-weight:900}
     .oc-state p{margin:4px 0 0;color:var(--oc-muted);font-size:11px;line-height:1.9}
     .oc-state button{margin-inline-start:auto;flex:0 0 auto;padding:8px 11px;border:1px solid #dfe6ef;border-radius:9px;background:#fff;color:var(--oc-navy);font-size:10px;font-weight:850;cursor:pointer}
+
+    .oc-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .oc-upcoming-card{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:start;gap:12px;min-width:0;padding:15px;border:1px solid var(--oc-line);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(18,32,58,.035);transition:border-color .16s ease,transform .16s ease}
+    .oc-upcoming-card:hover{transform:translateY(-2px);border-color:#d3deeb}
+    .oc-upcoming-date{display:grid;align-content:center;justify-items:center;min-height:65px;padding:6px 4px;border:1px solid #f0d8df;border-radius:11px;background:#fff4f6;color:var(--oc-red);text-align:center}
+    .oc-upcoming-date strong{display:block;font-size:22px;line-height:1.3;font-weight:900}
+    .oc-upcoming-date span{display:block;font-size:10px;font-weight:850}
+    .oc-upcoming-copy{min-width:0}
+    .oc-upcoming-copy h3{margin:1px 0 5px;color:var(--oc-navy);font-size:13px;font-weight:900;line-height:1.65;overflow-wrap:anywhere}
+    .oc-upcoming-copy p{margin:0;color:var(--oc-muted);font-size:10px;line-height:1.9}
+    .oc-upcoming-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+    .oc-upcoming-kind{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef4fa;color:#526e8e;font-size:9px;font-weight:850}
+    .oc-upcoming-countdown{display:inline-flex;padding:4px 7px;border-radius:999px;background:#f5f6f8;color:#69788d;font-size:9px;font-weight:850}
+    .oc-upcoming-countdown.is-today{background:#fff0f3;color:#b61e3b}
+    .oc-upcoming-countdown.is-current{background:#edf8f2;color:#267450}
+    .oc-agenda-note{display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:11px 13px;border:1px solid #e3e9f1;border-radius:12px;background:#fafbfd;color:#7a8798;font-size:10px;line-height:1.9}
+    @media(max-width:960px){.oc-upcoming-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:680px){.oc-upcoming-grid{grid-template-columns:1fr}.oc-upcoming-card{padding:13px}.oc-upcoming-date{min-height:62px}}
     .oc-privacy{display:flex;align-items:flex-start;gap:10px;margin-top:25px;padding:13px 15px;border:1px solid #e3e9f1;border-radius:13px;background:#fafbfd;color:#7b8798;font-size:10px;line-height:1.9}
     .oc-privacy b{color:#475a71}
     .oc-footer{padding:23px 0 0;text-align:center;color:#8994a4;font-size:10px}
@@ -101,6 +119,20 @@
         <img src="https://res.cloudinary.com/pyvrk863/image/upload/v1792010969/vcg4ozasic2zutw5pknl.jpg" alt="من مشاركة فريق ميدلايف في أنشطة ومؤتمرات الرعاية الصحية" fetchpriority="high">
         <div class="oc-photo-caption"><strong>معاً نصنع الأثر</strong><span>كل عضو… قصة تستحق التقدير</span></div>
       </div>
+    </section>
+
+    <section class="oc-section" aria-labelledby="oc-upcoming-title">
+      <div class="oc-section-head">
+        <div class="oc-section-title">
+          <span class="oc-section-icon" aria-hidden="true">▦</span>
+          <div><h2 id="oc-upcoming-title">المناسبات القادمة</h2><p>أيام عالمية وصحية قريبة يمكن لفريق ميدلايف الاستعداد لها بحملات توعوية وأنشطة مجتمعية.</p></div>
+        </div>
+        <span class="oc-date-pill"><i></i><span id="oc-upcoming-count">أجندة التوعية</span></span>
+      </div>
+      <div id="oc-upcoming" aria-live="polite">
+        <div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ ترتيب الأجندة القادمة</strong><p>نجهّز قائمة الأيام الصحية والتوعوية التالية.</p></div></div>
+      </div>
+      <div class="oc-agenda-note"><span aria-hidden="true">ℹ</span><span>هذه أجندة إرشادية للأيام الدولية والصحية المتداولة. يمكن إضافة المناسبات الخاصة بميدلايف، مثل الأنشطة المحلية والتخرج والتكريم، من لوحة إدارة المناسبات.</span></div>
     </section>
 
     <section class="oc-section" aria-labelledby="oc-birthday-title">
@@ -209,6 +241,59 @@
           '<p class="oc-occasion-description">' + description + '</p>' +
           '<div class="oc-occasion-signature"><img src="/logo.PNG" alt=""><span>مؤسسة ميدلايف الطبية الخيرية التطوعية</span></div></div></article>';
       };
+      const upcomingObservances = [
+        { month: 10, day: 29, title: "اليوم العالمي للسكتة الدماغية", type: "صحة عامة", description: "التوعية بعلامات السكتة الدماغية وأهمية طلب الرعاية الإسعافية بسرعة." },
+        { month: 11, day: 12, title: "اليوم العالمي للالتهاب الرئوي", type: "صحة عامة", description: "التوعية بالوقاية من الالتهاب الرئوي وأعراضه وأهمية الرعاية المبكرة." },
+        { month: 11, day: 14, title: "اليوم العالمي للسكري", type: "توعية صحية", description: "التشجيع على الكشف المبكر والوقاية وتقليل عوامل الخطورة." },
+        { month: 11, day: 15, title: "اليوم العالمي للخداج", type: "صحة الأم والطفل", description: "دعم الأطفال الخدّج وعائلاتهم والتوعية برعاية حديثي الولادة." },
+        { month: 11, day: 17, title: "اليوم العالمي للقضاء على سرطان عنق الرحم", type: "صحة المرأة", description: "التوعية بالوقاية والتطعيم والكشف المبكر." },
+        { month: 11, day: 18, endMonth: 11, endDay: 24, title: "الأسبوع العالمي للتوعية بمقاومة مضادات الميكروبات", type: "مكافحة العدوى", description: "تعزيز الاستخدام المسؤول للمضادات والوقاية من العدوى وفق نهج الصحة الواحدة." },
+        { month: 11, day: 20, title: "اليوم العالمي للطفل", type: "حقوق وصحة الطفل", description: "التذكير بحق الأطفال في الصحة والحماية والرعاية والنماء." },
+        { month: 11, day: 25, title: "اليوم الدولي للقضاء على العنف ضد المرأة", type: "حماية وصحة مجتمعية", description: "تعزيز الوعي بالوقاية من العنف وتوفير الدعم الآمن للمتضررات." },
+        { month: 12, day: 1, title: "اليوم العالمي للإيدز", type: "صحة عامة", description: "نشر الوعي بالوقاية والفحص ومكافحة الوصمة والتمييز." },
+        { month: 12, day: 3, title: "اليوم الدولي للأشخاص ذوي الإعاقة", type: "شمول وإتاحة", description: "التأكيد على الكرامة وتكافؤ الفرص وإتاحة الخدمات الصحية للجميع." },
+        { month: 12, day: 5, title: "اليوم الدولي للمتطوعين", type: "تطوع ومجتمع", description: "الاحتفاء بعطاء المتطوعين وأثرهم في خدمة المجتمع والتنمية." },
+        { month: 12, day: 10, title: "يوم حقوق الإنسان", type: "حقوق إنسان", description: "تعزيز الكرامة والمساواة والحقوق الأساسية للجميع." },
+        { month: 12, day: 12, title: "اليوم الدولي للتغطية الصحية الشاملة", type: "أنظمة صحية", description: "الدعوة إلى خدمات صحية جيدة ومتاحة دون مشقة مالية." },
+        { month: 12, day: 18, title: "اليوم العالمي للغة العربية", type: "ثقافة ولغة", description: "الاحتفاء باللغة العربية ودورها في التواصل والمعرفة." }
+      ];
+      const damascusToday = () => {
+        const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Damascus", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+        const value = key => Number(parts.find(part => part.type === key)?.value || 0);
+        return new Date(Date.UTC(value("year"), value("month") - 1, value("day"), 12));
+      };
+      const agendaDate = (year, month, day) => new Date(Date.UTC(year, month - 1, day, 12));
+      const formatAgendaDate = date => new Intl.DateTimeFormat("ar-SY", {day:"numeric", month:"long", timeZone:"UTC"}).format(date);
+      function renderUpcomingObservances() {
+        const root = document.getElementById("oc-upcoming");
+        const today = damascusToday();
+        const year = today.getUTCFullYear();
+        const tomorrowBoundary = agendaDate(year, today.getUTCMonth() + 1, today.getUTCDate());
+        const upcoming = upcomingObservances.map(item => {
+          const startThisYear = agendaDate(year, item.month, item.day);
+          const start = startThisYear < today ? agendaDate(year + 1, item.month, item.day) : startThisYear;
+          const end = item.endMonth ? agendaDate(start.getUTCFullYear(), item.endMonth, item.endDay) : start;
+          const days = Math.round((start - today) / 86400000);
+          return { ...item, start, end, days };
+        }).sort((a,b) => a.start - b.start);
+        const nextYear = upcoming.filter(item => item.start.getUTCFullYear() === year);
+        document.getElementById("oc-upcoming-count").textContent = nextYear.length.toLocaleString("ar-SY") + " مناسبة قادمة";
+        if (!upcoming.length) {
+          state(root, "لا توجد مناسبات قريبة", "سيتم تحديث الأجندة مع اقتراب الأيام الدولية والصحية.");
+          return;
+        }
+        root.innerHTML = '<div class="oc-upcoming-grid">' + upcoming.map(item => {
+          const currentlyRunning = item.end < today ? false : item.start <= today && item.end >= today;
+          const countdown = item.days === 0 ? "اليوم" : item.days === 1 ? "غداً" : "بعد " + item.days.toLocaleString("ar-SY") + " يوم";
+          const range = item.end > item.start ? formatAgendaDate(item.start) + " – " + formatAgendaDate(item.end) : formatAgendaDate(item.start);
+          return '<article class="oc-upcoming-card">' +
+            '<div class="oc-upcoming-date"><strong>' + item.day.toLocaleString("ar-SY") + '</strong><span>' + escapeHtml(new Intl.DateTimeFormat("ar-SY",{month:"long",timeZone:"UTC"}).format(item.start)) + '</span></div>' +
+            '<div class="oc-upcoming-copy"><h3>' + escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.description) + '</p>' +
+            '<div class="oc-upcoming-meta"><span class="oc-upcoming-kind">' + escapeHtml(item.type) + '</span>' +
+            '<span class="oc-upcoming-countdown' + (item.days === 0 ? ' is-today' : currentlyRunning ? ' is-current' : '') + '">' + escapeHtml(countdown) + '</span></div></div></article>';
+        }).join("") + '</div>';
+      }
+
       async function loadBirthdays() {
         birthdayRoot.innerHTML = '<div class="oc-state"><span class="oc-state-symbol">…</span><div><strong>جارٍ تحميل أعياد الميلاد</strong><p>يتم تحميل مناسبات اليوم من قاعدة بيانات الأعضاء.</p></div></div>';
         try {
@@ -245,6 +330,7 @@
         }
       }
       document.getElementById("oc-today-label").textContent = new Intl.DateTimeFormat("ar-SY",{timeZone:"Asia/Damascus",weekday:"long",day:"numeric",month:"long"}).format(new Date());
+      renderUpcomingObservances();
       document.getElementById("oc-year").textContent = String(new Date().getFullYear());
       void loadBirthdays();
       void loadOccasions();
