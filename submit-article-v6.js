@@ -35,12 +35,18 @@ async function handleRichPaste(event){
   if(selection&&selection.rangeCount)savedRange=selection.getRangeAt(0).cloneRange();
   const holder=document.createElement('div');
   if(html)holder.innerHTML=html;
-  else holder.innerHTML=plain.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
+  else holder.innerHTML=window.MedLifeArticlePaste
+    ? window.MedLifeArticlePaste.plainTextToArticleHtml(plain)
+    : plain.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
   holder.querySelectorAll('script,style,iframe,object,embed,form,meta,link,xml').forEach(n=>n.remove());
-  holder.querySelectorAll('p[class],div[class]').forEach(node=>{
-    const cls=String(node.getAttribute('class')||'').toLowerCase(),match=cls.match(/msoheading([1-6])/);
-    if(match){const tag=Number(match[1])<=2?'h2':'h3',replacement=document.createElement(tag);replacement.innerHTML=node.innerHTML;node.replaceWith(replacement)}
-  });
+  if(window.MedLifeArticlePaste){
+    window.MedLifeArticlePaste.normalizeImportedArticleHeadings(holder);
+  }else{
+    holder.querySelectorAll('p[class],div[class]').forEach(node=>{
+      const cls=String(node.getAttribute('class')||'').toLowerCase(),match=cls.match(/msoheading([1-6])/);
+      if(match){const tag=Number(match[1])<=2?'h2':'h3',replacement=document.createElement(tag);replacement.innerHTML=node.innerHTML;node.replaceWith(replacement)}
+    });
+  }
   const embedded=[...holder.querySelectorAll('img')].filter(img=>/^data:image\//i.test(img.getAttribute('src')||''));
   if(embedded.length){
     if(!$('title_ar').value.trim()||!$('author_name').value.trim()){

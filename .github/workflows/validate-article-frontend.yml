@@ -7,6 +7,8 @@ on:
       - "article-reader-v8.html"
       - "submit-article-v6.html"
       - "submit-article-v6.js"
+      - "js/medical-article-paste.js"
+      - "tests/medical-article-paste.test.cjs"
       - "functions/articles/**"
       - "functions/api/management.js"
       - ".github/workflows/validate-article-frontend.yml"
@@ -17,6 +19,8 @@ on:
       - "article-reader-v8.html"
       - "submit-article-v6.html"
       - "submit-article-v6.js"
+      - "js/medical-article-paste.js"
+      - "tests/medical-article-paste.test.cjs"
       - "functions/articles/**"
       - "functions/api/management.js"
       - ".github/workflows/validate-article-frontend.yml"
@@ -62,16 +66,21 @@ jobs:
             });
           }
 
-          try {
-            new Function(fs.readFileSync("submit-article-v6.js", "utf8"));
-            console.log("OK: submit-article-v6.js");
-          } catch (error) {
-            failed = true;
-            console.error("ERROR: submit-article-v6.js", error.message);
+          for (const file of ["submit-article-v6.js", "js/medical-article-paste.js"]) {
+            try {
+              new Function(fs.readFileSync(file, "utf8"));
+              console.log("OK:", file);
+            } catch (error) {
+              failed = true;
+              console.error("ERROR:", file, error.message);
+            }
           }
 
           if (failed) process.exit(1);
           NODE
+
+      - name: Test public article paste formatter
+        run: node --test tests/medical-article-paste.test.cjs
 
       - name: Check Cloudflare Pages function modules
         run: |
