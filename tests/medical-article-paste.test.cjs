@@ -4,8 +4,8 @@ const { detectPastedHeading, plainTextToArticleHtml } = require("../js/medical-a
 
 test("normalizes pasted paragraphs and mixed line endings", () => {
   assert.equal(
-    plainTextToArticleHtml("مقدمة\r\nسطر تابع\r\n\r\nفقرة ثانية"),
-    "<p>مقدمة سطر تابع</p><p>فقرة ثانية</p>",
+    plainTextToArticleHtml("هذا نص\r\nسطر تابع\r\n\r\nفقرة ثانية"),
+    "<p>هذا نص سطر تابع</p><p>فقرة ثانية</p>",
   );
 });
 
