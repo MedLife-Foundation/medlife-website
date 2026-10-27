@@ -19,6 +19,8 @@ on:
       - "article-reader-v8.html"
       - "submit-article-v6.html"
       - "submit-article-v6.js"
+      - "js/medical-article-paste.js"
+      - "tests/medical-article-paste.test.cjs"
       - "functions/articles/**"
       - "functions/api/management.js"
       - ".github/workflows/validate-article-frontend.yml"
