@@ -2308,7 +2308,11 @@ textarea{min-height:108px}
       }
       setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
       const p=await window.medlifeSubmitMembership(data,schema,units,formKey);
-      setStatus("ok","تم حفظ بياناتك وإصدار بطاقة عضويتك بنجاح.");
+      if(!p?.membership_number || !String(p.membership_number).trim()){
+        setStatus("err","تم استلام البيانات، لكن تعذر تأكيد رقم العضوية الآن. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة.");
+        return;
+      }
+      setStatus("ok","تم تسجيل بياناتك وإصدار رقم عضويتك. يجري إرسال بطاقة العضوية إلى بريدك الإلكتروني.");
       renderConfirmation(data,p.submission_id,p.membership_number);
       window.scrollTo({top:0,behavior:"smooth"});
     }catch(e){
