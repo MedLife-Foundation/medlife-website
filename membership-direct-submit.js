@@ -192,6 +192,26 @@
     };
   }
 
+  async function provisionVolunteerAccount(result,data,formKey){
+    if(formKey!=="membership_renewal"||!result?.submission_id||!result?.membership_number)return result;
+    try{
+      const response=await fetch(SUPABASE_URL+"/functions/v1/provision-volunteer-account",{
+        method:"POST",
+        headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json",Accept:"application/json"},
+        body:JSON.stringify({
+          submission_id:result.submission_id,
+          email:str(data?.email).toLowerCase(),
+          membership_number:result.membership_number
+        })
+      });
+      const raw=await response.text();
+      let body={};try{body=raw?JSON.parse(raw):{}}catch(_){}
+      return {...result,account:{success:Boolean(response.ok&&body.success),status:body.account_status||"failed",error:body.error||""}};
+    }catch(error){
+      return {...result,account:{success:false,status:"unavailable",error:"تعذر إنشاء حساب الدخول تلقائياً."}};
+    }
+  }
+
   window.medlifeSubmitMembership=async function(data,schema,units,formKey){
     const payload=build(data,schema,units,formKey,crypto.randomUUID());
     const requestBody={
@@ -204,26 +224,27 @@
     // 1) Dedicated public route, intentionally outside /api.
     const dedicated=await submitViaServer("/membership-submit",requestBody);
     if(dedicated.ok){
-      return {
+      return await provisionVolunteerAccount({
         submission_id:dedicated.body.submission_id,
         membership_number:dedicated.body.membership_number||null
-      };
+      },data,formKey);
     }
 
     // 2) Existing management route for backwards compatibility.
     const management=await submitViaServer("/api/management",requestBody);
     if(management.ok){
-      return {
+      return await provisionVolunteerAccount({
         submission_id:management.body.submission_id,
         membership_number:management.body.membership_number||null
-      };
+      },data,formKey);
     }
 
     // 3) Last resort: the membership table explicitly exposes a restricted
     // public insert policy (pending + public_website). This bypasses any
     // Cloudflare path/WAF issue while keeping the write scoped by RLS.
     try{
-      return await submitViaSupabase(payload);
+      const result=await submitViaSupabase(payload);
+      return await provisionVolunteerAccount(result,data,formKey);
     }catch(fallbackError){
       const firstDetail=str(dedicated.body?.error||dedicated.body?.message);
       const secondDetail=str(management.body?.error||management.body?.message);
