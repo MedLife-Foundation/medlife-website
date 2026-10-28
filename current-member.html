@@ -300,7 +300,7 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .id-card-main{padding:clamp(9px,2vw,18px) clamp(12px,2.8vw,25px);grid-template-columns:clamp(72px,12vw,112px) minmax(0,1fr);gap:clamp(9px,1.8vw,18px);align-items:stretch;min-height:0}
 .id-photo{min-width:0;padding:8px;border-radius:13px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px}
 .id-photo-image{width:clamp(42px,7.2vw,66px);height:clamp(42px,7.2vw,66px);border-radius:50%;overflow:hidden;border:2px solid #fff;box-shadow:0 0 0 1px #e1e6ee;flex:0 0 auto}
-.id-photo-image .id-profile-image{width:100%;height:100%;display:block;object-fit:cover}
+.id-photo-image{position:relative}.id-photo-image .id-profile-image{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block;object-fit:cover}
 .id-photo-image .id-initials{width:100%;height:100%;margin:0;font-size:clamp(14px,2vw,20px)}
 .id-photo strong{font-size:clamp(7px,1.2vw,11px);line-height:1.45;overflow-wrap:anywhere}
 .id-photo>span{font-size:clamp(6px,.9vw,8px);color:var(--muted)}
@@ -2206,9 +2206,8 @@ textarea{min-height:108px}
         '<div class="id-status">عضوية فعّالة</div>'+
       '</div>';
 
-    const profileImageHtml=profileImageUrl
-      ? '<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous" onerror="this.hidden=true">'
-      : '<div class="id-initials">'+esc(initials(cardName))+'</div>';
+    const profileImageHtml='<div class="id-initials">'+esc(initials(cardName))+'</div>'+
+      (profileImageUrl ? '<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous" onerror="this.hidden=true">' : '');
 
     confirmation.innerHTML=`
       <div class="card-capture" data-card-capture>
