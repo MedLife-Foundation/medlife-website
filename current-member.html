@@ -1193,7 +1193,7 @@ textarea{min-height:108px}
   function collect(){
     const out={};
     new FormData(form).forEach((value,key)=>{
-      if(/^unit_(role|role_started|role_continuing|role_left|joined|continuing|left|notes)_/.test(key)||/^content_assignment_/.test(key)||key==="current_units")return;
+      if(/^unit_(role|role_started|role_continuing|role_left|joined|continuing|left|notes)_/.test(key)||/^content_assignment_/.test(key)||/^language_assignment(_level|_other)?_/.test(key)||/^certificate_history_(type|title|issuer|date|unit|reference|notes)_/.test(key)||key==="current_units")return;
       if(Object.prototype.hasOwnProperty.call(out,key))out[key]=Array.isArray(out[key])?out[key].concat(value):[out[key],value];
       else out[key]=value;
     });
@@ -2108,8 +2108,11 @@ textarea{min-height:108px}
         const certificateUnitId=String(item?.issuing_unit_id||"").trim();
         const certificateUnit=units.find(u=>String(u.id)===certificateUnitId);
         const certificateUnitName=certificateUnit?.name_ar||certificateUnit?.name_en||"غير مرتبطة بوحدة";
+        const certificateTypeField=fields.find(f=>f.field_key==="certificate_types");
+        const certificateType=(certificateTypeField?.options||[]).find(option=>String(option.value)===String(item.type||""));
+        const certificateTypeLabel=certificateType?.label_ar||certificateType?.label_en||item.type||"نوع غير محدد";
         return '<div class="confirm-item"><span>شهادة '+(index+1)+'</span><strong>'+
-          esc(item.title||"—")+" — "+esc(item.issuing_organization||"—")+" — "+
+          esc(certificateTypeLabel)+" — "+esc(item.title||"—")+" — "+esc(item.issuing_organization||"—")+" — "+
           esc(item.issued_date||"—")+" — الوحدة: "+esc(certificateUnitName)+
           (item.reference_code?" — المرجع: "+esc(item.reference_code):"")+
           '</strong></div>';
