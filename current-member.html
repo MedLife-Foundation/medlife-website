@@ -286,6 +286,35 @@ header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0
 .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}button,.btn{border:0;border-radius:14px;padding:13px 22px;font:inherit;font-weight:900;cursor:pointer;text-decoration:none}.btn-primary{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;min-width:240px}.btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}button:disabled{opacity:.55;cursor:not-allowed}
 .status{display:none;margin-top:17px;padding:14px;border-radius:14px;text-align:center;font-size:12px;line-height:1.8}.status.show{display:block}.status.ok{background:var(--okbg);color:var(--ok);border:1px solid #bcebd9}.status.err{background:var(--errbg);color:var(--err);border:1px solid #ffd0d8}.hidden{display:none!important}.footer{text-align:center;color:#98a2b3;font-size:10px;padding-bottom:40px}
 .confirmation{padding:10px 0 50px}.id-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 70px rgba(21,29,54,.10);overflow:hidden}.id-card-top{padding:25px 28px;background:linear-gradient(135deg,#151d36,#263150);color:#fff;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.id-brand{display:flex;align-items:center;gap:12px}.id-brand img{height:42px;width:auto;background:#fff;border-radius:10px;padding:4px}.id-brand strong{display:block;font-size:17px}.id-brand span{display:block;font-size:10px;opacity:.75;margin-top:2px}.id-status{padding:8px 12px;border-radius:999px;background:#fff3e6;color:#8b4b12;font-size:10px;font-weight:900;white-space:nowrap}.id-card-main{padding:24px 28px;display:grid;grid-template-columns:170px 1fr;gap:24px;align-items:start}.id-photo{border:1px solid var(--line);border-radius:20px;padding:18px;text-align:center;background:var(--soft)}.id-initials{width:92px;height:92px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#fff0f3;color:var(--red);font-size:28px;font-weight:900}.id-photo strong{display:block;color:var(--navy);font-size:14px;line-height:1.7}.id-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.id-meta>div,.confirm-item{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}.id-meta span,.confirm-item span{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}.id-meta strong,.confirm-item strong{display:block;color:var(--navy);font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-word}.confirmation-note{margin:16px 28px 0;padding:15px 17px;border-radius:15px;background:#effaf5;color:#126047;border:1px solid #bcebd9;font-size:11px;line-height:1.9}.confirm-section{padding:22px 28px;border-top:1px solid var(--line)}.confirm-section h3{margin:0 0 5px;color:var(--navy);font-size:16px}.confirm-section>p{margin:0 0 14px;color:var(--muted);font-size:10px}.confirm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.confirm-grid .wide{grid-column:1/-1}.confirm-units{display:grid;gap:10px}.confirm-unit{border:1px solid #ffd9e1;border-radius:15px;background:#fffafb;padding:13px}.confirm-unit-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}.confirm-unit-head strong{font-size:12px;color:var(--navy)}.confirm-unit-head span{font-size:9px;color:var(--red);font-weight:900;background:#fff0f3;border-radius:999px;padding:5px 8px}.confirm-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:24px 28px 28px;border-top:1px solid var(--line)}.download-btn{min-width:205px;background:#151d36;color:#fff}.download-btn.pdf{background:linear-gradient(135deg,#e83255,#ff7185)}.download-btn:disabled{opacity:.55;cursor:wait}.download-status{width:100%;text-align:center;color:var(--muted);font-size:10px;margin-top:2px}.card-capture{background:#fff}.confirm-thanks{padding:24px 28px;border-top:1px solid var(--line);text-align:center;background:#fbfcfe}.confirm-thanks h3{margin:0 0 8px;color:var(--navy);font-size:19px}.confirm-thanks p{margin:0 auto;color:var(--muted);font-size:11px;line-height:2;max-width:760px}
+.id-card{width:min(100%,860px);margin-inline:auto;aspect-ratio:85.6/54;display:grid;grid-template-rows:auto minmax(0,1fr) auto;border-radius:18px;position:relative;background:linear-gradient(135deg,#fff 0%,#f9fafc 100%);min-height:0}
+.id-card:after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.4);border-radius:inherit;pointer-events:none}
+.id-card-top{min-height:0;padding:clamp(10px,2.2vw,20px) clamp(12px,2.8vw,25px);align-items:center;gap:12px}
+.id-brand{min-width:0;align-items:center;gap:10px}
+.id-brand img{width:clamp(28px,4.5vw,42px);height:clamp(28px,4.5vw,42px);object-fit:contain;flex:0 0 auto}
+.id-brand strong{font-size:clamp(9px,1.6vw,15px);line-height:1.5;max-width:300px}
+.id-brand span{font-size:clamp(7px,1vw,10px)}
+.id-card-number{min-width:132px;text-align:left;direction:ltr}
+.id-card-number>span{display:block;font-size:clamp(7px,.95vw,9px);opacity:.78;letter-spacing:.04em}
+.id-card-number>strong{display:block;font-size:clamp(12px,2.2vw,21px);font-weight:900;letter-spacing:.05em;white-space:nowrap}
+.id-status{display:inline-block;margin-top:5px;padding:4px 8px;font-size:clamp(7px,.95vw,9px)}
+.id-card-main{padding:clamp(9px,2vw,18px) clamp(12px,2.8vw,25px);grid-template-columns:clamp(72px,12vw,112px) minmax(0,1fr);gap:clamp(9px,1.8vw,18px);align-items:stretch;min-height:0}
+.id-photo{min-width:0;padding:8px;border-radius:13px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.id-photo-image{width:clamp(42px,7.2vw,66px);height:clamp(42px,7.2vw,66px);border-radius:50%;overflow:hidden;border:2px solid #fff;box-shadow:0 0 0 1px #e1e6ee;flex:0 0 auto}
+.id-photo-image .id-profile-image{width:100%;height:100%;display:block;object-fit:cover}
+.id-photo-image .id-initials{width:100%;height:100%;margin:0;font-size:clamp(14px,2vw,20px)}
+.id-photo strong{font-size:clamp(7px,1.2vw,11px);line-height:1.45;overflow-wrap:anywhere}
+.id-photo>span{font-size:clamp(6px,.9vw,8px);color:var(--muted)}
+.id-meta{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(5px,.9vw,8px);align-content:center;min-width:0}
+.id-meta>div{min-height:0;padding:clamp(5px,.9vw,9px);border-radius:9px;overflow:hidden}
+.id-meta span{font-size:clamp(6px,.85vw,8px);margin-bottom:2px}
+.id-meta strong{font-size:clamp(7px,1.05vw,10px);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.id-meta .id-meta-wide{grid-column:span 2}
+.id-card-bottom{padding:8px clamp(12px,2.8vw,25px);display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f0f3f8;color:#667085;font-size:clamp(6px,.85vw,8px);line-height:1.4}
+.record-details{border:1px solid var(--line);border-radius:13px;background:#fff;overflow:hidden}
+.record-details summary{padding:13px 15px;cursor:pointer;font-weight:800;color:var(--navy);list-style-position:inside}
+.record-details[open] summary{border-bottom:1px solid var(--line);background:#f9fafc}
+.record-details-grid{padding:12px}
+@media(max-width:650px){.id-card{border-radius:12px}.id-card-top{padding:8px 10px;gap:6px}.id-brand{gap:6px}.id-brand img{width:25px;height:25px;padding:2px}.id-brand strong{font-size:7px;max-width:125px}.id-brand span{font-size:6px}.id-card-number{min-width:86px}.id-card-number>strong{font-size:11px}.id-status{padding:2px 5px;font-size:6px;margin-top:2px}.id-card-main{padding:7px 9px;grid-template-columns:55px minmax(0,1fr);gap:7px}.id-photo{padding:4px;border-radius:7px;gap:3px}.id-photo-image{width:32px;height:32px}.id-photo strong{font-size:6px}.id-photo>span{font-size:5px}.id-meta{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.id-meta>div{padding:4px;border-radius:6px}.id-meta span{font-size:5.5px}.id-meta strong{font-size:6.5px;line-height:1.25;-webkit-line-clamp:2}.id-meta .id-meta-wide{grid-column:1/-1}.id-card-bottom{padding:4px 9px;font-size:5px;gap:4px}.confirm-section{padding:17px 14px}.confirmation-note{margin:0 14px}.confirm-actions{padding:18px 12px}}
 @media print{header,.hero,.footer,.confirm-actions{display:none!important}body{background:#fff}.wrap{width:100%}.confirmation{padding:0}.id-card{box-shadow:none;border:1px solid #d9dde5}.id-card-top{background:#fff!important;color:#151d36!important}.id-status{border:1px solid #f0cf9d}.confirm-section,.confirmation-note,.confirm-thanks{break-inside:avoid}}
 
 @media(max-width:800px){.unit-choices{grid-template-columns:repeat(2,minmax(0,1fr)}}@media(max-width:650px){.grid,.choice-grid,.unit-card-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.unit-choices{grid-template-columns:1fr}.card{padding:19px}.nav{min-height:64px}.logo{height:42px}.hero{padding-top:36px}}
@@ -2078,27 +2107,23 @@ textarea{min-height:108px}
 
     const unitCards=unitRows.map(({u,d})=>{
       const isAdmin=String(u.unit_type)==="other";
-      const role=roleTextByValue[d.role]||d.role||"عضو / متطوع";
+      const role=roleTextByValue[d.role]||d.role||"متطوع / عضو";
       const position=positionTextFor(d);
       const roleLine=isAdmin?"المنصب: "+position:"الدور: "+role;
-      const startedLine=(isAdmin?"بدء المنصب: ":"بدء الدور: ")+(d.role_started_on||"—");
-      const continuationLine=d.role_continuing
-        ?"الدور مستمر"
-        :"انتهى الدور"+(d.role_left_on?" في "+d.role_left_on:"");
-      const note=d.notes
-        ?'<div class="help" style="margin-top:7px">'+esc(d.notes)+'</div>'
-        :"";
-
-      return '<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+
-        esc(u.name_ar||u.name_en||"الوحدة")+
-        '</strong><span>'+esc(typeLabel(u.unit_type))+'</span></div>'+
-        '<div class="confirm-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">'+
+      const membershipState=d.continuing===true||d.continuing==="true"?"عضوية مستمرة":"انتهت العضوية";
+      const note=d.notes?'<div class="help" style="margin-top:7px">'+esc(d.notes)+'</div>':"";
+      const common=
         '<div class="confirm-item"><span>الصفة / الدور</span><strong>'+esc(roleLine)+'</strong></div>'+
-        '<div class="confirm-item"><span>تاريخ البداية</span><strong>'+esc(startedLine)+'</strong></div>'+
-        '<div class="confirm-item"><span>الحالة</span><strong>'+esc(continuationLine)+'</strong></div>'+
-        (d.role_left_on?'<div class="confirm-item"><span>تاريخ انتهاء الدور</span><strong>'+esc(d.role_left_on)+'</strong></div>':"")+
-        (d.left_on?'<div class="confirm-item"><span>تاريخ مغادرة الوحدة</span><strong>'+esc(d.left_on)+'</strong></div>':"")+
-        '</div>'+note+'</div>';
+        '<div class="confirm-item"><span>تاريخ الانضمام إلى الوحدة</span><strong>'+esc(d.joined_on||"—")+'</strong></div>'+
+        '<div class="confirm-item"><span>حالة العضوية</span><strong>'+esc(membershipState)+'</strong></div>'+
+        (d.left_on?'<div class="confirm-item"><span>تاريخ مغادرة الوحدة</span><strong>'+esc(d.left_on)+'</strong></div>':"");
+      const roleHistory=isSupervisorForm()
+        ?'<div class="confirm-item"><span>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء الدور")+'</span><strong>'+esc(d.role_started_on||"—")+'</strong></div>'+
+          '<div class="confirm-item"><span>حالة الدور</span><strong>'+esc(d.role_continuing?"الدور مستمر":"انتهى الدور"+(d.role_left_on?" في "+d.role_left_on:""))+'</strong></div>'+
+          (d.role_left_on?'<div class="confirm-item"><span>تاريخ انتهاء الدور</span><strong>'+esc(d.role_left_on)+'</strong></div>':"")
+        :"";
+      return '<div class="confirm-unit"><div class="confirm-unit-head"><strong>'+esc(u.name_ar||u.name_en||"الوحدة")+'</strong><span>'+esc(typeLabel(u.unit_type))+'</span></div>'+
+        '<div class="confirm-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">'+roleHistory+common+'</div>'+note+'</div>';
     }).join("");
 
     const baseName=String(values.full_name||"عضو ميدلايف").trim().replace(/\s+/g," ");
@@ -2162,8 +2187,8 @@ textarea{min-height:108px}
 
     const cardMeta=
       '<div class="id-card-number">'+
-        '<span>MEMBERSHIP NUMBER</span>'+
-        '<strong>'+esc(membershipNumber||"—")+'</strong>'+
+        '<span>رقم العضوية</span>'+
+        '<strong dir="ltr">'+esc(membershipNumber||"—")+'</strong>'+
         '<div class="id-status">عضوية فعّالة</div>'+
       '</div>';
 
@@ -2172,10 +2197,10 @@ textarea{min-height:108px}
         '<div class="id-card">'+
           '<div class="id-card-top">'+
             '<div class="id-brand">'+
-              '<img src="logo.PNG" alt="MedLife">'+
+              '<img src="/logo.PNG" alt="MedLife" onerror="this.hidden=true">'+
               '<div>'+
                 '<strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong>'+
-                '<span>'+esc(isSupervisorForm()?"بطاقة عضوية المشرف":"بطاقة العضوية")+'</span>'+
+                '<span>'+esc(isSupervisorForm()?"بطاقة عضوية إشرافية":"بطاقة العضوية الرسمية")+'</span>'+
               '</div>'+
             '</div>'+
             cardMeta+
@@ -2184,47 +2209,42 @@ textarea{min-height:108px}
             '<div class="id-photo">'+
               '<div class="id-photo-image">'+
                 (profileImageUrl
-                  ?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous">'
+                  ?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'id-initials\',textContent:'+JSON.stringify(initials(cardName))+'}))">'
                   :'<div class="id-initials">'+esc(initials(cardName))+'</div>')+
               '</div>'+
               '<strong data-card-name>'+esc(cardName)+'</strong>'+
-              '<span>بطاقة عضوية رسمية</span>'+
+              '<span>عضو في مؤسسة ميدلايف</span>'+
             '</div>'+
             '<div class="id-meta">'+
               (isSupervisorForm()
-                ?'<div class="id-meta-supervisor"><span>المنصب / الدور</span><strong>'+esc(supervisorPositionText)+'</strong></div>'
-                :'<div><span>الصفة</span><strong>عضو / متطوع</strong></div>')+
-              '<div class="id-meta-wide"><span>الوحدات والأدوار</span><strong>'+esc(roleSummary)+'</strong></div>'+
+                ?'<div><span>الصفة / المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>'
+                :'<div><span>الصفة</span><strong>متطوع / عضو</strong></div>')+
+              '<div class="id-meta-wide"><span>الوحدات / الفرق</span><strong>'+esc(unitSummary)+'</strong></div>'+
               '<div><span>المؤهل والجامعة</span><strong>'+esc(educationSummary)+'</strong></div>'+
-              '<div><span>المهنة والاختصاص</span><strong>'+esc(professionAndSpecialty)+'</strong></div>'+
-              '<div><span>المحافظة / المدينة</span><strong>'+esc(locationText)+'</strong></div>'+
-              '<div><span>تاريخ الانضمام</span><strong>'+esc(values.join_date||"—")+'</strong></div>'+
-              (supervisorStartDate?'<div><span>بداية الإشراف</span><strong>'+esc(supervisorStartDate)+'</strong></div>':"")+
-              '<div class="id-meta-status"><span>حالة العضوية</span><strong>سارية وفعّالة</strong></div>'+
-              '<div><span>إجمالي التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
-              '<div><span>الالتزام الأسبوعي</span><strong>'+esc(weeklyHours)+(weeklyHours!=="—"?" ساعة":"")+'</strong></div>'+
-              '<div><span>اللغات</span><strong>'+esc(String(languageCount))+'</strong></div>'+
+              '<div><span>المهنة / الاختصاص</span><strong>'+esc(professionAndSpecialty)+'</strong></div>'+
+              '<div><span>الموقع</span><strong>'+esc(locationText)+'</strong></div>'+
+              '<div><span>تاريخ الانضمام إلى ميدلايف</span><strong>'+esc(values.join_date||"—")+'</strong></div>'+
+              '<div><span>ساعات التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
               '<div><span>الشهادات</span><strong>'+esc(String(certificateCount))+'</strong></div>'+
-              '<div><span>تاريخ الإصدار</span><strong>'+esc(new Date().toLocaleDateString("ar-SY"))+'</strong></div>'+
             '</div>'+
           '</div>'+
           '<div class="id-card-bottom">'+
-            '<span>MedLife Medical Voluntary Charity Foundation · www.medlifesy.org</span>'+
-            '<span>رمز الطلب: <strong>'+esc((submissionId||"—").replace(/-/g,"").slice(-10))+'</strong></span>'+
+            '<span>MedLife · مؤسسة ميدلايف الطبية الخيرية التطوعية · medlifesy.org</span>'+
+            '<span>صدرت في '+esc(new Date().toLocaleDateString("ar-SY"))+'</span>'+
           '</div>'+
         '</div>'+
       '</div>'+
       '<div class="confirmation-details">'+
-        '<div class="confirmation-note">تم حفظ بياناتك بنجاح، وتطبيق البيانات على السجل المركزي، وإصدار رقم العضوية الخاص بك.</div>'+
+        '<div class="confirmation-note">تم حفظ بياناتك بنجاح وتحديث سجل العضوية المركزي. رقم العضوية المخصص لك ظاهر على البطاقة أعلاه.</div>'+
         '<section class="confirm-section">'+
           '<h3>بيانات العضوية الأساسية</h3>'+
-          '<p>هذه هي المعلومات الأساسية المعتمدة لملف العضو وبطاقة العضوية.</p>'+
+          '<p>المعلومات الأساسية التي تم تسجيلها في ملفك.</p>'+
           '<div class="confirm-grid">'+detailItemsHtml+'</div>'+
         '</section>'+
         '<section class="confirm-section">'+
-          '<h3>كامل البيانات التي تم تسجيلها</h3>'+
-          '<p>جميع الإجابات المرسلة في نموذج التحديث.</p>'+
-          '<div class="confirm-grid">'+profileRecordHtml+'</div>'+
+          '<h3>كامل الإجابات المسجلة في النموذج</h3>'+
+          '<p>هذه التفاصيل محفوظة في سجلك ويمكن الرجوع إليها عند الحاجة.</p>'+
+          '<details class="record-details"><summary>عرض جميع الإجابات المسجلة</summary><div class="confirm-grid record-details-grid">'+profileRecordHtml+'</div></details>'+
         '</section>'+
         '<section class="confirm-section">'+
           '<h3>اللغات</h3>'+
@@ -2238,21 +2258,18 @@ textarea{min-height:108px}
         '</section>'+
         '<section class="confirm-section">'+
           '<h3>العضوية داخل ميدلايف</h3>'+
-          '<p>تفاصيل كل خلية أو قسم أو فريق أو منصب إداري تم تحديده في النموذج.</p>'+
+          '<p>تواريخ الانتساب إلى الوحدات منفصلة عن الأدوار الإشرافية.</p>'+
           '<div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div>'+
         '</section>'+
-        '<div class="confirm-thanks">'+
-          '<h3>أهلًا بك في ميدلايف ❤️</h3>'+
-          '<p>تم تثبيت عضويتك وتحديث سجلك المركزي بنجاح. بطاقة العضوية أعلاه تمثل هويتك العضوية الرسمية لدى ميدلايف.</p>'+
-        '</div>'+
+        '<div class="confirm-thanks"><h3>أهلًا بك في ميدلايف ❤️</h3><p>نتمنى لك تجربة تطوعية مثمرة ومؤثرة.</p></div>'+
       '</div>'+
       '<div class="confirm-actions">'+
         '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل بطاقة العضوية PDF</button>'+
         '<button type="button" class="btn download-btn" id="downloadImage">حفظ بطاقة العضوية كصورة</button>'+
         '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة بطاقة العضوية</button>'+
         '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
-        '<div class="download-status">بطاقة العضوية مصممة للطباعة بحجم 85.6 × 54 مم، بينما يظهر سجل البيانات الكامل أسفلها.</div>'+
-      '</div>';
+        '<div class="download-status">البطاقة مصممة بنسبة أبعاد البطاقة الرسمية 85.6 × 54 مم. بيانات الهوية الحساسة لا تظهر على البطاقة نفسها.</div>'+
+      </div>';
 
     confirmation.classList.remove("hidden");
     formCard.classList.add("hidden");
