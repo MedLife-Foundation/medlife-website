@@ -647,6 +647,15 @@ export async function onRequestPost({ request }) {
             role = "volunteer";
           }
 
+          // Regular volunteers have only the volunteer/member role. Keep the
+          // database timeline internally consistent without asking for a
+          // separate role start/end date in their public form.
+          if (!supervisorForm) {
+            role = "volunteer";
+            roleStartedOn = joinedOn;
+            roleContinuing = continuing;
+          }
+
           return {
             id: String(unit.id),
             name_ar: cleanText(unit.name_ar || unit.name_en, 200),
@@ -776,10 +785,21 @@ export async function onRequestPost({ request }) {
             .slice(0, 30)
         : [];
       const certificateHistory = [];
+      const certificateTypeField = (dynamic.form_schema?.fields || [])
+        .find(field => field.field_key === "certificate_types");
+      const validCertificateTypes = new Set(
+        (Array.isArray(certificateTypeField?.options) ? certificateTypeField.options : [])
+          .map(option => cleanText(option?.value, 60).toLowerCase())
+          .filter(value => value && value !== "none")
+      );
       for (const item of rawCertificateHistory) {
-        // Certificate classification is intentionally not user-configured.
-        // Members enter any certificate by name; internally we store it as "other".
-        const type = "other";
+        // Keep the selected category with the certificate record. Older clients
+        // that do not send a category remain compatible and are stored as "other".
+        const requestedType = cleanText(item.type, 60).toLowerCase();
+        if (requestedType && !validCertificateTypes.has(requestedType)) {
+          return json({ success: false, error: "نوع الشهادة المختار غير صالح." }, 400);
+        }
+        const type = requestedType || "other";
         const title = cleanText(item.title, 500);
         const issuingOrganization = cleanText(item.issuing_organization, 500);
         const issuedDate = normalizeDate(item.issued_date);
