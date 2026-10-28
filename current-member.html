@@ -961,6 +961,44 @@ textarea{min-height:108px}
   .card-capture .id-meta{grid-template-columns:1fr 1fr!important}
   .card-capture .id-card-bottom{align-items:flex-start!important;flex-direction:column!important}
 }
+
+/* Export keeps the official landscape card dimensions regardless of the screen width. */
+.card-capture.is-exporting{
+  width:856px!important;max-width:none!important;padding:0!important;margin:0!important;
+  display:block!important;background:#fff!important;
+}
+.card-capture.is-exporting .id-card{
+  width:856px!important;max-width:none!important;height:540px!important;
+  aspect-ratio:85.6/54!important;border-radius:20px!important;
+}
+.card-capture.is-exporting .id-card-top{
+  min-height:92px!important;padding:17px 22px!important;display:flex!important;
+  flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;
+}
+.card-capture.is-exporting .id-brand{display:flex!important;flex-direction:row!important;align-items:center!important;gap:11px!important}
+.card-capture.is-exporting .id-brand img{width:48px!important;height:48px!important;flex:0 0 48px!important}
+.card-capture.is-exporting .id-card-number{text-align:left!important;direction:ltr!important}
+.card-capture.is-exporting .id-card-number strong{font-size:20px!important}
+.card-capture.is-exporting .id-card-main{
+  height:calc(100% - 126px)!important;min-height:0!important;padding:16px 20px 13px!important;
+  grid-template-columns:170px minmax(0,1fr)!important;gap:18px!important;
+}
+.card-capture.is-exporting .id-photo{padding:9px!important}
+.card-capture.is-exporting .id-photo-image{width:126px!important;height:158px!important;flex:0 0 158px!important}
+.card-capture.is-exporting .id-photo strong{max-width:145px!important;font-size:13px!important}
+.card-capture.is-exporting .id-photo span{font-size:7.5px!important}
+.card-capture.is-exporting .id-meta{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr)!important;gap:7px!important;
+}
+.card-capture.is-exporting .id-meta>div{padding:7px 9px!important}
+.card-capture.is-exporting .id-meta span{font-size:7px!important;line-height:1.35!important}
+.card-capture.is-exporting .id-meta strong{font-size:8.6px!important;line-height:1.55!important}
+.card-capture.is-exporting .id-meta>div:first-child strong{font-size:12px!important}
+.card-capture.is-exporting .id-meta .id-meta-wide{grid-column:1/-1!important}
+.card-capture.is-exporting .id-card-bottom{
+  min-height:34px!important;padding:8px 20px!important;display:flex!important;
+  flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+}
 @media print{
   @page{size:85.6mm 54mm;margin:0}
   html,body{
@@ -1817,6 +1855,16 @@ textarea{min-height:108px}
     return String(v??"").trim();
   }
 
+  function formatCardDate(value){
+    const raw=String(value??"").trim();
+    if(!raw)return"—";
+    const date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw)?raw+"T00:00:00Z":raw);
+    if(Number.isNaN(date.getTime()))return raw;
+    return new Intl.DateTimeFormat("ar-SY",{
+      year:"numeric",month:"short",day:"numeric",timeZone:"Asia/Damascus"
+    }).format(date);
+  }
+
   function downloadName(name,extension){
     const safe=String(name||"عضو-ميدلايف").trim().replace(/[^\\p{L}\\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"عضو-ميدلايف";
     return "بطاقة-عضوية-ميدلايف-"+safe+"."+extension;
@@ -1872,29 +1920,35 @@ textarea{min-height:108px}
     const el=captureElement();
     if(!el)throw new Error("تعذر تجهيز بطاقة العضوية.");
     if(typeof window.html2canvas!=="function")throw new Error("تعذر تحميل أداة الصورة. أعد تحميل الصفحة وحاول مرة أخرى.");
-    if(document.fonts?.ready)await document.fonts.ready;
-    const images=Array.from(el.querySelectorAll("img"));
-    await Promise.all(images.map(async img=>{
-      if(!img.complete){
-        await new Promise(resolve=>{
-          const done=()=>{img.removeEventListener("load",done);img.removeEventListener("error",done);resolve();};
-          img.addEventListener("load",done,{once:true});
-          img.addEventListener("error",done,{once:true});
-        });
-      }
-      if(typeof img.decode==="function"){
-        try{await img.decode();}catch(_){}
-      }
-    }));
-    return window.html2canvas(el,{
-      backgroundColor:"#ffffff",
-      scale:2,
-      useCORS:true,
-      allowTaint:false,
-      logging:false,
-      imageTimeout:15000,
-      removeContainer:true
-    });
+    const wrapper=el.closest(".card-capture");
+    wrapper?.classList.add("is-exporting");
+    try{
+      if(document.fonts?.ready)await document.fonts.ready;
+      const images=Array.from(el.querySelectorAll("img"));
+      await Promise.all(images.map(async img=>{
+        if(!img.complete){
+          await new Promise(resolve=>{
+            const done=()=>{img.removeEventListener("load",done);img.removeEventListener("error",done);resolve();};
+            img.addEventListener("load",done,{once:true});
+            img.addEventListener("error",done,{once:true});
+          });
+        }
+        if(typeof img.decode==="function"){
+          try{await img.decode();}catch(_){}
+        }
+      }));
+      return await window.html2canvas(el,{
+        backgroundColor:"#ffffff",
+        scale:2,
+        useCORS:true,
+        allowTaint:false,
+        logging:false,
+        imageTimeout:15000,
+        removeContainer:true
+      });
+    }finally{
+      wrapper?.classList.remove("is-exporting");
+    }
   }
 
   async function downloadCardImage(button){
@@ -2239,14 +2293,14 @@ textarea{min-height:108px}
               <div><span>المؤهل والجامعة</span><strong>${esc(educationSummary)}</strong></div>
               <div><span>المهنة / الاختصاص</span><strong>${esc(professionAndSpecialty)}</strong></div>
               <div><span>الموقع</span><strong>${esc(locationText)}</strong></div>
-              <div><span>تاريخ الانضمام إلى ميدلايف</span><strong>${esc(values.join_date||"—")}</strong></div>
+              <div><span>تاريخ الانضمام إلى ميدلايف</span><strong>${esc(formatCardDate(values.join_date))}</strong></div>
               <div><span>ساعات التطوع</span><strong>${esc(totalHours)}${totalHours!=="—"?" ساعة":""}</strong></div>
               <div><span>الشهادات</span><strong>${esc(String(certificateCount))}</strong></div>
             </div>
           </div>
           <div class="id-card-bottom">
             <span>MedLife · مؤسسة ميدلايف الطبية الخيرية التطوعية · medlifesy.org</span>
-            <span>صدرت في ${esc(new Date().toLocaleDateString("ar-SY"))}</span>
+            <span>صدرت في ${esc(formatCardDate(new Date().toISOString()))}</span>
           </div>
         </div>
       </div>
