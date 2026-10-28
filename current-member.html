@@ -225,6 +225,30 @@
   }
 
   window.medlifeSubmitMembership=async function(data,schema,units,formKey){
+    // The public membership_renewal link is a data-update form for existing members.
+    // It must never insert a new membership request or provision a new account.
+    if(formKey==="membership_renewal"){
+      const nationalId=str(data?.national_id);
+      const email=str(data?.email).toLowerCase();
+      if(!nationalId||!email) throw new Error("يرجى إدخال الرقم الوطني والبريد الإلكتروني للتحقق من السجل الحالي.");
+      const response=await fetch(SUPABASE_URL+"/rest/v1/rpc/update_existing_member_public",{
+        method:"POST",
+        headers:{
+          apikey:SUPABASE_KEY,
+          Authorization:"Bearer "+SUPABASE_KEY,
+          "Content-Type":"application/json",
+          Accept:"application/json"
+        },
+        body:JSON.stringify({p_national_id:nationalId,p_email:email,p_data:data})
+      });
+      const raw=await response.text();
+      let body={};try{body=raw?JSON.parse(raw):{}}catch(_){}
+      if(!response.ok||!body?.success){
+        const detail=str(body?.message||body?.error||body?.details);
+        throw new Error(detail||"تعذر تحديث السجل الحالي. يرجى مراجعة الإدارة.");
+      }
+      return {updated:true,membership_number:body.membership_number||null,submission_id:null};
+    }
     const payload=build(data,schema,units,formKey,crypto.randomUUID());
     const requestBody={
       action:"membership_renewal",
@@ -2327,8 +2351,14 @@ textarea{min-height:108px}
         data.profile_image_url=profileImageData.url;
         data.profile_image_public_id=profileImageData.public_id;
       }
-      setStatus("ok","جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
+      setStatus("ok",formKey==="membership_renewal"?"جارٍ التحقق من السجل وتحديث البيانات...":"جارٍ حفظ بيانات العضوية وإصدار رقم العضوية...");
       const p=await window.medlifeSubmitMembership(data,schema,units,formKey);
+      if(p?.updated){
+        setStatus("ok","تم تحديث بياناتك في سجل ميدلايف مع الحفاظ على رقم العضوية الحالي. لم يتم إنشاء عضوية أو حساب جديد.");
+        if(p.membership_number) renderConfirmation(data,null,p.membership_number);
+        window.scrollTo({top:0,behavior:"smooth"});
+        return;
+      }
       if(!p?.membership_number || !String(p.membership_number).trim()){
         setStatus("err","تم استلام البيانات، لكن تعذر تأكيد رقم العضوية الآن. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة.");
         return;
