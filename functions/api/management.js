@@ -945,7 +945,16 @@ export async function onRequestPost({ request }) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Membership renewal write failed", response.status, errorText);
-        return json({ success: false, error: "تعذر تسجيل طلب تجديد العضوية." }, 502);
+        if (
+          response.status === 409 ||
+          /23505|national_id|هذا الرقم الوطني مسجل مسبقاً|الرقم الوطني مسجل/i.test(errorText)
+        ) {
+          return json({
+            success: false,
+            error: "هذا الرقم الوطني مسجل مسبقاً لدى ميدلايف. يرجى مراجعة الإدارة أو مراسلتها لإتمام الإجراء."
+          }, 409);
+        }
+        return json({ success: false, error: "تعذر تسجيل طلب العضوية حالياً." }, 502);
       }
       const receiptResponse = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_membership_renewal_receipt", {
         method: "POST",
