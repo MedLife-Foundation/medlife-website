@@ -37,9 +37,12 @@
         unit_type:str(u.unit_type),
         role:supervisor&&String(u.unit_type)==="other"?"volunteer":str(d.role)||"volunteer",
         senior_management_position:str(d.senior_management_position),
-        role_started_on:supervisor?(d.role_started_on||null):null,
-        role_continuing:supervisor?Boolean(d.role_continuing):null,
-        role_left_on:supervisor?(d.role_left_on||null):null,
+        // Regular volunteers have one role (volunteer/member): their role dates
+        // follow the membership dates internally, so no separate role-date question
+        // is shown to them. Supervisory forms keep their separate role history.
+        role_started_on:supervisor?(d.role_started_on||null):(d.joined_on||null),
+        role_continuing:supervisor?Boolean(d.role_continuing):Boolean(d.continuing),
+        role_left_on:supervisor?(d.role_left_on||null):(d.left_on||null),
         joined_on:d.joined_on||null,
         continuing:Boolean(d.continuing),
         left_on:d.left_on||null,
