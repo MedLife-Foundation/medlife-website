@@ -204,6 +204,26 @@
     };
   }
 
+  async function provisionVolunteerAccount(result,data,formKey){
+    if(formKey!=="membership_renewal"||!result?.submission_id||!result?.membership_number)return result;
+    try{
+      const response=await fetch(SUPABASE_URL+"/functions/v1/provision-volunteer-account",{
+        method:"POST",
+        headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json",Accept:"application/json"},
+        body:JSON.stringify({
+          submission_id:result.submission_id,
+          email:str(data?.email).toLowerCase(),
+          membership_number:result.membership_number
+        })
+      });
+      const raw=await response.text();
+      let body={};try{body=raw?JSON.parse(raw):{}}catch(_){}
+      return {...result,account:{success:Boolean(response.ok&&body.success),status:body.account_status||"failed",error:body.error||""}};
+    }catch(error){
+      return {...result,account:{success:false,status:"unavailable",error:"تعذر إنشاء حساب الدخول تلقائياً."}};
+    }
+  }
+
   window.medlifeSubmitMembership=async function(data,schema,units,formKey){
     const payload=build(data,schema,units,formKey,crypto.randomUUID());
     const requestBody={
@@ -223,10 +243,10 @@
       dedicated.networkError=error;
     }
     if(dedicated.ok){
-      return {
+      return await provisionVolunteerAccount({
         submission_id:dedicated.body.submission_id,
         membership_number:dedicated.body.membership_number||null
-      };
+      },data,formKey);
     }
 
     let management={ok:false,status:0,body:{},networkError:null};
@@ -236,15 +256,16 @@
       management.networkError=error;
     }
     if(management.ok){
-      return {
+      return await provisionVolunteerAccount({
         submission_id:management.body.submission_id,
         membership_number:management.body.membership_number||null
-      };
+      },data,formKey);
     }
 
     // Last resort: direct Supabase insert scoped by the public RLS policy.
     try{
-      return await submitViaSupabase(payload);
+      const result=await submitViaSupabase(payload);
+      return await provisionVolunteerAccount(result,data,formKey);
     }catch(fallbackError){
       const responseDetail=str(dedicated.body?.error||dedicated.body?.message)||
         str(management.body?.error||management.body?.message);
@@ -2312,7 +2333,15 @@ textarea{min-height:108px}
         setStatus("err","تم استلام البيانات، لكن تعذر تأكيد رقم العضوية الآن. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة.");
         return;
       }
-      setStatus("ok","تم تسجيل بياناتك وإصدار رقم عضويتك. يجري إرسال بطاقة العضوية إلى بريدك الإلكتروني.");
+      if(formKey==="membership_renewal"){
+        if(p.account?.success){
+          setStatus("ok","تم تسجيل بياناتك وإصدار رقم عضويتك. سيصلك بريد بطاقة العضوية، ويمكنك الدخول إلى مساحة التطوع ببريدك الإلكتروني ورقم عضويتك ككلمة مرور مؤقتة؛ سيُطلب منك تغييرها عند أول دخول.");
+        }else{
+          setStatus("ok","تم تسجيل بياناتك وإصدار رقم عضويتك. يجري إرسال بطاقة العضوية إلى بريدك الإلكتروني، لكن تعذر إكمال إنشاء حساب الدخول تلقائياً. لا تعِد إرسال النموذج؛ يرجى مراسلة الإدارة لتفعيل حسابك.");
+        }
+      }else{
+        setStatus("ok","تم تسجيل بياناتك وإصدار رقم عضويتك. يجري إرسال بطاقة العضوية إلى بريدك الإلكتروني.");
+      }
       renderConfirmation(data,p.submission_id,p.membership_number);
       window.scrollTo({top:0,behavior:"smooth"});
     }catch(e){
