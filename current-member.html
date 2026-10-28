@@ -1363,7 +1363,7 @@ textarea{min-height:108px}
   function syncCertificateHistoryFromDom(){
     const rows=Array.from(form.querySelectorAll(".certificate-history-card"));
     certificateHistory=rows.map(row=>({
-      type:"other",
+      type:String(row.querySelector('[name^="certificate_history_type_"]')?.value||""),
       title:String(row.querySelector('[name^="certificate_history_title_"]')?.value||""),
       issuingOrganization:String(row.querySelector('[name^="certificate_history_issuer_"]')?.value||""),
       issuedDate:String(row.querySelector('[name^="certificate_history_date_"]')?.value||""),
@@ -1381,12 +1381,19 @@ textarea{min-height:108px}
     const certificateHelp=certificateField?.help_ar||"سجّل الشهادات أو التكريمات التي حصلت عليها من أي جهة. يمكنك إضافة أكثر من شهادة، وإذا لم تحصل على أي شهادة اترك هذا القسم دون إضافة.";
     const certificateUnits=units.filter(u=>u&&u.is_active!==false&&["cell","department","field_team","other"].includes(String(u.unit_type||"")));
     const validCertificateUnitIds=new Set(certificateUnits.map(u=>String(u.id)));
+    const certificateTypeField=(schema?.fields||[]).find(field=>field.field_key==="certificate_types");
+    const certificateTypeOptions=Array.isArray(certificateTypeField?.options)?certificateTypeField.options.filter(option=>String(option.value)!=="none"):[];
     const rows=certificateHistory.map((item,index)=>{
       const safeIssuingUnitId=validCertificateUnitIds.has(String(item.issuingUnitId||""))?String(item.issuingUnitId):"";
       const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+certificateUnits.map(u=>'<option value="'+esc(u.id)+'"'+(safeIssuingUnitId===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
+      const typeOptions='<option value="">اختر نوع الشهادة</option>'+certificateTypeOptions.map(option=>{
+        const selected=String(item.type||"")===String(option.value)?" selected":"";
+        return '<option value="'+esc(option.value)+'"'+selected+'>'+esc(option.label_ar||option.label_en||option.value)+'</option>';
+      }).join("");
       return'<div class="certificate-history-card unit-card" data-certificate-index="'+index+'">'+
         '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
         '<div class="grid">'+
+          '<div class="field"><label>نوع الشهادة <span class="req">*</span></label><select name="certificate_history_type_'+index+'">'+typeOptions+'</select></div>'+
           '<div class="field"><label>اسم الشهادة / عنوانها <span class="req">*</span></label><input type="text" name="certificate_history_title_'+index+'" value="'+esc(item.title||"")+'" placeholder="مثال: شهادة تطوع متميز"></div>'+
           '<div class="field"><label>الجهة المانحة <span class="req">*</span></label><input type="text" name="certificate_history_issuer_'+index+'" value="'+esc(item.issuingOrganization||"")+'" placeholder="اسم الجهة المانحة"></div>'+
           '<div class="field"><label>تاريخ الحصول على الشهادة <span class="req">*</span></label><input type="date" name="certificate_history_date_'+index+'" value="'+esc(item.issuedDate||"")+'"></div>'+
@@ -1438,8 +1445,8 @@ textarea{min-height:108px}
   }
 
   function renderField(f){
-    if(isSupervisorForm()&&["language_assignments","language","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))return"";
-    if(isSupervisorForm()&&f.field_key==="certificate_history")return renderCertificateHistoryField();
+    if(["language_assignments","language","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))return"";
+    if((isSupervisorForm()||formKey==="membership_renewal")&&f.field_key==="certificate_history")return renderCertificateHistoryField();
     const full=f.field_key==="current_units"||f.field_type==="textarea"||f.field_type==="multi_select";
     if(f.field_key==="current_unit_details"||f.field_key==="senior_management_position"||f.field_key==="content_assignments")return"";
     const req=f.required?'<span class="req"> *</span>':"";
@@ -1576,6 +1583,10 @@ textarea{min-height:108px}
       for(const item of certificateRows){
         const title=String(item.title||"").trim().replace(/\s+/g," ");
         const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
+        const certificateType=String(item.type||"").trim();
+        const validTypes=new Set(((schema?.fields||[]).find(field=>field.field_key==="certificate_types")?.options||[]).map(option=>String(option.value)).filter(value=>value!=="none"));
+        if(!certificateType)return"يرجى تحديد نوع كل شهادة.";
+        if(!validTypes.has(certificateType))return"نوع الشهادة المختار غير صالح.";
         const issued=String(item.issuedDate||"").trim();
         const issuingUnitId=String(item.issuingUnitId||"").trim();
         if(!title)return"يرجى كتابة اسم كل شهادة.";
@@ -1699,8 +1710,8 @@ textarea{min-height:108px}
         continue;
       }
       if(["language_assignments","language_level","language_other"].includes(f.field_key))continue;
-      if(isSupervisorForm()&&["certificate_types","certificate_other"].includes(f.field_key))continue;
-      if(isSupervisorForm()&&f.field_key==="certificate_history"){
+      if(["certificate_types","certificate_other"].includes(f.field_key))continue;
+      if((isSupervisorForm()||formKey==="membership_renewal")&&f.field_key==="certificate_history"){
         if(certificateSettings.enabled)group.html+=renderCertificateHistoryField();
         continue;
       }
