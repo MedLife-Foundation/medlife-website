@@ -2192,84 +2192,85 @@ textarea{min-height:108px}
         '<div class="id-status">عضوية فعّالة</div>'+
       '</div>';
 
-    confirmation.innerHTML=
-      '<div class="card-capture" data-card-capture>'+
-        '<div class="id-card">'+
-          '<div class="id-card-top">'+
-            '<div class="id-brand">'+
-              '<img src="/logo.PNG" alt="MedLife" onerror="this.hidden=true">'+
-              '<div>'+
-                '<strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong>'+
-                '<span>'+esc(isSupervisorForm()?"بطاقة عضوية إشرافية":"بطاقة العضوية الرسمية")+'</span>'+
-              '</div>'+
-            '</div>'+
-            cardMeta+
-          '</div>'+
-          '<div class="id-card-main">'+
-            '<div class="id-photo">'+
-              '<div class="id-photo-image">'+
-                (profileImageUrl
-                  ?'<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'id-initials\',textContent:'+JSON.stringify(initials(cardName))+'}))">'
-                  :'<div class="id-initials">'+esc(initials(cardName))+'</div>')+
-              '</div>'+
-              '<strong data-card-name>'+esc(cardName)+'</strong>'+
-              '<span>عضو في مؤسسة ميدلايف</span>'+
-            '</div>'+
-            '<div class="id-meta">'+
-              (isSupervisorForm()
-                ?'<div><span>الصفة / المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>'
-                :'<div><span>الصفة</span><strong>متطوع / عضو</strong></div>')+
-              '<div class="id-meta-wide"><span>الوحدات / الفرق</span><strong>'+esc(unitSummary)+'</strong></div>'+
-              '<div><span>المؤهل والجامعة</span><strong>'+esc(educationSummary)+'</strong></div>'+
-              '<div><span>المهنة / الاختصاص</span><strong>'+esc(professionAndSpecialty)+'</strong></div>'+
-              '<div><span>الموقع</span><strong>'+esc(locationText)+'</strong></div>'+
-              '<div><span>تاريخ الانضمام إلى ميدلايف</span><strong>'+esc(values.join_date||"—")+'</strong></div>'+
-              '<div><span>ساعات التطوع</span><strong>'+esc(totalHours)+(totalHours!=="—"?" ساعة":"")+'</strong></div>'+
-              '<div><span>الشهادات</span><strong>'+esc(String(certificateCount))+'</strong></div>'+
-            '</div>'+
-          '</div>'+
-          '<div class="id-card-bottom">'+
-            '<span>MedLife · مؤسسة ميدلايف الطبية الخيرية التطوعية · medlifesy.org</span>'+
-            '<span>صدرت في '+esc(new Date().toLocaleDateString("ar-SY"))+'</span>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="confirmation-details">'+
-        '<div class="confirmation-note">تم حفظ بياناتك بنجاح وتحديث سجل العضوية المركزي. رقم العضوية المخصص لك ظاهر على البطاقة أعلاه.</div>'+
-        '<section class="confirm-section">'+
-          '<h3>بيانات العضوية الأساسية</h3>'+
-          '<p>المعلومات الأساسية التي تم تسجيلها في ملفك.</p>'+
-          '<div class="confirm-grid">'+detailItemsHtml+'</div>'+
-        '</section>'+
-        '<section class="confirm-section">'+
-          '<h3>كامل الإجابات المسجلة في النموذج</h3>'+
-          '<p>هذه التفاصيل محفوظة في سجلك ويمكن الرجوع إليها عند الحاجة.</p>'+
-          '<details class="record-details"><summary>عرض جميع الإجابات المسجلة</summary><div class="confirm-grid record-details-grid">'+profileRecordHtml+'</div></details>'+
-        '</section>'+
-        '<section class="confirm-section">'+
-          '<h3>اللغات</h3>'+
-          '<p>اللغات ومستوى الإتقان المسجل لكل لغة.</p>'+
-          '<div class="confirm-grid">'+(languageHtml||'<div class="confirm-item"><strong>لا توجد لغات مسجلة.</strong></div>')+'</div>'+
-        '</section>'+
-        '<section class="confirm-section">'+
-          '<h3>الشهادات والتكريمات السابقة</h3>'+
-          '<p>الشهادات التي تم تسجيلها في هذا النموذج.</p>'+
-          '<div class="confirm-grid">'+certificateHtml+'</div>'+
-        '</section>'+
-        '<section class="confirm-section">'+
-          '<h3>العضوية داخل ميدلايف</h3>'+
-          '<p>تواريخ الانتساب إلى الوحدات منفصلة عن الأدوار الإشرافية.</p>'+
-          '<div class="confirm-units">'+(unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>')+'</div>'+
-        '</section>'+
-        '<div class="confirm-thanks"><h3>أهلًا بك في ميدلايف ❤️</h3><p>نتمنى لك تجربة تطوعية مثمرة ومؤثرة.</p></div>'+
-      '</div>'+
-      '<div class="confirm-actions">'+
-        '<button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل بطاقة العضوية PDF</button>'+
-        '<button type="button" class="btn download-btn" id="downloadImage">حفظ بطاقة العضوية كصورة</button>'+
-        '<button type="button" class="btn btn-secondary" id="printConfirmation">طباعة بطاقة العضوية</button>'+
-        '<a class="btn btn-secondary" href="join-options.html">العودة</a>'+
-        '<div class="download-status">البطاقة مصممة بنسبة أبعاد البطاقة الرسمية 85.6 × 54 مم. بيانات الهوية الحساسة لا تظهر على البطاقة نفسها.</div>'+
-      </div>';
+    const profileImageHtml=profileImageUrl
+      ? '<img class="id-profile-image" src="'+esc(profileImageUrl)+'" alt="الصورة الشخصية لعضو ميدلايف" crossorigin="anonymous" onerror="this.hidden=true">'
+      : '<div class="id-initials">'+esc(initials(cardName))+'</div>';
+
+    confirmation.innerHTML=`
+      <div class="card-capture" data-card-capture>
+        <div class="id-card">
+          <div class="id-card-top">
+            <div class="id-brand">
+              <img src="/logo.PNG" alt="MedLife" onerror="this.hidden=true">
+              <div>
+                <strong>مؤسسة ميدلايف الطبية الخيرية التطوعية</strong>
+                <span>${esc(isSupervisorForm()?"بطاقة عضوية إشرافية":"بطاقة العضوية الرسمية")}</span>
+              </div>
+            </div>
+            ${cardMeta}
+          </div>
+          <div class="id-card-main">
+            <div class="id-photo">
+              <div class="id-photo-image">${profileImageHtml}</div>
+              <strong data-card-name>${esc(cardName)}</strong>
+              <span>عضو في مؤسسة ميدلايف</span>
+            </div>
+            <div class="id-meta">
+              ${isSupervisorForm()
+                ? '<div><span>الصفة / المنصب</span><strong>'+esc(supervisorPositionText)+'</strong></div>'
+                : '<div><span>الصفة</span><strong>متطوع / عضو</strong></div>'}
+              <div class="id-meta-wide"><span>الوحدات / الفرق</span><strong>${esc(unitSummary)}</strong></div>
+              <div><span>المؤهل والجامعة</span><strong>${esc(educationSummary)}</strong></div>
+              <div><span>المهنة / الاختصاص</span><strong>${esc(professionAndSpecialty)}</strong></div>
+              <div><span>الموقع</span><strong>${esc(locationText)}</strong></div>
+              <div><span>تاريخ الانضمام إلى ميدلايف</span><strong>${esc(values.join_date||"—")}</strong></div>
+              <div><span>ساعات التطوع</span><strong>${esc(totalHours)}${totalHours!=="—"?" ساعة":""}</strong></div>
+              <div><span>الشهادات</span><strong>${esc(String(certificateCount))}</strong></div>
+            </div>
+          </div>
+          <div class="id-card-bottom">
+            <span>MedLife · مؤسسة ميدلايف الطبية الخيرية التطوعية · medlifesy.org</span>
+            <span>صدرت في ${esc(new Date().toLocaleDateString("ar-SY"))}</span>
+          </div>
+        </div>
+      </div>
+      <div class="confirmation-details">
+        <div class="confirmation-note">تم حفظ بياناتك بنجاح وتحديث سجل العضوية المركزي. رقم العضوية المخصص لك ظاهر على البطاقة أعلاه.</div>
+        <section class="confirm-section">
+          <h3>بيانات العضوية الأساسية</h3>
+          <p>المعلومات الأساسية التي تم تسجيلها في ملفك.</p>
+          <div class="confirm-grid">${detailItemsHtml}</div>
+        </section>
+        <section class="confirm-section">
+          <h3>كامل الإجابات المسجلة في النموذج</h3>
+          <p>هذه التفاصيل محفوظة في سجلك ويمكن الرجوع إليها عند الحاجة.</p>
+          <details class="record-details"><summary>عرض جميع الإجابات المسجلة</summary><div class="confirm-grid record-details-grid">${profileRecordHtml}</div></details>
+        </section>
+        <section class="confirm-section">
+          <h3>اللغات</h3>
+          <p>اللغات ومستوى الإتقان المسجل لكل لغة.</p>
+          <div class="confirm-grid">${languageHtml||'<div class="confirm-item"><strong>لا توجد لغات مسجلة.</strong></div>'}</div>
+        </section>
+        <section class="confirm-section">
+          <h3>الشهادات والتكريمات السابقة</h3>
+          <p>الشهادات التي تم تسجيلها في هذا النموذج.</p>
+          <div class="confirm-grid">${certificateHtml}</div>
+        </section>
+        <section class="confirm-section">
+          <h3>العضوية داخل ميدلايف</h3>
+          <p>تواريخ الانتساب إلى الوحدات منفصلة عن الأدوار الإشرافية.</p>
+          <div class="confirm-units">${unitCards||'<div class="confirm-item"><strong>لم يتم اختيار وحدات.</strong></div>'}</div>
+        </section>
+        <div class="confirm-thanks"><h3>أهلًا بك في ميدلايف ❤️</h3><p>نتمنى لك تجربة تطوعية مثمرة ومؤثرة.</p></div>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn download-btn pdf" id="downloadPdf">تحميل بطاقة العضوية PDF</button>
+        <button type="button" class="btn download-btn" id="downloadImage">حفظ بطاقة العضوية كصورة</button>
+        <button type="button" class="btn btn-secondary" id="printConfirmation">طباعة بطاقة العضوية</button>
+        <a class="btn btn-secondary" href="join-options.html">العودة</a>
+        <div class="download-status">البطاقة مصممة بنسبة أبعاد البطاقة الرسمية 85.6 × 54 مم. بيانات الهوية الحساسة لا تظهر على البطاقة نفسها.</div>
+      </div>`;
+
 
     confirmation.classList.remove("hidden");
     formCard.classList.add("hidden");
