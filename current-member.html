@@ -37,9 +37,9 @@
         unit_type:str(u.unit_type),
         role:supervisor&&String(u.unit_type)==="other"?"volunteer":str(d.role)||"volunteer",
         senior_management_position:str(d.senior_management_position),
-        role_started_on:d.role_started_on||null,
-        role_continuing:Boolean(d.role_continuing),
-        role_left_on:d.role_left_on||null,
+        role_started_on:supervisor?(d.role_started_on||null):null,
+        role_continuing:supervisor?Boolean(d.role_continuing):null,
+        role_left_on:supervisor?(d.role_left_on||null):null,
         joined_on:d.joined_on||null,
         continuing:Boolean(d.continuing),
         left_on:d.left_on||null,
@@ -1218,24 +1218,24 @@ textarea{min-height:108px}
       const get=n=>card.querySelector('[name^="'+n+'_"]')?.value||"";
       const joined=get("unit_joined");
       const continuing=get("unit_continuing")==="true";
-      const roleStarted=get("unit_role_started")||"";
-      const roleContinuingValue=get("unit_role_continuing");
-      const roleContinuing=roleContinuingValue==="true";
-      const roleLeft=roleContinuing?"":get("unit_role_left");
-      const unit=units.find(u=>String(u.id)===id);
-      const seniorPosition=get("senior_management_position");
-      details[id]={
-        role:get("unit_role")||"volunteer",
-        senior_management_position:seniorPosition,
-        role_started_on:roleStarted,
-        role_continuing:roleContinuing,
-        role_left_on:roleLeft,
+      const detail={
+        role:isSupervisorForm()?(get("unit_role")||"volunteer"):"volunteer",
         joined_on:joined,
         continuing,
         left_on:continuing?"":get("unit_left"),
-        notes:get("unit_notes"),
-        seniorManagementPosition:get("senior_management_position")
+        notes:get("unit_notes")
       };
+      if(isSupervisorForm()){
+        const roleStarted=get("unit_role_started")||"";
+        const roleContinuingValue=get("unit_role_continuing");
+        const roleContinuing=roleContinuingValue==="true";
+        detail.senior_management_position=get("senior_management_position");
+        detail.role_started_on=roleStarted;
+        detail.role_continuing=roleContinuing;
+        detail.role_left_on=roleContinuing?"":get("unit_role_left");
+        detail.seniorManagementPosition=get("senior_management_position");
+      }
+      details[id]=detail;
     });
 
     out.current_unit_details=details;
@@ -1312,7 +1312,7 @@ textarea{min-height:108px}
   }
 
   function renderLanguageField(){
-    if(!isSupervisorForm())return"";
+    if(!isSupervisorForm()&&formKey!=="membership_renewal")return"";
     if(!languageAssignments.length)languageAssignments=[{language:"",languageOther:"",level:""}];
     const rows=languageAssignments.map((item,index)=>{
       const langOptions='<option value="">اختر اللغة</option>'+languageOptions.map(o=>'<option value="'+esc(o.value)+'"'+(item.language===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
@@ -1431,9 +1431,8 @@ textarea{min-height:108px}
       if(!u)return"";
       const isAdmin=String(u.unit_type)==="other";
       const isCell=String(u.unit_type)==="cell";
-      const oldCard=document.querySelector('.unit-card[data-unit-id="'+escSel(id)+'"]');
+      const oldCard=detailsHost.querySelector('.unit-card[data-unit-id="'+escSel(id)+'"]');
       const previous={};
-
       if(oldCard){
         const get=n=>oldCard.querySelector('[name="'+n+'_'+escSel(id)+'"]')?.value||"";
         previous.role=get("unit_role")||"volunteer";
@@ -1446,54 +1445,48 @@ textarea{min-height:108px}
         previous.notes=get("unit_notes");
         previous.seniorManagementPosition=get("senior_management_position");
       }
-
       let roleHtml="";
-      if(isAdmin){
-        const options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(previous.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
-        roleHtml='<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select name="senior_management_position_'+esc(id)+'">'+options+'</select></div>';
+      let roleHistoryHtml="";
+      if(isSupervisorForm()){
+        if(isAdmin){
+          const options='<option value="">اختر المنصب</option>'+seniorManagementOptions.map(o=>'<option value="'+esc(o.value)+'"'+(previous.seniorManagementPosition===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+          roleHtml='<div class="field full"><label>المنصب في الإدارة العامة <span class="req">*</span></label><select name="senior_management_position_'+esc(id)+'">'+options+'</select></div>';
+        }else{
+          const configuredContentCellIds=new Set((schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean));
+          const availableRoles=roleOptions.filter(role=>role.value!=="content_writer"||(String(u.unit_type)==="cell"&&configuredContentCellIds.has(String(u.id))));
+          const options='<option value="">اختر الدور</option>'+availableRoles.map(o=>'<option value="'+esc(o.value)+'"'+(previous.role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
+          roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>';
+        }
+        roleHistoryHtml=
+          '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(previous.roleStarted||"")+'"></div>'+
+          '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(previous.roleContinuing==="true"?" selected":"")+'>نعم، ما زلت مستمراً '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(previous.roleContinuing==="false"?" selected":"")+'>لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
+          '<div class="field '+(previous.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(previous.roleLeft||"")+'"></div>';
       }else{
-        const configuredContentCellIds=new Set(
-          (schema?.settings?.content_cells||[]).map(item=>String(item?.id||"")).filter(Boolean)
-        );
-        const availableRoles=isSupervisorForm()
-          ? roleOptions.filter(role =>
-              role.value!=="content_writer"
-              || (String(u.unit_type)==="cell" && configuredContentCellIds.has(String(u.id)))
-            )
-          : [{value:"volunteer",label:"متطوع / عضو"}];
-        const options='<option value="">اختر الدور</option>'+availableRoles.map(o=>'<option value="'+esc(o.value)+'"'+(previous.role===o.value?" selected":"")+'>'+esc(o.label)+'</option>').join("");
-        roleHtml='<div class="field"><label>دورك في هذه الوحدة <span class="req">*</span></label><select name="unit_role_'+esc(id)+'">'+options+'</select></div>';
+        roleHtml='<div class="field"><label>الدور في هذه الوحدة</label><div style="padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:700;color:var(--navy)">متطوع / عضو</div></div>';
       }
-
-      const context="";
-
       return'<div class="unit-card" data-unit-id="'+esc(id)+'">'+
-        '<div class="unit-card-head"><strong>'+esc(isAdmin?"تفاصيل دورك في الإدارة العامة":(u.name_ar||u.name_en||"الوحدة"))+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div>'+
-        '<div class="unit-card-grid">'+roleHtml+context+
-        '<div class="field"><label>'+(isAdmin?"تاريخ بدء المنصب":"تاريخ بدء هذا الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_started_'+esc(id)+'" value="'+esc(previous.roleStarted||"")+'"></div>'+
-        '<div class="field"><label>'+(isAdmin?"هل ما زلت تشغل المنصب؟":"هل ما زلت تشغل هذا الدور؟")+' <span class="req">*</span></label><select name="unit_role_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+(previous.roleContinuing==="true"?" selected":"")+'>نعم، مستمر '+(isAdmin?"بالمنصب":"بهذا الدور")+'</option><option value="false"'+(previous.roleContinuing==="false"?" selected":"")+'>لا، انتهى '+(isAdmin?"المنصب":"هذا الدور")+'</option></select></div>'+
-        '<div class="field '+(previous.roleContinuing==="false"?"":"hidden")+'" data-role-left-wrap="'+esc(id)+'"><label>'+(isAdmin?"تاريخ انتهاء المنصب":"تاريخ انتهاء الدور")+' <span class="req">*</span></label><input type="date" name="unit_role_left_'+esc(id)+'" value="'+esc(previous.roleLeft||"")+'"></div>'+
-        '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(previous.joined||"")+'"></div>'+
-        '<div class="field"><label>هل ما زلت عضواً فيها؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+((previous.continuing==="true"||previous.continuing===true)?" selected":"")+'>نعم، ما زلت مستمراً</option><option value="false"'+((previous.continuing==="false"||previous.continuing===false)?" selected":"")+'>لا، تركتها</option></select></div>'+
-        '<div class="field '+((previous.continuing==="false"||previous.continuing===false)?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(previous.left||"")+'"></div>'+
-        '<div class="field notes"><label>ملاحظات</label><textarea name="unit_notes_'+esc(id)+'" placeholder="'+(isCell&&isSupervisorForm()?"الدور أو المسؤولية الإشرافية أو أي معلومة مهمة":"أي معلومة مهمة عن هذا الدور")+'">'+esc(previous.notes||"")+'</textarea></div>'+
+        '<div class="unit-card-head"><strong>'+esc(isSupervisorForm()&&isAdmin?"تفاصيل منصبك في الإدارة العامة":(u.name_ar||u.name_en||"الوحدة"))+'</strong><span class="unit-type">'+esc(typeLabel(u.unit_type))+'</span></div>'+
+        '<div class="unit-card-grid">'+roleHtml+roleHistoryHtml+
+        '<div class="field"><label>تاريخ الانضمام إلى هذه الوحدة <span class="req">*</span></label><div class="help">اكتب تاريخ بدء تطوعك في هذه الوحدة تحديداً، وليس تاريخ انضمامك إلى ميدلايف بشكل عام.</div><input type="date" name="unit_joined_'+esc(id)+'" value="'+esc(previous.joined||"")+'"></div>'+
+        '<div class="field"><label>هل ما زلت عضواً في هذه الوحدة؟ <span class="req">*</span></label><select name="unit_continuing_'+esc(id)+'"><option value="">اختر</option><option value="true"'+((previous.continuing==="true"||previous.continuing===true)?" selected":"")+'>نعم، ما زلت عضواً</option><option value="false"'+((previous.continuing==="false"||previous.continuing===false)?" selected":"")+'>لا، لم أعد عضواً</option></select></div>'+
+        '<div class="field '+((previous.continuing==="false"||previous.continuing===false)?"":"hidden")+'" data-left-wrap="'+esc(id)+'"><label>تاريخ مغادرة الوحدة <span class="req">*</span></label><div class="help">يظهر هذا الحقل فقط إذا لم تعد عضواً في الوحدة.</div><input type="date" name="unit_left_'+esc(id)+'" value="'+esc(previous.left||"")+'"></div>'+
+        '<div class="field notes"><label>ملاحظات (اختياري)</label><textarea name="unit_notes_'+esc(id)+'" placeholder="'+(isCell&&isSupervisorForm()?"الدور أو المسؤولية الإشرافية أو أي معلومة مهمة":"أي معلومة إضافية عن عضويتك في هذه الوحدة")+'">'+esc(previous.notes||"")+'</textarea></div>'+
         '</div></div>';
     }).join("");
-
     detailsHost.innerHTML=rendered;
-
     detailsHost.querySelectorAll('select[name^="unit_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_continuing_","");
-      detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]')?.classList.toggle("hidden",el.value!=="false");
-      updateProgress();
-      applyVisibility();
+      const left=detailsHost.querySelector('[data-left-wrap="'+escSel(id)+'"]');
+      left?.classList.toggle("hidden",el.value!=="false");
+      if(el.value!=="false"){const input=left?.querySelector("input");if(input)input.value="";}
+      updateProgress();applyVisibility();
     }));
-
     detailsHost.querySelectorAll('select[name^="unit_role_continuing_"]').forEach(el=>el.addEventListener("change",()=>{
       const id=el.name.replace("unit_role_continuing_","");
-      detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]')?.classList.toggle("hidden",el.value!=="false");
-      updateProgress();
-      applyVisibility();
+      const left=detailsHost.querySelector('[data-role-left-wrap="'+escSel(id)+'"]');
+      left?.classList.toggle("hidden",el.value!=="false");
+      if(el.value!=="false"){const input=left?.querySelector("input");if(input)input.value="";}
+      updateProgress();applyVisibility();
     }));
   }
 
@@ -1538,7 +1531,7 @@ textarea{min-height:108px}
 
   function validate(){
     const data=collect();
-    if(isSupervisorForm()){
+    if(isSupervisorForm() || formKey === "membership_renewal"){
       syncLanguageAssignmentsFromDom();
       syncCertificateHistoryFromDom();
       const certificateRows=certificateSettings.enabled?certificateHistory.filter(item=>{
@@ -1671,12 +1664,13 @@ textarea{min-height:108px}
         groups.push(group);
       }
 
-      if(isSupervisorForm()&&f.field_key==="language"){
+      if(f.field_key==="language"&&(isSupervisorForm()||formKey==="membership_renewal")){
         group.html+=renderLanguageField();
         languageRendered=true;
         continue;
       }
-      if(isSupervisorForm()&&["language_assignments","language_level","language_other","certificate_types","certificate_other"].includes(f.field_key))continue;
+      if(["language_assignments","language_level","language_other"].includes(f.field_key))continue;
+      if(isSupervisorForm()&&["certificate_types","certificate_other"].includes(f.field_key))continue;
       if(isSupervisorForm()&&f.field_key==="certificate_history"){
         if(certificateSettings.enabled)group.html+=renderCertificateHistoryField();
         continue;
@@ -1685,7 +1679,7 @@ textarea{min-height:108px}
       group.html+=renderField(f);
     }
 
-    if(isSupervisorForm()&&!languageRendered){
+    if((isSupervisorForm()||formKey==="membership_renewal")&&!languageRendered){
       let languageGroup=groups.find(g=>g.title==="المهارات والمواهب والمساهمة القادمة");
       if(!languageGroup){
         languageGroup={title:"المهارات والمواهب والمساهمة القادمة",description:"نريد معرفة ما تستطيع تقديمه، وما لديك من مواهب وخبرات، وما ترغب بتطويره أو تجربته داخل ميدلايف.",html:""};
