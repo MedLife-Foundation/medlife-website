@@ -976,24 +976,35 @@ export async function onRequestPost({ request }) {
         }
         return json({ success: false, error: "تعذر تسجيل طلب العضوية حالياً." }, 502);
       }
-      const receiptResponse = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_membership_renewal_receipt", {
-        method: "POST",
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: "Bearer " + SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-        body: JSON.stringify({p_submission_id: submissionId, p_email: cleanText(data.email, 250).toLowerCase()})
-      });
-      const receipt = await receiptResponse.json().catch(() => ({}));
+      // The submission is already committed. Receipt lookup is best-effort:
+      // a transient RPC/network failure must never turn a successful insert into
+      // an error response that encourages the browser to submit the same form again.
+      let receipt = {};
+      try {
+        const receiptResponse = await fetch(SUPABASE_URL + "/rest/v1/rpc/get_membership_renewal_receipt", {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json"
+          },
+          body: JSON.stringify({p_submission_id: submissionId, p_email: cleanText(data.email, 250).toLowerCase()})
+        });
+        if (receiptResponse.ok) receipt = await receiptResponse.json().catch(() => ({}));
+      } catch (receiptError) {
+        console.error("Membership submission saved but receipt lookup failed", submissionId, receiptError?.message || receiptError);
+      }
+      const hasReceipt = Boolean(receipt?.success && receipt?.membership_number);
       return json({
         success: true,
         submission_id: submissionId,
-        membership_number: receipt?.success ? receipt.membership_number : null,
-        message: supervisorForm
-          ? "تم حفظ بيانات المشرف وإصدار رقم العضوية وبطاقة العضوية بنجاح."
-          : "تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء ميدلايف."
+        membership_number: hasReceipt ? receipt.membership_number : null,
+        message: hasReceipt
+          ? (supervisorForm
+              ? "تم حفظ بيانات المشرف وإصدار رقم العضوية وبطاقة العضوية بنجاح."
+              : "تم تسجيل تجديد العضوية مباشرة في قاعدة أعضاء ميدلايف.")
+          : "تم استلام البيانات وحفظ الطلب، لكن تعذر تأكيد رقم العضوية الآن. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة."
       }, 201);
     } else {
       const recruitmentResponse = await fetch(
