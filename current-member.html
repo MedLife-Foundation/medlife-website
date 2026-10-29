@@ -177,24 +177,32 @@
       throw new Error(detail||("تعذر تسجيل العضوية. رمز الاستجابة: "+response.status));
     }
 
+    // The insert returned success, so receipt lookup must not make the whole
+    // submission look failed. Otherwise a member may retry and create a duplicate.
     const email=str(payload.email).toLowerCase();
-    const receiptResponse=await fetch(SUPABASE_URL+"/rest/v1/rpc/get_membership_renewal_receipt",{
-      method:"POST",
-      headers:{
-        apikey:SUPABASE_KEY,
-        Authorization:"Bearer "+SUPABASE_KEY,
-        "Content-Type":"application/json",
-        Accept:"application/json"
-      },
-      body:JSON.stringify({
-        p_submission_id:payload.id,
-        p_email:email
-      })
-    });
-    const receiptRaw=await receiptResponse.text();
     let receipt={};
-    try{receipt=receiptRaw?JSON.parse(receiptRaw):{};}catch(_){}
-    if(receiptResponse.ok&&receipt&&receipt.success){
+    try{
+      const receiptResponse=await fetch(SUPABASE_URL+"/rest/v1/rpc/get_membership_renewal_receipt",{
+        method:"POST",
+        headers:{
+          apikey:SUPABASE_KEY,
+          Authorization:"Bearer "+SUPABASE_KEY,
+          "Content-Type":"application/json",
+          Accept:"application/json"
+        },
+        body:JSON.stringify({
+          p_submission_id:payload.id,
+          p_email:email
+        })
+      });
+      if(receiptResponse.ok){
+        const receiptRaw=await receiptResponse.text();
+        try{receipt=receiptRaw?JSON.parse(receiptRaw):{};}catch(_){}
+      }
+    }catch(receiptError){
+      console.warn("Membership submission saved; receipt lookup unavailable.",receiptError);
+    }
+    if(receipt&&receipt.success){
       return {
         submission_id:receipt.submission_id||payload.id,
         membership_number:receipt.membership_number||null
