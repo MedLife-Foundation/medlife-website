@@ -141,11 +141,14 @@ async function fetchResource(resource, url) {
       query.set("birth_month", "eq." + month);
       query.set("birth_day", "eq." + day);
     }
-    query.set("limit", "20");
+    // Return every person sharing today's birthday, not just the first 20.
+    query.set("limit", "1000");
   }
   if (resource === "upcoming_birthdays") {
     // Month and day only: the public view never exposes birth year or full DOB.
-    query.set("limit", "100");
+    // The current team has 87 eligible profiles; use a higher ceiling so growth
+    // does not silently hide birthdays beyond the first 100 alphabetic names.
+    query.set("limit", "1000");
   }
   if (resource === "membership_renewal_form") {
     query.set("form_kind", "eq.membership_renewal");
