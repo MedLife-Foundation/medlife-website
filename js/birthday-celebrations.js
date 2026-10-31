@@ -26,7 +26,7 @@
           <div class="birthday-celebration">
             <div class="birthday-celebration-copy">
               <span class="eyebrow">🎂 من عائلة ميدلايف</span>
-              <h2>اليوم نحتفل بأحد أعضاء فريقنا</h2>
+              <h2>${payload.data.length > 1 ? "اليوم نحتفل بأعضاء من فريقنا" : "اليوم نحتفل بأحد أعضاء فريقنا"}</h2>
               <p>نتمنى لأعضاء عائلة MedLife الذين يحتفلون اليوم بعيد ميلادهم عاماً جديداً مليئاً بالصحة والإنجاز والأيام الجميلة.</p>
             </div>
             <div class="birthday-celebration-names">
