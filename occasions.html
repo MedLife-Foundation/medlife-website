@@ -492,7 +492,7 @@
           '<p class="oc-birthday-greeting-secondary">' + escapeHtml(greeting.closing) + '</p>' +
           '<div class="oc-birthday-spotlight-signoff"><img src="/logo.PNG" alt="شعار ميدلايف"><span>بمحبة وتقدير، مؤسسة ميدلايف الطبية الخيرية التطوعية</span></div></div></article>';
       }
-      function nearestBirthdayCard(member, dateInfo) {
+      function nearestBirthdayCard(member, dateInfo, sharedDate = false) {
         const name = String(member.display_name || "أحد أعضاء ميدلايف").trim();
         const image = safeImage(member.profile_image_url);
         const photo = image
@@ -501,8 +501,9 @@
         const monthName = new Intl.DateTimeFormat("ar-SY",{numberingSystem:"latn",month:"long",timeZone:"UTC"}).format(dateInfo.date);
         const day = dateInfo.date.getUTCDate().toLocaleString("en-US");
         const countdown = dateInfo.days === 1 ? "غداً" : "بعد " + dateInfo.days.toLocaleString("en-US") + " يوم";
+        const label = sharedDate ? "يحتفل في اليوم نفسه" : "أقرب عيد ميلاد";
         return '<article class="oc-nearest-birthday-card">' + photo +
-          '<div class="oc-nearest-birthday-copy"><span class="oc-nearest-birthday-label">أقرب عيد ميلاد</span><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
+          '<div class="oc-nearest-birthday-copy"><span class="oc-nearest-birthday-label">' + label + '</span><h3>' + escapeHtml(name) + '</h3><p>' + escapeHtml(monthsWithTeam(member.team_months)) + '</p></div>' +
           '<div class="oc-nearest-birthday-date"><strong>' + day + '</strong><span>' + escapeHtml(monthName) + '</span><small>' + escapeHtml(countdown) + '</small></div></article>';
       }
       async function loadBirthdayFeature() {
@@ -539,16 +540,23 @@
             }
             return;
           }
-          const next = allMembers
+          const upcoming = allMembers
             .map(member => ({member, occurrence:nextBirthdayOccurrence(member,today)}))
             .filter(item => item.occurrence && item.occurrence.days > 0)
-            .sort((a,b) => a.occurrence.date - b.occurrence.date || compareVolunteerIds(a.member.volunteer_id,b.member.volunteer_id))[0];
-          document.getElementById("oc-upcoming-birthday-count").textContent = "أقرب عيد ميلاد";
-          if (!next) {
+            .sort((a,b) => a.occurrence.date - b.occurrence.date || compareVolunteerIds(a.member.volunteer_id,b.member.volunteer_id));
+          const nearestDate = upcoming[0]?.occurrence.date;
+          const nearestGroup = nearestDate
+            ? upcoming.filter(item => item.occurrence.date.getTime() === nearestDate.getTime())
+            : [];
+          document.getElementById("oc-upcoming-birthday-count").textContent =
+            nearestGroup.length > 1 ? "أقرب أعياد الميلاد" : "أقرب عيد ميلاد";
+          if (!nearestGroup.length) {
             state(root,"لا توجد مناسبة قريبة","لا يوجد عيد ميلاد قادم ضمن سجلات الأعضاء النشطين حالياً.");
             return;
           }
-          root.innerHTML = nearestBirthdayCard(next.member,next.occurrence);
+          root.innerHTML = '<div class="oc-birthday-feature-list">' + nearestGroup
+            .map(item => nearestBirthdayCard(item.member,item.occurrence,nearestGroup.length > 1))
+            .join("") + '</div>';
         } catch {
           state(root,"تعذّر تحميل أقرب المناسبات","لم نتمكن من تحميل أعياد الميلاد حالياً. يمكنك إعادة المحاولة.",loadBirthdayFeature);
         }
