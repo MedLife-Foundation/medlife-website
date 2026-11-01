@@ -128,9 +128,9 @@ $("applicationForm").addEventListener("submit",async event=>{
    graduation_year:val(data.graduation_year),profession:val(data.profession),workplace:val(data.workplace),
    resident_specialty:val(data.resident_specialty),residency_year:val(data.residency_year),
    residency_hospital:val(data.residency_hospital),doctor_specialty:val(data.doctor_specialty),
-   specialty:val(data.specialty),interest:primary,medlife_role:primary,join_date:null,
+   specialty:val(data.specialty),interest:primaryLabel,medlife_role:primaryLabel,join_date:null,
    cell:"",field_location:val(data.governorate),motivation:val(data.motivation),
-   requested_departments:[primary],source:"public_website",admin_notes:null,
+   requested_departments:[primaryLabel],source:"public_website",admin_notes:null,
    form_id:formDefinition.id,form_version:formDefinition.version,
    form_data:{...data,primary_volunteer_field:primary,secondary_talent_field:val(data.secondary_talent_field),privacy_consent:true,submitted_at:new Date().toISOString()},
    form_schema:{form_id:formDefinition.id,form_key:formDefinition.form_key,version:formDefinition.version,name_ar:formDefinition.name_ar,fields:fields,settings:formDefinition.settings||{},captured_at:new Date().toISOString()}
