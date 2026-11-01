@@ -10,6 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/admin-ui.css">
+<style>
+.member-portal-entry{margin:0 0 18px;padding:20px;border:1px solid #d9e4f6;border-radius:18px;background:linear-gradient(145deg,#f7faff,#fff);text-align:right}
+.member-portal-entry h2{margin:0 0 8px;color:#12203a;font-size:19px;line-height:1.6}
+.member-portal-entry p{margin:0 0 13px;color:#526078;font-size:13px;line-height:1.9}
+.member-portal-entry .portal-button{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border-radius:12px;background:#12203a;color:#fff;text-decoration:none;font-weight:800;font-size:14px}
+.member-portal-entry .portal-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #e3eaf5;font-size:11px;color:#59667c}
+.legacy-login-label{margin:0 0 7px;color:#667085;font-size:11px;font-weight:800}
+</style>
 </head>
 <body>
 <main class="login-shell">
@@ -21,9 +29,16 @@
       <p>الوصول الآمن إلى خدمات وأدوات MedLife وفق صلاحيات الحساب. يتم توجيهك تلقائياً إلى مساحة العمل المناسبة بعد تسجيل الدخول.</p>
     </div>
     <div class="login-form-side">
+      <section class="member-portal-entry" aria-label="دخول أعضاء ومتطوعي ميدلايف">
+        <h2>هل جددت عضويتك أو حصلت على بطاقة MedLife؟</h2>
+        <p>حسابات العضوية الجديدة تُسجّل الدخول عبر بوابة MedLife الموحدة المرتبطة بملف العضوية.</p>
+        <a class="portal-button" href="https://admin.medlifesy.org/login?next=%2Fvolunteer">الدخول إلى بوابة الأعضاء والمتطوعين</a>
+        <p class="portal-note">لأول دخول: افتح رسالة دعوة ميدلايف في بريدك واضغط «تأكيد الدعوة وإعداد الحساب»، ثم اختر كلمة مرورك الشخصية. بعد اختيارها، استخدم كلمة المرور الجديدة؛ رقم العضوية ليس كلمة المرور الدائمة.</p>
+      </section>
       <div class="login-card">
-        <h2 class="login-title">تسجيل الدخول</h2>
-        <p class="login-subtitle">أدخل بيانات حسابك للمتابعة إلى مساحة العمل الخاصة بك.</p>
+        <p class="legacy-login-label">دخول الحسابات القديمة المرتبطة بنظام الموقع السابق</p>
+        <h2 class="login-title">تسجيل الدخول القديم</h2>
+        <p class="login-subtitle">هذا النموذج مخصص للحسابات التي أُنشئت في نظام الموقع السابق، وليس لحسابات تجديد العضوية الجديدة.</p>
         <form id="form" novalidate>
           <div class="login-field">
             <label for="identifier">البريد الإلكتروني أو اسم المستخدم</label>
@@ -51,7 +66,13 @@ $('form').onsubmit=async e=>{
   try{
     const r=await fetch('/api/member-login-unified',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},credentials:'include',body:JSON.stringify({identifier:$('identifier').value.trim(),password:$('password').value})});
     const j=await r.json().catch(()=>({}));
-    if(!r.ok||!j.success)throw Error(j.error||'تعذر تسجيل الدخول حالياً.');
+    if(!r.ok||!j.success){
+      const message=String(j.error||'تعذر تسجيل الدخول حالياً.');
+      if(r.status===401){
+        throw Error(message+' إذا كنت قد جددت عضويتك أو حصلت على بطاقة جديدة، استخدم رابط «الدخول إلى بوابة الأعضاء والمتطوعين» أعلى الصفحة.');
+      }
+      throw Error(message);
+    }
     $('msg').className='login-message success show';
     $('msg').textContent='تم تسجيل الدخول. يتم فتح مساحة العمل...';
     location.assign(j.redirect||'/members.html');
