@@ -493,22 +493,20 @@ html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!i
  const submitTab=byId("showSubmitTab");
  const trackTab=byId("showTrackTab");
 
- function setMode(mode){
+ function setMode(mode,shouldScroll=true){
   const track=mode==="track";
   complaintsWrap.dataset.mode=track?"track":"submit";
   submitTab.classList.toggle("is-active",!track);
   trackTab.classList.toggle("is-active",track);
   submitTab.setAttribute("aria-selected",String(!track));
   trackTab.setAttribute("aria-selected",String(track));
-  if(track){
-   byId("trackComplaint").scrollIntoView({behavior:"smooth",block:"start"});
-  }else{
-   byId("submitComplaint").scrollIntoView({behavior:"smooth",block:"start"});
+  if(shouldScroll){
+   byId("showSubmitTab").parentElement.scrollIntoView({behavior:"smooth",block:"start"});
   }
  }
  submitTab.addEventListener("click",()=>setMode("submit"));
  trackTab.addEventListener("click",()=>setMode("track"));
- setMode(location.hash==="#trackComplaint"?"track":"submit");
+ setMode(location.hash==="#trackComplaint"?"track":"submit",false);
 
  function showMessage(id,message,type){
   const el=byId(id);el.textContent=message;el.className="status-message show "+type;
