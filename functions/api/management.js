@@ -159,17 +159,41 @@ async function fetchResource(resource, url) {
     query.set("limit", "1");
   }
 
-  const response = await fetch(SUPABASE_URL + "/rest/v1/" + config.table + "?" + query.toString(), {
-    headers: {
-      apikey: SUPABASE_PUBLISHABLE_KEY,
-      Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-      Accept: "application/json"
-    }
+  const resourceUrl = SUPABASE_URL + "/rest/v1/" + config.table + "?" + query.toString();
+  const readHeaders = (key) => ({
+    apikey: key,
+    Authorization: "Bearer " + key,
+    Accept: "application/json"
   });
-  const body = await response.text();
+  let response = await fetch(resourceUrl, {
+    headers: readHeaders(SUPABASE_PUBLISHABLE_KEY)
+  });
+  let body = await response.text();
   let data;
   try { data = JSON.parse(body); } catch { data = { error: body }; }
-  if (!response.ok) throw new Error("تعذر تحميل بيانات الموقع.");
+
+  // Membership forms are public registration-critical resources. Retry their
+  // lookup with the project's anon JWT if the publishable-key request fails or
+  // unexpectedly returns no published form, so a key-format mismatch cannot
+  // leave every applicant staring at an empty form.
+  if (resource === "membership_renewal_form" &&
+      (!response.ok || !Array.isArray(data) || data.length === 0)) {
+    const fallbackResponse = await fetch(resourceUrl, {
+      headers: readHeaders(SUPABASE_ANON_KEY)
+    });
+    const fallbackBody = await fallbackResponse.text();
+    let fallbackData;
+    try { fallbackData = JSON.parse(fallbackBody); } catch { fallbackData = { error: fallbackBody }; }
+    if (fallbackResponse.ok && Array.isArray(fallbackData) && fallbackData.length > 0) {
+      response = fallbackResponse;
+      body = fallbackBody;
+      data = fallbackData;
+    }
+  }
+  if (!response.ok) {
+    console.error("Public resource read failed", resource, response.status, body.slice(0, 500));
+    throw new Error("تعذر تحميل بيانات الموقع.");
+  }
   if (resource === "join_form" || resource === "membership_renewal_form") {
     const form = Array.isArray(data) ? data[0] : null;
     if (!form?.id) return [];
