@@ -28,18 +28,32 @@
           .card-icon{width:38px!important;height:38px!important;flex-basis:38px!important}
           .card-head h2{font-size:17px!important;line-height:1.5!important}
           .card-head p{font-size:11px!important;line-height:1.8!important}
-          .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;width:100%!important}
-          .field,.field.wide{display:flex!important;grid-column:1!important;width:100%!important;min-width:0!important;gap:6px!important}
-          .field label,.field>span{font-size:12px!important;line-height:1.7!important;text-align:right!important}
-          .field input,.field select,.field textarea{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:45px!important;padding:10px 12px!important;border-radius:10px!important;font-size:14px!important;line-height:1.6!important;box-sizing:border-box!important}
-          .field textarea{min-height:115px!important}
-          .anonymous-toggle,.consent{width:100%!important;padding:11px!important;gap:9px!important;font-size:12px!important;line-height:1.8!important}
-          .anonymous-copy strong{font-size:12px!important;line-height:1.7!important}
-          .anonymous-copy small{font-size:11px!important;line-height:1.7!important}
-          .help{font-size:10px!important;line-height:1.7!important}
-          .form-actions{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important}
-          .form-actions>*{width:100%!important;max-width:none!important;min-width:0!important}
-          .primary-btn,.secondary-btn{min-height:46px!important;font-size:13px!important}
+          /* This embedded form must stay single-column even when iOS gives an iframe a desktop layout viewport. */
+          form#complaintForm{width:100%!important;min-width:0!important}
+          #complaintForm .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;gap:12px!important;width:100%!important;min-width:0!important}
+          #complaintForm .form-grid>.field,
+          #complaintForm .form-grid>.field.wide{grid-column:1/-1!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;width:100%!important;min-width:0!important;margin:0!important}
+          #complaintForm .field label:not(.anonymous-toggle):not(.consent){display:block!important;width:100%!important;max-width:none!important;margin:0!important;text-align:right!important;font-size:13px!important;line-height:1.7!important}
+          #complaintForm .field input:not([type="checkbox"]),
+          #complaintForm .field select,
+          #complaintForm .field textarea{display:block!important;float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:48px!important;margin:0!important;padding:11px 13px!important;border:1px solid #d9e1eb!important;border-radius:11px!important;background:#fff!important;font-family:Cairo,Arial,sans-serif!important;font-size:16px!important;line-height:1.65!important;box-sizing:border-box!important}
+          #complaintForm .field textarea{min-height:130px!important;resize:vertical!important}
+          #complaintForm .field .help{display:block!important;width:100%!important;font-size:10px!important;line-height:1.7!important}
+          #complaintForm .anonymous-toggle,
+          #complaintForm .consent{display:flex!important;flex-direction:row!important;align-items:flex-start!important;justify-content:flex-start!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px!important;gap:10px!important;box-sizing:border-box!important;border-radius:11px!important;font-size:12px!important;line-height:1.8!important}
+          #complaintForm .anonymous-toggle>input[type="checkbox"],
+          #complaintForm .consent>input[type="checkbox"]{display:block!important;appearance:auto!important;-webkit-appearance:checkbox!important;flex:0 0 20px!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;margin:2px 0 0!important;padding:0!important;box-sizing:border-box!important;accent-color:#bd2547!important}
+          #complaintForm .anonymous-copy{display:block!important;flex:1 1 auto!important;min-width:0!important}
+          #complaintForm .anonymous-copy strong{display:block!important;font-size:13px!important;line-height:1.7!important}
+          #complaintForm .anonymous-copy small{display:block!important;font-size:11px!important;line-height:1.7!important}
+          #complaintForm .consent span{display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:11px!important;line-height:1.8!important}
+          #complaintForm .form-actions{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important}
+          #complaintForm .form-actions>*{display:flex!important;width:100%!important;max-width:none!important;min-width:0!important;justify-content:center!important}
+          #complaintForm .primary-btn,
+          #trackForm .primary-btn,
+          #complaintForm .secondary-btn{min-height:48px!important;font-size:13px!important}
+          #nameField[style*="display: none"],
+          #contactField[style*="display: none"]{display:none!important}
           .result-box{padding:12px!important}
           .result-box h3{font-size:14px!important}
           .result-box p,.secret-warning{font-size:11px!important}
