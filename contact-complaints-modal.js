@@ -35,7 +35,7 @@
         body .privacy-card{display:block!important}
         @media(max-width:560px){body .wrap{padding:12px 10px 24px!important}body .card{padding:16px!important}body .card-head h2{font-size:17px!important}}
       `;
-      doc.getElementById('medlife-complaints-modal-layout')?.remove();
+
     }catch(error){
       // The embedded page includes its own responsive styles and remains usable independently.
     }
