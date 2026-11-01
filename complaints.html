@@ -18,673 +18,346 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root{--navy:#071b3a;--navy2:#102f55;--red:#bd2547;--red2:#d53a5a;--ink:#172b45;--muted:#718198;--line:#e5ebf2;--bg:#f4f7fa;--white:#fff;--green:#287b58;--shadow:0 20px 50px rgba(16,37,66,.08}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Arial,sans-serif;overflow-x:hidden}
-button,input,select,textarea{font:inherit}
-a{color:inherit;text-decoration:none}
-button{cursor:pointer}
-.hero{position:relative;overflow:hidden;color:#fff;padding:75px 18px 62px;text-align:center;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.13),transparent 28%),radial-gradient(circle at 88% 80%,rgba(213,58,90,.22),transparent 28%),linear-gradient(125deg,#06152f,#0b3157 64%,#174a69)}
-.hero:before,.hero:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.1);border-radius:50%}
-.hero:before{width:410px;height:410px;top:-245px;right:-130px}
-.hero:after{width:330px;height:330px;bottom:-225px;left:-100px}
-.hero-inner{position:relative;z-index:1;max-width:850px;margin:auto}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid rgba(255,255,255,.18);border-radius:99px;background:rgba(255,255,255,.08);color:#f4ccd5;font-size:10px;font-weight:850}
-.hero h1{margin:17px 0 9px;font-size:clamp(31px,5.8vw,53px);line-height:1.3;font-weight:950}
-.hero p{max-width:700px;margin:auto;color:rgba(255,255,255,.8);font-size:12px;line-height:2}
-.hero-note{display:flex;justify-content:center;align-items:center;gap:8px;margin:17px auto 0;color:#f6e7eb;font-size:9px;line-height:1.9}
-.hero-note i{color:#ffb5c5}
-.wrap{width:min(1120px,calc(100% - 28px));margin:-28px auto 0;position:relative;z-index:2;padding-bottom:70px}
-.intro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-.intro-card{display:flex;align-items:flex-start;gap:11px;padding:15px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 23px rgba(16,37,66,.04)}
-.intro-icon{flex:0 0 37px;width:37px;height:37px;display:grid;place-items:center;border-radius:11px;background:#fff0f4;color:var(--red);font-size:15px}
-.intro-card:nth-child(2) .intro-icon{background:#edf5fc;color:#3e6c9b}
-.intro-card:nth-child(3) .intro-icon{background:#edf8f1;color:#287b58}
-.intro-card strong{display:block;margin-bottom:2px;color:#1b3554;font-size:10px;font-weight:900}
-.intro-card small{display:block;color:#7c8ba0;font-size:8px;line-height:1.8}
-.content-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.78fr);gap:15px;align-items:start}
-.card{min-width:0;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:0 14px 40px rgba(16,37,66,.05)}
-.card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
-.card-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;color:var(--red);background:#fff0f4;font-size:17px}
-.card-head h2{margin:0 0 3px;color:#183653;font-size:16px;font-weight:950}
-.card-head p{margin:0;color:#8492a3;font-size:9px;line-height:1.85}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.field{display:flex;flex-direction:column;gap:5px;min-width:0}
-.field.wide{grid-column:1/-1}
-.field label,.field>span{color:#425b77;font-size:9px;font-weight:900}
-.field input,.field select,.field textarea{width:100%;min-width:0;min-height:39px;padding:9px 11px;border:1px solid #dfe6ee;border-radius:9px;background:#fff;color:#263f5d;outline:none;font-size:10px;transition:border-color .18s,box-shadow .18s}
-.field textarea{min-height:138px;resize:vertical;line-height:1.95}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:#bb3c59;box-shadow:0 0 0 3px rgba(189,37,71,.08)}
-.field input::placeholder,.field textarea::placeholder{color:#a4afbb}
-.help{color:#929eac;font-size:8px;line-height:1.7}
-.anonymous-toggle,.consent{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #e9edf2;border-radius:10px;background:#fbfcfd;color:#516880;font-size:9px;line-height:1.8}
-.anonymous-toggle input,.consent input{flex:0 0 auto;margin-top:4px;accent-color:var(--red)}
-.anonymous-copy strong{display:block;color:#29445f;font-size:9px}
-.anonymous-copy small{display:block;color:#8b99a8;font-size:8px}
-.consent a{color:#a52b49;text-decoration:underline;text-underline-offset:2px}
-.honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
-.form-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
-.primary-btn,.secondary-btn{min-height:41px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid transparent;font-size:10px;font-weight:900}
-.primary-btn{color:#fff;background:linear-gradient(135deg,var(--red2),#a71d3d);box-shadow:0 8px 18px rgba(183,32,66,.16)}
-.primary-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(183,32,66,.22)}
-.primary-btn:disabled{opacity:.55;cursor:wait;transform:none}
-.secondary-btn{border-color:#dfe6ee;background:#fff;color:#46617d}
-.status-message{display:none;margin-top:12px;padding:10px 12px;border-radius:9px;font-size:9px;line-height:1.8}
-.status-message.show{display:block}
-.status-message.error{color:#a32944;background:#fff2f4;border:1px solid #f0d4dc}
-.status-message.success{color:#276e50;background:#f0f9f3;border:1px solid #d5eadc}
-.privacy-card{margin-top:14px;padding:12px 13px;border-radius:11px;background:#f4f8fb;border:1px solid #e6edf3;color:#71839a;font-size:8px;line-height:1.9}
-.privacy-card strong{color:#385573}
-.result-box{display:none;margin-top:15px;padding:14px;border:1px solid #cfe7d7;border-radius:12px;background:#f4fbf6}
-.result-box.show{display:block}
-.result-box h3{display:flex;align-items:center;gap:7px;margin:0 0 5px;color:#287451;font-size:12px}
-.result-box p{margin:0 0 10px;color:#5e7e6b;font-size:8px;line-height:1.8}
-.result-field{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;margin-top:8px}
-.result-field>div{min-width:0;padding:8px 10px;border:1px solid #d8e8dd;border-radius:8px;background:#fff}
-.result-field small{display:block;color:#84958a;font-size:7px}
-.result-field strong{display:block;overflow-wrap:anywhere;color:#234d37;font:900 11px ui-monospace,Consolas,monospace;direction:ltr;text-align:left}
-.copy-btn{min-height:35px;padding:7px 10px;border:1px solid #d2e5d9;border-radius:8px;background:#fff;color:#287451;font-size:8px;font-weight:900}
-.secret-warning{margin-top:10px;padding:9px 10px;border-radius:8px;color:#835c24;background:#fff7e9;border:1px solid #f1e1c5;font-size:8px;line-height:1.8}
-.track-card{position:sticky;top:100px}
-.track-card .card-icon{background:#edf5fc;color:#3d6c9d}
-.track-form{display:grid;gap:11px}
-.track-result{display:none;margin-top:14px;padding:13px;border:1px solid #dfe8f0;border-radius:11px;background:#fbfcfe}
-.track-result.show{display:block}
-.track-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #e8edf3}
-.track-top strong{display:block;color:#1c3a59;font-size:12px}
-.track-top small{display:block;margin-top:3px;color:#8492a3;font-size:8px}
-.state-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:99px;background:#eef4fb;color:#496c96;font-size:8px;font-weight:900}
-.state-pill.status-new{background:#fff5e6;color:#9c641e}
-.state-pill.status-under_review{background:#eef4fc;color:#526f9b}
-.state-pill.status-in_progress{background:#e9f7f7;color:#277981}
-.state-pill.status-resolved{background:#edf8f0;color:#2c7952}
-.state-pill.status-closed{background:#f0f2f5;color:#657588}
-.track-events{display:grid;gap:0;margin:12px 0 0;padding:0;list-style:none}
-.track-events li{position:relative;padding:0 15px 13px 0;border-right:1px solid #dfe7ef}
-.track-events li:last-child{padding-bottom:0;border-right-color:transparent}
-.track-events li:before{content:"";position:absolute;right:-5px;top:5px;width:8px;height:8px;border:1px solid #fff;border-radius:50%;background:#b52b4a;box-shadow:0 0 0 1px #e8bdc8}
-.track-events strong{display:block;color:#3d5b78;font-size:8px}
-.track-events p{margin:3px 0;color:#6e8197;font-size:8px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
-.track-events small{color:#94a0af;font-size:7px}
-.track-empty{padding:10px 0;color:#8a98a8;font-size:8px;line-height:1.8}
-.footer-note{margin-top:15px;text-align:center;color:#8a98a8;font-size:8px;line-height:1.9}
-.footer-note a{color:#426c91;text-decoration:underline;text-underline-offset:2px}
-@media(max-width:860px){
- .content-grid{grid-template-columns:1fr}
- .track-card{position:static}
- .intro-grid{grid-template-columns:1fr 1fr}
- .intro-card:last-child{grid-column:1/-1}
-}
-@media(max-width:560px){
- .hero{padding:60px 16px 54px}
- .wrap{width:calc(100% - 18px);margin-top:-22px;padding-bottom:45px}
- .card{padding:15px;border-radius:14px}
- .intro-grid{gap:7px}
- .intro-card{padding:10px;gap:8px}
- .intro-icon{width:31px;height:31px;flex-basis:31px}
- .intro-card strong{font-size:8px}
- .intro-card small{font-size:7px}
- .form-grid{grid-template-columns:1fr}
- .field.wide{grid-column:auto}
- .form-actions>*{flex:1}
- .result-field{grid-template-columns:1fr auto}
-}
 
-/* MedLife complaints portal — compact, mobile-first interface */
-html.complaints-embed,html.complaints-embed body{
-  width:100%;min-height:100%;margin:0;background:#f4f6fa;color:#172b45;
-  font-family:Cairo,Arial,sans-serif;overflow-x:hidden;
+:root{
+  color-scheme:light;
+  --ml-navy:#092544;
+  --ml-navy-2:#153d63;
+  --ml-red:#b42343;
+  --ml-red-dark:#951b36;
+  --ml-ink:#20364f;
+  --ml-muted:#728297;
+  --ml-line:#e4eaf1;
+  --ml-soft:#f4f7fa;
+  --ml-green:#287451;
 }
+*{box-sizing:border-box}
+html,html.complaints-embed,html.complaints-embed body{
+  width:100%;min-width:0;min-height:100%;margin:0;padding:0;
+  background:var(--ml-soft);overflow-x:hidden;
+}
+body{
+  color:var(--ml-ink);font-family:Cairo,Arial,sans-serif;
+  font-size:14px;line-height:1.8;direction:rtl;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
 html.complaints-embed body .hero,
 html.complaints-embed body .intro-grid,
 html.complaints-embed body .footer-note{display:none!important}
 html.complaints-embed body .wrap{
-  display:block!important;width:100%!important;max-width:760px!important;
-  margin:0 auto!important;padding:14px 14px 26px!important;box-sizing:border-box!important;
+  display:block!important;width:100%!important;max-width:820px!important;
+  min-width:0!important;margin:0 auto!important;padding:20px 18px 32px!important;
+  box-sizing:border-box!important;
+}
+html.complaints-embed body .portal-welcome{
+  display:flex;align-items:center;gap:13px;width:100%;min-width:0;
+  margin:0 0 15px;padding:15px 17px;border:1px solid #e8d5dc;
+  border-radius:16px;background:linear-gradient(115deg,#fff 0%,#fff7f9 100%);
+  box-shadow:0 5px 18px rgba(26,48,73,.045);
+}
+.portal-welcome__mark{
+  display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;
+  border-radius:13px;background:#fceaf0;color:var(--ml-red);font-size:18px;
+}
+.portal-welcome__copy{display:block;flex:1 1 auto;min-width:0}
+.portal-welcome__copy strong{display:block;color:var(--ml-navy);font-size:15px;font-weight:900;line-height:1.55}
+.portal-welcome__copy small{display:block;margin-top:2px;color:var(--ml-muted);font-size:11px;line-height:1.7}
+.portal-welcome__badge{
+  display:inline-flex;align-items:center;gap:6px;flex:none;padding:6px 10px;
+  border:1px solid #d8eade;border-radius:99px;background:#f2faf4;
+  color:#287451;font-size:10px;font-weight:800;white-space:nowrap;
 }
 html.complaints-embed body .mode-switch{
-  display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;margin:0 0 14px;
-  border:1px solid #e7ebf1;border-radius:14px;background:#edf1f6;
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;width:100%;margin:0 0 15px!important;padding:5px!important;
+  border:1px solid #e1e7ef!important;border-radius:14px!important;background:#eaf0f6!important;
 }
 html.complaints-embed body .mode-tab{
-  display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;
-  padding:9px 10px;border:1px solid transparent;border-radius:10px;background:transparent;
-  color:#65758b;font:800 12px Cairo,Arial,sans-serif;cursor:pointer;transition:.18s ease;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-width:0;min-height:47px;padding:10px 12px;
+  border:1px solid transparent;border-radius:10px;background:transparent;
+  color:#66788d;font-family:Cairo,Arial,sans-serif;font-size:13px;font-weight:800;
+  line-height:1.5;transition:background .18s,border-color .18s,color .18s,box-shadow .18s;
 }
 html.complaints-embed body .mode-tab.is-active{
-  border-color:#f0d7de;background:#fff;color:#a32140;
-  box-shadow:0 3px 10px rgba(17,37,62,.06);
+  border-color:#efd4dc;background:#fff;color:var(--ml-red);
+  box-shadow:0 3px 10px rgba(17,37,62,.055);
 }
-html.complaints-embed body .mode-tab:focus-visible{
-  outline:3px solid rgba(189,37,71,.18);outline-offset:2px;
+.mode-tab:focus-visible,.primary-btn:focus-visible,.secondary-btn:focus-visible,
+.copy-btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(180,35,67,.18);outline-offset:2px;
 }
-html.complaints-embed body .content-grid{
-  display:block!important;width:100%!important;margin:0!important;
-}
+html.complaints-embed body .content-grid{display:block!important;width:100%!important;margin:0!important}
 html.complaints-embed body .card{
-  display:block;width:100%;min-width:0;margin:0;padding:20px!important;
-  border:1px solid #e5eaf0!important;border-radius:17px!important;background:#fff!important;
-  box-shadow:0 7px 22px rgba(18,42,69,.055)!important;box-sizing:border-box!important;
+  display:block!important;width:100%!important;min-width:0!important;margin:0!important;
+  padding:24px!important;border:1px solid var(--ml-line)!important;border-radius:18px!important;
+  background:#fff!important;box-shadow:0 8px 26px rgba(18,42,69,.055)!important;
 }
 html.complaints-embed body #complaintsWrap[data-mode="submit"] #trackComplaint{display:none!important}
 html.complaints-embed body #complaintsWrap[data-mode="track"] #submitComplaint{display:none!important}
 html.complaints-embed body .card-head{
-  display:flex!important;align-items:center!important;gap:12px!important;margin:0 0 18px!important;
+  display:flex!important;align-items:center!important;gap:13px!important;
+  margin:0 0 21px!important;padding:0 0 16px;border-bottom:1px solid #edf0f4;
 }
 html.complaints-embed body .card-icon{
-  display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;
-  border-radius:12px;background:#fff0f4;color:#b42343;font-size:16px;
+  display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;
+  border-radius:13px;background:#fff0f4;color:var(--ml-red);font-size:18px;
 }
 html.complaints-embed body #trackComplaint .card-icon{background:#edf4fb;color:#3e6c94}
 html.complaints-embed body .card-head h2{
-  margin:0 0 3px!important;color:#102b4b!important;font-size:18px!important;
-  line-height:1.5!important;font-weight:900!important;
+  margin:0 0 4px!important;color:var(--ml-navy)!important;
+  font-size:19px!important;font-weight:900!important;line-height:1.5!important;
 }
 html.complaints-embed body .card-head p{
-  margin:0!important;color:#748398!important;font-size:11px!important;line-height:1.8!important;
+  margin:0!important;color:var(--ml-muted)!important;font-size:12px!important;line-height:1.8!important;
 }
 html.complaints-embed body #complaintForm{display:block!important;width:100%!important;min-width:0!important}
 html.complaints-embed body #complaintForm .form-grid{
-  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
-  grid-auto-flow:row!important;gap:15px!important;width:100%!important;min-width:0!important;
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-flow:row;gap:16px!important;width:100%!important;min-width:0!important;
 }
-html.complaints-embed body #complaintForm .form-grid>.field,
-html.complaints-embed body #complaintForm .form-grid>.field.wide{
+html.complaints-embed body #complaintForm .form-grid>.field{
   display:flex!important;flex-direction:column!important;align-items:stretch!important;
-  grid-column:1/-1!important;width:100%!important;min-width:0!important;margin:0!important;gap:6px!important;
+  gap:7px!important;width:100%!important;min-width:0!important;margin:0!important;
 }
+html.complaints-embed body #complaintForm .form-grid>.field.wide{grid-column:1/-1!important}
 html.complaints-embed body #complaintForm .field>label:not(.anonymous-toggle):not(.consent){
-  display:block!important;width:100%!important;margin:0!important;color:#334b67!important;
-  font-size:12px!important;font-weight:800!important;line-height:1.7!important;text-align:right!important;
+  display:block!important;width:100%!important;margin:0!important;
+  color:#354d67!important;font-size:13px!important;font-weight:800!important;
+  line-height:1.65!important;text-align:right!important;
 }
 html.complaints-embed body #complaintForm .field input:not([type="checkbox"]),
 html.complaints-embed body #complaintForm .field select,
 html.complaints-embed body #complaintForm .field textarea,
 html.complaints-embed body #trackForm .field input{
   display:block!important;float:none!important;width:100%!important;max-width:100%!important;
-  min-width:0!important;min-height:48px!important;margin:0!important;padding:11px 13px!important;
+  min-width:0!important;min-height:50px!important;margin:0!important;padding:12px 14px!important;
   border:1px solid #dce4ed!important;border-radius:11px!important;background:#fbfcfe!important;
-  color:#203a57!important;font:500 15px/1.7 Cairo,Arial,sans-serif!important;
-  text-align:right;box-sizing:border-box!important;outline:none!important;
-  box-shadow:none!important;transition:border-color .18s,background .18s,box-shadow .18s!important;
+  color:#203a57!important;font-family:Cairo,Arial,sans-serif!important;
+  font-size:16px!important;font-weight:500!important;line-height:1.65!important;
+  text-align:right;box-sizing:border-box!important;outline:none!important;box-shadow:none!important;
+  transition:border-color .18s,background .18s,box-shadow .18s!important;
 }
-html.complaints-embed body #complaintForm .field select{padding-left:38px!important}
+html.complaints-embed body #complaintForm .field select{padding-left:40px!important}
 html.complaints-embed body #complaintForm .field textarea{
-  min-height:126px!important;resize:vertical!important;line-height:1.9!important;
+  min-height:150px!important;resize:vertical!important;line-height:1.9!important;
 }
 html.complaints-embed body #complaintForm .field input:focus,
 html.complaints-embed body #complaintForm .field select:focus,
 html.complaints-embed body #complaintForm .field textarea:focus,
 html.complaints-embed body #trackForm .field input:focus{
-  border-color:#b42343!important;background:#fff!important;
+  border-color:var(--ml-red)!important;background:#fff!important;
   box-shadow:0 0 0 3px rgba(180,35,67,.09)!important;
 }
 html.complaints-embed body #complaintForm .field input::placeholder,
 html.complaints-embed body #complaintForm .field textarea::placeholder,
-html.complaints-embed body #trackForm .field input::placeholder{color:#9aa7b6!important;opacity:1}
+html.complaints-embed body #trackForm .field input::placeholder{
+  color:#98a6b6!important;opacity:1;
+}
 html.complaints-embed body #complaintForm .field .help{
-  display:block!important;width:100%!important;color:#8794a4!important;font-size:10px!important;line-height:1.75!important;
+  display:block!important;width:100%!important;color:#7f8da0!important;
+  font-size:11px!important;line-height:1.75!important;
 }
 html.complaints-embed body #complaintForm .anonymous-toggle,
 html.complaints-embed body #complaintForm .consent{
   display:flex!important;flex-direction:row!important;align-items:flex-start!important;
-  justify-content:flex-start!important;gap:11px!important;width:100%!important;max-width:100%!important;
-  min-width:0!important;margin:0!important;padding:13px!important;border:1px solid #e7ebf0!important;
-  border-radius:12px!important;background:#f9fafc!important;color:#435a73!important;
-  font:500 12px/1.8 Cairo,Arial,sans-serif!important;box-sizing:border-box!important;
+  justify-content:flex-start!important;gap:12px!important;width:100%!important;max-width:100%!important;
+  min-width:0!important;margin:0!important;padding:14px!important;
+  border:1px solid #e6ebf1!important;border-radius:12px!important;
+  background:#f9fafc!important;color:#435a73!important;
+  font:500 12px/1.85 Cairo,Arial,sans-serif!important;box-sizing:border-box!important;
 }
+html.complaints-embed body #complaintForm .anonymous-toggle{background:#fff8fa!important;border-color:#f0dce2!important}
 html.complaints-embed body #complaintForm .anonymous-toggle>input[type="checkbox"],
 html.complaints-embed body #complaintForm .consent>input[type="checkbox"]{
   display:block!important;appearance:auto!important;-webkit-appearance:checkbox!important;
-  flex:0 0 19px!important;width:19px!important;height:19px!important;min-width:19px!important;
-  min-height:19px!important;margin:2px 0 0!important;padding:0!important;accent-color:#b42343!important;
+  flex:0 0 19px!important;width:19px!important;height:19px!important;
+  min-width:19px!important;min-height:19px!important;margin:3px 0 0!important;
+  padding:0!important;accent-color:var(--ml-red)!important;
 }
 html.complaints-embed body #complaintForm .anonymous-copy{
   display:block!important;flex:1 1 auto!important;min-width:0!important;
 }
 html.complaints-embed body #complaintForm .anonymous-copy strong{
-  display:block!important;margin:0 0 2px!important;color:#213d5a!important;
+  display:block!important;margin:0 0 3px!important;color:#203c59!important;
   font-size:13px!important;font-weight:900!important;line-height:1.7!important;
 }
 html.complaints-embed body #complaintForm .anonymous-copy small{
-  display:block!important;color:#7b899a!important;font-size:10px!important;line-height:1.75!important;
+  display:block!important;color:#78899e!important;font-size:11px!important;line-height:1.8!important;
 }
 html.complaints-embed body #complaintForm .consent span{
-  display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:11px!important;line-height:1.8!important;
+  display:block!important;flex:1 1 auto!important;min-width:0!important;
+  font-size:11px!important;line-height:1.85!important;
 }
 html.complaints-embed body #nameField[style*="display: none"],
 html.complaints-embed body #contactField[style*="display: none"]{display:none!important}
+html.complaints-embed body .honeypot{
+  position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;
+  overflow:hidden!important;opacity:0!important;pointer-events:none!important;
+}
 html.complaints-embed body #complaintForm .form-actions{
-  display:flex!important;flex-direction:column!important;align-items:stretch!important;
-  gap:10px!important;width:100%!important;margin-top:16px!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:space-between!important;gap:14px!important;width:100%!important;
+  margin-top:18px!important;
 }
-html.complaints-embed body #complaintForm .form-actions>*{
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  width:100%!important;max-width:none!important;min-width:0!important;
+html.complaints-embed body #complaintForm .form-actions .help{
+  display:block!important;flex:1 1 auto!important;min-width:0!important;
+  color:#718198!important;font-size:11px!important;line-height:1.8!important;
 }
-html.complaints-embed body .help{color:#7f8da0!important;font-size:10px!important;line-height:1.7!important}
 html.complaints-embed body .primary-btn,
 html.complaints-embed body .secondary-btn{
-  min-height:48px!important;padding:11px 16px!important;border-radius:11px!important;
-  font:800 13px Cairo,Arial,sans-serif!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  gap:9px!important;min-height:50px!important;padding:11px 19px!important;
+  border-radius:11px!important;font-family:Cairo,Arial,sans-serif!important;
+  font-size:13px!important;font-weight:900!important;line-height:1.5!important;
+  white-space:normal!important;transition:background .18s,transform .18s,box-shadow .18s!important;
 }
 html.complaints-embed body .primary-btn{
-  border:1px solid #a91f40!important;background:linear-gradient(135deg,#c53657,#a91f40)!important;
-  color:#fff!important;box-shadow:0 6px 14px rgba(169,31,64,.15)!important;
+  border:1px solid var(--ml-red-dark)!important;
+  background:linear-gradient(135deg,#c63859,var(--ml-red-dark))!important;
+  color:#fff!important;box-shadow:0 6px 15px rgba(169,31,64,.16)!important;
 }
-html.complaints-embed body .primary-btn:disabled{opacity:.6!important}
+html.complaints-embed body .primary-btn:hover:not(:disabled){
+  transform:translateY(-1px);box-shadow:0 9px 20px rgba(169,31,64,.2)!important;
+}
+html.complaints-embed body .primary-btn:disabled{opacity:.6!important;cursor:wait!important}
 html.complaints-embed body .secondary-btn{
   border:1px solid #dce4ed!important;background:#fff!important;color:#415b77!important;
 }
+html.complaints-embed body #complaintForm .form-actions .primary-btn{flex:0 0 auto;min-width:190px}
 html.complaints-embed body .status-message{
-  margin-top:12px!important;padding:11px 13px!important;border-radius:10px!important;
-  font-size:11px!important;line-height:1.8!important;
+  display:none;margin-top:14px!important;padding:12px 14px!important;
+  border-radius:10px!important;font-size:12px!important;line-height:1.8!important;
 }
+html.complaints-embed body .status-message.show{display:block!important}
+html.complaints-embed body .status-message.error{color:#a32944!important;background:#fff2f4!important;border:1px solid #f0d4dc!important}
+html.complaints-embed body .status-message.success{color:#276e50!important;background:#f0f9f3!important;border:1px solid #d5eadc!important}
 html.complaints-embed body .result-box{
-  display:none;margin-top:16px!important;padding:17px!important;width:100%!important;
+  display:none;margin-top:18px!important;padding:18px!important;width:100%!important;
   border:1px solid #cfe5d7!important;border-radius:14px!important;background:#f3faf5!important;
   box-sizing:border-box!important;
 }
 html.complaints-embed body .result-box.show{display:block!important}
 html.complaints-embed body .result-box h3{
-  margin:0 0 6px!important;color:#246a48!important;font-size:16px!important;line-height:1.6!important;
+  display:flex;align-items:center;gap:8px;margin:0 0 7px!important;
+  color:#246a48!important;font-size:16px!important;font-weight:900!important;
 }
 html.complaints-embed body .result-box p{
-  margin:0 0 12px!important;color:#627b6c!important;font-size:11px!important;line-height:1.8!important;
+  margin:0 0 12px!important;color:#607d6b!important;font-size:11px!important;line-height:1.8!important;
 }
 html.complaints-embed body .result-field{
-  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;
-  gap:8px!important;margin-top:9px!important;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;margin-top:9px;
 }
 html.complaints-embed body .result-field>div{
-  display:block!important;min-width:0!important;padding:10px 12px!important;
-  border:1px solid #d7e7dc!important;border-radius:10px!important;background:#fff!important;
+  min-width:0;padding:9px 11px;border:1px solid #d8e8dd;border-radius:9px;background:#fff;
 }
-html.complaints-embed body .result-field small{
-  display:block!important;margin:0 0 3px!important;color:#718779!important;font-size:9px!important;
-}
+html.complaints-embed body .result-field small{display:block;color:#84958a;font-size:9px}
 html.complaints-embed body .result-field strong{
-  display:block!important;overflow-wrap:anywhere!important;direction:ltr!important;text-align:left!important;
-  color:#234d37!important;font:800 13px ui-monospace,Consolas,monospace!important;
+  display:block;overflow-wrap:anywhere;color:#234d37;
+  font:900 13px ui-monospace,Consolas,monospace;direction:ltr;text-align:left;
 }
 html.complaints-embed body .copy-btn{
-  min-height:39px!important;padding:8px 11px!important;border:1px solid #cfe1d5!important;
-  border-radius:9px!important;background:#fff!important;color:#286b4b!important;
-  font:800 10px Cairo,Arial,sans-serif!important;
+  min-height:39px;padding:8px 12px;border:1px solid #cfe1d5;border-radius:9px;
+  background:#fff;color:#286b4b;font:800 11px Cairo,Arial,sans-serif;
 }
 html.complaints-embed body .secret-warning{
-  margin-top:11px!important;padding:10px 11px!important;border:1px solid #f0e0c5!important;
-  border-radius:10px!important;background:#fff8eb!important;color:#84602c!important;
-  font-size:10px!important;line-height:1.8!important;
+  margin-top:12px;padding:11px 12px;border:1px solid #f0e0c5;border-radius:9px;
+  background:#fff8eb;color:#84602c;font-size:10px;line-height:1.8;
 }
-html.complaints-embed body #trackComplaint .card-head{margin-bottom:18px!important}
 html.complaints-embed body #trackForm{
-  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;width:100%!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  gap:15px!important;width:100%!important;
 }
-html.complaints-embed body #trackForm>.field{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;min-width:0!important}
+html.complaints-embed body #trackForm>.field{
+  display:flex!important;flex-direction:column!important;gap:7px!important;
+  width:100%!important;min-width:0!important;
+}
 html.complaints-embed body #trackForm .field label{
-  display:block!important;width:100%!important;color:#334b67!important;font-size:12px!important;font-weight:800!important;
+  display:block!important;width:100%!important;color:#354d67!important;
+  font-size:13px!important;font-weight:800!important;
 }
 html.complaints-embed body #trackForm .field input{direction:ltr!important;text-align:left!important}
 html.complaints-embed body #trackForm .primary-btn{width:100%!important}
 html.complaints-embed body .track-result{
-  margin-top:14px!important;padding:14px!important;border:1px solid #e0e7ef!important;
-  border-radius:12px!important;background:#f9fbfd!important;
+  display:none;margin-top:16px!important;padding:16px!important;
+  border:1px solid #e0e7ef!important;border-radius:12px!important;background:#f9fbfd!important;
 }
-html.complaints-embed body .track-top strong{font-size:14px!important}
-html.complaints-embed body .track-top small,
-html.complaints-embed body .track-events strong,
-html.complaints-embed body .track-events p{font-size:11px!important;line-height:1.8!important}
-html.complaints-embed body .state-pill{font-size:10px!important}
+html.complaints-embed body .track-result.show{display:block!important}
+html.complaints-embed body .track-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding-bottom:12px;border-bottom:1px solid #e8edf3;
+}
+html.complaints-embed body .track-top strong{display:block;color:#1c3a59;font-size:15px}
+html.complaints-embed body .track-top small{display:block;margin-top:3px;color:#8492a3;font-size:10px;line-height:1.7}
+html.complaints-embed body .state-pill{
+  display:inline-flex;align-items:center;padding:5px 10px;border-radius:99px;
+  background:#eef4fb;color:#496c96;font-size:10px;font-weight:900;white-space:nowrap;
+}
+html.complaints-embed body .state-pill.status-new{background:#fff5e6;color:#9c641e}
+html.complaints-embed body .state-pill.status-under_review{background:#eef4fc;color:#526f9b}
+html.complaints-embed body .state-pill.status-in_progress{background:#e9f7f7;color:#277981}
+html.complaints-embed body .state-pill.status-resolved{background:#edf8f0;color:#2c7952}
+html.complaints-embed body .state-pill.status-closed{background:#f0f2f5;color:#657588}
+html.complaints-embed body .track-events{
+  display:grid;gap:0;margin:14px 0 0;padding:0;list-style:none;
+}
+html.complaints-embed body .track-events li{
+  position:relative;padding:0 17px 14px 0;border-right:1px solid #dfe7ef;
+}
+html.complaints-embed body .track-events li:last-child{padding-bottom:0;border-right-color:transparent}
+html.complaints-embed body .track-events li:before{
+  content:"";position:absolute;right:-5px;top:6px;width:8px;height:8px;
+  border:1px solid #fff;border-radius:50%;background:var(--ml-red);box-shadow:0 0 0 1px #e8bdc8;
+}
+html.complaints-embed body .track-events strong{display:block;color:#3d5b78;font-size:11px}
+html.complaints-embed body .track-events p{
+  margin:4px 0;color:#6e8197;font-size:11px;line-height:1.8;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+html.complaints-embed body .track-events small{color:#94a0af;font-size:9px}
+html.complaints-embed body .track-empty{padding:12px 0;color:#8a98a8;font-size:11px;line-height:1.8}
 html.complaints-embed body .privacy-card{
-  margin-top:12px!important;padding:12px 13px!important;border:1px solid #e4eaf0!important;
-  border-radius:11px!important;background:#eef3f8!important;color:#667a91!important;
-  font-size:10px!important;line-height:1.8!important;
+  display:block!important;margin-top:15px!important;padding:13px 15px!important;
+  border:1px solid #e4ebf2!important;border-radius:12px!important;
+  background:#f8fafc!important;color:#71839a!important;font-size:11px!important;line-height:1.9!important;
 }
-html.complaints-embed body .privacy-card strong{color:#2f4d6b!important}
-html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important}
-@media(max-width:560px){
-  html.complaints-embed body .wrap{padding:11px 10px 20px!important}
-  html.complaints-embed body .card{padding:15px!important;border-radius:14px!important}
-  html.complaints-embed body .mode-switch{margin-bottom:11px}
-  html.complaints-embed body .mode-tab{min-height:42px;font-size:11px}
-  html.complaints-embed body .card-head h2{font-size:16px!important}
-  html.complaints-embed body #complaintForm .field textarea{min-height:118px!important}
+html.complaints-embed body .privacy-card strong{color:#385573!important}
+html.complaints-embed body .footer-note{display:none!important}
+@media(max-width:620px){
+  html.complaints-embed body .wrap{max-width:100%!important;padding:13px 11px 22px!important}
+  html.complaints-embed body .portal-welcome{gap:10px;margin-bottom:11px;padding:12px}
+  html.complaints-embed body .portal-welcome__mark{flex-basis:38px;width:38px;height:38px;font-size:16px}
+  html.complaints-embed body .portal-welcome__copy strong{font-size:13px}
+  html.complaints-embed body .portal-welcome__copy small{font-size:10px}
+  html.complaints-embed body .portal-welcome__badge{padding:5px 7px;font-size:9px}
+  html.complaints-embed body .mode-switch{margin-bottom:11px!important}
+  html.complaints-embed body .mode-tab{min-height:43px;padding:8px 7px;font-size:12px}
+  html.complaints-embed body .card{padding:17px!important;border-radius:15px!important}
+  html.complaints-embed body .card-head{align-items:flex-start!important;gap:10px!important;margin-bottom:17px!important;padding-bottom:13px}
+  html.complaints-embed body .card-icon{flex-basis:39px;width:39px;height:39px;font-size:16px}
+  html.complaints-embed body .card-head h2{font-size:17px!important}
+  html.complaints-embed body .card-head p{font-size:11px!important}
+  html.complaints-embed body #complaintForm .form-grid{grid-template-columns:minmax(0,1fr)!important;gap:13px!important}
+  html.complaints-embed body #complaintForm .form-grid>.field.wide{grid-column:1!important}
+  html.complaints-embed body #complaintForm .field>label:not(.anonymous-toggle):not(.consent),
+  html.complaints-embed body #trackForm .field label{font-size:12px!important}
+  html.complaints-embed body #complaintForm .field input:not([type="checkbox"]),
+  html.complaints-embed body #complaintForm .field select,
+  html.complaints-embed body #complaintForm .field textarea,
+  html.complaints-embed body #trackForm .field input{min-height:49px!important;font-size:16px!important}
+  html.complaints-embed body #complaintForm .field textarea{min-height:135px!important}
+  html.complaints-embed body #complaintForm .form-actions{flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+  html.complaints-embed body #complaintForm .form-actions .help{width:100%!important}
+  html.complaints-embed body #complaintForm .form-actions .primary-btn{width:100%!important;min-width:0!important}
+  html.complaints-embed body .primary-btn,html.complaints-embed body .secondary-btn{width:100%!important;min-height:49px!important}
+  html.complaints-embed body .result-box{padding:14px!important}
   html.complaints-embed body .result-field{grid-template-columns:minmax(0,1fr)!important}
   html.complaints-embed body .copy-btn{width:100%!important}
 }
-
-/* Premium responsive embed refresh — keep the form calm, spacious and legible */
-html.complaints-embed,html.complaints-embed body{
-  width:100%!important;min-width:0!important;max-width:100%!important;
-  margin:0!important;padding:0!important;overflow-x:hidden!important;
-  background:#f3f6fa!important;color:#172b45!important;
-  font-family:Cairo,Arial,sans-serif!important;
-}
-html.complaints-embed body .hero,
-html.complaints-embed body .intro-grid,
-html.complaints-embed body .footer-note{display:none!important}
-html.complaints-embed body .wrap{
-  display:block!important;width:100%!important;max-width:720px!important;
-  margin:0 auto!important;padding:16px!important;box-sizing:border-box!important;
-}
-html.complaints-embed body .mode-switch{
-  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:6px!important;padding:5px!important;margin:0 0 14px!important;
-  border:1px solid #e2e8f0!important;border-radius:15px!important;background:#eaf0f6!important;
-}
-html.complaints-embed body .mode-tab{
-  min-width:0!important;min-height:46px!important;padding:10px 8px!important;
-  border:1px solid transparent!important;border-radius:11px!important;
-  font:800 12px Cairo,Arial,sans-serif!important;color:#64758b!important;
-}
-html.complaints-embed body .mode-tab.is-active{
-  border-color:#f0d5dc!important;background:#fff!important;color:#a62243!important;
-  box-shadow:0 3px 10px rgba(16,37,66,.06)!important;
-}
-html.complaints-embed body .content-grid{display:block!important;width:100%!important;margin:0!important}
-html.complaints-embed body .card{
-  display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
-  margin:0!important;padding:22px!important;border:1px solid #e4eaf1!important;
-  border-radius:18px!important;background:#fff!important;
-  box-shadow:0 10px 28px rgba(16,37,66,.055)!important;box-sizing:border-box!important;
-}
-html.complaints-embed body #complaintsWrap[data-mode="submit"] #trackComplaint{display:none!important}
-html.complaints-embed body #complaintsWrap[data-mode="track"] #submitComplaint{display:none!important}
-html.complaints-embed body .card-head{display:flex!important;align-items:center!important;gap:12px!important;margin:0 0 20px!important}
-html.complaints-embed body .card-icon{flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:13px!important;background:#fff0f4!important;color:#ae2545!important}
-html.complaints-embed body #trackComplaint .card-icon{background:#edf4fb!important;color:#3e6c94!important}
-html.complaints-embed body .card-head h2{margin:0 0 4px!important;font-size:19px!important;line-height:1.45!important;color:#102b4b!important;font-weight:900!important}
-html.complaints-embed body .card-head p{margin:0!important;font-size:11px!important;line-height:1.9!important;color:#7a899b!important}
-html.complaints-embed body #complaintForm{display:block!important;width:100%!important;min-width:0!important}
-html.complaints-embed body #complaintForm .form-grid{
- display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:17px!important;
- width:100%!important;min-width:0!important;align-items:stretch!important;
-}
-html.complaints-embed body #complaintForm .form-grid>.field,
-html.complaints-embed body #complaintForm .form-grid>.field.wide{
- display:flex!important;flex-direction:column!important;align-items:stretch!important;
- grid-column:1/-1!important;width:100%!important;min-width:0!important;margin:0!important;gap:7px!important;
-}
-html.complaints-embed body #complaintForm .field>label:not(.anonymous-toggle):not(.consent),
-html.complaints-embed body #trackForm .field>label{
- display:block!important;width:100%!important;margin:0!important;text-align:right!important;
- color:#344c67!important;font:800 12px/1.8 Cairo,Arial,sans-serif!important;
-}
-html.complaints-embed body #complaintForm .field input:not([type=checkbox]),
-html.complaints-embed body #complaintForm .field select,
-html.complaints-embed body #complaintForm .field textarea,
-html.complaints-embed body #trackForm .field input{
- display:block!important;float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;
- min-height:49px!important;margin:0!important;padding:12px 14px!important;box-sizing:border-box!important;
- border:1px solid #dce4ed!important;border-radius:12px!important;background:#fbfcfe!important;
- color:#203a57!important;font:500 14px/1.8 Cairo,Arial,sans-serif!important;
- box-shadow:none!important;outline:none!important;
-}
-html.complaints-embed body #complaintForm .field textarea{min-height:132px!important;resize:vertical!important}
-html.complaints-embed body #complaintForm .field input:focus,
-html.complaints-embed body #complaintForm .field select:focus,
-html.complaints-embed body #complaintForm .field textarea:focus,
-html.complaints-embed body #trackForm .field input:focus{
- border-color:#b52b4b!important;background:#fff!important;box-shadow:0 0 0 3px rgba(181,43,75,.09)!important;
-}
-html.complaints-embed body #complaintForm .field .help{font-size:10px!important;line-height:1.8!important;color:#8290a1!important}
-html.complaints-embed body #complaintForm .anonymous-toggle,
-html.complaints-embed body #complaintForm .consent{
- display:flex!important;flex-direction:row!important;align-items:flex-start!important;justify-content:flex-start!important;
- gap:11px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;
- padding:14px!important;border:1px solid #e4eaf0!important;border-radius:13px!important;
- background:#f8fafc!important;color:#435a73!important;font:500 11px/1.9 Cairo,Arial,sans-serif!important;box-sizing:border-box!important;
-}
-html.complaints-embed body #complaintForm .anonymous-toggle>input[type=checkbox],
-html.complaints-embed body #complaintForm .consent>input[type=checkbox]{
- appearance:auto!important;-webkit-appearance:checkbox!important;flex:0 0 19px!important;
- width:19px!important;height:19px!important;min-width:19px!important;min-height:19px!important;
- margin:3px 0 0!important;padding:0!important;accent-color:#b52b4b!important;
-}
-html.complaints-embed body #complaintForm .anonymous-copy{display:block!important;flex:1 1 auto!important;min-width:0!important}
-html.complaints-embed body #complaintForm .anonymous-copy strong{display:block!important;margin:0 0 3px!important;color:#203d5a!important;font-size:13px!important;font-weight:900!important}
-html.complaints-embed body #complaintForm .anonymous-copy small{display:block!important;color:#7b899a!important;font-size:10px!important;line-height:1.8!important}
-html.complaints-embed body #complaintForm .consent span{display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:11px!important}
-html.complaints-embed body #nameField[style*="display: none"],
-html.complaints-embed body #contactField[style*="display: none"]{display:none!important}
-html.complaints-embed body .form-actions{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important;margin-top:17px!important}
-html.complaints-embed body .form-actions .help{font-size:10px!important;line-height:1.8!important}
-html.complaints-embed body .primary-btn,
-html.complaints-embed body .secondary-btn{
- display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;
- width:100%!important;max-width:100%!important;min-width:0!important;min-height:49px!important;
- padding:12px 16px!important;border-radius:12px!important;font:800 13px Cairo,Arial,sans-serif!important;
-}
-html.complaints-embed body .primary-btn{border:1px solid #a62243!important;background:linear-gradient(135deg,#c73b5a,#a62243)!important;color:#fff!important;box-shadow:0 7px 16px rgba(166,34,67,.16)!important}
-html.complaints-embed body .secondary-btn{border:1px solid #dce4ed!important;background:#fff!important;color:#405b77!important}
-html.complaints-embed body .status-message{margin-top:13px!important;padding:12px 14px!important;border-radius:11px!important;font-size:11px!important;line-height:1.9!important}
-html.complaints-embed body .result-box{display:none;margin-top:17px!important;padding:16px!important;border:1px solid #cfe5d7!important;border-radius:14px!important;background:#f3faf5!important;box-sizing:border-box!important}
-html.complaints-embed body .result-box.show{display:block!important}
-html.complaints-embed body .result-box h3{margin:0 0 6px!important;color:#246a48!important;font-size:16px!important}
-html.complaints-embed body .result-box p{font-size:11px!important;line-height:1.9!important}
-html.complaints-embed body .result-field{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;align-items:center!important;margin-top:10px!important}
-html.complaints-embed body .result-field>div{min-width:0!important;padding:10px!important;border:1px solid #d7e7dc!important;border-radius:10px!important;background:#fff!important}
-html.complaints-embed body .result-field strong{display:block!important;overflow-wrap:anywhere!important;font:800 13px ui-monospace,Consolas,monospace!important;direction:ltr!important;text-align:left!important}
-html.complaints-embed body .copy-btn{min-height:39px!important;padding:8px 11px!important;border:1px solid #cfe1d5!important;border-radius:9px!important;background:#fff!important;color:#286b4b!important;font:800 10px Cairo,Arial,sans-serif!important}
-html.complaints-embed body .secret-warning{margin-top:11px!important;padding:11px!important;border-radius:10px!important;background:#fff8eb!important;color:#84602c!important;font-size:10px!important;line-height:1.9!important}
-html.complaints-embed body #trackForm{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:15px!important;width:100%!important}
-html.complaints-embed body #trackForm>.field{display:flex!important;flex-direction:column!important;gap:7px!important;width:100%!important;min-width:0!important}
-html.complaints-embed body #trackForm .field input{direction:ltr!important;text-align:left!important}
-html.complaints-embed body .track-result{margin-top:14px!important;padding:14px!important;border:1px solid #e0e7ef!important;border-radius:12px!important;background:#f9fbfd!important}
-html.complaints-embed body .track-top strong{font-size:14px!important}
-html.complaints-embed body .track-top small,html.complaints-embed body .track-events strong,html.complaints-embed body .track-events p{font-size:11px!important;line-height:1.9!important}
-html.complaints-embed body .privacy-card{margin-top:13px!important;padding:13px!important;border:1px solid #e2e9f0!important;border-radius:12px!important;background:#edf3f8!important;color:#657a91!important;font-size:10px!important;line-height:1.9!important}
-html.complaints-embed body .privacy-card strong{color:#2f4d6b!important}
-html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
-@media(max-width:560px){
- html.complaints-embed body .wrap{padding:12px 10px 24px!important}
- html.complaints-embed body .card{padding:17px!important;border-radius:15px!important}
- html.complaints-embed body .card-head h2{font-size:17px!important}
- html.complaints-embed body .mode-tab{font-size:11px!important}
- html.complaints-embed body #complaintForm .field textarea{min-height:120px!important}
- html.complaints-embed body .result-field{grid-template-columns:minmax(0,1fr)!important}
- html.complaints-embed body .copy-btn{width:100%!important}
-}
-
- 
-/* Final MedLife visual system — clear hierarchy, strong brand, compact mobile spacing */
-html.complaints-embed body{font-size:14px!important;color:#172d4b!important;background:#f2f5f9!important}
-html.complaints-embed body #complaintsWrap{
- width:100%!important;max-width:760px!important;margin:0 auto!important;
- padding:14px 14px 28px!important;box-sizing:border-box!important;
-}
-html.complaints-embed body .portal-welcome{
- display:flex!important;align-items:center!important;gap:11px!important;
- width:100%!important;min-width:0!important;margin:0 0 13px!important;padding:13px 14px!important;
- border:1px solid #e0e7f0!important;border-radius:14px!important;
- background:linear-gradient(115deg,#fff 0%,#f8fafc 100%)!important;
- box-shadow:0 5px 16px rgba(7,27,58,.035)!important;box-sizing:border-box!important;
-}
-html.complaints-embed body .portal-welcome__mark{
- display:grid!important;place-items:center!important;flex:0 0 40px!important;
- width:40px!important;height:40px!important;border-radius:12px!important;
- background:#fff0f4!important;color:#b42343!important;font-size:17px!important;
-}
-html.complaints-embed body .portal-welcome__copy{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
-html.complaints-embed body .portal-welcome__copy strong{display:block!important;color:#102b4b!important;font-size:13px!important;font-weight:900!important;line-height:1.5!important}
-html.complaints-embed body .portal-welcome__copy small{display:block!important;color:#78899e!important;font-size:10px!important;line-height:1.6!important}
-html.complaints-embed body .portal-welcome__badge{
- display:inline-flex!important;align-items:center!important;gap:5px!important;flex:none!important;
- padding:6px 9px!important;border:1px solid #dcebe2!important;border-radius:99px!important;
- background:#f2faf5!important;color:#287451!important;font-size:9px!important;font-weight:800!important;
-}
-html.complaints-embed body .mode-switch{
- display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
- gap:6px!important;margin:0 0 13px!important;padding:5px!important;
- border:1px solid #e0e7f0!important;border-radius:14px!important;background:#e9eef5!important;
-}
-html.complaints-embed body .mode-tab{
- display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
- width:100%!important;min-width:0!important;min-height:45px!important;padding:10px 8px!important;
- border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;
- color:#60738c!important;font:800 12px Cairo,Arial,sans-serif!important;
- box-shadow:none!important;transition:background .18s,color .18s,box-shadow .18s!important;
-}
-html.complaints-embed body .mode-tab i{font-size:12px!important}
-html.complaints-embed body .mode-tab.is-active{
- border-color:#102b4b!important;background:#102b4b!important;color:#fff!important;
- box-shadow:0 4px 11px rgba(16,43,75,.18)!important;
-}
-html.complaints-embed body .content-grid{display:block!important;width:100%!important;margin:0!important}
-html.complaints-embed body #submitComplaint,
-html.complaints-embed body #trackComplaint{
- display:block!important;width:100%!important;min-width:0!important;margin:0!important;
- padding:19px!important;border:1px solid #e0e7ef!important;border-radius:16px!important;
- background:#fff!important;box-shadow:0 8px 24px rgba(7,27,58,.045)!important;box-sizing:border-box!important;
-}
-html.complaints-embed body #complaintsWrap[data-mode="submit"] #trackComplaint{display:none!important}
-html.complaints-embed body #complaintsWrap[data-mode="track"] #submitComplaint{display:none!important}
-html.complaints-embed body #submitComplaint .card-head,
-html.complaints-embed body #trackComplaint .card-head{
- display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;
- gap:12px!important;margin:0 0 18px!important;padding:0 0 15px!important;
- border-bottom:1px solid #edf1f5!important;text-align:right!important;
-}
-html.complaints-embed body #submitComplaint .card-icon,
-html.complaints-embed body #trackComplaint .card-icon{
- display:grid!important;place-items:center!important;flex:0 0 43px!important;
- width:43px!important;height:43px!important;border-radius:13px!important;
- background:#fff0f4!important;color:#b42343!important;font-size:16px!important;
-}
-html.complaints-embed body #trackComplaint .card-icon{background:#edf4fb!important;color:#3f6c96!important}
-html.complaints-embed body .card-head>div{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
-html.complaints-embed body .card-head h2{
- display:block!important;margin:0!important;color:#102b4b!important;
- font:900 18px/1.5 Cairo,Arial,sans-serif!important;text-align:right!important;
-}
-html.complaints-embed body .card-head p{
- display:block!important;margin:0!important;color:#7b8b9e!important;
- font:500 10px/1.85 Cairo,Arial,sans-serif!important;text-align:right!important;
-}
-html.complaints-embed body #complaintForm{display:block!important;width:100%!important;min-width:0!important}
-html.complaints-embed body #complaintForm .form-grid{
- display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;
- gap:13px!important;width:100%!important;min-width:0!important;align-items:stretch!important;
-}
-html.complaints-embed body #complaintForm .form-grid>.field,
-html.complaints-embed body #complaintForm .form-grid>.field.wide{
- display:flex!important;flex-direction:column!important;align-items:stretch!important;
- grid-column:1/-1!important;width:100%!important;min-width:0!important;margin:0!important;gap:5px!important;
-}
-html.complaints-embed body #complaintForm .field>label:not(.anonymous-toggle):not(.consent),
-html.complaints-embed body #trackForm .field>label{
- display:block!important;width:100%!important;margin:0!important;color:#344b67!important;
- font:800 11px/1.7 Cairo,Arial,sans-serif!important;text-align:right!important;
-}
-html.complaints-embed body #complaintForm .field input:not([type=checkbox]),
-html.complaints-embed body #complaintForm .field select,
-html.complaints-embed body #complaintForm .field textarea,
-html.complaints-embed body #trackForm .field input{
- display:block!important;float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;
- min-height:45px!important;margin:0!important;padding:10px 12px!important;box-sizing:border-box!important;
- border:1px solid #d8e1ec!important;border-radius:10px!important;background:#fbfcfe!important;
- color:#1c3654!important;font:500 13px/1.75 Cairo,Arial,sans-serif!important;
- text-align:right!important;box-shadow:none!important;outline:none!important;
- transition:border-color .18s,background .18s,box-shadow .18s!important;
-}
-html.complaints-embed body #complaintForm .field select{padding-left:36px!important}
-html.complaints-embed body #complaintForm .field textarea{
- min-height:150px!important;padding:12px!important;resize:vertical!important;line-height:1.9!important;
-}
-html.complaints-embed body #complaintForm .field input:focus,
-html.complaints-embed body #complaintForm .field select:focus,
-html.complaints-embed body #complaintForm .field textarea:focus,
-html.complaints-embed body #trackForm .field input:focus{
- border-color:#b42343!important;background:#fff!important;box-shadow:0 0 0 3px rgba(180,35,67,.08)!important;
-}
-html.complaints-embed body #complaintForm .field input::placeholder,
-html.complaints-embed body #complaintForm .field textarea::placeholder,
-html.complaints-embed body #trackForm .field input::placeholder{color:#9ba8b7!important;opacity:1!important}
-html.complaints-embed body #complaintForm .field .help{display:block!important;width:100%!important;color:#8190a2!important;font-size:9px!important;line-height:1.75!important}
-html.complaints-embed body #complaintForm .anonymous-toggle,
-html.complaints-embed body #complaintForm .consent{
- display:flex!important;flex-direction:row!important;align-items:flex-start!important;gap:10px!important;
- width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px!important;
- border:1px solid #e4e9f0!important;border-radius:11px!important;background:#f8fafc!important;
- color:#425a75!important;font:500 10px/1.8 Cairo,Arial,sans-serif!important;box-sizing:border-box!important;
-}
-html.complaints-embed body #complaintForm .anonymous-toggle{background:#fff8fa!important;border-color:#f0dce2!important}
-html.complaints-embed body #complaintForm .anonymous-toggle input[type=checkbox],
-html.complaints-embed body #complaintForm .consent input[type=checkbox]{
- appearance:auto!important;-webkit-appearance:checkbox!important;flex:0 0 18px!important;
- width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
- margin:2px 0 0!important;padding:0!important;accent-color:#b42343!important;
-}
-html.complaints-embed body #complaintForm .anonymous-copy{display:block!important;flex:1 1 auto!important;min-width:0!important}
-html.complaints-embed body #complaintForm .anonymous-copy strong{display:block!important;margin:0 0 2px!important;color:#173451!important;font-size:12px!important;font-weight:900!important;line-height:1.7!important}
-html.complaints-embed body #complaintForm .anonymous-copy small{display:block!important;color:#78899e!important;font-size:9px!important;line-height:1.8!important}
-html.complaints-embed body #complaintForm .consent span{display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:10px!important;line-height:1.85!important}
-html.complaints-embed body #nameField[style*="display: none"],
-html.complaints-embed body #contactField[style*="display: none"]{display:none!important}
-html.complaints-embed body #complaintForm .form-actions{
- display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important;
- width:100%!important;margin-top:14px!important;
-}
-html.complaints-embed body #complaintForm .form-actions>*{
- display:flex!important;align-items:center!important;justify-content:center!important;
- width:100%!important;max-width:none!important;min-width:0!important;
-}
-html.complaints-embed body #complaintForm .form-actions .help{text-align:right!important;font-size:9px!important;line-height:1.7!important}
-html.complaints-embed body .primary-btn,
-html.complaints-embed body .secondary-btn{
- display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
- width:100%!important;max-width:100%!important;min-width:0!important;min-height:47px!important;
- padding:11px 14px!important;border-radius:11px!important;font:800 12px Cairo,Arial,sans-serif!important;
-}
-html.complaints-embed body .primary-btn{
- border:1px solid #a32243!important;background:linear-gradient(115deg,#c33a59,#a32243)!important;
- color:#fff!important;box-shadow:0 6px 15px rgba(163,34,67,.15)!important;
-}
-html.complaints-embed body .primary-btn:disabled{opacity:.58!important}
-html.complaints-embed body .secondary-btn{border:1px solid #d9e2ec!important;background:#fff!important;color:#304e6e!important}
-html.complaints-embed body .status-message{margin-top:11px!important;padding:11px 12px!important;border-radius:10px!important;font-size:10px!important;line-height:1.8!important}
-html.complaints-embed body .result-box{
- display:none!important;margin-top:14px!important;padding:14px!important;border:1px solid #cfe5d7!important;
- border-radius:13px!important;background:#f3faf5!important;box-sizing:border-box!important;
-}
-html.complaints-embed body .result-box.show{display:block!important}
-html.complaints-embed body .result-box h3{margin:0 0 5px!important;color:#246a48!important;font-size:15px!important}
-html.complaints-embed body .result-box p{font-size:10px!important;line-height:1.8!important}
-html.complaints-embed body .result-field{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;margin-top:9px!important}
-html.complaints-embed body .result-field>div{min-width:0!important;padding:9px!important;border:1px solid #d7e7dc!important;border-radius:9px!important;background:#fff!important}
-html.complaints-embed body .result-field strong{display:block!important;overflow-wrap:anywhere!important;font:800 12px ui-monospace,Consolas,monospace!important;direction:ltr!important;text-align:left!important}
-html.complaints-embed body .copy-btn{min-height:36px!important;padding:7px 10px!important;border:1px solid #cfe1d5!important;border-radius:9px!important;background:#fff!important;color:#286b4b!important;font:800 9px Cairo,Arial,sans-serif!important}
-html.complaints-embed body .secret-warning{margin-top:10px!important;padding:10px!important;border:1px solid #f0e0c5!important;border-radius:9px!important;background:#fff8eb!important;color:#84602c!important;font-size:9px!important;line-height:1.8!important}
-html.complaints-embed body #trackForm{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;width:100%!important}
-html.complaints-embed body #trackForm>.field{display:flex!important;flex-direction:column!important;gap:5px!important;width:100%!important;min-width:0!important}
-html.complaints-embed body #trackForm .field input{direction:ltr!important;text-align:left!important}
-html.complaints-embed body .track-result{margin-top:12px!important;padding:12px!important;border:1px solid #e0e7ef!important;border-radius:11px!important;background:#f9fbfd!important}
-html.complaints-embed body .track-top strong{font-size:13px!important}
-html.complaints-embed body .track-top small,html.complaints-embed body .track-events strong,html.complaints-embed body .track-events p{font-size:10px!important;line-height:1.8!important}
-html.complaints-embed body .privacy-card{
- margin-top:11px!important;padding:11px 13px!important;border:1px solid #e1e8f0!important;
- border-radius:11px!important;background:#edf3f8!important;color:#667b92!important;font-size:9px!important;line-height:1.8!important;
-}
-html.complaints-embed body .privacy-card strong{color:#294b6e!important}
-html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
-@media(max-width:560px){
- html.complaints-embed body #complaintsWrap{padding:11px 10px 22px!important}
- html.complaints-embed body .portal-welcome{padding:11px!important;gap:9px!important}
- html.complaints-embed body .portal-welcome__mark{flex-basis:36px!important;width:36px!important;height:36px!important;font-size:15px!important}
- html.complaints-embed body .portal-welcome__copy strong{font-size:11px!important}
- html.complaints-embed body .portal-welcome__copy small{font-size:9px!important}
- html.complaints-embed body .portal-welcome__badge{font-size:8px!important;padding:5px 7px!important}
- html.complaints-embed body #submitComplaint,html.complaints-embed body #trackComplaint{padding:16px!important}
- html.complaints-embed body #submitComplaint .card-head,html.complaints-embed body #trackComplaint .card-head{gap:10px!important;margin-bottom:15px!important;padding-bottom:13px!important}
- html.complaints-embed body #submitComplaint .card-icon,html.complaints-embed body #trackComplaint .card-icon{flex-basis:39px!important;width:39px!important;height:39px!important}
- html.complaints-embed body .card-head h2{font-size:16px!important}
- html.complaints-embed body .card-head p{font-size:9px!important}
- html.complaints-embed body #complaintForm .form-grid{gap:12px!important}
- html.complaints-embed body #complaintForm .field textarea{min-height:138px!important}
- html.complaints-embed body .result-field{grid-template-columns:minmax(0,1fr)!important}
- html.complaints-embed body .copy-btn{width:100%!important}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
 }
 
 </style>
