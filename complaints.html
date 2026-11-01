@@ -248,7 +248,6 @@ button{cursor:pointer}
  const submitBtn=byId("submitBtn");
  const trackBtn=byId("trackBtn");
  const anonymous=byId("isAnonymous");
- let secretInMemory="";
 
  function showMessage(id,message,type){
   const el=byId(id);el.textContent=message;el.className="status-message show "+type;
@@ -303,7 +302,6 @@ button{cursor:pointer}
   setBusy(submitBtn,true,"جارٍ إرسال الشكوى");
   try{
    const data=await callApi(payload);
-   secretInMemory=data.tracking_token;
    byId("resultTicket").textContent=data.ticket_code;
    byId("resultToken").textContent=data.tracking_token;
    byId("submissionResult").classList.add("show");
