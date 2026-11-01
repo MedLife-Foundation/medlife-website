@@ -5,22 +5,21 @@
   function initComplaintsModal(){
     if(document.getElementById('medlifeComplaintsModal'))return;
 
-    const card=Array.from(document.querySelectorAll('.forum-card')).find(item=>{
-      const heading=item.querySelector('h3');
-      return heading&&heading.textContent.replace(/\s+/g,' ').trim()==='صندوق الشكاوى والملاحظات';
-    });
-    if(!card)return;
-
-    const actions=card.querySelector('.forum-actions');
-    if(!actions)return;
+    // The live Contact Us page is rebuilt by contact-page-v8.js.
+    // Add the complaint entry to its actual contact card, not the removed legacy markup.
+    const page=document.getElementById('medlife-contact-v8');
+    const contactCard=page&&page.querySelector('.mc8-contact-card');
+    const actions=contactCard&&contactCard.querySelector('.mc8-actions');
+    if(!page||!contactCard||!actions)return;
 
     const style=document.createElement('style');
     style.id='medlife-complaints-modal-style';
     style.textContent=`
       body.medlife-complaints-modal-open{overflow:hidden!important}
-      .forum-actions .ml-complaints-open{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:39px;padding:9px 14px;border:0;border-radius:11px;background:linear-gradient(135deg,#bd2547,#9f1f3b);color:#fff;font:800 11px Cairo,Arial,sans-serif;cursor:pointer;box-shadow:0 7px 18px rgba(189,37,71,.16);transition:transform .2s,box-shadow .2s}
-      .forum-actions .ml-complaints-open:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(189,37,71,.22)}
-      .forum-actions .ml-complaints-open:focus-visible,.ml-complaints-modal__close:focus-visible{outline:3px solid rgba(27,154,192,.35);outline-offset:3px}
+      #medlife-contact-v8 .ml-complaints-entry{margin-top:13px;width:100%}
+      #medlife-contact-v8 .ml-complaints-open{width:100%!important;min-height:47px!important;padding:10px 14px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;border:1px solid #eabfc9!important;border-radius:12px!important;background:linear-gradient(135deg,#fff0f4,#fff8fa)!important;color:#a32140!important;font:900 12px Cairo,Arial,sans-serif!important;cursor:pointer!important;box-shadow:0 6px 16px rgba(189,37,71,.08)!important;transition:transform .2s,box-shadow .2s,border-color .2s!important}
+      #medlife-contact-v8 .ml-complaints-open:hover{transform:translateY(-2px)!important;border-color:#bd2547!important;box-shadow:0 9px 20px rgba(189,37,71,.15)!important}
+      #medlife-contact-v8 .ml-complaints-open:focus-visible,.ml-complaints-modal__close:focus-visible{outline:3px solid rgba(27,154,192,.35);outline-offset:3px}
       .ml-complaints-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(5,18,39,.76);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
       .ml-complaints-modal.is-open{display:flex}
       .ml-complaints-modal__dialog{display:flex;flex-direction:column;width:min(1040px,100%);height:min(88vh,900px);min-height:360px;overflow:hidden;border:1px solid rgba(255,255,255,.55);border-radius:20px;background:#f4f7fa;box-shadow:0 24px 80px rgba(0,0,0,.28)}
@@ -35,7 +34,10 @@
     `;
     document.head.appendChild(style);
 
-    actions.innerHTML='<button class="ml-complaints-open" id="openMedlifeComplaints" type="button"><i class="fa-solid fa-shield-heart"></i> فتح صندوق الشكاوى والملاحظات</button>';
+    const entry=document.createElement('div');
+    entry.className='ml-complaints-entry';
+    entry.innerHTML='<button class="ml-complaints-open" id="openMedlifeComplaints" type="button"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i><span>صندوق الشكاوى والملاحظات</span></button>';
+    actions.insertAdjacentElement('afterend',entry);
 
     const modal=document.createElement('div');
     modal.className='ml-complaints-modal';
@@ -48,7 +50,7 @@
             <strong id="mlComplaintsModalTitle">صندوق الشكاوى والملاحظات</strong>
             <small>قناة رسمية وآمنة — تقديم الشكوى ومتابعتها بسرية</small>
           </div>
-          <button class="ml-complaints-modal__close" id="closeMedlifeComplaints" type="button" aria-label="إغلاق صندوق الشكاوى"><i class="fa-solid fa-xmark"></i> إغلاق</button>
+          <button class="ml-complaints-modal__close" id="closeMedlifeComplaints" type="button" aria-label="إغلاق صندوق الشكاوى"><i class="fa-solid fa-xmark" aria-hidden="true"></i> إغلاق</button>
         </div>
         <iframe class="ml-complaints-modal__frame" id="medlifeComplaintsFrame" title="نموذج صندوق الشكاوى والملاحظات" data-src="/complaints.html?embed=1" loading="lazy"></iframe>
       </section>`;
@@ -88,9 +90,27 @@
     if(window.location.hash==='#complaints')openModal();
   }
 
+  function waitForContactPage(){
+    if(document.getElementById('medlife-contact-v8')){
+      initComplaintsModal();
+      return;
+    }
+    // contact-page-v8.js rebuilds the page asynchronously after the navigation scripts.
+    let attempts=0;
+    const timer=window.setInterval(()=>{
+      attempts+=1;
+      if(document.getElementById('medlife-contact-v8')){
+        window.clearInterval(timer);
+        initComplaintsModal();
+      }else if(attempts>=40){
+        window.clearInterval(timer);
+      }
+    },100);
+  }
+
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',initComplaintsModal,{once:true});
+    document.addEventListener('DOMContentLoaded',waitForContactPage,{once:true});
   }else{
-    initComplaintsModal();
+    waitForContactPage();
   }
 })();
