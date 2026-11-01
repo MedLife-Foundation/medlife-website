@@ -6,7 +6,15 @@
 <meta name="theme-color" content="#071b3a">
 <title>صندوق الشكاوى | مؤسسة ميدلايف</title>
 <meta name="description" content="قدّم شكوى أو ملاحظة إلى مؤسسة ميدلايف بسرية، واحصل على رقم مرجعي ورمز خاص لمتابعة المعالجة.">
-<meta name="robots" content="index,follow">
+<meta name="robots" content="noindex,nofollow">
+<script>
+(function(){
+ const inFrame=window.parent!==window;
+ const embedded=new URLSearchParams(window.location.search).get('embed')==='1'&&inFrame;
+ if(embedded){document.documentElement.classList.add('complaints-embed');}
+ else{window.location.replace('/contact.html#complaints');}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -124,6 +132,19 @@ button{cursor:pointer}
  .form-actions>*{flex:1}
  .result-field{grid-template-columns:1fr auto}
 }
+
+/* Embedded presentation inside the Contact Us modal */
+html.complaints-embed,html.complaints-embed body{min-height:100%;background:var(--bg)}
+html.complaints-embed body .hero{display:none}
+html.complaints-embed body .wrap{width:100%;max-width:1120px;margin:0 auto;padding:12px 12px 24px}
+html.complaints-embed body .intro-grid{display:none}
+html.complaints-embed body .content-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+html.complaints-embed body .card{padding:15px;border-radius:13px;box-shadow:0 5px 18px rgba(16,37,66,.045)}
+html.complaints-embed body .track-card{position:static}
+html.complaints-embed body .privacy-card{margin-top:10px}
+html.complaints-embed body .footer-note{display:none}
+@media(max-width:560px){html.complaints-embed body .wrap{padding:9px 8px 18px}html.complaints-embed body .card{padding:12px}}
+
 </style>
 </head>
 <body>
@@ -234,7 +255,7 @@ button{cursor:pointer}
  <p class="footer-note">للاستفسارات العامة: <a href="contact.html">تواصل مع مؤسسة ميدلايف</a> · © مؤسسة ميدلايف الطبية الخيرية التطوعية</p>
 </main>
 
-<script src="/site-nav.js?v=complaints-2026-1"></script>
+
 <script>
 (function(){
  "use strict";
