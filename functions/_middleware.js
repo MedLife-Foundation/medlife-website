@@ -110,6 +110,7 @@ export async function onRequest(context) {
     const isArticlesAdmin = path === '/articles-admin' || path === '/articles-admin/' || path.endsWith('/articles-admin.html');
     const isArticleReader = path === '/article-reader-v5.html' || path.startsWith('/articles/');
     const isSupportPage = path === '/support' || path === '/support/' || path === '/support.html';
+    const isSupportDonationPage = path === '/support-donation' || path === '/support-donation.html';
     const isContactPage = path === '/contact' || path === '/contact/' || path === '/contact.html';
     const isManagedCmsRoute = CMS_LEGACY_ROUTES.has(path);
 
@@ -161,6 +162,8 @@ export async function onRequest(context) {
     if (isArticlesLibrary) tags.push('<script src="/articles-library-canonical.js?v=20260901-2" defer></script>');
     if (isArticleReader) tags.push('<script src="/article-reader-rich-content.js?v=20260828-1" defer></script>');
     if (isSupportPage && !html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261026-occasions" defer></script>');
+    if (isSupportPage) tags.push('<script src="/support-public.js?v=20261102-1" defer></script>');
+    if (isSupportDonationPage) tags.push('<script src="/support-donation-flow.js?v=20261102-1" defer></script>');
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
