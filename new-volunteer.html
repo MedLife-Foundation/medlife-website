@@ -116,6 +116,8 @@ $("applicationForm").addEventListener("submit",async event=>{
  const missing=fields.find(f=>visible(f,data)&&f.required&&(data[f.field_key]===undefined||data[f.field_key]===null||data[f.field_key]===""||(Array.isArray(data[f.field_key])&&!data[f.field_key].length)));
  if(missing){message("يرجى تعبئة الحقل: "+(missing.label_ar||missing.field_key),"error");return;}
  const primary=val(data.primary_volunteer_field), email=val(data.email).toLowerCase(), nationalId=val(data.national_id).replace(/\s+/g,"");
+  const primaryField=fields.find(f=>f.field_key==="primary_volunteer_field");
+  const primaryLabel=primaryField?.options?.find(o=>String(o.value)===primary)?.label_ar||primary;
  if(!primary||!email||!nationalId){message("يرجى التأكد من المجال الأساسي والبريد الإلكتروني والرقم الوطني.","error");return;}
  const button=$("submitButton");button.disabled=true;button.textContent="جارٍ إرسال الطلب…";
  try{
