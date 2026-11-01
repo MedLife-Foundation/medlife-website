@@ -16,6 +16,7 @@
     ['initiatives-gallery.html', 'مبادرات وأنشطة ميدلايف', 'activities', 60],
     ['occasions.html', 'المناسبات', 'occasions', 65],
     ['support.html', 'صندوق الدعم', 'support', 70],
+    ['complaints.html', 'الشكاوى', 'complaints', 75],
     ['contact.html', 'تواصل معنا', 'contact', 80]
   ];
 
@@ -85,6 +86,7 @@
     if (page === 'about-medlife' || page === 'about-medlife.html') return 'about';
     if (page === 'forum-v3' || page === 'forum-v3.html') return 'forum';
     if (page === 'support' || page === 'support.html') return 'support';
+    if (page === 'complaints' || page === 'complaints.html') return 'complaints';
     const currentPath = location.pathname.replace(/\/$/, '') || '/';
     const match = items.find(item => {
       const target = String(item[0]);
@@ -107,6 +109,7 @@
       '/forum-v3.html',
       '/gallery.html',
       '/support.html',
+      '/complaints.html',
       '/contact.html'
     ];
 
