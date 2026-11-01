@@ -99,6 +99,146 @@ function formatDetailBlocks(value) {
   return output.length ? output : ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
 }
 
+
+function safeActivityHref(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^\/(?!\/)|^#/.test(raw)) return raw;
+  try {
+    const url = new URL(raw);
+    return ["https:", "http:", "mailto:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function sanitizeActivityInlineStyle(value) {
+  return String(value || "").split(";").map(rule => rule.trim()).filter(rule => {
+    const [property, ...rest] = rule.split(":");
+    const prop = property?.trim().toLowerCase();
+    const cssValue = rest.join(":").trim();
+    if (!cssValue || /url\s*\(|expression\s*\(|javascript:|position\s*:/i.test(cssValue)) return false;
+    if (prop === "text-align") return /^(left|right|center|justify)$/i.test(cssValue);
+    if (prop === "font-weight") return /^(normal|bold|[1-9]00)$/i.test(cssValue);
+    if (prop === "font-style") return /^(normal|italic|oblique)$/i.test(cssValue);
+    if (prop === "text-decoration") return /^(none|underline|line-through|underline line-through)$/i.test(cssValue);
+    if (prop === "font-size") {
+      const match = cssValue.match(/^(\d+(?:\.\d+)?)(px|pt|em|rem|%)$/i);
+      if (!match) return false;
+      const amount = Number(match[1]);
+      const unit = match[2].toLowerCase();
+      return unit === "px" ? amount >= 9 && amount <= 64
+        : unit === "pt" ? amount >= 7 && amount <= 48
+        : unit === "%" ? amount >= 60 && amount <= 250
+        : amount >= 0.65 && amount <= 3.5;
+    }
+    if (prop === "color" || prop === "background-color") {
+      return /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\)|black|white|red|blue|green|gray|grey|navy|maroon)$/i.test(cssValue);
+    }
+    if (prop === "line-height") {
+      return /^(normal|\d+(?:\.\d+)?(?:px|pt|em|%)?)$/i.test(cssValue);
+    }
+    return false;
+  }).join(";");
+}
+
+async function sanitizeActivityArticleHtml(value) {
+  const allowedTags = new Set([
+    "p","br","strong","b","em","i","u","s","del","ul","ol","li",
+    "h1","h2","h3","h4","div","span","blockquote","a","hr",
+    "table","thead","tbody","tfoot","tr","td","th","pre","code",
+    "sub","sup","mark"
+  ]);
+  const dangerousTags = new Set(["script","style","iframe","object","embed","form","svg","math","video","audio","canvas"]);
+  const response = new HTMLRewriter().on("*", {
+    element(element) {
+      const tag = String(element.tagName || "").toLowerCase();
+      if (!allowedTags.has(tag)) {
+        if (dangerousTags.has(tag)) element.remove();
+        else element.removeAndKeepContent();
+        return;
+      }
+
+      const rawHref = tag === "a" ? element.getAttribute("href") : null;
+      const href = rawHref ? safeActivityHref(rawHref) : "";
+      for (const [name, attributeValue] of element.attributes) {
+        const key = String(name).toLowerCase();
+        if (key === "style") {
+          const style = sanitizeActivityInlineStyle(attributeValue);
+          if (style) element.setAttribute("style", style);
+          else element.removeAttribute("style");
+          continue;
+        }
+        if (tag === "a" && key === "href" && href) {
+          element.setAttribute("href", href);
+          continue;
+        }
+        element.removeAttribute(name);
+      }
+      if (tag === "a") {
+        if (href) {
+          element.setAttribute("href", href);
+          element.setAttribute("target", "_blank");
+          element.setAttribute("rel", "noopener noreferrer");
+        } else {
+          element.removeAttribute("href");
+        }
+      }
+    }
+  }).transform(new Response(String(value || ""), {
+    headers: { "content-type": "text/html; charset=utf-8" }
+  }));
+  return await response.text();
+}
+
+function splitActivityArticleHtml(value) {
+  const html = String(value || "");
+  const blockTags = new Set(["p","h1","h2","h3","h4","ul","ol","blockquote","pre","table","div","hr"]);
+  const tokens = html.match(/<!--[\s\S]*?-->|<![^>]*>|<\/?[^>]+>|[^<]+/g) || [];
+  const blocks = [];
+  let current = "";
+  let depth = 0;
+
+  for (const token of tokens) {
+    const tagMatch = token.match(/^<\s*(\/?)\s*([a-z0-9]+)\b[^>]*>$/i);
+    if (!tagMatch) {
+      current += token;
+      continue;
+    }
+    const closing = Boolean(tagMatch[1]);
+    const tag = tagMatch[2].toLowerCase();
+    const selfClosing = /\/\s*>$/.test(token) || tag === "hr" || tag === "br";
+    if (!blockTags.has(tag)) {
+      current += token;
+      continue;
+    }
+
+    if (!closing) {
+      if (depth === 0 && current.trim()) {
+        blocks.push(current.trim());
+        current = "";
+      }
+      current += token;
+      if (!selfClosing) depth += 1;
+      else if (depth === 0) {
+        blocks.push(current.trim());
+        current = "";
+      }
+      continue;
+    }
+
+    current += token;
+    depth = Math.max(0, depth - 1);
+    if (depth === 0 && current.trim()) {
+      blocks.push(current.trim());
+      current = "";
+    }
+  }
+
+  if (current.trim()) blocks.push(current.trim());
+  return blocks.filter(Boolean);
+}
+
 export async function onRequestGet({ params, request }) {
   const slug = String(params?.slug || "").trim();
   if (!slug || slug.length > 160) return new Response("الصفحة غير موجودة.", { status:404 });
@@ -166,7 +306,20 @@ export async function onRequestGet({ params, request }) {
     return { ...item, placement, html, index };
   });
 
-  const detailBlocks = formatDetailBlocks(details);
+  const containsRichHtml = /<\/?(?:p|h1|h2|h3|h4|strong|b|em|i|u|s|ul|ol|li|blockquote|a|table|span|div|br|hr)\b[^>]*>/i.test(details);
+  let detailBlocks;
+  if (containsRichHtml) {
+    try {
+      const safeHtml = await sanitizeActivityArticleHtml(details);
+      detailBlocks = splitActivityArticleHtml(safeHtml);
+    } catch (error) {
+      console.error("Activity article HTML sanitization failed", error);
+      detailBlocks = [`<p>${esc(details.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())}</p>`];
+    }
+  } else {
+    detailBlocks = formatDetailBlocks(details);
+  }
+  if (!detailBlocks.length) detailBlocks = ["<p>لا توجد تفاصيل إضافية منشورة لهذا النشاط حالياً.</p>"];
   const inlineImages = editorialImages.filter(item => item.placement !== "bottom");
   const bottomImages = editorialImages.filter(item => item.placement === "bottom");
   const storyParts = [];
@@ -258,6 +411,15 @@ export async function onRequestGet({ params, request }) {
 .activity-story-heading .activity-section-kicker,.activity-inline-gallery-heading .activity-section-kicker{color:var(--ml-red);font-size:11px;font-weight:900;letter-spacing:.02em}
 .activity-story-heading h2{margin:5px 0 0;color:var(--ml-navy);font-size:clamp(23px,3vw,30px);line-height:1.6}
 .activity-story-body{color:#46536a}
+.activity-story-body h1,.activity-story-body h2{margin:34px auto 13px;max-width:760px;color:var(--ml-navy);font-size:clamp(21px,2.8vw,27px);line-height:1.75;font-weight:900}
+.activity-story-body h3{margin:30px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8;font-weight:850}
+.activity-story-body h4{margin:24px auto 10px;max-width:760px;color:#263f60;font-size:17px;line-height:1.8;font-weight:850}
+.activity-story-body ol{max-width:760px;margin:0 auto 24px;padding-inline-start:28px;color:#46536a}
+.activity-story-body a{color:#b42343;text-decoration:underline;text-underline-offset:3px}
+.activity-story-body table{width:min(100%,820px);margin:22px auto;border-collapse:collapse;font-size:13px}
+.activity-story-body th,.activity-story-body td{padding:10px 12px;border:1px solid #dfe6ee;text-align:start;line-height:1.8}
+.activity-story-body th{background:#f4f7fa;color:#263b59;font-weight:900}
+.activity-story-body hr{max-width:760px;margin:28px auto;border:0;border-top:1px solid #e5eaf0}
 .activity-story-body p{margin:0 auto 24px;color:#46536a;font-size:15px;line-height:2.25;max-width:760px;text-wrap:pretty}
 .activity-story-body p:first-child{color:#26364f;font-size:17px;line-height:2.15;font-weight:600}
 .activity-story-body strong{font-weight:900;color:#1e2e49}
