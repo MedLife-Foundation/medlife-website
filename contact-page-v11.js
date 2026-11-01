@@ -247,7 +247,31 @@
 
   function initMap(page) {
     const element = page.querySelector('#syriaMap');
-    if (!element || !window.L || element.dataset.ready === '1') return;
+    if (!element || element.dataset.ready === '1') return;
+    if (!window.L) {
+      if (element.dataset.leafletLoading === '1') return;
+      element.dataset.leafletLoading = '1';
+      let leafletCss = document.querySelector('link[data-medlife-leaflet-fallback]');
+      if (!leafletCss) {
+        leafletCss = document.createElement('link');
+        leafletCss.rel = 'stylesheet';
+        leafletCss.href = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+        leafletCss.dataset.medlifeLeafletFallback = '1';
+        document.head.appendChild(leafletCss);
+      }
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+      fallbackScript.onload = function () {
+        element.dataset.leafletLoading = '';
+        initMap(page);
+      };
+      fallbackScript.onerror = function () {
+        element.dataset.leafletLoading = '';
+        element.innerHTML = '<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#69758b;font:600 15px/1.8 Arial,sans-serif" dir="rtl">تعذّر تحميل الخريطة حالياً. تحقق من الاتصال بالإنترنت ثم حدّث الصفحة.</div>';
+      };
+      document.head.appendChild(fallbackScript);
+      return;
+    }
     element.dataset.ready = '1';
     const map = window.L.map(element, {
       scrollWheelZoom: false,
