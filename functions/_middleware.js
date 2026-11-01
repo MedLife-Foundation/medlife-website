@@ -182,6 +182,7 @@ export async function onRequest(context) {
       tags.push('<script src="/contact-collaboration-center-final.js?v=20260831-contact-collaboration-center-final" defer></script>');
       tags.push('<script src="/contact-ui-align-final.js?v=20260831-contact-ui-align-final" defer></script>');
       tags.push('<script src="/contact-ui-final-fix.js?v=20260831-contact-ui-final-fix" defer></script>');
+      tags.push('<script src="/contact-complaints-modal.js?v=20261102-1" defer></script>');
     }
     if (PUBLIC_HEADER_ROUTES.has(path) && !html.includes('/site-nav.js')) {
       tags.push('<script src="/site-nav.js?v=20261026-occasions" defer></script>');
