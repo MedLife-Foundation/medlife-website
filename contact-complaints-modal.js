@@ -2,11 +2,74 @@
   'use strict';
   if(!/\/contact(?:\.html)?\/?$/i.test(window.location.pathname))return;
 
+  function applyEmbeddedLayout(frame){
+    try{
+      const doc=frame.contentDocument;
+      if(!doc||!doc.documentElement||!doc.body)return;
+      doc.documentElement.classList.add('complaints-embed');
+
+      // Remove the duplicate standalone page chrome: the modal already has its own heading.
+      doc.querySelector('.hero')?.remove();
+      doc.querySelector('.intro-grid')?.remove();
+      doc.querySelector('.footer-note')?.remove();
+      doc.querySelector('.site-header')?.remove();
+
+      let style=doc.getElementById('medlife-complaints-modal-layout');
+      if(!style){
+        style=doc.createElement('style');
+        style.id='medlife-complaints-modal-layout';
+        style.textContent=`
+          html,body{width:100%!important;min-width:0!important;min-height:100%!important;margin:0!important;background:#f4f7fa!important;overflow-x:hidden!important}
+          body{font-family:Cairo,Arial,sans-serif!important;color:#172b45!important}
+          .wrap{width:100%!important;max-width:900px!important;margin:0 auto!important;padding:12px 12px 26px!important;box-sizing:border-box!important}
+          .content-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;align-items:start!important}
+          .card{width:100%!important;min-width:0!important;padding:16px!important;border:1px solid #e4eaf0!important;border-radius:15px!important;background:#fff!important;box-shadow:0 5px 18px rgba(16,37,66,.045)!important}
+          .card-head{align-items:center!important;gap:10px!important;margin-bottom:13px!important}
+          .card-icon{width:38px!important;height:38px!important;flex-basis:38px!important}
+          .card-head h2{font-size:17px!important;line-height:1.5!important}
+          .card-head p{font-size:11px!important;line-height:1.8!important}
+          .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;width:100%!important}
+          .field,.field.wide{display:flex!important;grid-column:1!important;width:100%!important;min-width:0!important;gap:6px!important}
+          .field label,.field>span{font-size:12px!important;line-height:1.7!important;text-align:right!important}
+          .field input,.field select,.field textarea{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:45px!important;padding:10px 12px!important;border-radius:10px!important;font-size:14px!important;line-height:1.6!important;box-sizing:border-box!important}
+          .field textarea{min-height:115px!important}
+          .anonymous-toggle,.consent{width:100%!important;padding:11px!important;gap:9px!important;font-size:12px!important;line-height:1.8!important}
+          .anonymous-copy strong{font-size:12px!important;line-height:1.7!important}
+          .anonymous-copy small{font-size:11px!important;line-height:1.7!important}
+          .help{font-size:10px!important;line-height:1.7!important}
+          .form-actions{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important}
+          .form-actions>*{width:100%!important;max-width:none!important;min-width:0!important}
+          .primary-btn,.secondary-btn{min-height:46px!important;font-size:13px!important}
+          .result-box{padding:12px!important}
+          .result-box h3{font-size:14px!important}
+          .result-box p,.secret-warning{font-size:11px!important}
+          .result-field{grid-template-columns:minmax(0,1fr) auto!important}
+          .copy-btn{font-size:11px!important}
+          .track-card{position:static!important;top:auto!important}
+          .track-form{gap:12px!important}
+          .track-result{padding:12px!important}
+          .track-top strong{font-size:14px!important}
+          .track-top small,.track-events strong,.track-events p{font-size:11px!important;line-height:1.8!important}
+          .state-pill{font-size:10px!important}
+          .privacy-card{margin-top:10px!important;padding:11px!important;font-size:10px!important;line-height:1.8!important}
+          @media(max-width:560px){
+            .wrap{padding:10px 9px 20px!important}
+            .card{padding:13px!important;border-radius:13px!important}
+            .card-head h2{font-size:16px!important}
+            .result-field{grid-template-columns:minmax(0,1fr)!important}
+            .copy-btn{width:100%!important}
+          }
+        `;
+        doc.head.appendChild(style);
+      }
+    }catch(error){
+      // Keep the original secure complaint form available if the browser blocks frame styling.
+      console.warn('MedLife complaints modal layout could not be applied.',error);
+    }
+  }
+
   function initComplaintsModal(){
     if(document.getElementById('medlifeComplaintsModal'))return;
-
-    // The live Contact Us page is rebuilt by contact-page-v8.js.
-    // Add the complaint entry to its actual contact card, not the removed legacy markup.
     const page=document.getElementById('medlife-contact-v8');
     const contactCard=page&&page.querySelector('.mc8-contact-card');
     const actions=contactCard&&contactCard.querySelector('.mc8-actions');
@@ -22,15 +85,15 @@
       #medlife-contact-v8 .ml-complaints-open:focus-visible,.ml-complaints-modal__close:focus-visible{outline:3px solid rgba(27,154,192,.35);outline-offset:3px}
       .ml-complaints-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(5,18,39,.76);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
       .ml-complaints-modal.is-open{display:flex}
-      .ml-complaints-modal__dialog{display:flex;flex-direction:column;width:min(1040px,100%);height:min(88vh,900px);min-height:360px;overflow:hidden;border:1px solid rgba(255,255,255,.55);border-radius:20px;background:#f4f7fa;box-shadow:0 24px 80px rgba(0,0,0,.28)}
-      .ml-complaints-modal__header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 17px;background:#fff;border-bottom:1px solid #e7edf3}
+      .ml-complaints-modal__dialog{display:flex;flex-direction:column;width:min(920px,100%);height:min(90vh,940px);min-height:360px;overflow:hidden;border:1px solid rgba(255,255,255,.55);border-radius:20px;background:#f4f7fa;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+      .ml-complaints-modal__header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;padding:12px 17px;background:#fff;border-bottom:1px solid #e7edf3}
       .ml-complaints-modal__heading{min-width:0}
       .ml-complaints-modal__heading strong{display:block;color:#071b3a;font-size:15px;font-weight:900}
       .ml-complaints-modal__heading small{display:block;margin-top:2px;color:#718198;font-size:10px}
       .ml-complaints-modal__close{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;min-height:36px;padding:7px 11px;border:1px solid #e3e8ef;border-radius:10px;background:#fff;color:#475a70;font:800 11px Cairo,Arial,sans-serif;cursor:pointer}
       .ml-complaints-modal__close:hover{background:#fff5f7;border-color:#f0cbd4;color:#a32140}
-      .ml-complaints-modal__frame{display:block;flex:1;width:100%;height:100%;min-height:0;border:0;background:#f4f7fa}
-      @media(max-width:560px){.ml-complaints-modal{padding:0}.ml-complaints-modal__dialog{width:100%;height:100dvh;min-height:0;border:0;border-radius:0}.ml-complaints-modal__header{padding:10px 12px}.ml-complaints-modal__heading strong{font-size:13px}}
+      .ml-complaints-modal__frame{display:block;flex:1 1 auto;width:100%;height:100%;min-height:0;max-height:100%;border:0;background:#f4f7fa}
+      @media(max-width:560px){.ml-complaints-modal{padding:0}.ml-complaints-modal__dialog{width:100%;height:100dvh;height:100vh;min-height:0;border:0;border-radius:0}.ml-complaints-modal__header{padding:10px 12px}.ml-complaints-modal__heading strong{font-size:13px}}
     `;
     document.head.appendChild(style);
 
@@ -52,7 +115,7 @@
           </div>
           <button class="ml-complaints-modal__close" id="closeMedlifeComplaints" type="button" aria-label="إغلاق صندوق الشكاوى"><i class="fa-solid fa-xmark" aria-hidden="true"></i> إغلاق</button>
         </div>
-        <iframe class="ml-complaints-modal__frame" id="medlifeComplaintsFrame" title="نموذج صندوق الشكاوى والملاحظات" data-src="/complaints.html?embed=1" loading="lazy"></iframe>
+        <iframe class="ml-complaints-modal__frame" id="medlifeComplaintsFrame" title="نموذج صندوق الشكاوى والملاحظات" data-src="/complaints.html?embed=1&layout=2" loading="lazy"></iframe>
       </section>`;
     document.body.appendChild(modal);
 
@@ -80,6 +143,7 @@
       if(previousFocus&&typeof previousFocus.focus==='function')previousFocus.focus();
     }
 
+    frame.addEventListener('load',()=>applyEmbeddedLayout(frame));
     openButton.addEventListener('click',openModal);
     closeButton.addEventListener('click',closeModal);
     modal.addEventListener('click',event=>{if(event.target===modal)closeModal();});
@@ -95,7 +159,6 @@
       initComplaintsModal();
       return;
     }
-    // contact-page-v8.js rebuilds the page asynchronously after the navigation scripts.
     let attempts=0;
     const timer=window.setInterval(()=>{
       attempts+=1;
@@ -108,9 +171,6 @@
     },100);
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',waitForContactPage,{once:true});
-  }else{
-    waitForContactPage();
-  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',waitForContactPage,{once:true});
+  else waitForContactPage();
 })();
