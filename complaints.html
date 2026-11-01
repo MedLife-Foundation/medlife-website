@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071b3a">
+<title>صندوق الشكاوى | مؤسسة ميدلايف</title>
+<meta name="description" content="قدّم شكوى أو ملاحظة إلى مؤسسة ميدلايف بسرية، واحصل على رقم مرجعي ورمز خاص لمتابعة المعالجة.">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{--navy:#071b3a;--navy2:#102f55;--red:#bd2547;--red2:#d53a5a;--ink:#172b45;--muted:#718198;--line:#e5ebf2;--bg:#f4f7fa;--white:#fff;--green:#287b58;--shadow:0 20px 50px rgba(16,37,66,.08}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Arial,sans-serif;overflow-x:hidden}
+button,input,select,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
+.hero{position:relative;overflow:hidden;color:#fff;padding:75px 18px 62px;text-align:center;background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.13),transparent 28%),radial-gradient(circle at 88% 80%,rgba(213,58,90,.22),transparent 28%),linear-gradient(125deg,#06152f,#0b3157 64%,#174a69)}
+.hero:before,.hero:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.1);border-radius:50%}
+.hero:before{width:410px;height:410px;top:-245px;right:-130px}
+.hero:after{width:330px;height:330px;bottom:-225px;left:-100px}
+.hero-inner{position:relative;z-index:1;max-width:850px;margin:auto}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid rgba(255,255,255,.18);border-radius:99px;background:rgba(255,255,255,.08);color:#f4ccd5;font-size:10px;font-weight:850}
+.hero h1{margin:17px 0 9px;font-size:clamp(31px,5.8vw,53px);line-height:1.3;font-weight:950}
+.hero p{max-width:700px;margin:auto;color:rgba(255,255,255,.8);font-size:12px;line-height:2}
+.hero-note{display:flex;justify-content:center;align-items:center;gap:8px;margin:17px auto 0;color:#f6e7eb;font-size:9px;line-height:1.9}
+.hero-note i{color:#ffb5c5}
+.wrap{width:min(1120px,calc(100% - 28px));margin:-28px auto 0;position:relative;z-index:2;padding-bottom:70px}
+.intro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.intro-card{display:flex;align-items:flex-start;gap:11px;padding:15px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 8px 23px rgba(16,37,66,.04)}
+.intro-icon{flex:0 0 37px;width:37px;height:37px;display:grid;place-items:center;border-radius:11px;background:#fff0f4;color:var(--red);font-size:15px}
+.intro-card:nth-child(2) .intro-icon{background:#edf5fc;color:#3e6c9b}
+.intro-card:nth-child(3) .intro-icon{background:#edf8f1;color:#287b58}
+.intro-card strong{display:block;margin-bottom:2px;color:#1b3554;font-size:10px;font-weight:900}
+.intro-card small{display:block;color:#7c8ba0;font-size:8px;line-height:1.8}
+.content-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.78fr);gap:15px;align-items:start}
+.card{min-width:0;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:0 14px 40px rgba(16,37,66,.05)}
+.card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.card-icon{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;color:var(--red);background:#fff0f4;font-size:17px}
+.card-head h2{margin:0 0 3px;color:#183653;font-size:16px;font-weight:950}
+.card-head p{margin:0;color:#8492a3;font-size:9px;line-height:1.85}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.wide{grid-column:1/-1}
+.field label,.field>span{color:#425b77;font-size:9px;font-weight:900}
+.field input,.field select,.field textarea{width:100%;min-width:0;min-height:39px;padding:9px 11px;border:1px solid #dfe6ee;border-radius:9px;background:#fff;color:#263f5d;outline:none;font-size:10px;transition:border-color .18s,box-shadow .18s}
+.field textarea{min-height:138px;resize:vertical;line-height:1.95}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#bb3c59;box-shadow:0 0 0 3px rgba(189,37,71,.08)}
+.field input::placeholder,.field textarea::placeholder{color:#a4afbb}
+.help{color:#929eac;font-size:8px;line-height:1.7}
+.anonymous-toggle,.consent{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #e9edf2;border-radius:10px;background:#fbfcfd;color:#516880;font-size:9px;line-height:1.8}
+.anonymous-toggle input,.consent input{flex:0 0 auto;margin-top:4px;accent-color:var(--red)}
+.anonymous-copy strong{display:block;color:#29445f;font-size:9px}
+.anonymous-copy small{display:block;color:#8b99a8;font-size:8px}
+.consent a{color:#a52b49;text-decoration:underline;text-underline-offset:2px}
+.honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+.form-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
+.primary-btn,.secondary-btn{min-height:41px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid transparent;font-size:10px;font-weight:900}
+.primary-btn{color:#fff;background:linear-gradient(135deg,var(--red2),#a71d3d);box-shadow:0 8px 18px rgba(183,32,66,.16)}
+.primary-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(183,32,66,.22)}
+.primary-btn:disabled{opacity:.55;cursor:wait;transform:none}
+.secondary-btn{border-color:#dfe6ee;background:#fff;color:#46617d}
+.status-message{display:none;margin-top:12px;padding:10px 12px;border-radius:9px;font-size:9px;line-height:1.8}
+.status-message.show{display:block}
+.status-message.error{color:#a32944;background:#fff2f4;border:1px solid #f0d4dc}
+.status-message.success{color:#276e50;background:#f0f9f3;border:1px solid #d5eadc}
+.privacy-card{margin-top:14px;padding:12px 13px;border-radius:11px;background:#f4f8fb;border:1px solid #e6edf3;color:#71839a;font-size:8px;line-height:1.9}
+.privacy-card strong{color:#385573}
+.result-box{display:none;margin-top:15px;padding:14px;border:1px solid #cfe7d7;border-radius:12px;background:#f4fbf6}
+.result-box.show{display:block}
+.result-box h3{display:flex;align-items:center;gap:7px;margin:0 0 5px;color:#287451;font-size:12px}
+.result-box p{margin:0 0 10px;color:#5e7e6b;font-size:8px;line-height:1.8}
+.result-field{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;margin-top:8px}
+.result-field>div{min-width:0;padding:8px 10px;border:1px solid #d8e8dd;border-radius:8px;background:#fff}
+.result-field small{display:block;color:#84958a;font-size:7px}
+.result-field strong{display:block;overflow-wrap:anywhere;color:#234d37;font:900 11px ui-monospace,Consolas,monospace;direction:ltr;text-align:left}
+.copy-btn{min-height:35px;padding:7px 10px;border:1px solid #d2e5d9;border-radius:8px;background:#fff;color:#287451;font-size:8px;font-weight:900}
+.secret-warning{margin-top:10px;padding:9px 10px;border-radius:8px;color:#835c24;background:#fff7e9;border:1px solid #f1e1c5;font-size:8px;line-height:1.8}
+.track-card{position:sticky;top:100px}
+.track-card .card-icon{background:#edf5fc;color:#3d6c9d}
+.track-form{display:grid;gap:11px}
+.track-result{display:none;margin-top:14px;padding:13px;border:1px solid #dfe8f0;border-radius:11px;background:#fbfcfe}
+.track-result.show{display:block}
+.track-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #e8edf3}
+.track-top strong{display:block;color:#1c3a59;font-size:12px}
+.track-top small{display:block;margin-top:3px;color:#8492a3;font-size:8px}
+.state-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:99px;background:#eef4fb;color:#496c96;font-size:8px;font-weight:900}
+.state-pill.status-new{background:#fff5e6;color:#9c641e}
+.state-pill.status-under_review{background:#eef4fc;color:#526f9b}
+.state-pill.status-in_progress{background:#e9f7f7;color:#277981}
+.state-pill.status-resolved{background:#edf8f0;color:#2c7952}
+.state-pill.status-closed{background:#f0f2f5;color:#657588}
+.track-events{display:grid;gap:0;margin:12px 0 0;padding:0;list-style:none}
+.track-events li{position:relative;padding:0 15px 13px 0;border-right:1px solid #dfe7ef}
+.track-events li:last-child{padding-bottom:0;border-right-color:transparent}
+.track-events li:before{content:"";position:absolute;right:-5px;top:5px;width:8px;height:8px;border:1px solid #fff;border-radius:50%;background:#b52b4a;box-shadow:0 0 0 1px #e8bdc8}
+.track-events strong{display:block;color:#3d5b78;font-size:8px}
+.track-events p{margin:3px 0;color:#6e8197;font-size:8px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.track-events small{color:#94a0af;font-size:7px}
+.track-empty{padding:10px 0;color:#8a98a8;font-size:8px;line-height:1.8}
+.footer-note{margin-top:15px;text-align:center;color:#8a98a8;font-size:8px;line-height:1.9}
+.footer-note a{color:#426c91;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:860px){
+ .content-grid{grid-template-columns:1fr}
+ .track-card{position:static}
+ .intro-grid{grid-template-columns:1fr 1fr}
+ .intro-card:last-child{grid-column:1/-1}
+}
+@media(max-width:560px){
+ .hero{padding:60px 16px 54px}
+ .wrap{width:calc(100% - 18px);margin-top:-22px;padding-bottom:45px}
+ .card{padding:15px;border-radius:14px}
+ .intro-grid{gap:7px}
+ .intro-card{padding:10px;gap:8px}
+ .intro-icon{width:31px;height:31px;flex-basis:31px}
+ .intro-card strong{font-size:8px}
+ .intro-card small{font-size:7px}
+ .form-grid{grid-template-columns:1fr}
+ .field.wide{grid-column:auto}
+ .form-actions>*{flex:1}
+ .result-field{grid-template-columns:1fr auto}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+ <div class="hero-inner">
+  <span class="eyebrow"><i class="fa-solid fa-shield-halved"></i> مؤسسة ميدلايف · قناة رسمية وآمنة</span>
+  <h1>صندوق الشكاوى والملاحظات</h1>
+  <p>نستقبل ملاحظاتكم وشكاواكم بجدية واهتمام، ونعمل على مراجعتها ومتابعتها بسرية وحياد، بهدف تحسين جودة العمل وحماية كرامة الجميع.</p>
+  <div class="hero-note"><i class="fa-solid fa-lock"></i><span>يمكنك تقديم الشكوى باسمك أو دون كشف هويتك، ومتابعتها برقم مرجعي ورمز سري خاص.</span></div>
+ </div>
+</header>
+
+<main class="wrap">
+ <section class="intro-grid" aria-label="كيف يعمل صندوق الشكاوى">
+  <article class="intro-card"><span class="intro-icon"><i class="fa-solid fa-inbox"></i></span><div><strong>استلام موثّق</strong><small>تحصل على رقم مرجعي تلقائي لكل شكوى يتم استلامها.</small></div></article>
+  <article class="intro-card"><span class="intro-icon"><i class="fa-solid fa-user-shield"></i></span><div><strong>خصوصية مقدم الشكوى</strong><small>بياناتك لا تظهر في صفحة المتابعة العامة.</small></div></article>
+  <article class="intro-card"><span class="intro-icon"><i class="fa-solid fa-route"></i></span><div><strong>متابعة حتى الإغلاق</strong><small>تابع انتقال الشكوى بين المراجعة والمعالجة والنتيجة.</small></div></article>
+ </section>
+
+ <div class="content-grid">
+  <section class="card" id="submitComplaint">
+   <div class="card-head"><span class="card-icon"><i class="fa-solid fa-file-circle-plus"></i></span><div><h2>تقديم شكوى جديدة</h2><p>يرجى كتابة التفاصيل بوضوح، وتجنب تضمين كلمات المرور أو البيانات الطبية غير الضرورية.</p></div></div>
+   <form id="complaintForm" novalidate>
+    <div class="form-grid">
+     <div class="field">
+      <label for="category">تصنيف الشكوى *</label>
+      <select id="category" name="category" required>
+       <option value="">اختر التصنيف</option>
+       <option value="service_quality">جودة الخدمة</option>
+       <option value="staff_conduct">سلوك أحد العاملين</option>
+       <option value="volunteer_conduct">سلوك أحد المتطوعين</option>
+       <option value="safety">سلامة أو حماية</option>
+       <option value="administrative">إجراء إداري</option>
+       <option value="financial">موضوع مالي</option>
+       <option value="privacy">خصوصية أو سرية</option>
+       <option value="other">أخرى</option>
+      </select>
+     </div>
+     <div class="field">
+      <label for="subject">موضوع الشكوى *</label>
+      <input id="subject" name="subject" maxlength="160" minlength="6" required placeholder="اكتب عنواناً مختصراً وواضحاً">
+     </div>
+     <div class="field wide">
+      <label for="description">تفاصيل الشكوى *</label>
+      <textarea id="description" name="description" minlength="20" maxlength="6000" required placeholder="ماذا حدث؟ ومتى وأين؟ وما الإجراء أو المعالجة التي تتوقعها؟"></textarea>
+      <span class="help">لا تذكر معلومات شخصية أو صحية لأشخاص آخرين إلا بقدر الضرورة.</span>
+     </div>
+     <div class="field wide">
+      <label class="anonymous-toggle" for="isAnonymous">
+       <input id="isAnonymous" name="isAnonymous" type="checkbox">
+       <span class="anonymous-copy"><strong>أريد تقديم الشكوى دون كشف هويتي</strong><small>لن نحفظ اسمك أو وسيلة اتصال بك. ستحتاج إلى الاحتفاظ برقم الشكوى ورمز المتابعة السري.</small></span>
+      </label>
+     </div>
+     <div class="field" id="nameField">
+      <label for="fullName">الاسم *</label>
+      <input id="fullName" name="fullName" autocomplete="name" maxlength="120" placeholder="الاسم الكامل">
+     </div>
+     <div class="field" id="contactField">
+      <label for="contact">وسيلة التواصل *</label>
+      <input id="contact" name="contact" autocomplete="email" maxlength="160" placeholder="بريد إلكتروني أو رقم هاتف">
+     </div>
+     <div class="field wide">
+      <label class="consent" for="consent">
+       <input id="consent" type="checkbox" required>
+       <span>أؤكد أن المعلومات المقدمة صحيحة بحسب علمي، وأوافق على استخدامها حصراً لمراجعة الشكوى ومتابعتها وفق سياسة الخصوصية.</span>
+      </label>
+     </div>
+     <div class="honeypot" aria-hidden="true">
+      <label for="website">لا تملأ هذا الحقل</label>
+      <input id="website" name="website" tabindex="-1" autocomplete="off">
+     </div>
+    </div>
+    <div class="form-actions">
+     <span class="help"><i class="fa-solid fa-lock"></i> المعلومات الحساسة لا تُعرض للعامة.</span>
+     <button class="primary-btn" id="submitBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> إرسال الشكوى</button>
+    </div>
+    <div id="submitMessage" class="status-message" role="status" aria-live="polite"></div>
+   </form>
+
+   <section class="result-box" id="submissionResult" aria-live="polite">
+    <h3><i class="fa-solid fa-circle-check"></i> تم استلام الشكوى بنجاح</h3>
+    <p>احتفظ بالرقم المرجعي ورمز المتابعة معاً. رمز المتابعة لن يظهر مرة أخرى بعد مغادرة هذه الصفحة، ولا يمكن استعادته من الإدارة.</p>
+    <div class="result-field"><div><small>الرقم المرجعي</small><strong id="resultTicket"></strong></div><button class="copy-btn" type="button" data-copy="resultTicket">نسخ الرقم</button></div>
+    <div class="result-field"><div><small>رمز المتابعة السري</small><strong id="resultToken"></strong></div><button class="copy-btn" type="button" data-copy="resultToken">نسخ الرمز</button></div>
+    <div class="secret-warning"><i class="fa-solid fa-triangle-exclamation"></i> لا تشارك رمز المتابعة مع أي شخص. لا يكفي رقم الشكوى وحده لعرض تفاصيلها.</div>
+    <div class="form-actions"><button class="secondary-btn" type="button" id="goTrack"><i class="fa-solid fa-magnifying-glass"></i> متابعة هذه الشكوى</button></div>
+   </section>
+  </section>
+
+  <aside class="card track-card" id="trackComplaint">
+   <div class="card-head"><span class="card-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></span><div><h2>متابعة شكوى سابقة</h2><p>أدخل الرقم المرجعي ورمز المتابعة السري اللذين حصلا عند تقديم الشكوى.</p></div></div>
+   <form class="track-form" id="trackForm" novalidate>
+    <div class="field"><label for="ticketCode">الرقم المرجعي *</label><input id="ticketCode" name="ticketCode" required maxlength="40" placeholder="MLF-CMP-2026-000001" autocomplete="off" dir="ltr"></div>
+    <div class="field"><label for="trackingToken">رمز المتابعة السري *</label><input id="trackingToken" name="trackingToken" required maxlength="100" placeholder="الرمز الذي حصلت عليه بعد الإرسال" autocomplete="off" dir="ltr"></div>
+    <button class="primary-btn" id="trackBtn" type="submit"><i class="fa-solid fa-magnifying-glass"></i> عرض حالة الشكوى</button>
+   </form>
+   <div id="trackMessage" class="status-message" role="status" aria-live="polite"></div>
+   <section id="trackResult" class="track-result" aria-live="polite">
+    <div class="track-top"><div><strong id="trackSubject"></strong><small id="trackMeta"></small></div><span id="trackStatus" class="state-pill"></span></div>
+    <ol class="track-events" id="trackEvents"></ol>
+   </section>
+  </aside>
+ </div>
+
+ <div class="privacy-card"><strong><i class="fa-solid fa-shield-halved"></i> كيف نحمي خصوصيتك؟</strong><br>
+  لا نعرض اسم مقدم الشكوى أو وسيلة التواصل أو نص الشكوى التفصيلي في صفحة المتابعة العامة. هذه المعلومات متاحة فقط للمخولين داخل المؤسسة. لا تستخدم هذا النموذج لحالات الخطر الفوري أو الطوارئ.
+ </div>
+ <p class="footer-note">للاستفسارات العامة: <a href="contact.html">تواصل مع مؤسسة ميدلايف</a> · © مؤسسة ميدلايف الطبية الخيرية التطوعية</p>
+</main>
+
+<script src="/site-nav.js?v=complaints-2026-1"></script>
+<script>
+(function(){
+ "use strict";
+ const API="https://ftvjakwogxdlxxbpfydf.supabase.co/functions/v1/complaint-portal";
+ const API_KEY="sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3";
+ const statusLabels={new:"جديدة",under_review:"قيد المراجعة",in_progress:"قيد المعالجة",resolved:"تم الحل",closed:"مغلقة"};
+ const eventLabels={submitted:"تم استلام الشكوى",status_changed:"تحديث حالة الشكوى",priority_changed:"تحديث الأولوية",assigned:"تعيين مسؤول للمتابعة",public_response:"رد من فريق المتابعة",closed:"تم إغلاق الشكوى"};
+ const categoryLabels={service_quality:"جودة الخدمة",staff_conduct:"سلوك أحد العاملين",volunteer_conduct:"سلوك أحد المتطوعين",safety:"سلامة أو حماية",administrative:"إجراء إداري",financial:"موضوع مالي",privacy:"خصوصية أو سرية",other:"أخرى"};
+ const byId=id=>document.getElementById(id);
+ const form=byId("complaintForm");
+ const submitBtn=byId("submitBtn");
+ const trackBtn=byId("trackBtn");
+ const anonymous=byId("isAnonymous");
+ let secretInMemory="";
+
+ function showMessage(id,message,type){
+  const el=byId(id);el.textContent=message;el.className="status-message show "+type;
+ }
+ function clearMessage(id){
+  const el=byId(id);el.textContent="";el.className="status-message";
+ }
+ function setAnonymousFields(){
+  const isAnon=anonymous.checked;
+  byId("nameField").style.display=isAnon?"none":"flex";
+  byId("contactField").style.display=isAnon?"none":"flex";
+  byId("fullName").required=!isAnon;
+  byId("contact").required=!isAnon;
+  if(isAnon){byId("fullName").value="";byId("contact").value="";}
+ }
+ anonymous.addEventListener("change",setAnonymousFields);
+ setAnonymousFields();
+
+ async function callApi(payload){
+  const response=await fetch(API,{
+   method:"POST",
+   headers:{"apikey":API_KEY,"Content-Type":"application/json"},
+   body:JSON.stringify(payload),
+   cache:"no-store"
+  });
+  let data={};
+  try{data=await response.json();}catch{}
+  if(!response.ok||data.ok!==true)throw new Error(data.error||"تعذر إتمام الطلب.");
+  return data;
+ }
+ function setBusy(button,busy,label){
+  button.disabled=busy;
+  if(busy){button.dataset.old=button.innerHTML;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> '+label;}
+  else if(button.dataset.old){button.innerHTML=button.dataset.old;delete button.dataset.old;}
+ }
+
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();clearMessage("submitMessage");
+  if(!form.reportValidity())return;
+  const isAnonymous=anonymous.checked;
+  const payload={
+   action:"submit",
+   category:byId("category").value,
+   subject:byId("subject").value.trim(),
+   description:byId("description").value.trim(),
+   isAnonymous,
+   fullName:isAnonymous?"":byId("fullName").value.trim(),
+   contact:isAnonymous?"":byId("contact").value.trim(),
+   consent:byId("consent").checked,
+   website:byId("website").value
+  };
+  setBusy(submitBtn,true,"جارٍ إرسال الشكوى");
+  try{
+   const data=await callApi(payload);
+   secretInMemory=data.tracking_token;
+   byId("resultTicket").textContent=data.ticket_code;
+   byId("resultToken").textContent=data.tracking_token;
+   byId("submissionResult").classList.add("show");
+   byId("ticketCode").value=data.ticket_code;
+   byId("trackingToken").value=data.tracking_token;
+   showMessage("submitMessage","وصلت شكواك إلى صندوق المتابعة. احتفظ بالبيانات المرجعية أدناه.","success");
+   form.reset();setAnonymousFields();
+   byId("submissionResult").scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(error){
+   showMessage("submitMessage",error instanceof Error?error.message:"تعذر إرسال الشكوى. حاول مجدداً.","error");
+  }finally{setBusy(submitBtn,false);}
+ });
+
+ document.querySelectorAll("[data-copy]").forEach(button=>{
+  button.addEventListener("click",async()=>{
+   const id=button.getAttribute("data-copy");
+   const value=byId(id).textContent||"";
+   try{
+    await navigator.clipboard.writeText(value);
+    const old=button.textContent;button.textContent="تم النسخ";setTimeout(()=>button.textContent=old,1600);
+   }catch{showMessage("submitMessage","تعذر النسخ التلقائي. حدّد النص وانسخه يدوياً.","error");}
+  });
+ });
+
+ byId("goTrack").addEventListener("click",()=>{
+  byId("trackComplaint").scrollIntoView({behavior:"smooth",block:"center"});
+  byId("ticketCode").focus();
+ });
+
+ function formatDate(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return value;
+  return d.toLocaleString("ar-SY",{year:"numeric",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+ }
+ function renderTracking(complaint){
+  byId("trackSubject").textContent=complaint.subject||"شكوى";
+  byId("trackMeta").textContent="الرقم المرجعي: "+complaint.ticket_code+" · تاريخ الاستلام: "+formatDate(complaint.created_at)+" · التصنيف: "+(categoryLabels[complaint.category]||"أخرى");
+  byId("trackStatus").textContent=statusLabels[complaint.status]||"قيد المتابعة";
+  byId("trackStatus").className="state-pill status-"+complaint.status;
+  const list=byId("trackEvents");list.replaceChildren();
+  const events=Array.isArray(complaint.public_events)?complaint.public_events:[];
+  if(!events.length){
+   const li=document.createElement("li");li.className="track-empty";li.textContent="تم استلام الشكوى، وسيظهر أي تحديث عام هنا بعد مراجعته.";
+   list.appendChild(li);
+  }else{
+   events.forEach(item=>{
+    const li=document.createElement("li");
+    const title=document.createElement("strong");
+    title.textContent=eventLabels[item.event_type]||"تحديث";
+    const message=document.createElement("p");
+    message.textContent=item.message||"تم تسجيل تحديث على الشكوى.";
+    const time=document.createElement("small");
+    time.textContent=formatDate(item.created_at);
+    li.append(title,message,time);list.appendChild(li);
+   });
+  }
+  byId("trackResult").classList.add("show");
+ }
+
+ byId("trackForm").addEventListener("submit",async event=>{
+  event.preventDefault();clearMessage("trackMessage");byId("trackResult").classList.remove("show");
+  if(!byId("trackForm").reportValidity())return;
+  setBusy(trackBtn,true,"جارٍ التحقق");
+  try{
+   const data=await callApi({
+    action:"track",
+    ticketCode:byId("ticketCode").value.trim(),
+    trackingToken:byId("trackingToken").value.trim()
+   });
+   renderTracking(data.complaint);
+   showMessage("trackMessage","تم العثور على الشكوى. هذه هي التحديثات المسموح بعرضها لمقدم الطلب.","success");
+  }catch(error){
+   showMessage("trackMessage",error instanceof Error?error.message:"تعذر جلب حالة الشكوى.","error");
+  }finally{setBusy(trackBtn,false);}
+ });
+})();
+</script>
+</body>
+</html>
