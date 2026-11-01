@@ -166,7 +166,7 @@ export async function onRequest(context) {
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
-      tags.push('<script src="/contact-page-v11.js?v=20261102-contact11" defer></script>');
+      tags.push('<script src="/contact-page-v11.js?v=20261102-contact11-2" defer></script>');
       tags.push('<script src="/contact-complaints-modal.js?v=20261102-13" defer></script>');
     }
     if (PUBLIC_HEADER_ROUTES.has(path) && !isContactPage && !html.includes('/site-nav.js')) {
