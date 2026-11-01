@@ -91,6 +91,11 @@ function normalizeDate(value) {
 
 async function fetchResource(resource, url) {
   const config = RESOURCES[resource];
+  // Keep the requested form key in function scope: unit filtering below also
+  // needs it when the membership form's options are assembled.
+  const requestedFormKey = resource === "membership_renewal_form"
+    ? cleanText(url.searchParams.get("form_key"), 120)
+    : "";
   const limitRaw = Number(url.searchParams.get("limit") || 50);
   const limit = Number.isFinite(limitRaw) ? Math.min(50, Math.max(1, Math.trunc(limitRaw))) : 50;
   const query = new URLSearchParams({select: config.select, order: config.order, limit: String(limit)});
@@ -154,7 +159,6 @@ async function fetchResource(resource, url) {
     query.set("form_kind", "eq.membership_renewal");
     query.set("status", "eq.published");
     query.set("is_public", "eq.true");
-    const requestedFormKey = cleanText(url.searchParams.get("form_key"), 120);
     if (requestedFormKey) query.set("form_key", "eq." + requestedFormKey);
     query.set("limit", "1");
   }
