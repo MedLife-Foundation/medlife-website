@@ -164,27 +164,12 @@ export async function onRequest(context) {
     if (isContactPage) {
       const earlyStyle = '<style id="medlife-contact-no-flash">body>header.hero,body>main.wrap{visibility:hidden!important;opacity:0!important}</style>';
       html = html.includes('</head>') ? html.replace('</head>', `${earlyStyle}</head>`) : `${earlyStyle}${html}`;
-      if (!html.includes('/site-nav.js')) tags.push('<script src="/site-nav.js?v=20261026-occasions" defer></script>');
       tags.push('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">');
       tags.push('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous" defer></script>');
-      tags.push('<script src="/contact-page-v8.js?v=20260831-contact-final" defer></script>');
-      tags.push('<script src="/contact-page-final-4.js?v=20260831-contact-final4" defer></script>');
-      tags.push('<script src="/contact-page-final-5.js?v=20260831-contact-final5" defer></script>');
-      tags.push('<script src="/contact-page-final-6.js?v=20260831-contact-final6" defer></script>');
-      tags.push('<script src="/contact-page-final-7.js?v=20260831-contact-final7" defer></script>');
-      tags.push('<script src="/contact-page-final-8.js?v=20260831-contact-final8" defer></script>');
-      tags.push('<script src="/contact-page-final-9.js?v=20260831-contact-final9" defer></script>');
-      tags.push('<script src="/contact-page-final-10.js?v=20260831-contact-final10" defer></script>');
-      tags.push('<script src="/contact-page-nav-final.js?v=20260831-contact-nav-final" defer></script>');
-      tags.push('<script src="/contact-social-refinement-v2.js?v=20260831-social-refinement2" defer></script>');
-      tags.push('<script src="/contact-social-roles-final.js?v=20260831-social-roles-final" defer></script>');
-      tags.push('<script src="/contact-nav-direct-final.js?v=20260831-contact-nav-direct-final" defer></script>');
-      tags.push('<script src="/contact-collaboration-center-final.js?v=20260831-contact-collaboration-center-final" defer></script>');
-      tags.push('<script src="/contact-ui-align-final.js?v=20260831-contact-ui-align-final" defer></script>');
-      tags.push('<script src="/contact-ui-final-fix.js?v=20260831-contact-ui-final-fix" defer></script>');
+      tags.push('<script src="/contact-page-v11.js?v=20261102-contact11" defer></script>');
       tags.push('<script src="/contact-complaints-modal.js?v=20261102-13" defer></script>');
     }
-    if (PUBLIC_HEADER_ROUTES.has(path) && !html.includes('/site-nav.js')) {
+    if (PUBLIC_HEADER_ROUTES.has(path) && !isContactPage && !html.includes('/site-nav.js')) {
       tags.push('<script src="/site-nav.js?v=20261026-occasions" defer></script>');
     }
 
