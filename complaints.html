@@ -488,6 +488,205 @@ html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!i
  html.complaints-embed body .copy-btn{width:100%!important}
 }
 
+ 
+/* Final MedLife visual system — clear hierarchy, strong brand, compact mobile spacing */
+html.complaints-embed body{font-size:14px!important;color:#172d4b!important;background:#f2f5f9!important}
+html.complaints-embed body #complaintsWrap{
+ width:100%!important;max-width:760px!important;margin:0 auto!important;
+ padding:14px 14px 28px!important;box-sizing:border-box!important;
+}
+html.complaints-embed body .portal-welcome{
+ display:flex!important;align-items:center!important;gap:11px!important;
+ width:100%!important;min-width:0!important;margin:0 0 13px!important;padding:13px 14px!important;
+ border:1px solid #e0e7f0!important;border-radius:14px!important;
+ background:linear-gradient(115deg,#fff 0%,#f8fafc 100%)!important;
+ box-shadow:0 5px 16px rgba(7,27,58,.035)!important;box-sizing:border-box!important;
+}
+html.complaints-embed body .portal-welcome__mark{
+ display:grid!important;place-items:center!important;flex:0 0 40px!important;
+ width:40px!important;height:40px!important;border-radius:12px!important;
+ background:#fff0f4!important;color:#b42343!important;font-size:17px!important;
+}
+html.complaints-embed body .portal-welcome__copy{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+html.complaints-embed body .portal-welcome__copy strong{display:block!important;color:#102b4b!important;font-size:13px!important;font-weight:900!important;line-height:1.5!important}
+html.complaints-embed body .portal-welcome__copy small{display:block!important;color:#78899e!important;font-size:10px!important;line-height:1.6!important}
+html.complaints-embed body .portal-welcome__badge{
+ display:inline-flex!important;align-items:center!important;gap:5px!important;flex:none!important;
+ padding:6px 9px!important;border:1px solid #dcebe2!important;border-radius:99px!important;
+ background:#f2faf5!important;color:#287451!important;font-size:9px!important;font-weight:800!important;
+}
+html.complaints-embed body .mode-switch{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:6px!important;margin:0 0 13px!important;padding:5px!important;
+ border:1px solid #e0e7f0!important;border-radius:14px!important;background:#e9eef5!important;
+}
+html.complaints-embed body .mode-tab{
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+ width:100%!important;min-width:0!important;min-height:45px!important;padding:10px 8px!important;
+ border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;
+ color:#60738c!important;font:800 12px Cairo,Arial,sans-serif!important;
+ box-shadow:none!important;transition:background .18s,color .18s,box-shadow .18s!important;
+}
+html.complaints-embed body .mode-tab i{font-size:12px!important}
+html.complaints-embed body .mode-tab.is-active{
+ border-color:#102b4b!important;background:#102b4b!important;color:#fff!important;
+ box-shadow:0 4px 11px rgba(16,43,75,.18)!important;
+}
+html.complaints-embed body .content-grid{display:block!important;width:100%!important;margin:0!important}
+html.complaints-embed body #submitComplaint,
+html.complaints-embed body #trackComplaint{
+ display:block!important;width:100%!important;min-width:0!important;margin:0!important;
+ padding:19px!important;border:1px solid #e0e7ef!important;border-radius:16px!important;
+ background:#fff!important;box-shadow:0 8px 24px rgba(7,27,58,.045)!important;box-sizing:border-box!important;
+}
+html.complaints-embed body #complaintsWrap[data-mode="submit"] #trackComplaint{display:none!important}
+html.complaints-embed body #complaintsWrap[data-mode="track"] #submitComplaint{display:none!important}
+html.complaints-embed body #submitComplaint .card-head,
+html.complaints-embed body #trackComplaint .card-head{
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;
+ gap:12px!important;margin:0 0 18px!important;padding:0 0 15px!important;
+ border-bottom:1px solid #edf1f5!important;text-align:right!important;
+}
+html.complaints-embed body #submitComplaint .card-icon,
+html.complaints-embed body #trackComplaint .card-icon{
+ display:grid!important;place-items:center!important;flex:0 0 43px!important;
+ width:43px!important;height:43px!important;border-radius:13px!important;
+ background:#fff0f4!important;color:#b42343!important;font-size:16px!important;
+}
+html.complaints-embed body #trackComplaint .card-icon{background:#edf4fb!important;color:#3f6c96!important}
+html.complaints-embed body .card-head>div{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
+html.complaints-embed body .card-head h2{
+ display:block!important;margin:0!important;color:#102b4b!important;
+ font:900 18px/1.5 Cairo,Arial,sans-serif!important;text-align:right!important;
+}
+html.complaints-embed body .card-head p{
+ display:block!important;margin:0!important;color:#7b8b9e!important;
+ font:500 10px/1.85 Cairo,Arial,sans-serif!important;text-align:right!important;
+}
+html.complaints-embed body #complaintForm{display:block!important;width:100%!important;min-width:0!important}
+html.complaints-embed body #complaintForm .form-grid{
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row!important;
+ gap:13px!important;width:100%!important;min-width:0!important;align-items:stretch!important;
+}
+html.complaints-embed body #complaintForm .form-grid>.field,
+html.complaints-embed body #complaintForm .form-grid>.field.wide{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ grid-column:1/-1!important;width:100%!important;min-width:0!important;margin:0!important;gap:5px!important;
+}
+html.complaints-embed body #complaintForm .field>label:not(.anonymous-toggle):not(.consent),
+html.complaints-embed body #trackForm .field>label{
+ display:block!important;width:100%!important;margin:0!important;color:#344b67!important;
+ font:800 11px/1.7 Cairo,Arial,sans-serif!important;text-align:right!important;
+}
+html.complaints-embed body #complaintForm .field input:not([type=checkbox]),
+html.complaints-embed body #complaintForm .field select,
+html.complaints-embed body #complaintForm .field textarea,
+html.complaints-embed body #trackForm .field input{
+ display:block!important;float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;
+ min-height:45px!important;margin:0!important;padding:10px 12px!important;box-sizing:border-box!important;
+ border:1px solid #d8e1ec!important;border-radius:10px!important;background:#fbfcfe!important;
+ color:#1c3654!important;font:500 13px/1.75 Cairo,Arial,sans-serif!important;
+ text-align:right!important;box-shadow:none!important;outline:none!important;
+ transition:border-color .18s,background .18s,box-shadow .18s!important;
+}
+html.complaints-embed body #complaintForm .field select{padding-left:36px!important}
+html.complaints-embed body #complaintForm .field textarea{
+ min-height:150px!important;padding:12px!important;resize:vertical!important;line-height:1.9!important;
+}
+html.complaints-embed body #complaintForm .field input:focus,
+html.complaints-embed body #complaintForm .field select:focus,
+html.complaints-embed body #complaintForm .field textarea:focus,
+html.complaints-embed body #trackForm .field input:focus{
+ border-color:#b42343!important;background:#fff!important;box-shadow:0 0 0 3px rgba(180,35,67,.08)!important;
+}
+html.complaints-embed body #complaintForm .field input::placeholder,
+html.complaints-embed body #complaintForm .field textarea::placeholder,
+html.complaints-embed body #trackForm .field input::placeholder{color:#9ba8b7!important;opacity:1!important}
+html.complaints-embed body #complaintForm .field .help{display:block!important;width:100%!important;color:#8190a2!important;font-size:9px!important;line-height:1.75!important}
+html.complaints-embed body #complaintForm .anonymous-toggle,
+html.complaints-embed body #complaintForm .consent{
+ display:flex!important;flex-direction:row!important;align-items:flex-start!important;gap:10px!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px!important;
+ border:1px solid #e4e9f0!important;border-radius:11px!important;background:#f8fafc!important;
+ color:#425a75!important;font:500 10px/1.8 Cairo,Arial,sans-serif!important;box-sizing:border-box!important;
+}
+html.complaints-embed body #complaintForm .anonymous-toggle{background:#fff8fa!important;border-color:#f0dce2!important}
+html.complaints-embed body #complaintForm .anonymous-toggle input[type=checkbox],
+html.complaints-embed body #complaintForm .consent input[type=checkbox]{
+ appearance:auto!important;-webkit-appearance:checkbox!important;flex:0 0 18px!important;
+ width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
+ margin:2px 0 0!important;padding:0!important;accent-color:#b42343!important;
+}
+html.complaints-embed body #complaintForm .anonymous-copy{display:block!important;flex:1 1 auto!important;min-width:0!important}
+html.complaints-embed body #complaintForm .anonymous-copy strong{display:block!important;margin:0 0 2px!important;color:#173451!important;font-size:12px!important;font-weight:900!important;line-height:1.7!important}
+html.complaints-embed body #complaintForm .anonymous-copy small{display:block!important;color:#78899e!important;font-size:9px!important;line-height:1.8!important}
+html.complaints-embed body #complaintForm .consent span{display:block!important;flex:1 1 auto!important;min-width:0!important;font-size:10px!important;line-height:1.85!important}
+html.complaints-embed body #nameField[style*="display: none"],
+html.complaints-embed body #contactField[style*="display: none"]{display:none!important}
+html.complaints-embed body #complaintForm .form-actions{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important;
+ width:100%!important;margin-top:14px!important;
+}
+html.complaints-embed body #complaintForm .form-actions>*{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;max-width:none!important;min-width:0!important;
+}
+html.complaints-embed body #complaintForm .form-actions .help{text-align:right!important;font-size:9px!important;line-height:1.7!important}
+html.complaints-embed body .primary-btn,
+html.complaints-embed body .secondary-btn{
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+ width:100%!important;max-width:100%!important;min-width:0!important;min-height:47px!important;
+ padding:11px 14px!important;border-radius:11px!important;font:800 12px Cairo,Arial,sans-serif!important;
+}
+html.complaints-embed body .primary-btn{
+ border:1px solid #a32243!important;background:linear-gradient(115deg,#c33a59,#a32243)!important;
+ color:#fff!important;box-shadow:0 6px 15px rgba(163,34,67,.15)!important;
+}
+html.complaints-embed body .primary-btn:disabled{opacity:.58!important}
+html.complaints-embed body .secondary-btn{border:1px solid #d9e2ec!important;background:#fff!important;color:#304e6e!important}
+html.complaints-embed body .status-message{margin-top:11px!important;padding:11px 12px!important;border-radius:10px!important;font-size:10px!important;line-height:1.8!important}
+html.complaints-embed body .result-box{
+ display:none!important;margin-top:14px!important;padding:14px!important;border:1px solid #cfe5d7!important;
+ border-radius:13px!important;background:#f3faf5!important;box-sizing:border-box!important;
+}
+html.complaints-embed body .result-box.show{display:block!important}
+html.complaints-embed body .result-box h3{margin:0 0 5px!important;color:#246a48!important;font-size:15px!important}
+html.complaints-embed body .result-box p{font-size:10px!important;line-height:1.8!important}
+html.complaints-embed body .result-field{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;margin-top:9px!important}
+html.complaints-embed body .result-field>div{min-width:0!important;padding:9px!important;border:1px solid #d7e7dc!important;border-radius:9px!important;background:#fff!important}
+html.complaints-embed body .result-field strong{display:block!important;overflow-wrap:anywhere!important;font:800 12px ui-monospace,Consolas,monospace!important;direction:ltr!important;text-align:left!important}
+html.complaints-embed body .copy-btn{min-height:36px!important;padding:7px 10px!important;border:1px solid #cfe1d5!important;border-radius:9px!important;background:#fff!important;color:#286b4b!important;font:800 9px Cairo,Arial,sans-serif!important}
+html.complaints-embed body .secret-warning{margin-top:10px!important;padding:10px!important;border:1px solid #f0e0c5!important;border-radius:9px!important;background:#fff8eb!important;color:#84602c!important;font-size:9px!important;line-height:1.8!important}
+html.complaints-embed body #trackForm{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;width:100%!important}
+html.complaints-embed body #trackForm>.field{display:flex!important;flex-direction:column!important;gap:5px!important;width:100%!important;min-width:0!important}
+html.complaints-embed body #trackForm .field input{direction:ltr!important;text-align:left!important}
+html.complaints-embed body .track-result{margin-top:12px!important;padding:12px!important;border:1px solid #e0e7ef!important;border-radius:11px!important;background:#f9fbfd!important}
+html.complaints-embed body .track-top strong{font-size:13px!important}
+html.complaints-embed body .track-top small,html.complaints-embed body .track-events strong,html.complaints-embed body .track-events p{font-size:10px!important;line-height:1.8!important}
+html.complaints-embed body .privacy-card{
+ margin-top:11px!important;padding:11px 13px!important;border:1px solid #e1e8f0!important;
+ border-radius:11px!important;background:#edf3f8!important;color:#667b92!important;font-size:9px!important;line-height:1.8!important;
+}
+html.complaints-embed body .privacy-card strong{color:#294b6e!important}
+html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+@media(max-width:560px){
+ html.complaints-embed body #complaintsWrap{padding:11px 10px 22px!important}
+ html.complaints-embed body .portal-welcome{padding:11px!important;gap:9px!important}
+ html.complaints-embed body .portal-welcome__mark{flex-basis:36px!important;width:36px!important;height:36px!important;font-size:15px!important}
+ html.complaints-embed body .portal-welcome__copy strong{font-size:11px!important}
+ html.complaints-embed body .portal-welcome__copy small{font-size:9px!important}
+ html.complaints-embed body .portal-welcome__badge{font-size:8px!important;padding:5px 7px!important}
+ html.complaints-embed body #submitComplaint,html.complaints-embed body #trackComplaint{padding:16px!important}
+ html.complaints-embed body #submitComplaint .card-head,html.complaints-embed body #trackComplaint .card-head{gap:10px!important;margin-bottom:15px!important;padding-bottom:13px!important}
+ html.complaints-embed body #submitComplaint .card-icon,html.complaints-embed body #trackComplaint .card-icon{flex-basis:39px!important;width:39px!important;height:39px!important}
+ html.complaints-embed body .card-head h2{font-size:16px!important}
+ html.complaints-embed body .card-head p{font-size:9px!important}
+ html.complaints-embed body #complaintForm .form-grid{gap:12px!important}
+ html.complaints-embed body #complaintForm .field textarea{min-height:138px!important}
+ html.complaints-embed body .result-field{grid-template-columns:minmax(0,1fr)!important}
+ html.complaints-embed body .copy-btn{width:100%!important}
+}
+
 </style>
 </head>
 <body>
@@ -501,6 +700,11 @@ html.complaints-embed body .honeypot{position:absolute!important;right:-9999px!i
 </header>
 
 <main class="wrap" id="complaintsWrap" data-mode="submit">
+ <section class="portal-welcome" aria-label="قناة ميدلايف الآمنة">
+  <span class="portal-welcome__mark"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i></span>
+  <span class="portal-welcome__copy"><strong>مساحة آمنة للتواصل</strong><small>صوتك مهم، وملاحظتك تساعدنا على التطوير</small></span>
+  <span class="portal-welcome__badge"><i class="fa-solid fa-lock" aria-hidden="true"></i> سرّي وموثوق</span>
+ </section>
  <section class="intro-grid" aria-label="كيف يعمل صندوق الشكاوى">
   <article class="intro-card"><span class="intro-icon"><i class="fa-solid fa-inbox"></i></span><div><strong>استلام موثّق</strong><small>تحصل على رقم مرجعي تلقائي لكل شكوى يتم استلامها.</small></div></article>
   <article class="intro-card"><span class="intro-icon"><i class="fa-solid fa-user-shield"></i></span><div><strong>خصوصية مقدم الشكوى</strong><small>بياناتك لا تظهر في صفحة المتابعة العامة.</small></div></article>
