@@ -148,7 +148,8 @@
   }
 
   function buildNavigation() {
-    document.querySelectorAll('.medlife-global-header,.mc11-nav').forEach(function(node){ node.remove(); });
+    document.querySelectorAll('.medlife-global-header').forEach(function(node){ node.remove(); });
+    if (document.querySelector('.mc11-nav')) return;
     const header = document.createElement('header');
     header.className = 'mc11-nav';
     header.innerHTML =
