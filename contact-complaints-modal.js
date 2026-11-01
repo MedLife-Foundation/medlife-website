@@ -7,6 +7,34 @@
       const doc=frame.contentDocument;
       if(!doc||!doc.documentElement)return;
       doc.documentElement.classList.add('complaints-embed');
+      doc.body.classList.add('complaints-embed');
+      // Force the embedded/mobile layout from the parent after load. This is a
+      // deliberate fallback for Safari/WebKit cases where the cached document
+      // stylesheet is stale or the embed class was not applied before first paint.
+      let layout=doc.getElementById('medlife-complaints-modal-layout');
+      if(!layout){
+        layout=doc.createElement('style');
+        layout.id='medlife-complaints-modal-layout';
+        (doc.head||doc.documentElement).appendChild(layout);
+      }
+      layout.textContent=`
+        html,html body{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;overflow-x:hidden!important;background:#f4f6fa!important;font-family:Cairo,Arial,sans-serif!important}
+        body .hero,body .intro-grid,body .footer-note{display:none!important}
+        body .wrap{display:block!important;width:100%!important;max-width:760px!important;margin:0 auto!important;padding:14px 14px 26px!important;box-sizing:border-box!important}
+        body .mode-switch{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px!important;padding:5px!important;margin:0 0 14px!important;border:1px solid #e7ebf1!important;border-radius:14px!important;background:#edf1f6!important}
+        body .content-grid{display:block!important;width:100%!important;margin:0!important}
+        body .card{display:block!important;width:100%!important;min-width:0!important;margin:0!important;padding:20px!important;border:1px solid #e5eaf0!important;border-radius:17px!important;background:#fff!important;box-sizing:border-box!important}
+        body #complaintsWrap[data-mode="submit"] #trackComplaint{display:none!important}
+        body #complaintsWrap[data-mode="track"] #submitComplaint{display:none!important}
+        body #complaintForm .form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:15px!important;width:100%!important;min-width:0!important}
+        body #complaintForm .form-grid>.field,body #complaintForm .form-grid>.field.wide{display:flex!important;flex-direction:column!important;align-items:stretch!important;grid-column:1/-1!important;width:100%!important;min-width:0!important;margin:0!important;gap:6px!important}
+        body #complaintForm .field input:not([type="checkbox"]),body #complaintForm .field select,body #complaintForm .field textarea,body #trackForm .field input{display:block!important;float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+        body #complaintForm .anonymous-toggle,body #complaintForm .consent{display:flex!important;flex-direction:row!important;align-items:flex-start!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+        body .form-actions{display:flex!important;flex-wrap:wrap!important;gap:10px!important}
+        body .primary-btn{width:100%!important;min-height:48px!important;justify-content:center!important}
+        body .privacy-card{display:block!important}
+        @media(max-width:560px){body .wrap{padding:12px 10px 24px!important}body .card{padding:16px!important}body .card-head h2{font-size:17px!important}}
+      `;
       doc.getElementById('medlife-complaints-modal-layout')?.remove();
     }catch(error){
       // The embedded page includes its own responsive styles and remains usable independently.
