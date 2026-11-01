@@ -17,6 +17,10 @@
 .member-portal-entry .portal-button{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border-radius:12px;background:#12203a;color:#fff;text-decoration:none;font-weight:800;font-size:14px}
 .member-portal-entry .portal-note{margin:12px 0 0;padding-top:10px;border-top:1px solid #e3eaf5;font-size:11px;color:#59667c}
 .legacy-login-label{margin:0 0 7px;color:#667085;font-size:11px;font-weight:800}
+.legacy-login-details{border:1px solid #e5e9f0;border-radius:15px;background:#fff;overflow:hidden}
+.legacy-login-details>summary{cursor:pointer;padding:13px 15px;color:#667085;font-size:12px;font-weight:800}
+.legacy-login-details[open]>summary{border-bottom:1px solid #e5e9f0;background:#f8fafc}
+.legacy-login-details .login-card{border:0;box-shadow:none;margin:0;padding:18px}
 </style>
 </head>
 <body>
@@ -35,7 +39,9 @@
         <a class="portal-button" href="https://admin.medlifesy.org/login?next=%2Fvolunteer">الدخول إلى بوابة الأعضاء والمتطوعين</a>
         <p class="portal-note">لأول دخول: افتح رسالة دعوة ميدلايف في بريدك واضغط «تأكيد الدعوة وإعداد الحساب»، ثم اختر كلمة مرورك الشخصية. بعد اختيارها، استخدم كلمة المرور الجديدة؛ رقم العضوية ليس كلمة المرور الدائمة.</p>
       </section>
-      <div class="login-card">
+      <details class="legacy-login-details">
+        <summary>دخول الحسابات القديمة فقط</summary>
+        <div class="login-card">
         <p class="legacy-login-label">دخول الحسابات القديمة المرتبطة بنظام الموقع السابق</p>
         <h2 class="login-title">تسجيل الدخول القديم</h2>
         <p class="login-subtitle">هذا النموذج مخصص للحسابات التي أُنشئت في نظام الموقع السابق، وليس لحسابات تجديد العضوية الجديدة.</p>
@@ -52,7 +58,8 @@
           <div id="msg" class="login-message" role="status" aria-live="polite"></div>
         </form>
         <div class="login-note">نظام إدارة وحسابات MedLife — الدخول مخصص للمستخدمين المصرح لهم.</div>
-      </div>
+        </div>
+      </details>
     </div>
   </section>
 </main>
