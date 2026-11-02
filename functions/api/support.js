@@ -154,7 +154,7 @@ export async function onRequest({request,env}){
         if(!applicant||!phone||!governorate||!requestType||!need||!body.consent)return json({success:false,error:'يرجى تعبئة الحقول المطلوبة والموافقة على معالجة الطلب.'},400);
         if(!validPhone(phone))return json({success:false,error:'يرجى إدخال رقم هاتف صحيح.'},400);
         const amount=Math.max(0,Math.min(100000000000,Number(body.requested_amount||0))); if(!Number.isFinite(amount))return json({success:false,error:'قيمة المبلغ غير صحيحة.'},400);
-        const supabaseResponse = await fetch(SUPABASE_URL + '/rest/v1/rpc/submit_support_application', {
+        const supabaseResponse = await fetch(SUPABASE_URL + '/rest/v1/rpc/support_submit_application', {
           method: 'POST',
           headers: {
             apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -162,7 +162,7 @@ export async function onRequest({request,env}){
             'Content-Type': 'application/json',
             Accept: 'application/json'
           },
-          body: JSON.stringify({p_data: {
+          body: JSON.stringify({p_payload: {
             applicant_name: applicant,
             phone,
             email: text(body.email,160),
@@ -183,9 +183,10 @@ export async function onRequest({request,env}){
           }})
         });
         const responseText = await supabaseResponse.text();
-        let applicationCode = '';
-        try { applicationCode = JSON.parse(responseText); } catch (_) {}
-        if (!supabaseResponse.ok || typeof applicationCode !== 'string' || !applicationCode.startsWith('MSA-')) {
+        let rpcResult = null;
+        try { rpcResult = JSON.parse(responseText); } catch (_) {}
+        const applicationCode = rpcResult?.application_code;
+        if (!supabaseResponse.ok || rpcResult?.success !== true || typeof applicationCode !== 'string' || !applicationCode.startsWith('MSA-')) {
           console.error('Supabase support application submission failed', supabaseResponse.status, responseText.slice(0,300));
           return json({success:false,error:'تعذر حفظ الطلب حالياً. يرجى المحاولة لاحقاً.'},502);
         }
