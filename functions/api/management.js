@@ -23,6 +23,11 @@ const RESOURCES = {
     select: "source_id,case_code,subject,summary,category,status,priority,description,governorate,areas,support_type,start_date,end_date,progress_stage,public_status_note,amount_required,amount_secured,currency,public_url,documents_verified,created_at,updated_at",
     order: "created_at.desc"
   },
+  support_payment_methods: {
+    table: "support_payment_methods",
+    select: "method_code,label,account_label,account_value,instructions,sort_order",
+    order: "sort_order.asc"
+  },
   media: {
     table: "public_site_media",
     select: "source_id,file_name,mime_type,alt_text,caption,public_url,created_at",
@@ -119,6 +124,8 @@ async function fetchResource(resource, url) {
   if (resource === "support") {
     const status = url.searchParams.get("status");
     if (status) query.set("status", "eq." + status);
+    const caseCode = url.searchParams.get("case_code");
+    if (caseCode) query.set("case_code", "eq." + cleanText(caseCode, 80));
   }
   if (resource === "volunteer_recruitment") {
     query.set("id", "eq.1");
