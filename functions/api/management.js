@@ -20,7 +20,7 @@ const RESOURCES = {
   },
   support: {
     table: "public_site_support_cases",
-    select: "source_id,case_code,subject,summary,category,status,priority,description,public_description,governorate,areas,support_type,start_date,end_date,progress_stage,public_status_note,amount_required,amount_secured,currency,public_url,documents_verified,created_at,updated_at",
+    select: "source_id,case_code,subject,summary,category,status,priority,description,governorate,areas,support_type,start_date,end_date,progress_stage,public_status_note,amount_required,amount_secured,currency,public_url,documents_verified,created_at,updated_at",
     order: "created_at.desc"
   },
   media: {
