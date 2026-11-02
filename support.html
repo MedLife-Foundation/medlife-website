@@ -21,33 +21,65 @@
 <div class="modal" id="detailModal" aria-hidden="true"><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h3 id="modalTitle">تفاصيل الحالة</h3><button type="button" class="close" id="closeModal">إغلاق</button></div><div class="modal-body" id="modalBody"></div></div></div>
 <footer>MedLife · صندوق الدعم · الكرامة والخصوصية والشفافية</footer>
 <script>
-const cases=[
-['ML-SUP-DEMO-001','عملية جراحية','طرطوس','طبي',12500,'حالة مكتملة','تم تنفيذ المساعدة وفق المبلغ المسجل.'],
-['ML-SUP-DEMO-002','كرسي متحرك','حمص','أدوات مساعدة للحركة',8500,'حالة مكتملة','تم توفير وسيلة مساعدة للحركة وفق الاحتياج المدروس.'],
-['ML-SUP-DEMO-003','أدوية مزمنة','اللاذقية','دوائي',4200,'حالة مكتملة','تم تقديم المساعدة الدوائية ضمن المبلغ المسجل.'],
-['ML-SUP-DEMO-004','فحوصات طبية','طرطوس','تشخيصي',3800,'حالة مكتملة','تمت تغطية المساعدة التشخيصية المسجلة.'],
-['ML-SUP-DEMO-005','سماعة أذن','حماة','سمعي',11000,'حالة مكتملة','تم توفير المساعدة السمعية ضمن المبلغ المسجل.'],
-['ML-SUP-DEMO-006','عملية عينية','جبلة','طبي',9500,'حالة مكتملة','تم تقديم الدعم المرتبط بالإجراء العيني.'],
-['ML-SUP-DEMO-007','أدوات مساعدة للحركة','بانياس','حركي',2750,'حالة مكتملة','تم توفير الأدوات المساعدة المسجلة.'],
-['ML-SUP-DEMO-008','جلسات إعادة تأهيل','حمص','تأهيلي',6000,'حالة مكتملة','تم تقديم الدعم لجلسات إعادة التأهيل المسجلة.'],
-['ML-SUP-DEMO-009','حليب ومستلزمات طفل','طرطوس','طفولة',3300,'حالة مكتملة','تم تقديم المستلزمات المسجلة للطفل.'],
-['ML-SUP-DEMO-010','علاج دوائي متخصص','دمشق','دوائي',7200,'حالة مكتملة','تم تقديم المساعدة الدوائية المتخصصة المسجلة.'],
-['ML-SUP-DEMO-011','سرير طبي','اللاذقية','تجهيز طبي',14000,'حالة مكتملة','تم توفير السرير الطبي ضمن المبلغ المسجل.'],
-['ML-SUP-DEMO-012','علاج أسنان','حماة','سني',5000,'حالة مكتملة','تم تقديم المساعدة العلاجية السنية المسجلة.'],
-['ML-SUP-DEMO-013','مستلزمات مدرسية','طرطوس','تعليمي',2500,'حالة مكتملة','تم تقديم المستلزمات المدرسية المسجلة.'],
-['ML-SUP-DEMO-014','مستلزمات علاجية','حمص','علاجي',4600,'حالة مكتملة','تم توفير المستلزمات العلاجية المسجلة.'],
-['ML-SUP-DEMO-015','علاج ومتابعة طفل','بانياس','طفولة',10500,'حالة مكتملة','تم تقديم الدعم المرتبط بالعلاج والمتابعة.']
-];
-const fmt=n=>new Intl.NumberFormat('en-US').format(n);
-const grid=document.getElementById('completedGrid');
-grid.innerHTML=cases.map((c,i)=>`<article class="case-card"><div class="case-top"><span class="case-code">${c[0]}</span><span class="done">مكتملة</span></div><div class="case-body"><h4>${c[1]}</h4><div class="amount">${fmt(c[4])} <small>ل.س</small></div><div class="meta"><div><b>${c[2]}</b>المحافظة</div><div><b>100%</b>نسبة الإنجاز</div><div><b>${c[3]}</b>نوع الدعم</div><div><b>موثق داخلياً</b>حالة التوثيق</div></div><button type="button" class="btn detail-btn" data-index="${i}">عرض تفاصيل الحالة</button></div></article>`).join('');
+const fmt=n=>new Intl.NumberFormat('en-US').format(Number(n)||0);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=(n,c='SYP')=>fmt(n)+' '+(c==='SYP'?'ل.س':esc(c||'ل.س'));
+const statusLabel=s=>({closed:'مكتملة',supporting:'جمع الدعم',published:'منشورة',under_review:'قيد الدراسة',draft:'مسودة'})[String(s||'').toLowerCase()]||'منشورة';
+const isClosed=c=>String(c.status||'').toLowerCase()==='closed';
+const isActive=c=>['supporting','published'].includes(String(c.status||'').toLowerCase());
 function scrollToId(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});}
-document.getElementById('heroRequest').addEventListener('click',()=>window.location.href='support-request.html');
-document.getElementById('heroCases').addEventListener('click',()=>scrollToId('cases'));
-document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.case-section').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');scrollToId('cases');}));
-const modal=document.getElementById('detailModal'),body=document.getElementById('modalBody'),title=document.getElementById('modalTitle');
-document.querySelectorAll('.detail-btn').forEach(btn=>btn.addEventListener('click',()=>{const c=cases[Number(btn.dataset.index)];title.textContent=`تفاصيل ${c[0]}`;body.innerHTML=`<h3 style="margin-top:0;color:var(--navy)">${c[1]}</h3><div class="detail-grid"><div><b>${c[2]}</b>المحافظة النموذجية</div><div><b>${c[4].toLocaleString('en-US')} ل.س</b>المبلغ المسجل</div><div><b>${c[3]}</b>نوع الدعم</div><div><b>100%</b>نسبة الإنجاز</div><div><b>مكتملة</b>حالة التنفيذ</div><div><b>موثق ضمن السجلات الداخلية</b>حالة التوثيق</div><div><b>بيانات المستفيد غير منشورة</b>الخصوصية</div><div><b>${c[0]}</b>رقم الحالة</div></div><div class="modal-note"><strong>ملاحظة:</strong> تفاصيل المحافظة والوصف المعروضة في هذه البطاقة بيانات نموذجية لأغراض العرض فقط، وليست سجلاً عاماً لمستفيد حقيقي. المبلغ ونوع المساعدة هما البيانات المعتمدة في هذه الصفحة.</div>`;modal.classList.add('show');modal.setAttribute('aria-hidden','false');}));
-function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}document.getElementById('closeModal').addEventListener('click',closeModal);modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('heroRequest')?.addEventListener('click',()=>window.location.href='support-request.html');
+document.getElementById('heroCases')?.addEventListener('click',()=>scrollToId('cases'));
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.case-section').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab)?.classList.add('active');scrollToId('cases');}));
+const modal=document.getElementById('detailModal'),modalBody=document.getElementById('modalBody'),modalTitle=document.getElementById('modalTitle');
+function showDetails(c){
+ modalTitle.textContent='تفاصيل '+(c.case_code||'الحالة');
+ const required=Number(c.amount_required)||0,secured=Number(c.amount_secured)||0;
+ const percent=required>0?Math.min(100,Math.round(secured/required*100)):0;
+ modalBody.innerHTML=`<h3 style="margin-top:0;color:var(--navy)">${esc(c.subject||'حالة دعم')}</h3><p>${esc(c.public_description||c.summary||c.description||'')}</p><div class="detail-grid"><div><b>${esc(c.governorate||'غير محدد')}</b>المحافظة</div><div><b>${money(required,c.currency)}</b>المبلغ المطلوب</div><div><b>${money(secured,c.currency)}</b>المبلغ المؤمّن</div><div><b>${percent}%</b>نسبة الإنجاز</div><div><b>${esc(c.support_type||c.category||'دعم عام')}</b>نوع الدعم</div><div><b>${esc(statusLabel(c.status))}</b>حالة التنفيذ</div><div><b>${esc(c.case_code||'')}</b>رقم الحالة</div><div><b>بيانات المستفيد غير منشورة</b>الخصوصية</div></div>`;
+ modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-case-index]');if(b){const c=window.__medlifeSupportCases?.[Number(b.dataset.caseIndex)];if(c)showDetails(c);}});
+function card(c,i){
+ const required=Number(c.amount_required)||0,secured=Number(c.amount_secured)||0;
+ const pct=required>0?Math.min(100,Math.round(secured/required*100)):(isClosed(c)?100:0);
+ const done=isClosed(c);
+ return `<article class="case-card"><div class="case-top"><span class="case-code">${esc(c.case_code||'حالة دعم')}</span><span class="${done?'done':''}">${esc(statusLabel(c.status))}</span></div><div class="case-body"><h4>${esc(c.subject||'حالة دعم')}</h4><p style="font-size:12px;color:var(--muted)">${esc(c.public_description||c.summary||c.description||'')}</p><div class="amount">${money(done?(secured||required):secured,c.currency)} <small>${done?'مبلغ المساعدة':'تم تأمينه'}</small></div><div class="meta"><div><b>${esc(c.governorate||'غير محدد')}</b>المحافظة</div><div><b>${pct}%</b>نسبة الإنجاز</div><div><b>${esc(c.support_type||c.category||'دعم عام')}</b>نوع الدعم</div><div><b>${esc(c.public_status_note||'تمت مراجعة الحالة')}</b>حالة التوثيق</div></div><button type="button" class="btn detail-btn" data-case-index="${i}">عرض تفاصيل الحالة</button>${!done?'<a class="btn primary detail-btn" style="text-decoration:none" href="'+esc(c.public_url||('support-donation.html?case='+encodeURIComponent(c.case_code||'')))+'">دعم هذه الحالة</a>':''}</div></article>`;
+}
+function empty(text){return '<div class="empty" style="max-width:850px;margin:20px auto;padding:24px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--muted)">'+esc(text)+'</div>';}
+function setTabCount(key,n){const b=document.querySelector('[data-tab="'+key+'"] .count');if(b)b.textContent=fmt(n);}
+function renderCases(rows){
+ const all=Array.isArray(rows)?rows.filter(c=>c&&c.case_code):[];
+ const completed=all.filter(isClosed),active=all.filter(isActive),review=all.filter(c=>!isClosed(c)&&!isActive(c));
+ window.__medlifeSupportCases=all;
+ setTabCount('completed',completed.length);setTabCount('open',active.length);setTabCount('review',review.length);
+ const completedGrid=document.getElementById('completedGrid');
+ completedGrid.innerHTML=completed.length?completed.map(c=>card(c,all.indexOf(c))).join(''):empty('لا توجد حالياً مساعدات مكتملة منشورة في السجلات المعتمدة.');
+ const completedHeading=document.querySelector('#completed .section-heading p');
+ if(completedHeading)completedHeading.innerHTML=completed.length+' حالة · إجمالي المبالغ المسجلة: <strong>'+money(completed.reduce((s,c)=>s+(Number(c.amount_secured)||Number(c.amount_required)||0),0),'SYP')+'</strong>';
+ document.querySelector('#completed .demo-banner')?.remove();
+ const open=document.getElementById('open');
+ open.innerHTML='<div class="section-heading"><h3>حالات بحاجة إلى الدعم</h3><p>الحالات المعتمدة للنشر والتي تحتاج إلى تمويل.</p></div>'+(active.length?'<div class="completed-grid">'+active.map(c=>card(c,all.indexOf(c))).join('')+'</div>':empty('لا توجد حالياً حالات منشورة بحاجة إلى الدعم. ستظهر هنا الحالات التي تعتمدها الإدارة للنشر بعد التحقق والموافقة على الخصوصية.')));
+ const reviewEl=document.getElementById('review');
+ reviewEl.innerHTML='<div class="section-heading"><h3>حالات قيد الدراسة</h3><p>لا تُعرض الطلبات الخاصة أو قيد المراجعة للعامة.</p></div>'+empty('لا توجد حالات عامة ضمن هذه الفئة حالياً.');
+ const summary=document.querySelector('.numbers-grid');
+ if(summary){const ns=summary.querySelectorAll('.number strong');if(ns[0])ns[0].textContent=fmt(completed.length);if(ns[1])ns[1].textContent=money(completed.reduce((s,c)=>s+(Number(c.amount_secured)||Number(c.amount_required)||0),0),'SYP');if(ns[2])ns[2].textContent=fmt(active.length);}
+}
+function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+document.getElementById('closeModal')?.addEventListener('click',closeModal);modal?.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+(async()=>{
+ try{
+  const response=await fetch('/api/management?resource=support&limit=50',{headers:{Accept:'application/json'},cache:'no-store'});
+  const payload=await response.json();
+  if(!response.ok||payload.success!==true||!Array.isArray(payload.data))throw new Error('support data unavailable');
+  renderCases(payload.data);
+ }catch(error){
+  console.error('تعذر تحميل حالات صندوق الدعم من قاعدة البيانات',error);
+  renderCases([]);
+  const grid=document.getElementById('completedGrid');
+  if(grid)grid.innerHTML=empty('تعذر تحميل الحالات حالياً. يرجى المحاولة لاحقاً.');
+ }
+})();
 </script>
 </body>
 </html>
