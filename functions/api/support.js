@@ -6,7 +6,7 @@
 import { json } from './_auth.js';
 
 const SUPABASE_URL = 'https://ftvjakwogxdlxxbpfydf.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K';
 
 async function ensure(db){
   await db.prepare(`CREATE TABLE IF NOT EXISTS support_cases (
