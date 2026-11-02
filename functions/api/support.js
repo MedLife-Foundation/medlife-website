@@ -5,6 +5,9 @@
 */
 import { json } from './_auth.js';
 
+const SUPABASE_URL = 'https://ftvjakwogxdlxxbpfydf.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3';
+
 async function ensure(db){
   await db.prepare(`CREATE TABLE IF NOT EXISTS support_cases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -151,9 +154,42 @@ export async function onRequest({request,env}){
         if(!applicant||!phone||!governorate||!requestType||!need||!body.consent)return json({success:false,error:'يرجى تعبئة الحقول المطلوبة والموافقة على معالجة الطلب.'},400);
         if(!validPhone(phone))return json({success:false,error:'يرجى إدخال رقم هاتف صحيح.'},400);
         const amount=Math.max(0,Math.min(100000000000,Number(body.requested_amount||0))); if(!Number.isFinite(amount))return json({success:false,error:'قيمة المبلغ غير صحيحة.'},400);
-        const code=`MSA-${Date.now().toString(36).toUpperCase()}`; const docs=Array.isArray(body.document_urls)?body.document_urls.map(v=>text(v,600)).filter(Boolean).slice(0,10):[];
-        await env.MEMBERS_DB.prepare(`INSERT INTO support_applications(application_code,applicant_name,phone,email,governorate,area,request_type,beneficiary_relation,beneficiary_age,beneficiary_gender,need_summary,medical_details,requested_amount,family_income,existing_support,document_urls,preferred_contact,consent) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(code,applicant,phone,text(body.email,160),governorate,text(body.area,120),requestType,text(body.beneficiary_relation,100),text(body.beneficiary_age,30),text(body.beneficiary_gender,30),need,text(body.medical_details,3000),amount,text(body.family_income,500),text(body.existing_support,1000),JSON.stringify(docs),text(body.preferred_contact,80),1).run();
-        return json({success:true,application_code:code,message:'تم استلام طلبك. سيقوم فريق ميدلايف بمراجعته والتواصل معك.'},201);
+        const supabaseResponse = await fetch(SUPABASE_URL + '/rest/v1/rpc/submit_support_application', {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            Authorization: 'Bearer ' + SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          body: JSON.stringify({p_data: {
+            applicant_name: applicant,
+            phone,
+            email: text(body.email,160),
+            governorate,
+            area: text(body.area,120),
+            request_type: requestType,
+            beneficiary_relation: text(body.beneficiary_relation,100),
+            beneficiary_age: text(body.beneficiary_age,30),
+            beneficiary_gender: text(body.beneficiary_gender,30),
+            need_summary: need,
+            medical_details: text(body.medical_details,3000),
+            requested_amount: amount,
+            family_income: text(body.family_income,500),
+            existing_support: text(body.existing_support,1000),
+            document_urls: Array.isArray(body.document_urls) ? body.document_urls.map(v=>text(v,600)).filter(Boolean).slice(0,10) : [],
+            preferred_contact: text(body.preferred_contact,80),
+            consent: true
+          }})
+        });
+        const responseText = await supabaseResponse.text();
+        let applicationCode = '';
+        try { applicationCode = JSON.parse(responseText); } catch (_) {}
+        if (!supabaseResponse.ok || typeof applicationCode !== 'string' || !applicationCode.startsWith('MSA-')) {
+          console.error('Supabase support application submission failed', supabaseResponse.status, responseText.slice(0,300));
+          return json({success:false,error:'تعذر حفظ الطلب حالياً. يرجى المحاولة لاحقاً.'},502);
+        }
+        return json({success:true,application_code:applicationCode,message:'تم استلام طلبك. سيقوم فريق ميدلايف بمراجعته والتواصل معك.'},201);
       }
       if(!admin(request,env))return json({success:false,error:'غير مصرح.'},401);
       const action=body.action;
