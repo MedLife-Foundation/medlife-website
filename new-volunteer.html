@@ -130,6 +130,9 @@ $("applicationForm").addEventListener("submit",async event=>{
   const primaryField=fields.find(f=>f.field_key==="primary_volunteer_field");
   const primaryLabel=primaryField?.options?.find(o=>String(o.value)===primary)?.label_ar||primary;
  if(!primary||!email||!nationalId){message("يرجى التأكد من المجال الأساسي والبريد الإلكتروني والرقم الوطني.","error");return;}
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){message("يرجى إدخال بريد إلكتروني صحيح حتى نتمكن من التواصل معك.","error");return;}
+ const weeklyHours=Number(data.weekly_availability);
+ if(!Number.isInteger(weeklyHours)||weeklyHours<0||weeklyHours>168){message("يرجى إدخال عدد ساعات أسبوعي صحيح بين 0 و168.","error");return;}
  const button=$("submitButton");button.disabled=true;button.textContent="جارٍ إرسال الطلب…";
  try{
   const body={
