@@ -123,7 +123,7 @@ $("applicationForm").addEventListener("submit",async event=>{
  try{
   const body={
    application_kind:"new_member",status:"pending",hr_stage:"new",
-   full_name:val(data.full_name),national_id:nationalId,
+   full_name:val(data.full_name),mother_name:val(data.mother_name),national_id:nationalId,
    date_of_birth:data.date_of_birth||null,gender:val(data.gender),email,phone:val(data.phone),
    governorate:val(data.governorate),address:val(data.address),academic_status:val(data.academic_status),
    university:val(data.university),faculty:val(data.faculty),study_year:val(data.study_year),
