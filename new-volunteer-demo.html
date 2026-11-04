@@ -97,7 +97,8 @@ function counts(){
  $("countAll").textContent=apps.length;
  $("countReview").textContent=apps.filter(a=>["pending","under_review"].includes(a.status)).length;
  $("countAccepted").textContent=apps.filter(a=>a.status==="accepted").length;
- $("countReserved").textContent=apps.filter(a=>a.status==="reserved").length;\n $("countOnboarded").textContent=apps.filter(a=>a.status==="onboarded").length;
+ $("countReserved").textContent=apps.filter(a=>a.status==="reserved").length;
+ $("countOnboarded").textContent=apps.filter(a=>a.status==="onboarded").length;
 }
 function tab(name){
  const apply=name==="apply";$("applyTab").classList.toggle("hidden",!apply);$("hrTab").classList.toggle("hidden",apply);
@@ -141,7 +142,9 @@ function saveReview(){
  const a=apps.find(x=>x.id===selectedId);if(!a)return;
  const scores={};document.querySelectorAll("[data-score]").forEach(el=>scores[el.dataset.score]=Number(el.value)||0);
  const status=$("reviewStatus").value,assigned=$("assignedUnit").value;
- if(a.status==="onboarded"&&status!=="onboarded"){alert("تمت تهيئة هذا المتطوع في المحاكاة، ولا يمكن إعادة فتح قراره من هذه الشاشة.");return;}\n if(status==="onboarded"&&!a.profileMock){alert("لا يمكن تعيين حالة التهيئة يدويًا. استخدم زر محاكاة التهيئة بعد القبول.");return;}\n if(status==="accepted"||status==="reserved"){
+ if(a.status==="onboarded"&&status!=="onboarded"){alert("تمت تهيئة هذا المتطوع في المحاكاة، ولا يمكن إعادة فتح قراره من هذه الشاشة.");return;}
+ if(status==="onboarded"&&!a.profileMock){alert("لا يمكن تعيين حالة التهيئة يدويًا. استخدم زر محاكاة التهيئة بعد القبول.");return;}
+ if(status==="accepted"||status==="reserved"){
   const incomplete=Array.from({length:6},(_,i)=>scores["criterion_"+(i+1)]).some(n=>!Number.isInteger(n)||n<1||n>5);
   if(incomplete){alert("لا يمكن اعتماد القبول أو الاحتياط قبل تقييم المعايير الستة، كل معيار من 1 إلى 5.");return;}
  }
