@@ -96,6 +96,14 @@ function renderField(f){
  return '<div class="field '+(full?'full':'')+'" data-field-wrap="'+key+'"><label>'+label+required+'</label>'+control+(f.help_ar?'<div class="hint">'+esc(f.help_ar)+'</div>':"")+'</div>';
 }
 async function load(){
+ if(IS_PREVIEW){
+  $("formIntro").textContent="هذه نسخة معاينة شكلية لنموذج الانتساب. لم يتم ربطها بقاعدة اختبار، لذلك لا يتم تحميل أي بيانات أو إرسال أي طلب.";
+  $("formFields").innerHTML='<div class="field full"><strong>المعاينة التفاعلية وقاعدة الاختبار غير مفعّلتين حالياً.</strong><div class="hint">سيتم تفعيل عرض الحقول والإرسال فقط بعد تجهيز بيئة اختبار منفصلة وآمنة.</div></div>';
+  message("المعاينة معزولة بالكامل عن قاعدة بيانات الإنتاج؛ الإرسال والاتصال بالخدمة معطّلان.", "error");
+  $("submitButton").disabled=true;
+  $("submitButton").textContent="الإرسال غير متاح في المعاينة";
+  return;
+ }
  try{
   const defs=await api("/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,status,is_public,version,settings&form_key=eq.new_volunteer_application&status=eq.published&is_public=eq.true&limit=1");
   formDefinition=defs?.[0];if(!formDefinition)throw new Error("استمارة الانتساب غير مفعّلة حاليًا. يرجى المحاولة لاحقًا.");
@@ -107,8 +115,7 @@ async function load(){
   $("formFields").addEventListener("change",refreshVisibility);
   $("formFields").addEventListener("input",refreshVisibility);
   refreshVisibility();
-  if(IS_PREVIEW){message("هذه نسخة معاينة تجريبية فقط. تم تعطيل إرسال الطلبات حتى لا تُحفظ بيانات الاختبار في قاعدة البيانات الفعلية.","error");$("submitButton").disabled=true;$("submitButton").textContent="الإرسال معطّل في النسخة التجريبية";}
-  else $("submitButton").disabled=false;
+  $("submitButton").disabled=false;
  }catch(e){$("formIntro").textContent=e.message||"تعذر تحميل الاستمارة.";message(e.message||"تعذر تحميل الاستمارة.","error");}
 }
 $("applicationForm").addEventListener("submit",async event=>{
