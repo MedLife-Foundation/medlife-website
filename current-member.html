@@ -1426,6 +1426,20 @@ textarea{min-height:108px}
     }));
   }
 
+  const DEFAULT_CERTIFICATE_TYPE_OPTIONS=[
+    {value:"volunteer_service",label_ar:"شهادة تطوع"},
+    {value:"thank_you",label_ar:"شهادة شكر"},
+    {value:"participation",label_ar:"شهادة مشاركة"},
+    {value:"training",label_ar:"شهادة تدريب"},
+    {value:"appreciation",label_ar:"شهادة تقدير"},
+    {value:"other",label_ar:"أخرى"}
+  ];
+  function certificateTypeOptionsFromSchema(){
+    const field=(schema?.fields||[]).find(item=>item.field_key==="certificate_types");
+    const configured=Array.isArray(field?.options)?field.options.filter(option=>String(option?.value||"")!=="none"&&String(option?.value||"").trim()):[];
+    return configured.length?configured:DEFAULT_CERTIFICATE_TYPE_OPTIONS;
+  }
+
   function renderCertificateHistoryField(){
     if(!certificateSettings.enabled)return "";
     const certificateField=(schema?.fields||[]).find(field=>field.field_key==="certificate_history");
@@ -1434,7 +1448,7 @@ textarea{min-height:108px}
     const certificateUnits=units.filter(u=>u&&u.is_active!==false&&["cell","department","field_team","other"].includes(String(u.unit_type||"")));
     const validCertificateUnitIds=new Set(certificateUnits.map(u=>String(u.id)));
     const certificateTypeField=(schema?.fields||[]).find(field=>field.field_key==="certificate_types");
-    const certificateTypeOptions=Array.isArray(certificateTypeField?.options)?certificateTypeField.options.filter(option=>String(option.value)!=="none"):[];
+    const certificateTypeOptions=certificateTypeOptionsFromSchema();
     const rows=certificateHistory.map((item,index)=>{
       const safeIssuingUnitId=validCertificateUnitIds.has(String(item.issuingUnitId||""))?String(item.issuingUnitId):"";
       const unitOptions='<option value="">اختر الفريق / الوحدة (اختياري)</option>'+certificateUnits.map(u=>'<option value="'+esc(u.id)+'"'+(safeIssuingUnitId===String(u.id)?" selected":"")+'>'+esc(u.name_ar||u.name_en)+'</option>').join("");
@@ -1443,7 +1457,7 @@ textarea{min-height:108px}
         return '<option value="'+esc(option.value)+'"'+selected+'>'+esc(option.label_ar||option.label_en||option.value)+'</option>';
       }).join("");
       return'<div class="certificate-history-card unit-card" data-certificate-index="'+index+'">'+
-        '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+(index>0?'<button type="button" class="certificate-remove" data-index="'+index+'">حذف</button>':"")+'</div>'+
+        '<div class="unit-card-head certificate-history-head"><strong>شهادة رقم '+(index+1)+'</strong>'+'<button type="button" class="language-remove certificate-remove" data-index="'+index+'" aria-label="حذف الشهادة رقم '+(index+1)+'" title="حذف الشهادة">×</button>'+'</div>'+
         '<div class="grid">'+
           '<div class="field"><label>نوع الشهادة <span class="req">*</span></label><select name="certificate_history_type_'+index+'">'+typeOptions+'</select></div>'+
           '<div class="field"><label>اسم الشهادة / عنوانها <span class="req">*</span></label><input type="text" name="certificate_history_title_'+index+'" value="'+esc(item.title||"")+'" placeholder="مثال: شهادة تطوع متميز"></div>'+
@@ -1636,7 +1650,7 @@ textarea{min-height:108px}
         const title=String(item.title||"").trim().replace(/\s+/g," ");
         const issuer=String(item.issuingOrganization||"").trim().replace(/\s+/g," ");
         const certificateType=String(item.type||"").trim();
-        const validTypes=new Set(((schema?.fields||[]).find(field=>field.field_key==="certificate_types")?.options||[]).map(option=>String(option.value)).filter(value=>value!=="none"));
+        const validTypes=new Set(certificateTypeOptionsFromSchema().map(option=>String(option.value)));
         if(!certificateType)return"يرجى تحديد نوع كل شهادة.";
         if(!validTypes.has(certificateType))return"نوع الشهادة المختار غير صالح.";
         const issued=String(item.issuedDate||"").trim();
