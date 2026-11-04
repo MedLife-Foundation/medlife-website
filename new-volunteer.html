@@ -43,6 +43,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0
 "use strict";
 const SUPABASE_URL="https://ftvjakwogxdlxxbpfydf.supabase.co";
 const SUPABASE_KEY="sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const IS_PREVIEW=location.hostname.endsWith(".pages.dev");
 const $=id=>document.getElementById(id);
 let formDefinition=null, fields=[];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -105,11 +106,13 @@ async function load(){
   $("formFields").innerHTML=fields.map(renderField).join("");
   $("formFields").addEventListener("change",refreshVisibility);
   $("formFields").addEventListener("input",refreshVisibility);
-  refreshVisibility();$("submitButton").disabled=false;
+  refreshVisibility();
+  if(IS_PREVIEW){message("هذه نسخة معاينة تجريبية فقط. تم تعطيل إرسال الطلبات حتى لا تُحفظ بيانات الاختبار في قاعدة البيانات الفعلية.","error");$("submitButton").disabled=true;$("submitButton").textContent="الإرسال معطّل في النسخة التجريبية";}
+  else $("submitButton").disabled=false;
  }catch(e){$("formIntro").textContent=e.message||"تعذر تحميل الاستمارة.";message(e.message||"تعذر تحميل الاستمارة.","error");}
 }
 $("applicationForm").addEventListener("submit",async event=>{
- event.preventDefault();if(!formDefinition||!$("privacyConsent").checked)return;
+ event.preventDefault();if(IS_PREVIEW){message("الإرسال معطّل في النسخة التجريبية لحماية بيانات المتقدمين الحقيقية.","error");return;}if(!formDefinition||!$("privacyConsent").checked)return;
  if(val($("website").value)){message("تعذر إرسال الطلب.","error");return;}
  refreshVisibility();
  const data=currentValues();
