@@ -43,7 +43,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0
 "use strict";
 const SUPABASE_URL="https://ftvjakwogxdlxxbpfydf.supabase.co";
 const SUPABASE_KEY="sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
-const IS_PREVIEW=location.hostname.endsWith(".pages.dev");
+const PRODUCTION_HOSTS=new Set(["medlifesy.org","www.medlifesy.org"]);
+const IS_PREVIEW=!PRODUCTION_HOSTS.has(location.hostname.toLowerCase());
 const $=id=>document.getElementById(id);
 let formDefinition=null, fields=[];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
