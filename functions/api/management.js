@@ -838,10 +838,15 @@ export async function onRequestPost({ request }) {
       const certificateHistory = [];
       const certificateTypeField = (dynamic.form_schema?.fields || [])
         .find(field => field.field_key === "certificate_types");
+      const configuredCertificateTypes = Array.isArray(certificateTypeField?.options)
+        ? certificateTypeField.options
+            .map(option => cleanText(option?.value, 60).toLowerCase())
+            .filter(value => value && value !== "none")
+        : [];
       const validCertificateTypes = new Set(
-        (Array.isArray(certificateTypeField?.options) ? certificateTypeField.options : [])
-          .map(option => cleanText(option?.value, 60).toLowerCase())
-          .filter(value => value && value !== "none")
+        configuredCertificateTypes.length
+          ? configuredCertificateTypes
+          : DEFAULT_CERTIFICATE_TYPE_OPTIONS.map(option => option.value)
       );
       for (const item of rawCertificateHistory) {
         // Keep the selected category with the certificate record. Older clients
