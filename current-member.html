@@ -1364,7 +1364,7 @@ textarea{min-height:108px}
   function generic(f){
     const k=esc(f.field_key),t=f.field_type,opts=Array.isArray(f.options)?f.options:[];
     if(t==="multi_select")return'<div class="choice-grid">'+opts.map(o=>'<label class="choice"><input type="checkbox" name="'+k+'" value="'+esc(o.value)+'"><span>'+esc(o.label_ar||o.label_en||o.value)+'</span></label>').join("")+"</div>";
-    if(t==="boolean")return'<select data-field="'+k+'" name="'+k+'"><option value="">اختر</option><option value="true">نعم</option><option value="false">لا</option></select>';
+    if(t==="boolean")return'<select'+(f.required?' required aria-required="true"':"")+' data-field="'+k+'" name="'+k+'"><option value="">اختر</option><option value="true">نعم</option><option value="false">لا</option></select>';
     if(t==="select")return'<select data-field="'+k+'" name="'+k+'"><option value="">اختر</option>'+opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label_ar||o.label_en||o.value)+'</option>').join("")+'</select>';
     if(t==="textarea")return'<textarea data-field="'+k+'" name="'+k+'" placeholder="'+esc(f.placeholder_ar||"")+'"></textarea>';
     const it=["email","number","date","url","phone","datetime-local"].includes(t)?t:"text";
