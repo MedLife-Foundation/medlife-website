@@ -1285,7 +1285,7 @@ textarea{min-height:108px}
     if(ids.length)out.current_units=ids;
 
     for(const f of schema?.fields||[]){
-      if(f.field_type==="boolean"&&typeof out[f.field_key]==="string")out[f.field_key]=out[f.field_key]==="true";
+      if(f.field_type==="boolean"&&typeof out[f.field_key]==="string"){const choice=out[f.field_key].trim().toLowerCase();if(choice==="true"||choice==="yes"||choice==="1")out[f.field_key]=true;else if(choice==="false"||choice==="no"||choice==="0")out[f.field_key]=false;else delete out[f.field_key];}
     }
 
     const details={};
