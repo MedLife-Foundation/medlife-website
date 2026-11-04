@@ -98,8 +98,8 @@ function renderField(f){
 }
 async function load(){
  if(IS_PREVIEW){
-  $("formIntro").textContent="هذه نسخة معاينة شكلية لنموذج الانتساب. لم يتم ربطها بقاعدة اختبار، لذلك لا يتم تحميل أي بيانات أو إرسال أي طلب.";
-  $("formFields").innerHTML='<div class="field full"><strong>المعاينة التفاعلية وقاعدة الاختبار غير مفعّلتين حالياً.</strong><div class="hint">سيتم تفعيل عرض الحقول والإرسال فقط بعد تجهيز بيئة اختبار منفصلة وآمنة.</div></div>';
+  $("formIntro").textContent="هذه صفحة الانتساب الفعلية، لكن رابط المعاينة يعرض وضع المحاكاة المستقل. استخدم بيئة التجربة لاختبار رحلة المتقدم والموارد البشرية ببيانات وهمية فقط.";
+  $("formFields").innerHTML='<div class="field full"><strong>المعاينة التفاعلية وقاعدة الاختبار غير مفعّلتين حالياً.</strong><div class="hint">يمكنك الآن تجربة الاستمارة ومساحة الموارد البشرية ببيانات وهمية محفوظة في متصفحك فقط، من دون اتصال بقاعدة بيانات ميدلايف.</div><p style="margin:14px 0 0"><a href="/new-volunteer-demo.html" style="display:inline-block;padding:10px 16px;border-radius:10px;background:#e92d50;color:#fff;text-decoration:none;font-weight:800">فتح بيئة المحاكاة التفاعلية ←</a></p></div>';
   message("المعاينة معزولة بالكامل عن قاعدة بيانات الإنتاج؛ الإرسال والاتصال بالخدمة معطّلان.", "error");
   $("submitButton").disabled=true;
   $("submitButton").textContent="الإرسال غير متاح في المعاينة";
