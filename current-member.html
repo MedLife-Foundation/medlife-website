@@ -1686,6 +1686,7 @@ textarea{min-height:108px}
     if(!ids.length)return"يرجى اختيار خلية أو قسم أو فريق واحد على الأقل.";
     const today=new Date().toISOString().slice(0,10);
     const details=data.current_unit_details||{};
+    if(formKey==="membership_renewal"&&data.continuing_as_volunteer===false&&ids.some(id=>details[id]&&details[id].continuing===true))return"يوجد قسم أو فريق محدد كعضوية مستمرة؛ اختر نعم في سؤال الاستمرار العام أو عدّل حالة الوحدة.";
     if(formKey==="membership_renewal"&&typeof data.continuing_as_volunteer!=="boolean")return"يرجى الإجابة عن سؤال الاستمرار كمتطوع في ميدلايف.";
     for(const id of ids){
       const d=details[id]||{};
