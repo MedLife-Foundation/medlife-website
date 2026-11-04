@@ -75,6 +75,15 @@ const RESOURCES = {
   }
 };
 
+const DEFAULT_CERTIFICATE_TYPE_OPTIONS = [
+  {value:"volunteer_service",label_ar:"شهادة تطوع"},
+  {value:"thank_you",label_ar:"شهادة شكر"},
+  {value:"participation",label_ar:"شهادة مشاركة"},
+  {value:"training",label_ar:"شهادة تدريب"},
+  {value:"appreciation",label_ar:"شهادة تقدير"},
+  {value:"other",label_ar:"أخرى"}
+];
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -434,7 +443,11 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       placeholder_ar: field.placeholder_ar,
       field_type: field.field_type,
       required: Boolean(field.required),
-      options: Array.isArray(field.options) ? field.options.slice(0, 100) : [],
+      options: field.field_key === "certificate_types" && !Array.isArray(field.options?.filter?.(option => option?.value && option.value !== "none")) 
+        ? DEFAULT_CERTIFICATE_TYPE_OPTIONS
+        : (Array.isArray(field.options) && field.options.some(option => option?.value && option.value !== "none")
+          ? field.options.slice(0, 100)
+          : field.field_key === "certificate_types" ? DEFAULT_CERTIFICATE_TYPE_OPTIONS : []),
       validation: field.validation && typeof field.validation === "object" ? field.validation : {},
       visibility: field.visibility && typeof field.visibility === "object" ? field.visibility : {mode:"always"},
       target_unit_ids: Array.isArray(field.target_unit_ids) ? field.target_unit_ids.slice(0, 50) : [],
