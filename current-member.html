@@ -228,7 +228,11 @@
       });
       const raw=await response.text();
       let body={};try{body=raw?JSON.parse(raw):{}}catch(_){}
-      return {...result,account:{success:Boolean(response.ok&&body.success),status:body.account_status||"failed",error:body.error||""}};
+      return {
+        ...result,
+        membership_number:result.membership_number||body.membership_number||null,
+        account:{success:Boolean(response.ok&&body.success),status:body.account_status||"failed",error:body.error||""}
+      };
     }catch(error){
       return {...result,account:{success:false,status:"unavailable",error:"تعذر إنشاء حساب الدخول تلقائياً."}};
     }
@@ -2421,15 +2425,20 @@ textarea{min-height:108px}
       setStatus("ok","جارٍ حفظ بيانات التسجيل وإصدار رقم العضوية...");
       const p=await window.medlifeSubmitMembership(data,schema,units,formKey);
       if(!p?.membership_number || !String(p.membership_number).trim()){
-        if(formKey==="membership_renewal" && p?.submission_id){
-          setStatus("ok","تم استلام طلبك وحفظ بياناتك بنجاح. طلبك الآن بانتظار مراجعة الإدارة، وسيتم إصدار رقم العضوية بعد الموافقة. يرجى عدم إعادة إرسال النموذج.");
+        if(p?.account?.success && p.account.status==="pending_hr_review"){
+          setStatus("ok","تم استلام طلبك وحفظ بياناتك بنجاح. طلبك بانتظار مراجعة الموارد البشرية قبل إصدار العضوية وإنشاء حساب الدخول. يرجى عدم إعادة إرسال النموذج.");
           window.scrollTo({top:0,behavior:"smooth"});
           return;
         }
-        setStatus("err","تم استلام البيانات وحفظ الطلب، لكن تعذر تأكيد رقم العضوية. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة.");
+        if(p?.account?.success){
+          setStatus("ok","تم حفظ طلب التجديد وتجهيز حساب الدخول وإرسال رابط التفعيل إلى بريدك. رقم العضوية الحالي محفوظ في ملفك المركزي؛ لا تعِد إرسال النموذج.");
+          window.scrollTo({top:0,behavior:"smooth"});
+          return;
+        }
+        setStatus("err","تم استلام البيانات وحفظ الطلب، لكن تعذر تأكيد رقم العضوية أو تجهيز حساب الدخول. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة.");
         return;
       }
-      if(formKey==="membership_renewal"){
+      if(formKey==="membership_renewal" || formKey==="membership_renewal_supervisor"){
         if(p.account?.success && p.account.status==="pending_hr_review"){
           setStatus("ok","تم حفظ طلبك بنجاح. لا يحتاج حساب الدخول إلى التفعيل الآن؛ سيراجع فريق الموارد البشرية الطلب، وسيتم إنشاء الحساب وإرسال دعوته بعد الموافقة. يرجى عدم إعادة إرسال النموذج.");
         }else if(p.account?.success && p.account.status==="already_linked"){
