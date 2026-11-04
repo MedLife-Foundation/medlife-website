@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>محاكاة الانتساب والموارد البشرية | MedLife</title>
+<link rel="icon" href="logo.PNG">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#df3150;--red-dark:#bd2440;--navy:#172541;--ink:#26354d;--muted:#718096;--line:#e7ebf2;--bg:#f4f6fa;--white:#fff;--green:#16845b;--amber:#a66b11;--shadow:0 12px 36px #16213b0c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{max-width:1240px;width:calc(100% - 32px);margin:auto}
+.top{background:#fff;border-bottom:1px solid var(--line)}.topin{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px;color:var(--navy);font-weight:800}.brand img{height:43px;max-width:120px;object-fit:contain}.brand small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.link{color:var(--red);text-decoration:none;font-weight:800;font-size:13px}
+.demo-alert{margin:18px auto 0;background:#fff8e8;border:1px solid #f0dcae;color:#735016;border-radius:14px;padding:13px 16px;display:flex;gap:12px;align-items:flex-start;line-height:1.8;font-size:13px}.demo-alert strong{color:#63420d}
+.hero{padding:28px 0 18px}.eyebrow{font-size:12px;color:var(--red);font-weight:800;letter-spacing:.2px}.hero h1{margin:4px 0 5px;color:var(--navy);font-size:clamp(23px,4vw,34px)}.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.8}
+.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:18px 0}.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 17px;box-shadow:var(--shadow)}.metric span{display:block;color:var(--muted);font-size:12px}.metric b{display:block;color:var(--navy);font-size:27px;margin-top:2px}
+.tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin:20px 0 16px}.tab{border:0;background:transparent;padding:12px 16px;color:var(--muted);font-weight:800;border-bottom:3px solid transparent}.tab.active{color:var(--red);border-color:var(--red)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,24px);box-shadow:var(--shadow);margin-bottom:30px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.panel-head h2{margin:0;color:var(--navy);font-size:19px}.panel-head p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{min-width:0}.field.full{grid-column:1/-1}.field label,.field>span{display:block;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px}
+input,select,textarea{width:100%;min-width:0;border:1px solid #d5dce7;border-radius:11px;padding:11px 12px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px #df315016}textarea{min-height:96px;resize:vertical}.hint{font-size:11px;color:var(--muted);line-height:1.7;margin-top:5px}
+.consent{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);margin:17px 0}.consent input{width:auto;margin-top:5px}
+.btn{border:0;border-radius:11px;padding:11px 16px;background:var(--red);color:#fff;font-weight:800}.btn:hover{background:var(--red-dark)}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.secondary{background:#edf1f7;color:var(--navy)}.btn.ghost{background:#fff;color:var(--red);border:1px solid #f0c4ce}.btn.danger{background:#fff0f1;color:#b4233e;border:1px solid #f1c5ce}.btn.small{padding:8px 11px;font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px}.status-message{display:none;padding:11px 13px;border-radius:10px;margin:14px 0;font-size:13px}.status-message.show{display:block}.status-message.ok{background:#ecfdf5;color:#08764f}.status-message.err{background:#fff0f1;color:#a61d38}
+.workspace{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(0,1.55fr);gap:16px;align-items:start}.list-panel,.detail-panel{border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden}.list-head{padding:15px;border-bottom:1px solid var(--line)}.list-head h3{margin:0 0 10px;color:var(--navy);font-size:16px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters input,.filters select{font-size:12px;padding:9px}.app-list{max-height:760px;overflow:auto;padding:8px}.app-item{width:100%;text-align:right;border:1px solid transparent;border-radius:12px;background:#fff;padding:12px;margin:3px 0;color:var(--ink)}.app-item:hover,.app-item.selected{background:#fff7f8;border-color:#f2c6d0}.app-item strong{display:block;color:var(--navy);font-size:13px}.app-item small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.app-meta{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:8px}
+.pill{display:inline-flex;align-items:center;border-radius:99px;padding:3px 9px;font-size:10px;font-weight:800;background:#edf1f7;color:#46536a}.pill.pending{background:#fff5df;color:#8a5a08}.pill.under_review{background:#eaf3ff;color:#245b9b}.pill.accepted{background:#e8f8ef;color:#14744e}.pill.reserved{background:#f0edff;color:#6550a5}.pill.rejected{background:#fff0f1;color:#a9233e}.detail-empty{padding:42px 18px;text-align:center;color:var(--muted);font-size:13px}.detail-content{padding:18px}.candidate-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:15px;border-bottom:1px solid var(--line)}.candidate-head h3{margin:0;color:var(--navy);font-size:19px}.candidate-head p{margin:4px 0 0;color:var(--muted);font-size:12px}.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}.info{background:#f8f9fc;border-radius:10px;padding:9px 11px;min-width:0}.info small{display:block;color:var(--muted);font-size:10px}.info b{display:block;color:var(--ink);font-size:12px;overflow-wrap:anywhere}
+.section{border-top:1px solid var(--line);padding-top:15px;margin-top:15px}.section h4{margin:0 0 11px;font-size:14px;color:var(--navy)}.score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.score{background:#f8f9fc;border-radius:10px;padding:10px}.score label{display:block;font-size:11px;font-weight:800;margin-bottom:5px}.score select{padding:8px;font-size:12px}.score-total{margin-top:10px;padding:10px;border-radius:10px;background:#f0f4fa;font-weight:800;color:var(--navy);font-size:13px}
+.review-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.review-form .full{grid-column:1/-1}.review-form label{display:block;font-size:11px;color:var(--navy);font-weight:800;margin-bottom:5px}
+.mock-profile{margin-top:14px;padding:13px;border:1px dashed #78b99a;background:#f0fbf5;border-radius:12px;color:#176b49;font-size:12px;line-height:1.9}.mock-profile strong{display:block;font-size:14px}.muted-note{font-size:11px;color:var(--muted);line-height:1.8}.empty-list{text-align:center;padding:25px 12px;color:var(--muted);font-size:12px}
+footer{padding:10px 0 30px;text-align:center;color:#929bad;font-size:11px}
+@media(max-width:850px){.workspace{grid-template-columns:1fr}.app-list{max-height:320px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.shell{width:calc(100% - 20px)}.grid,.review-form,.score-grid,.info-grid{grid-template-columns:1fr}.field.full,.review-form .full{grid-column:auto}.topin{padding:10px 0;align-items:flex-start}.brand img{height:35px}.top-actions{justify-content:flex-end}.top-actions .btn{font-size:11px;padding:8px}.hero{padding-top:20px}.panel-head{display:block}.filters{grid-template-columns:1fr}.tabs{overflow:auto}.tab{white-space:nowrap;padding:10px}.candidate-head{display:block}.candidate-head .pill{margin-top:9px}}
+@media print{.top,.demo-alert,.tabs,.metrics,.actions,.list-panel,footer,.btn{display:none!important}.workspace{display:block}.panel,.detail-panel{box-shadow:none;border:0}.detail-content{padding:0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="shell topin"><div class="brand"><img src="logo.PNG" alt="MedLife"><div>MedLife<small>الموارد البشرية · مساحة تجريبية</small></div></div><div class="top-actions"><a class="link" href="/join-options.html">العودة للموقع ←</a><button class="btn danger small" id="resetButton" type="button">إعادة ضبط بيانات التجربة</button></div></div></header>
+<div class="shell">
+<div class="demo-alert"><span aria-hidden="true">🧪</span><div><strong>وضع محاكاة مستقل وآمن — ليس النظام الحقيقي.</strong><br>كل البيانات أدناه وهمية ومحفوظة محليًا في هذا المتصفح فقط. لا يوجد اتصال بـ Supabase أو قاعدة بيانات ميدلايف، ولا يتم إنشاء حسابات أو أرقام عضوية حقيقية أو إرسال بريد أو دعوات أو رسائل واتساب.</div></div>
+<section class="hero"><div class="eyebrow">NEW VOLUNTEER INTAKE · DEMO</div><h1>محاكاة طلبات الانتساب الجديدة</h1><p>اختبر رحلة المتقدم من تعبئة الاستمارة، مرورًا بفرز الموارد البشرية والتقييم والمقابلة، وصولًا إلى قرار القبول أو الاحتياط أو الرفض ومحاكاة التهيئة.</p></section>
+<section class="metrics" aria-label="إحصائيات تجريبية"><div class="metric"><span>إجمالي الطلبات</span><b id="countAll">0</b></div><div class="metric"><span>قيد المراجعة</span><b id="countReview">0</b></div><div class="metric"><span>مقبولون</span><b id="countAccepted">0</b></div><div class="metric"><span>احتياط</span><b id="countReserved">0</b></div><div class="metric"><span>تمت التهيئة (محاكاة)</span><b id="countOnboarded">0</b></div></section>
+<nav class="tabs"><button class="tab active" data-tab="apply" type="button">استمارة متقدم جديد</button><button class="tab" data-tab="hr" type="button">مساحة الموارد البشرية</button></nav>
+<section id="applyTab" class="panel">
+ <div class="panel-head"><div><h2>طلب انتساب تجريبي</h2><p>املأ بيانات افتراضية، وسيظهر الطلب مباشرة في قائمة الموارد البشرية ضمن هذه المحاكاة.</p></div><span class="pill">لا يُرسل إلى المؤسسة</span></div>
+ <form id="applicationForm" novalidate>
+  <div class="grid">
+   <div class="field"><label for="fullName">الاسم الكامل *</label><input id="fullName" required maxlength="120" placeholder="مثال: متقدم تجريبي"></div>
+   <div class="field"><label for="motherName">اسم الأم</label><input id="motherName" maxlength="100"></div>
+   <div class="field"><label for="email">البريد الإلكتروني *</label><input id="email" type="email" required placeholder="demo@example.test"></div>
+   <div class="field"><label for="phone">رقم الهاتف *</label><input id="phone" required maxlength="30" placeholder="رقم تجريبي"></div>
+   <div class="field"><label for="governorate">المحافظة *</label><select id="governorate" required><option value="">اختر المحافظة</option><option>طرطوس</option><option>اللاذقية</option><option>حمص</option><option>حماة</option><option>دمشق</option><option>ريف دمشق</option><option>حلب</option><option>أخرى</option></select></div>
+   <div class="field"><label for="city">المدينة / المنطقة</label><input id="city" maxlength="80"></div>
+   <div class="field"><label for="academic">الوضع العلمي / المهني *</label><select id="academic" required><option value="">اختر</option><option>طالب مدرسة</option><option>طالب معهد</option><option>طالب جامعي</option><option>خريج</option><option>طبيب</option><option>طبيب مقيم</option><option>طبيب اختصاصي</option><option>أخرى</option></select></div>
+   <div class="field"><label for="university">الجامعة / مكان الدراسة أو العمل</label><input id="university" maxlength="120"></div>
+   <div class="field"><label for="primary">مجال التطوع الأساسي *</label><select id="primary" required><option value="">اختر مجالًا واحدًا</option><option value="medical_content">المحتوى الطبي</option><option value="medical_content_formatting">تنسيق المحتوى الطبي</option><option value="video_editing">المونتاج</option><option value="design">التصميم</option><option value="visual_media">الإعلام المرئي</option><option value="university_media">الإعلام الجامعي</option><option value="field_work">العمل الميداني</option><option value="medical_consultations">الاستشارات الطبية</option><option value="voice_over">التعليق الصوتي</option><option value="instagram">إدارة إنستغرام</option><option value="telegram">إدارة تلغرام</option><option value="it">تقنية المعلومات</option></select></div>
+   <div class="field"><label for="secondary">المجال الإضافي</label><select id="secondary"><option value="">لا يوجد</option><option>البحث العلمي</option><option>الترجمة</option><option>العلاقات العامة</option><option>التدريب والتعليم</option><option>تحليل البيانات</option><option>تنظيم الفعاليات</option></select></div>
+   <div id="extraWrap" class="field full hidden"><label id="extraLabel" for="extraField">تفصيل مرتبط بالمجال</label><input id="extraField" maxlength="160"></div>
+   <div class="field"><label for="hours">عدد الساعات المتاحة أسبوعيًا *</label><input id="hours" type="number" min="0" max="168" step="1" required></div>
+   <div class="field"><label for="portfolio">رابط أعمال سابقة (اختياري)</label><input id="portfolio" type="url" placeholder="https://example.test"></div>
+   <div class="field full"><label for="motivation">لماذا ترغب بالانضمام إلى ميدلايف؟ *</label><textarea id="motivation" required maxlength="1500"></textarea></div>
+  </div>
+  <label class="consent"><input id="consent" type="checkbox" required><span>أفهم أن هذه استمارة محاكاة، وأن البيانات ستبقى في هذا المتصفح ولن تصل إلى ميدلايف.</span></label>
+  <div class="actions"><button class="btn" type="submit">إضافة الطلب التجريبي</button><button class="btn secondary" type="reset">مسح الحقول</button></div>
+  <div id="applyMessage" class="status-message" role="status"></div>
+ </form>
+</section>
+<section id="hrTab" class="panel hidden">
+ <div class="panel-head"><div><h2>لوحة الموارد البشرية</h2><p>فرز الطلبات ومراجعتها وتقييم المتقدمين وحفظ القرار ضمن بيانات المحاكاة فقط.</p></div><div class="actions"><button class="btn secondary small" id="exportButton" type="button">تصدير CSV</button><button class="btn secondary small" id="printButton" type="button">طباعة</button></div></div>
+ <div class="workspace">
+  <section class="list-panel"><div class="list-head"><h3>طلبات المتقدمين</h3><div class="filters"><input id="searchInput" placeholder="بحث بالاسم أو البريد"><select id="statusFilter"><option value="all">كل الحالات</option><option value="pending">بانتظار المراجعة</option><option value="under_review">قيد المراجعة</option><option value="accepted">مقبول</option><option value="reserved">احتياط</option><option value="rejected">مرفوض</option><option value="onboarded">تمت التهيئة (محاكاة)</option></select></div></div><div id="appList" class="app-list"></div></section>
+  <section class="detail-panel"><div id="detail"><div class="detail-empty">اختر طلبًا من القائمة لعرض التفاصيل وبدء المراجعة.</div></div></section>
+ </div>
+</section>
+<footer>MedLife · محاكاة مستقلة للانتساب والموارد البشرية · بيانات هذا المتصفح فقط</footer>
+</div>
+<script>
+(function(){
+"use strict";
+const STORAGE_KEY="medlife_hr_intake_demo_v1";
+// Snapshot of active org_units where unit_type = cell (read-only source inspection, 2026-11-05).\nconst units=["Plasma Cell","Neuron Cell","Astrocyte Cell","Leukocyte Cell","Stem Cells","Red Blood Cell","Heart Cell","المدونة الطبية"];
+const scoreLabels=["المهارة المرتبطة بالمجال","جودة التنفيذ","الدقة والانتباه للتفاصيل","التواصل والعمل الجماعي","الالتزام وتحمل المسؤولية","حل المشكلات والاستعداد للتعلم"];
+const statusLabels={pending:"بانتظار المراجعة",under_review:"قيد المراجعة",accepted:"مقبول",reserved:"قائمة احتياط",rejected:"مرفوض",onboarded:"تمت التهيئة (محاكاة)"};
+const stageLabels={new:"جديد",screening:"فرز أولي",interview:"مقابلة",decision:"قرار",closed:"مغلق"};
+const $=id=>document.getElementById(id);
+const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const fieldNames={medical_content:"المحتوى الطبي",medical_content_formatting:"تنسيق المحتوى الطبي",video_editing:"المونتاج",design:"التصميم",visual_media:"الإعلام المرئي",university_media:"الإعلام الجامعي",field_work:"العمل الميداني",medical_consultations:"الاستشارات الطبية",voice_over:"التعليق الصوتي",instagram:"إدارة إنستغرام",telegram:"إدارة تلغرام",it:"تقنية المعلومات"};
+let apps=[],selectedId=null;
+function makeSeed(id,name,field,status,stage,governorate){
+ return {id:id,fullName:name,motherName:"بيانات غير حقيقية",email:"demo"+id+"@example.test",phone:"0000000000",governorate:governorate,city:"منطقة تجريبية",academic:"متقدم افتراضي",university:"مؤسسة تعليمية تجريبية",primary:field,secondary:"البحث العلمي",extra:"خبرة تجريبية فقط",hours:6,portfolio:"",motivation:"هذا نص تجريبي لا يمثل شخصًا حقيقيًا. أود المشاركة في أنشطة المؤسسة والتعلم ضمن الفريق.",createdAt:new Date().toISOString(),status:status,stage:stage,assignedUnit:"",scores:{},hrNotes:"",decisionNote:"",interviewAt:"",profileMock:false,membershipNo:"",accountMock:false,firstLogin:true};
+}
+function initialData(){return [makeSeed("DEMO-01","متقدم تجريبي 01","medical_content","pending","new","طرطوس"),makeSeed("DEMO-02","متقدمة تجريبية 02","design","under_review","screening","اللاذقية")];}
+function loadData(){
+ try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}}catch(e){}
+ const seeds=initialData();saveData(seeds);return seeds;
+}
+function saveData(next){apps=next;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(apps));}catch(e){showMessage("تعذر حفظ البيانات محليًا. تحقق من إعدادات التخزين في المتصفح.","err");}}
+function showMessage(text,kind){const el=$("applyMessage");el.textContent=text;el.className="status-message show "+kind;}
+function counts(){
+ $("countAll").textContent=apps.length;
+ $("countReview").textContent=apps.filter(a=>["pending","under_review"].includes(a.status)).length;
+ $("countAccepted").textContent=apps.filter(a=>a.status==="accepted").length;
+ $("countReserved").textContent=apps.filter(a=>a.status==="reserved").length;
+ $("countOnboarded").textContent=apps.filter(a=>a.status==="onboarded").length;
+}
+function tab(name){
+ const apply=name==="apply";$("applyTab").classList.toggle("hidden",!apply);$("hrTab").classList.toggle("hidden",apply);
+ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+ if(!apply){renderList();renderDetail();}
+}
+function renderExtra(){
+ const v=$("primary").value;const labels={medical_content:"ما نوع المحتوى الذي تفضله؟",medical_content_formatting:"ما مهارات التنسيق التي تتقنها؟",video_editing:"ما نوع الفيديوهات التي تفضل مونتاجها؟",design:"ما نوع التصاميم التي تفضلها؟",visual_media:"ما الأجهزة المتوفرة لديك؟",field_work:"في أي محافظة تفضل العمل الميداني؟",medical_consultations:"ما الاختصاص الذي تستطيع تقديم استشارات ضمنه؟",university_media:"ما الجامعة أو الفئة الطلابية التي تستطيع الوصول إليها؟"};
+ if(labels[v]){$("extraWrap").classList.remove("hidden");$("extraLabel").textContent=labels[v];}else{$("extraWrap").classList.add("hidden");}
+}
+function createApplication(event){
+ event.preventDefault();const form=$("applicationForm");if(!form.reportValidity())return;
+ const hours=Number($("hours").value);if(!Number.isInteger(hours)||hours<0||hours>168){showMessage("عدد الساعات يجب أن يكون عددًا صحيحًا بين 0 و168.","err");return;}
+ const app={id:"DEMO-"+Date.now().toString(36).toUpperCase(),fullName:$("fullName").value.trim(),motherName:$("motherName").value.trim(),email:$("email").value.trim(),phone:$("phone").value.trim(),governorate:$("governorate").value,city:$("city").value.trim(),academic:$("academic").value,university:$("university").value.trim(),primary:$("primary").value,secondary:$("secondary").value,extra:$("extraField").value.trim(),hours:hours,portfolio:$("portfolio").value.trim(),motivation:$("motivation").value.trim(),createdAt:new Date().toISOString(),status:"pending",stage:"new",assignedUnit:"",scores:{},hrNotes:"",decisionNote:"",interviewAt:"",profileMock:false,membershipNo:"",accountMock:false,firstLogin:true};
+ saveData([app].concat(apps));selectedId=app.id;form.reset();renderExtra();showMessage("تمت إضافة الطلب إلى قائمة الموارد البشرية داخل المحاكاة فقط. لم يتم إرسال أي بيانات.","ok");counts();tab("hr");
+}
+function renderList(){
+ const query=$("searchInput").value.trim().toLowerCase(),filter=$("statusFilter").value;
+ const rows=apps.filter(a=>(filter==="all"||a.status===filter)&&(!query||[a.fullName,a.email,a.phone].join(" ").toLowerCase().includes(query)));
+ if(!rows.length){$("appList").innerHTML='<div class="empty-list">لا توجد طلبات مطابقة. أضف متقدمًا من تبويب الاستمارة.</div>';return;}
+ $("appList").innerHTML=rows.map(a=>'<button type="button" class="app-item '+(a.id===selectedId?'selected':'')+'" data-id="'+esc(a.id)+'"><strong>'+esc(a.fullName)+'</strong><small>'+esc(fieldNames[a.primary]||a.primary)+' · '+esc(a.governorate||"—")+'</small><div class="app-meta"><span class="pill '+esc(a.status)+'">'+esc(statusLabels[a.status]||a.status)+'</span><small>'+esc(new Date(a.createdAt).toLocaleDateString("ar-SY"))+'</small></div></button>').join("");
+}
+function renderDetail(){
+ const a=apps.find(x=>x.id===selectedId);if(!a){$("detail").innerHTML='<div class="detail-empty">اختر طلبًا من القائمة لعرض التفاصيل وبدء المراجعة.</div>';return;}
+ const total=Array.from({length:6},(_,i)=>Number(a.scores["criterion_"+(i+1)])||0).reduce((s,n)=>s+n,0);
+ const scoreHtml=scoreLabels.map((label,i)=>{const key="criterion_"+(i+1);return '<div class="score"><label>'+String(i+1)+'. '+esc(label)+'</label><select data-score="'+key+'"><option value="0">لم يُقيّم بعد</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+'" '+(Number(a.scores[key])===n?'selected':'')+'>'+n+' / 5</option>').join("")+'</select></div>';}).join("");
+ const unitOptions='<option value="">لم يحدد بعد</option>'+units.map(u=>'<option '+(a.assignedUnit===u?'selected':'')+'>'+esc(u)+'</option>').join("");
+ $("detail").innerHTML='<div class="detail-content"><div class="candidate-head"><div><h3>'+esc(a.fullName)+'</h3><p>رقم طلب تجريبي: '+esc(a.id)+' · '+esc(new Date(a.createdAt).toLocaleString("ar-SY"))+'</p></div><span class="pill '+esc(a.status)+'">'+esc(statusLabels[a.status]||a.status)+'</span></div>'+
+ '<div class="info-grid"><div class="info"><small>البريد الإلكتروني</small><b>'+esc(a.email)+'</b></div><div class="info"><small>الهاتف</small><b>'+esc(a.phone)+'</b></div><div class="info"><small>المحافظة / المدينة</small><b>'+esc(a.governorate)+" · "+esc(a.city||"—")+'</b></div><div class="info"><small>الوضع العلمي / المهني</small><b>'+esc(a.academic)+'</b></div><div class="info"><small>الجامعة / مكان العمل</small><b>'+esc(a.university||"—")+'</b></div><div class="info"><small>مجال التطوع الأساسي</small><b>'+esc(fieldNames[a.primary]||a.primary)+'</b></div><div class="info"><small>المجال الإضافي</small><b>'+esc(a.secondary||"—")+'</b></div><div class="info"><small>التفرغ الأسبوعي</small><b>'+esc(a.hours)+' ساعات</b></div><div class="info"><small>تفصيل المجال</small><b>'+esc(a.extra||"—")+'</b></div><div class="info"><small>أعمال سابقة</small><b>'+esc(a.portfolio||"غير متوفر")+'</b></div></div>'+
+ '<div class="section"><h4>الدافع للانضمام</h4><div class="muted-note">'+esc(a.motivation)+'</div></div>'+
+ '<div class="section"><h4>تقييم المقابلة · 6 معايير</h4><div class="score-grid">'+scoreHtml+'</div><div class="score-total">المجموع: <span id="scoreTotal">'+total+'</span> / 30</div></div>'+
+ '<div class="section"><h4>قرار وتوزيع الموارد البشرية</h4><div class="review-form"><div><label for="reviewStage">المرحلة</label><select id="reviewStage">'+Object.keys(stageLabels).map(k=>'<option value="'+k+'" '+(a.stage===k?'selected':'')+'>'+stageLabels[k]+'</option>').join("")+'</select></div><div><label for="reviewStatus">الحالة</label><select id="reviewStatus">'+Object.keys(statusLabels).map(k=>'<option value="'+k+'" '+(a.status===k?'selected':'')+' '+(k==="onboarded"&&!a.profileMock?"disabled":"")+'>'+statusLabels[k]+'</option>').join("")+'</select></div><div class="full"><label for="assignedUnit">الخلية التي سيُعيّن فيها المتطوع</label><select id="assignedUnit">'+unitOptions+'</select><div class="hint">القائمة محصورة بالخلايا النشطة المسجلة حاليًا في الهيكل التنظيمي لميدلايف. يُشترط اختيار خلية واستكمال المعايير الستة قبل اعتماد القبول.</div></div><div class="full"><label for="interviewAt">موعد المقابلة (اختياري)</label><input type="datetime-local" id="interviewAt" value="'+esc(a.interviewAt||"")+'"></div><div class="full"><label for="hrNotes">ملاحظات الموارد البشرية</label><textarea id="hrNotes">'+esc(a.hrNotes)+'</textarea></div><div class="full"><label for="decisionNote">ملاحظة القرار</label><textarea id="decisionNote">'+esc(a.decisionNote)+'</textarea></div></div><div class="actions" style="margin-top:13px"><button class="btn" id="saveReview" type="button">حفظ التقييم والقرار</button>'+(a.status==="accepted"&&!a.profileMock?'<button class="btn secondary" id="simulateOnboarding" type="button">محاكاة التهيئة</button>':"")+'</div></div>'+
+ (a.profileMock?'<div class="mock-profile"><strong>تمت محاكاة التهيئة فقط</strong>رقم عضوية تجريبي: <b>'+esc(a.membershipNo)+'</b><br>كلمة المرور الأولية التجريبية: <b>'+esc(a.membershipNo)+'</b><br>تغيير كلمة المرور عند أول دخول: <b>مطلوب (محاكاة)</b><br>لا يوجد حساب حقيقي أو دعوة مرسلة. <div class="actions" style="margin-top:10px"><button class="btn secondary small" id="copyInvite" type="button">نسخ نص الترحيب التجريبي</button></div></div>':"")+
+ '<p class="muted-note">كل التعديلات محفوظة في التخزين المحلي لهذا المتصفح فقط. لا يمكن استخدام هذا السجل كقرار إداري أو كملف عضوية حقيقي.</p></div>';
+ document.querySelectorAll("[data-score]").forEach(el=>el.addEventListener("change",()=>{const vals=document.querySelectorAll("[data-score]");const sum=Array.from(vals).reduce((s,n)=>s+(Number(n.value)||0),0);$("scoreTotal").textContent=sum;}));
+ $("saveReview").addEventListener("click",saveReview);
+ const onboard=$("simulateOnboarding");if(onboard)onboard.addEventListener("click",simulateOnboarding);
+ const copy=$("copyInvite");if(copy)copy.addEventListener("click",copyInvite);
+}
+function saveReview(){
+ const a=apps.find(x=>x.id===selectedId);if(!a)return;
+ const scores={};document.querySelectorAll("[data-score]").forEach(el=>scores[el.dataset.score]=Number(el.value)||0);
+ const status=$("reviewStatus").value,assigned=$("assignedUnit").value;
+ if(a.status==="onboarded"&&status!=="onboarded"){alert("تمت تهيئة هذا المتطوع في المحاكاة، ولا يمكن إعادة فتح قراره من هذه الشاشة.");return;}
+ if(status==="onboarded"&&!a.profileMock){alert("لا يمكن تعيين حالة التهيئة يدويًا. استخدم زر محاكاة التهيئة بعد القبول.");return;}
+ if(status==="accepted"||status==="reserved"){
+  const incomplete=Array.from({length:6},(_,i)=>scores["criterion_"+(i+1)]).some(n=>!Number.isInteger(n)||n<1||n>5);
+  if(incomplete){alert("لا يمكن اعتماد القبول أو الاحتياط قبل تقييم المعايير الستة، كل معيار من 1 إلى 5.");return;}
+ }
+ if(status==="accepted"&&!assigned){alert("لا يمكن اعتماد القبول قبل تحديد الخلية أو القسم أو الفريق.");return;}
+ if(status==="accepted"&&a.profileMock){alert("تمت محاكاة التهيئة لهذا الطلب مسبقًا.");return;}
+ a.scores=scores;a.status=status;a.stage=(["accepted","reserved","rejected"].includes(status)?"decision":$("reviewStage").value);
+ if(status==="pending"||status==="under_review")a.stage=$("reviewStage").value;
+ a.assignedUnit=assigned;a.interviewAt=$("interviewAt").value;a.hrNotes=$("hrNotes").value.trim();a.decisionNote=$("decisionNote").value.trim();
+ saveData(apps);counts();renderList();renderDetail();
+}
+function simulateOnboarding(){
+ const a=apps.find(x=>x.id===selectedId);if(!a||a.status!=="accepted"||!a.assignedUnit)return;
+ const ready=Array.from({length:6},(_,i)=>Number(a.scores["criterion_"+(i+1)])).every(n=>n>=1&&n<=5);
+ if(!ready){alert("أكمل المعايير الستة أولًا.");return;}
+ const n=apps.filter(x=>x.profileMock).length+1;
+ a.profileMock=true;a.accountMock=true;a.firstLogin=true;a.membershipNo="ML-DEMO-"+String(n).padStart(4,"0");a.status="onboarded";a.stage="onboarding";
+ saveData(apps);renderDetail();
+}
+async function copyInvite(){
+ const a=apps.find(x=>x.id===selectedId);if(!a||!a.profileMock)return;
+ const message="مرحبًا "+a.fullName+"، نرحب بانضمامك إلى فريق ميدلايف. هذه رسالة محاكاة فقط. رقم العضوية التجريبي: "+a.membershipNo+". كلمة المرور الأولية التجريبية: رقم العضوية، مع ضرورة تغييرها عند أول دخول. لن يتم إرسال هذه الرسالة من النظام التجريبي.";
+ try{await navigator.clipboard.writeText(message);alert("تم نسخ نص الترحيب التجريبي فقط؛ لم يتم إرسال أي رسالة.");}catch(e){alert(message);}
+}
+function exportCsv(){
+ const headers=["رقم الطلب","الاسم","البريد","الهاتف","المحافظة","مجال التطوع","الحالة","المرحلة","الوحدة","مجموع التقييم"];
+ const rows=apps.map(a=>[a.id,a.fullName,a.email,a.phone,a.governorate,fieldNames[a.primary]||a.primary,statusLabels[a.status]||a.status,stageLabels[a.stage]||a.stage,a.assignedUnit,Array.from({length:6},(_,i)=>Number(a.scores["criterion_"+(i+1)])||0).reduce((s,n)=>s+n,0)]);
+ const csv=[headers].concat(rows).map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="medlife-hr-demo-applications.csv";a.click();URL.revokeObjectURL(url);
+}
+function resetDemo(){
+ if(!confirm("سيتم حذف بيانات المحاكاة المحفوظة في هذا المتصفح وإعادة الطلبات الافتراضية. هل تريد المتابعة؟"))return;
+ const seeds=initialData();saveData(seeds);selectedId=seeds[0]?.id||null;counts();renderList();renderDetail();showMessage("تمت إعادة بيانات المحاكاة إلى الوضع الافتراضي.","ok");
+}
+$("applicationForm").addEventListener("submit",createApplication);
+$("primary").addEventListener("change",renderExtra);
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>tab(b.dataset.tab)));
+$("searchInput").addEventListener("input",renderList);$("statusFilter").addEventListener("change",renderList);
+$("appList").addEventListener("click",event=>{const btn=event.target.closest("[data-id]");if(!btn)return;selectedId=btn.dataset.id;renderList();renderDetail();});
+$("resetButton").addEventListener("click",resetDemo);$("exportButton").addEventListener("click",exportCsv);$("printButton").addEventListener("click",()=>window.print());
+apps=loadData();selectedId=apps[0]?.id||null;counts();renderList();renderDetail();renderExtra();
+})();
+</script>
+</body>
+</html>

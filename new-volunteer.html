@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>طلب الانتساب الجديد | مؤسسة ميدلايف</title>
+<link rel="icon" href="logo.PNG">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e92d50;--navy:#17213b;--line:#e2e8f0;--muted:#64748b}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#1e293b;font-family:Cairo,sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line)}.wrap{width:min(900px,calc(100% - 28px));margin:auto}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}.logo{height:48px;max-width:160px;object-fit:contain}
+.back{color:var(--red);font-weight:800;text-decoration:none}
+.hero{text-align:center;padding:34px 0 22px}.hero h1{margin:0;color:var(--navy);font-size:clamp(25px,5vw,38px)}.hero p{color:var(--muted);line-height:1.9;margin:12px auto;max-width:700px}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(16px,4vw,30px);box-shadow:0 15px 45px #17213b0c;margin-bottom:40px}
+.progress{background:#f1f5f9;border-radius:12px;padding:12px 14px;color:#475569;margin-bottom:18px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.field{min-width:0}.field.full{grid-column:1/-1}
+label{display:block;font-weight:800;color:var(--navy);margin-bottom:7px}
+input,select,textarea{width:100%;padding:12px 13px;border:1px solid #cbd5e1;border-radius:12px;font:inherit;background:#fff;color:#0f172a;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px #e92d5018}textarea{min-height:100px;resize:vertical}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.option{display:flex;align-items:flex-start;gap:8px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:500}.option input{width:auto;margin-top:5px}
+.section{font-size:18px;color:var(--navy);margin:24px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hidden{display:none!important}.hint{font-size:12px;color:var(--muted);margin-top:5px}.consent{display:flex;gap:10px;align-items:flex-start;margin:22px 0;font-size:14px}.consent input{width:auto;margin-top:7px}
+.btn{width:100%;border:0;border-radius:13px;padding:14px;background:var(--red);color:#fff;font:inherit;font-weight:800;cursor:pointer}.btn:disabled{opacity:.6;cursor:wait}
+.notice{padding:14px;border-radius:12px;margin:12px 0;display:none;line-height:1.8}.notice.show{display:block}.notice.error{background:#fef2f2;color:#991b1b}.notice.success{background:#ecfdf5;color:#065f46}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media(max-width:640px){.grid,.options{grid-template-columns:1fr}.field.full{grid-column:auto}.nav{gap:12px}.logo{height:40px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a href="/"><img class="logo" src="logo.PNG" alt="MedLife"></a><a class="back" href="/join-options.html">العودة ←</a></div></header>
+<section class="hero wrap"><h1>طلب الانتساب إلى ميدلايف</h1><p>أهلًا بك! اختر مجال التطوع الذي يناسبك، وسنطرح عليك أسئلة مرتبطة باهتماماتك وخبراتك. بعد إرسال الطلب، يراجعه فريق الموارد البشرية، ولا يتم إنشاء حساب أو إصدار رقم عضوية قبل القبول.</p></section>
+<main class="wrap"><form class="card" id="applicationForm" novalidate>
+<div class="progress" id="formIntro">جارٍ تحميل استمارة الانتساب…</div>
+<div class="hp" aria-hidden="true"><label>اترك هذا الحقل فارغًا<input id="website" tabindex="-1" autocomplete="off"></label></div>
+<div id="formFields" class="grid"></div>
+<label class="consent"><input id="privacyConsent" type="checkbox" required><span>أوافق على استخدام بياناتي لدراسة طلب الانتساب والتواصل معي بشأنه، وفق سياسة الخصوصية الخاصة بالمؤسسة.</span></label>
+<div id="notice" class="notice" role="status" aria-live="polite"></div>
+<button id="submitButton" class="btn" type="submit" disabled>إرسال طلب الانتساب</button>
+</form></main>
+<script>
+(function(){
+"use strict";
+const SUPABASE_URL="https://ftvjakwogxdlxxbpfydf.supabase.co";
+const SUPABASE_KEY="sb_publishable_beiimOXraRWZguAX7balCQ_HVao1o3K";
+const PRODUCTION_HOSTS=new Set(["medlifesy.org","www.medlifesy.org"]);
+const IS_PREVIEW=!PRODUCTION_HOSTS.has(location.hostname.toLowerCase());
+const $=id=>document.getElementById(id);
+let formDefinition=null, fields=[];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const val=s=>String(s??"").trim();
+function message(text,kind){const n=$("notice");n.textContent=text;n.className="notice show "+kind;}
+async function api(path,options={}){
+ const response=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json",...(options.headers||{})}});
+ const raw=await response.text();let body=null;try{body=raw?JSON.parse(raw):null}catch(_){}
+ if(!response.ok)throw new Error(body?.message||body?.details||body?.hint||"تعذر الاتصال بالخدمة.");
+ return body;
+}
+function currentValues(){
+ const out={};
+ fields.forEach(f=>{
+  const nodes=[...document.querySelectorAll('[data-field-key="'+CSS.escape(f.field_key)+'"]')];
+  if(f.field_type==="multi_select")out[f.field_key]=nodes.filter(n=>n.checked).map(n=>n.value);
+  else if(f.field_type==="boolean")out[f.field_key]=nodes[0]?.checked===true;
+  else out[f.field_key]=nodes[0]?.value??"";
+ });
+ return out;
+}
+function visible(f,data){
+ const rule=f.visibility||{mode:"always"};if(rule.mode!=="when")return true;
+ const actual=data[rule.field_key], expected=rule.value;
+ if(rule.operator==="in")return Array.isArray(expected)&&expected.includes(actual);
+ if(rule.operator==="not_equals")return actual!==expected;
+ if(rule.operator==="contains")return Array.isArray(actual)?actual.includes(expected):String(actual??"").includes(String(expected??""));
+ return String(actual??"")===String(expected??"");
+}
+function refreshVisibility(){
+ const data=currentValues();
+ fields.forEach(f=>{
+  const el=document.querySelector('[data-field-wrap="'+CSS.escape(f.field_key)+'"]');if(!el)return;
+  const show=visible(f,data);el.classList.toggle("hidden",!show);
+  el.querySelectorAll("input,select,textarea").forEach(input=>{
+   input.disabled=!show;
+   input.required=Boolean(show&&f.required&&input.type!=="checkbox"&&f.field_type!=="multi_select");
+  });
+ });
+}
+function renderField(f){
+ const key=esc(f.field_key), label=esc(f.label_ar||f.field_key), type=f.field_type, required=f.required?' <span aria-hidden="true">*</span>':"";
+ const opts=Array.isArray(f.options)?f.options:[];
+ let control="";
+ if(type==="textarea")control='<textarea data-field-key="'+key+'" '+(f.required?'required':'')+'></textarea>';
+ else if(type==="select")control='<select data-field-key="'+key+'" '+(f.required?'required':'')+'><option value="">اختر…</option>'+opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label_ar||o.label_en||o.value)+'</option>').join("")+'</select>';
+ else if(type==="multi_select")control='<div class="options">'+opts.map((o,i)=>'<label class="option"><input type="checkbox" data-field-key="'+key+'" value="'+esc(o.value)+'"><span>'+esc(o.label_ar||o.label_en||o.value)+'</span></label>').join("")+'</div>';
+ else {const t=({email:"email",phone:"tel",number:"number",date:"date",url:"url"})[type]||"text";control='<input type="'+t+'" data-field-key="'+key+'" '+(f.required?'required':'')+(type==="number"?' min="0" max="168" step="1"':"")+'>';}
+ const full=["textarea","multi_select"].includes(type)||["primary_volunteer_field","secondary_talent_field","motivation","address"].includes(f.field_key);
+ return '<div class="field '+(full?'full':'')+'" data-field-wrap="'+key+'"><label>'+label+required+'</label>'+control+(f.help_ar?'<div class="hint">'+esc(f.help_ar)+'</div>':"")+'</div>';
+}
+async function load(){
+ if(IS_PREVIEW){
+  $("formIntro").textContent="هذه صفحة الانتساب الفعلية، لكن رابط المعاينة يعرض وضع المحاكاة المستقل. استخدم بيئة التجربة لاختبار رحلة المتقدم والموارد البشرية ببيانات وهمية فقط.";
+  $("formFields").innerHTML='<div class="field full"><strong>المعاينة التفاعلية وقاعدة الاختبار غير مفعّلتين حالياً.</strong><div class="hint">يمكنك الآن تجربة الاستمارة ومساحة الموارد البشرية ببيانات وهمية محفوظة في متصفحك فقط، من دون اتصال بقاعدة بيانات ميدلايف.</div><p style="margin:14px 0 0"><a href="/new-volunteer-demo.html" style="display:inline-block;padding:10px 16px;border-radius:10px;background:#e92d50;color:#fff;text-decoration:none;font-weight:800">فتح بيئة المحاكاة التفاعلية ←</a></p></div>';
+  message("المعاينة معزولة بالكامل عن قاعدة بيانات الإنتاج؛ الإرسال والاتصال بالخدمة معطّلان.", "error");
+  $("submitButton").disabled=true;
+  $("submitButton").textContent="الإرسال غير متاح في المعاينة";
+  return;
+ }
+ try{
+  const defs=await api("/rest/v1/admin_form_definitions?select=id,form_key,name_ar,name_en,description_ar,description_en,status,is_public,version,settings&form_key=eq.new_volunteer_application&status=eq.published&is_public=eq.true&limit=1");
+  formDefinition=defs?.[0];if(!formDefinition)throw new Error("استمارة الانتساب غير مفعّلة حاليًا. يرجى المحاولة لاحقًا.");
+  fields=await api("/rest/v1/admin_form_fields?select=id,form_id,field_key,label_ar,label_en,help_ar,field_type,required,options,visibility,sort_order,is_active&form_id=eq."+encodeURIComponent(formDefinition.id)+"&is_active=eq.true&order=sort_order.asc");
+  fields=Array.isArray(fields)?fields:[];
+  if(!fields.length)throw new Error("لم يتم إعداد أسئلة الاستمارة بعد.");
+  $("formIntro").textContent=formDefinition.description_ar||"املأ الحقول التالية. تظهر الأسئلة المتخصصة وفق مجال التطوع الذي تختاره.";
+  $("formFields").innerHTML=fields.map(renderField).join("");
+  $("formFields").addEventListener("change",refreshVisibility);
+  $("formFields").addEventListener("input",refreshVisibility);
+  refreshVisibility();
+  $("submitButton").disabled=false;
+ }catch(e){$("formIntro").textContent=e.message||"تعذر تحميل الاستمارة.";message(e.message||"تعذر تحميل الاستمارة.","error");}
+}
+$("applicationForm").addEventListener("submit",async event=>{
+ event.preventDefault();if(IS_PREVIEW){message("الإرسال معطّل في النسخة التجريبية لحماية بيانات المتقدمين الحقيقية.","error");return;}if(!formDefinition||!$("privacyConsent").checked)return;
+ if(val($("website").value)){message("تعذر إرسال الطلب.","error");return;}
+ refreshVisibility();
+ const data=currentValues();
+ const missing=fields.find(f=>visible(f,data)&&f.required&&(data[f.field_key]===undefined||data[f.field_key]===null||data[f.field_key]===""||(Array.isArray(data[f.field_key])&&!data[f.field_key].length)));
+ if(missing){message("يرجى تعبئة الحقل: "+(missing.label_ar||missing.field_key),"error");return;}
+ const primary=val(data.primary_volunteer_field), email=val(data.email).toLowerCase(), nationalId=val(data.national_id).replace(/\s+/g,"");
+  const primaryField=fields.find(f=>f.field_key==="primary_volunteer_field");
+  const primaryLabel=primaryField?.options?.find(o=>String(o.value)===primary)?.label_ar||primary;
+ if(!primary||!email||!nationalId){message("يرجى التأكد من المجال الأساسي والبريد الإلكتروني والرقم الوطني.","error");return;}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){message("يرجى إدخال بريد إلكتروني صحيح حتى نتمكن من التواصل معك.","error");return;}
+ const weeklyHours=Number(data.weekly_availability);
+ if(!Number.isInteger(weeklyHours)||weeklyHours<0||weeklyHours>168){message("يرجى إدخال عدد ساعات أسبوعي صحيح بين 0 و168.","error");return;}
+ const button=$("submitButton");button.disabled=true;button.textContent="جارٍ إرسال الطلب…";
+ try{
+  const body={
+   application_kind:"new_member",status:"pending",hr_stage:"new",
+   full_name:val(data.full_name),mother_name:val(data.mother_name),national_id:nationalId,
+   date_of_birth:data.date_of_birth||null,gender:val(data.gender),email,phone:val(data.phone),
+   governorate:val(data.governorate),address:val(data.address),academic_status:val(data.academic_status),
+   university:val(data.university),faculty:val(data.faculty),study_year:val(data.study_year),
+   graduation_year:val(data.graduation_year),profession:val(data.profession),workplace:val(data.workplace),
+   resident_specialty:val(data.resident_specialty),residency_year:val(data.residency_year),
+   residency_hospital:val(data.residency_hospital),doctor_specialty:val(data.doctor_specialty),
+   specialty:val(data.specialty),interest:primaryLabel,medlife_role:primaryLabel,join_date:null,
+   cell:"",field_location:val(data.governorate),
+   requested_departments:[],source:"public_website",admin_notes:null,
+   form_id:formDefinition.id,form_version:formDefinition.version,
+   form_data:{...data,primary_volunteer_field:primary,secondary_talent_field:val(data.secondary_talent_field),privacy_consent:true,submitted_at:new Date().toISOString()},
+   form_schema:{form_id:formDefinition.id,form_key:formDefinition.form_key,version:formDefinition.version,name_ar:formDefinition.name_ar,fields:fields,settings:formDefinition.settings||{},captured_at:new Date().toISOString()}
+  };
+  await api("/rest/v1/public_volunteer_applications",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)});
+  $("applicationForm").reset();$("formFields").innerHTML="";message("تم استلام طلبك بنجاح. سيقوم فريق الموارد البشرية بمراجعته والتواصل معك عند الحاجة. لا يلزمك إنشاء حساب في هذه المرحلة.","success");
+  $("submitButton").textContent="تم إرسال الطلب";$("submitButton").disabled=true;
+ }catch(e){
+  const detail=String(e.message||"");
+  message(/duplicate|unique|national_id|email/i.test(detail)?"يبدو أن هناك طلبًا مسجلًا مسبقًا بالرقم الوطني أو البريد الإلكتروني. يرجى التواصل مع الإدارة إذا كنت تعتقد أن ذلك خطأ.":"تعذر إرسال الطلب حاليًا. يرجى التحقق من البيانات والمحاولة لاحقًا.", "error");
+  button.disabled=false;button.textContent="إرسال طلب الانتساب";
+ }
+});
+void load();
+})();
+</script>
+</body></html>
