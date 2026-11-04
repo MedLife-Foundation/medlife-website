@@ -201,7 +201,7 @@
   }
 
   async function provisionVolunteerAccount(result,data,formKey){
-    if(formKey!=="membership_renewal"||!result?.submission_id||!result?.membership_number)return result;
+    if(formKey!=="membership_renewal"||!result?.submission_id)return result;
     try{
       const response=await fetch(SUPABASE_URL+"/functions/v1/provision-volunteer-account",{
         method:"POST",
