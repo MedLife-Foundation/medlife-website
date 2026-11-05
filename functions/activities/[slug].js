@@ -198,6 +198,34 @@ async function sanitizeActivityArticleHtml(value) {
   return await response.text();
 }
 
+function normalizeActivityRichTextHtml(value) {
+  // The mobile editor/browser can store a visually bold heading as a normal
+  // paragraph containing one bold span instead of a semantic h2/h3. Promote
+  // those paragraphs on publication so headings remain visibly distinct.
+  return String(value || "").replace(/<p\\b([^>]*)>([\\s\\S]*?)<\\/p>/gi, (whole, paragraphAttrs, inner) => {
+    const plain = inner
+      .replace(/<br\\s*\\/?\\s*>/gi, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;|&#160;|\\u00a0/gi, " ")
+      .trim();
+    if (!plain) return "";
+
+    const content = inner.trim();
+    const onlySpan = content.match(/^<span\\b([^>]*)>([\\s\\S]*)<\\/span>$/i);
+    const spanIsBold = Boolean(onlySpan && /font-weight\\s*:\\s*(?:bold|[6-9]00)/i.test(onlySpan[1]));
+    const onlyStrong = /^<(?:strong|b)\\b[^>]*>[\\s\\S]*<\\/(?:strong|b)>$/i.test(content);
+    const paragraphIsBold = /font-weight\\s*:\\s*(?:bold|[6-9]00)/i.test(paragraphAttrs);
+    if (!spanIsBold && !onlyStrong && !paragraphIsBold) return whole;
+
+    // Preserve authored paragraph alignment but let the article heading
+    // typography control its size, weight, spacing and responsive appearance.
+    const styleMatch = paragraphAttrs.match(/style\\s*=\\s*(["'])(.*?)\\1/i);
+    const alignment = styleMatch?.[2].match(/(?:^|;)\\s*text-align\\s*:\\s*(left|right|center|justify)\\s*(?:;|$)/i)?.[1];
+    const style = alignment ? ' style="text-align:' + alignment.toLowerCase() + '"' : "";
+    return '<h3 class="activity-authored-heading"' + style + '>' + inner + '</h3>';
+  });
+}
+
 function splitActivityArticleHtml(value) {
   const html = String(value || "");
   const blockTags = new Set(["p","h1","h2","h3","h4","ul","ol","blockquote","pre","table","div","hr"]);
@@ -318,7 +346,8 @@ export async function onRequestGet({ params, request }) {
   if (containsRichHtml) {
     try {
       const safeHtml = await sanitizeActivityArticleHtml(details);
-      detailBlocks = splitActivityArticleHtml(safeHtml);
+      const normalizedHtml = normalizeActivityRichTextHtml(safeHtml);
+      detailBlocks = splitActivityArticleHtml(normalizedHtml);
     } catch (error) {
       console.error("Activity article HTML sanitization failed", error);
       detailBlocks = [`<p>${esc(details.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())}</p>`];
@@ -419,7 +448,7 @@ export async function onRequestGet({ params, request }) {
 .activity-story-heading h2{margin:5px 0 0;color:var(--ml-navy);font-size:clamp(23px,3vw,30px);line-height:1.6}
 .activity-story-body{color:#46536a}
 .activity-story-body h1,.activity-story-body h2{margin:34px auto 13px;max-width:760px;color:var(--ml-navy);font-size:clamp(21px,2.8vw,27px);line-height:1.75;font-weight:900}
-.activity-story-body h3{margin:30px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8;font-weight:850}
+.activity-story-body h3{margin:30px auto 12px;max-width:760px;color:var(--ml-navy);font-size:20px;line-height:1.8;font-weight:850}\n.activity-story-body h3.activity-authored-heading{margin:30px auto 14px;color:var(--ml-navy);font-size:clamp(19px,2.6vw,23px);line-height:1.75;font-weight:900;}
 .activity-story-body h4{margin:24px auto 10px;max-width:760px;color:#263f60;font-size:17px;line-height:1.8;font-weight:850}
 .activity-story-body ol{max-width:760px;margin:0 auto 24px;padding-inline-start:28px;color:#46536a}
 .activity-story-body a{color:#b42343;text-decoration:underline;text-underline-offset:3px}
