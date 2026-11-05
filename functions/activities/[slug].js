@@ -202,25 +202,25 @@ function normalizeActivityRichTextHtml(value) {
   // The mobile editor/browser can store a visually bold heading as a normal
   // paragraph containing one bold span instead of a semantic h2/h3. Promote
   // those paragraphs on publication so headings remain visibly distinct.
-  return String(value || "").replace(/<p\\b([^>]*)>([\\s\\S]*?)<\\/p>/gi, (whole, paragraphAttrs, inner) => {
+  return String(value || "").replace(/<p\b([^>]*)>([\s\S]*?)<\/p>/gi, (whole, paragraphAttrs, inner) => {
     const plain = inner
-      .replace(/<br\\s*\\/?\\s*>/gi, "")
+      .replace(/<br\s*\/?\s*>/gi, "")
       .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;|&#160;|\\u00a0/gi, " ")
+      .replace(/&nbsp;|&#160;|\u00a0/gi, " ")
       .trim();
     if (!plain) return "";
 
     const content = inner.trim();
-    const onlySpan = content.match(/^<span\\b([^>]*)>([\\s\\S]*)<\\/span>$/i);
-    const spanIsBold = Boolean(onlySpan && /font-weight\\s*:\\s*(?:bold|[6-9]00)/i.test(onlySpan[1]));
-    const onlyStrong = /^<(?:strong|b)\\b[^>]*>[\\s\\S]*<\\/(?:strong|b)>$/i.test(content);
-    const paragraphIsBold = /font-weight\\s*:\\s*(?:bold|[6-9]00)/i.test(paragraphAttrs);
+    const onlySpan = content.match(/^<span\b([^>]*)>([\s\S]*)<\/span>$/i);
+    const spanIsBold = Boolean(onlySpan && /font-weight\s*:\s*(?:bold|[6-9]00)/i.test(onlySpan[1]));
+    const onlyStrong = /^<(?:strong|b)\b[^>]*>[\s\S]*<\/(?:strong|b)>$/i.test(content);
+    const paragraphIsBold = /font-weight\s*:\s*(?:bold|[6-9]00)/i.test(paragraphAttrs);
     if (!spanIsBold && !onlyStrong && !paragraphIsBold) return whole;
 
     // Preserve authored paragraph alignment but let the article heading
     // typography control its size, weight, spacing and responsive appearance.
-    const styleMatch = paragraphAttrs.match(/style\\s*=\\s*(["'])(.*?)\\1/i);
-    const alignment = styleMatch?.[2].match(/(?:^|;)\\s*text-align\\s*:\\s*(left|right|center|justify)\\s*(?:;|$)/i)?.[1];
+    const styleMatch = paragraphAttrs.match(/style\s*=\s*(["'])(.*?)\1/i);
+    const alignment = styleMatch?.[2].match(/(?:^|;)\s*text-align\s*:\s*(left|right|center|justify)\s*(?:;|$)/i)?.[1];
     const style = alignment ? ' style="text-align:' + alignment.toLowerCase() + '"' : "";
     return '<h3 class="activity-authored-heading"' + style + '>' + inner + '</h3>';
   });
