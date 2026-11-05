@@ -345,9 +345,12 @@ export async function onRequestGet({ params, request }) {
   let detailBlocks;
   if (containsRichHtml) {
     try {
-      const safeHtml = await sanitizeActivityArticleHtml(details);
-      const normalizedHtml = normalizeActivityRichTextHtml(safeHtml);
-      detailBlocks = splitActivityArticleHtml(normalizedHtml);
+      // Promote editor-generated bold paragraph headings before sanitizing:
+      // the semantic heading tag then survives even if a browser-specific style
+      // attribute is normalized away by the HTML sanitizer.
+      const normalizedHtml = normalizeActivityRichTextHtml(details);
+      const safeHtml = await sanitizeActivityArticleHtml(normalizedHtml);
+      detailBlocks = splitActivityArticleHtml(safeHtml);
     } catch (error) {
       console.error("Activity article HTML sanitization failed", error);
       detailBlocks = [`<p>${esc(details.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())}</p>`];
