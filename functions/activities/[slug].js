@@ -192,8 +192,7 @@ async function sanitizeActivityArticleHtml(value) {
 }
 
 function renderMarkdownInsideRichHtml(value) {
-  // The admin rich-text editor wraps plain lines in <p> tags. Interpret
-  // lightweight Markdown inside those text nodes too, without touching HTML attributes.
+  // Restore the original symbol-based Markdown formatting used by the activity editor.
   const inline = (text) => {
     let out = text;
     out = out.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
@@ -205,25 +204,14 @@ function renderMarkdownInsideRichHtml(value) {
   };
 
   let html = String(value || "");
-
-  // Pair Markdown bold markers even when the editor wraps markers in spans
-  // or inserts styled inline elements between the opening and closing markers.
-  // Normalize editor-generated spans around delimiters and around bold text.
-  html = html.replace(/<span\b[^>]*>(\*\*)<\/span>/gi, "$1");
-  html = html.replace(/\*\*<span\b[^>]*>([\s\S]*?)<\/span>\*\*/gi, "**$1**");
-  html = html.replace(/\*\*<span\b[^>]*>([\s\S]*?)\*\*<\/span>/gi, "**$1**");
-  const boldMarker = "(?:\\*\\*|<span\\b[^>]*>\\s*\\*\\*\\s*</span>)";
-  const boldPair = new RegExp(boldMarker + "([\\s\\S]*?)" + boldMarker, "gi");
-  html = html.replace(boldPair, "<strong>$1</strong>");
-
   html = html.replace(/<p>\s*#{1,3}\s*([\s\S]*?)\s*<\/p>/gi, "<h3>$1</h3>");
   html = html.replace(/<p>\s*&gt;\s*([\s\S]*?)\s*<\/p>/gi, "<blockquote><p>$1</p></blockquote>");
+
   return html.split(/(<[^>]+>)/g).map((part) => {
     if (part.startsWith("<")) return part;
     return inline(part);
   }).join("");
 }
-
 function splitActivityArticleHtml(value) {
   const html = String(value || "");
   const blockTags = new Set(["p","h1","h2","h3","h4","ul","ol","blockquote","pre","table","div","hr"]);
