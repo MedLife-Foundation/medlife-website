@@ -191,6 +191,23 @@ async function sanitizeActivityArticleHtml(value) {
   return await response.text();
 }
 
+function promoteBoldOnlyParagraphHeadings(value) {
+  // Older activity reports often stored section headings as bold-only paragraphs.
+  // Promote only short paragraphs whose entire content is a single bold wrapper;
+  // ordinary paragraphs with emphasized phrases remain untouched.
+  return String(value || "").replace(/<p(\\s[^>]*)?>([\\s\\S]*?)<\\/p>/gi, (match, attrs = "", inner = "") => {
+    const content = String(inner).trim();
+    const strong = content.match(/^<(strong|b)\\b[^>]*>([\\s\\S]*)<\\/\\1>$/i);
+    const span = content.match(/^<span\\b([^>]*)>([\\s\\S]*)<\\/span>$/i);
+    const isBoldSpan = span && /font-weight\\s*:\\s*(?:bold|[6-9]00)/i.test(span[1]);
+    const headingContent = strong ? strong[2] : isBoldSpan ? span[2] : null;
+    if (headingContent === null) return match;
+    const plainText = headingContent.replace(/<[^>]*>/g, " ").replace(/&nbsp;|&#160;/gi, " ").replace(/\\s+/g, " ").trim();
+    if (plainText.length < 3 || plainText.length > 120) return match;
+    return "<h3" + attrs + ">" + headingContent + "</h3>";
+  });
+}
+
 function splitActivityArticleHtml(value) {
   const html = String(value || "");
   const blockTags = new Set(["p","h1","h2","h3","h4","ul","ol","blockquote","pre","table","div","hr"]);
@@ -311,7 +328,7 @@ export async function onRequestGet({ params, request }) {
   if (containsRichHtml) {
     try {
       const safeHtml = await sanitizeActivityArticleHtml(details);
-      detailBlocks = splitActivityArticleHtml(safeHtml);
+      detailBlocks = splitActivityArticleHtml(promoteBoldOnlyParagraphHeadings(safeHtml));
     } catch (error) {
       console.error("Activity article HTML sanitization failed", error);
       detailBlocks = [`<p>${esc(details.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())}</p>`];
