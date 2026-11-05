@@ -133,7 +133,14 @@ function sanitizeActivityInlineStyle(value) {
         : amount >= 0.65 && amount <= 3.5;
     }
     if (prop === "color" || prop === "background-color") {
-      return /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\)|black|white|red|blue|green|gray|grey|navy|maroon)$/i.test(cssValue);
+      return /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\)|hsla?\([\d\s.,%]+\)|black|white|red|blue|green|gray|grey|navy|maroon|transparent)$/i.test(cssValue);
+    }
+    if (prop === "font-family") {
+      // Keep common document fonts while rejecting arbitrary CSS/functions.
+      return /^(?:"?(?:Arial|Calibri|Cambria|Georgia|Tahoma|Times New Roman|Verdana|Cairo|IBM Plex Sans Arabic)"?)(?:\s*,\s*(?:"?(?:Arial|Calibri|Cambria|Georgia|Tahoma|Times New Roman|Verdana|Cairo|IBM Plex Sans Arabic)"?))*$/i.test(cssValue);
+    }
+    if (prop === "letter-spacing" || prop === "text-indent") {
+      return /^-?\d+(?:\.\d+)?(?:px|pt|em|rem|%)$/i.test(cssValue);
     }
     if (prop === "line-height") {
       return /^(normal|\d+(?:\.\d+)?(?:px|pt|em|%)?)$/i.test(cssValue);
