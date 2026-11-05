@@ -212,8 +212,8 @@ function renderMarkdownInsideRichHtml(value) {
   const boldPair = new RegExp(boldMarker + "([\\s\\S]*?)" + boldMarker, "gi");
   html = html.replace(boldPair, "<strong>$1</strong>");
 
-  html = html.replace(/<p>\\s*#{1,3}\\s*([\\s\\S]*?)\\s*<\\/p>/gi, "<h3>$1</h3>");
-  html = html.replace(/<p>\\s*&gt;\\s*([\\s\\S]*?)\\s*<\\/p>/gi, "<blockquote><p>$1</p></blockquote>");
+  html = html.replace(/<p>\s*#{1,3}\s*([\s\S]*?)\s*<\/p>/gi, "<h3>$1</h3>");
+  html = html.replace(/<p>\s*&gt;\s*([\s\S]*?)\s*<\/p>/gi, "<blockquote><p>$1</p></blockquote>");
   return html.split(/(<[^>]+>)/g).map((part) => {
     if (part.startsWith("<")) return part;
     return inline(part);
