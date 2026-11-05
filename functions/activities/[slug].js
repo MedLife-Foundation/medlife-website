@@ -209,9 +209,9 @@ function renderMarkdownInsideRichHtml(value) {
   // Pair Markdown bold markers even when the editor wraps markers in spans
   // or inserts styled inline elements between the opening and closing markers.
   // Normalize editor-generated spans around delimiters and around bold text.
-  html = html.replace(/<span\\b[^>]*>(\\*\\*)<\\/span>/gi, "$1");
-  html = html.replace(/\\*\\*<span\\b[^>]*>([\\s\\S]*?)<\\/span>\\*\\*/gi, "**$1**");
-  html = html.replace(/\\*\\*<span\\b[^>]*>([\\s\\S]*?)\\*\\*<\\/span>/gi, "**$1**");
+  html = html.replace(/<span\b[^>]*>(\*\*)<\/span>/gi, "$1");
+  html = html.replace(/\*\*<span\b[^>]*>([\s\S]*?)<\/span>\*\*/gi, "**$1**");
+  html = html.replace(/\*\*<span\b[^>]*>([\s\S]*?)\*\*<\/span>/gi, "**$1**");
   const boldMarker = "(?:\\*\\*|<span\\b[^>]*>\\s*\\*\\*\\s*</span>)";
   const boldPair = new RegExp(boldMarker + "([\\s\\S]*?)" + boldMarker, "gi");
   html = html.replace(boldPair, "<strong>$1</strong>");
