@@ -206,16 +206,14 @@ function renderMarkdownInsideRichHtml(value) {
 
   let html = String(value || "");
 
-  // The editor sometimes wraps Markdown delimiters in styled spans, or
-  // inserts inline spans between the opening and closing ** markers.
-  // Pair the markers across those tags before parsing individual text nodes.
-  const boldMarker = String.raw\`(?:\*\*|<span\b[^>]*>\s*\*\*\s*<\/span>)\`;
-  const boldPair = new RegExp(boldMarker + String.raw\`([\s\S]*?)\` + boldMarker, "gi");
+  // Pair Markdown bold markers even when the editor wraps markers in spans
+  // or inserts styled inline elements between the opening and closing markers.
+  const boldMarker = "(?:\\*\\*|<span\\b[^>]*>\\s*\\*\\*\\s*</span>)";
+  const boldPair = new RegExp(boldMarker + "([\\s\\S]*?)" + boldMarker, "gi");
   html = html.replace(boldPair, "<strong>$1</strong>");
 
-  html = html.replace(/<p>\s*#{1,3}\s*([\s\S]*?)\s*<\/p>/gi, "<h3>$1</h3>");
-  html = html.replace(/<p>\s*&gt;\s*([\s\S]*?)\s*<\/p>/gi, "<blockquote><p>$1</p></blockquote>");
-
+  html = html.replace(/<p>\\s*#{1,3}\\s*([\\s\\S]*?)\\s*<\\/p>/gi, "<h3>$1</h3>");
+  html = html.replace(/<p>\\s*&gt;\\s*([\\s\\S]*?)\\s*<\\/p>/gi, "<blockquote><p>$1</p></blockquote>");
   return html.split(/(<[^>]+>)/g).map((part) => {
     if (part.startsWith("<")) return part;
     return inline(part);
