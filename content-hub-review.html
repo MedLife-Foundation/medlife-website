@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>MedLife | مراجعة محتوى Notion</title>
+<link rel="icon" href="./logo.PNG">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#12203a;--red:#e51f45;--bg:#f4f6fa;--card:#fff;--muted:#66748b;--line:#e5eaf1;--green:#137b58;--amber:#8a5a00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--navy);font-family:Cairo,Arial,sans-serif}
+.wrap{max-width:1280px;margin:auto;padding:24px 16px 50px}.top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.eyebrow{margin:0;color:var(--red);font-size:10px;font-weight:900}.top h1{font-size:27px;margin:3px 0}.top p{margin:0;color:var(--muted);font-size:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:16px;box-shadow:0 12px 30px #12203a0b;margin-top:14px}
+.notice{background:#fff8e9;border:1px solid #f0dfb7;color:#705018;border-radius:12px;padding:11px 13px;font-size:10px;line-height:1.9;margin-top:15px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.input,.select{font:inherit;font-size:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;min-height:40px}
+.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--red);color:#fff;font:inherit;font-size:10px;font-weight:900;cursor:pointer}.btn.light{background:#fff;border:1px solid var(--line);color:var(--navy)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.stat{border:1px solid var(--line);border-radius:12px;padding:12px}.stat small{display:block;color:var(--muted);font-size:9px}.stat b{font-size:22px}
+.table-wrap{overflow:auto;margin-top:13px}.table{border-collapse:collapse;width:100%;font-size:10px;min-width:850px}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}.table th{background:#fafbfd;color:#5f6d83;font-size:9px;white-space:nowrap}
+.title-cell{font-weight:800;max-width:300px;white-space:normal;line-height:1.8}.muted{color:var(--muted);font-size:9px}.pill{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef1f5;font-size:8px;font-weight:900;white-space:nowrap}.pill.archive{background:#e9f6ef;color:var(--green)}.pill.active{background:#fff3df;color:var(--amber)}.pill.review{background:#fceced;color:#a3263c}
+a{color:#b41d3b;text-decoration:none;font-weight:800}a:hover{text-decoration:underline}
+.state{padding:20px;text-align:center;color:var(--muted);font-size:10px}.error{display:none;padding:12px;border:1px solid #f0c9c9;background:#fff2f2;color:#9e2626;border-radius:11px;margin-top:12px;font-size:10px;line-height:1.8}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}.footer{margin-top:14px;color:var(--muted);font-size:9px;text-align:center}
+@media(max-width:700px){.top{display:block}.stats{grid-template-columns:1fr 1fr}.wrap{padding:16px 10px 35px}.pager{align-items:stretch;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+  <div><p class="eyebrow">MEDLIFE CONTENT HUB · NOTION REVIEW</p><h1>مراجعة بنك المنشورات</h1><p>قراءة موحّدة لبنوك الخلايا القديمة مع فصل الأرشيف عن المحتوى القابل للمتابعة.</p></div>
+  <a class="btn light" href="/admin/">العودة إلى الإدارة</a>
+</header>
+<div class="notice">هذه شاشة مراجعة للقراءة فقط. لا تغيّر أي سجل في Notion ولا تنشر أي محتوى. المنشورات التي حالتها «تم نشره» تظهر ضمن الأرشيف التاريخي، أما «جاهز للنشر» و«بالتنسيق» فتبقى ضمن بنك العمل.</div>
+<section class="card">
+  <div class="toolbar">
+    <select id="cell" class="select" aria-label="اختر الخلية">
+      <option value="astrocyte">Astrocyte Cell</option><option value="leukocyte">Leukocyte Cell</option><option value="plasma">Plasma Cell</option><option value="heart">Heart Cell</option><option value="brain">Brain Cells</option><option value="red-blood">Red Blood Cell</option><option value="stem">Stem Cells</option>
+    </select>
+    <select id="bucket" class="select" aria-label="نوع السجلات"><option value="all">كل السجلات</option><option value="active">بنك العمل</option><option value="archive">الأرشيف التاريخي</option><option value="needs_review">بحاجة إلى مراجعة</option></select>
+    <input id="search" class="input" placeholder="ابحث بعنوان المنشور...">
+    <button id="refresh" class="btn">تحديث</button>
+  </div>
+  <div id="error" class="error"></div>
+  <div class="stats">
+    <div class="stat"><small>السجلات المحمّلة</small><b id="total">—</b></div>
+    <div class="stat"><small>الأرشيف التاريخي</small><b id="archived">—</b></div>
+    <div class="stat"><small>بنك العمل</small><b id="active">—</b></div>
+    <div class="stat"><small>بحاجة إلى مراجعة</small><b id="review">—</b></div>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>المنشور</th><th>الخلية</th><th>حالة البوست</th><th>حالة سير العمل</th><th>تاريخ الكتابة</th><th>تاريخ النشر</th><th>طريقة النشر</th><th>رابط النشر</th><th>المصدر</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="9" class="state">جارٍ تحميل السجلات من Notion...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="pager"><span id="pageInfo" class="muted">تُعرض النتائج المحمّلة من المصدر الأصلي فقط.</span><button id="more" class="btn light" disabled>تحميل المزيد</button></div>
+</section>
+<p class="footer">MedLife Content Hub · Read-only review · Original Notion records remain unchanged</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const state={items:[],cursor:null,hasMore:false,loading:false,cell:"astrocyte"};
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function safeUrl(value){try{const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u.href:""}catch{return ""}}
+function setError(message){$("error").textContent=message||"";$("error").style.display=message?"block":"none";}
+function badge(item){const labels={archive:"أرشيف منشور",active:"ضمن بنك العمل",needs_review:"بحاجة إلى مراجعة"};return '<span class="pill '+(item.bucket==="archive"?"archive":item.bucket==="active"?"active":"review")+'">'+esc(labels[item.bucket]||labels.needs_review)+'</span>';}
+function render(){
+  const term=$("search").value.trim().toLocaleLowerCase();
+  const bucket=$("bucket").value;
+  const filtered=state.items.filter(item=>(bucket==="all"||item.bucket===bucket)&&(!term||String(item.title||"").toLocaleLowerCase().includes(term)));
+  const counts={archive:0,active:0,needs_review:0};for(const item of state.items)counts[item.bucket]=(counts[item.bucket]||0)+1;
+  $("total").textContent=state.items.length;$("archived").textContent=counts.archive;$("active").textContent=counts.active;$("review").textContent=counts.needs_review;
+  $("rows").innerHTML=filtered.length?filtered.map(item=>{
+    const postUrl=safeUrl(item.publish_url),sourceUrl=safeUrl(item.source_page_url);
+    return '<tr><td class="title-cell">'+esc(item.title)+'</td><td>'+esc(item.source_cell)+'</td><td>'+badge(item)+'<div class="muted">'+esc(item.post_status||"غير محدد")+'</div></td><td>'+esc(item.workflow_status||"—")+'</td><td>'+esc(item.written_at||"—")+'</td><td>'+esc(item.published_at||"—")+'</td><td>'+esc(item.publication_method||"—")+'</td><td>'+(postUrl?'<a href="'+esc(postUrl)+'" target="_blank" rel="noopener noreferrer">المنشور</a>':"—")+'</td><td>'+(sourceUrl?'<a href="'+esc(sourceUrl)+'" target="_blank" rel="noopener noreferrer">فتح Notion</a>':"—")+'</td></tr>';
+  }).join(""):'<tr><td colspan="9" class="state">لا توجد سجلات مطابقة ضمن البيانات المحمّلة.</td></tr>';
+  $("pageInfo").textContent='تم تحميل '+state.items.length+' سجل من '+$("cell").selectedOptions[0].textContent+'. البحث والتصفية يطبّقان على النتائج المحمّلة.';
+  $("more").disabled=!state.hasMore||state.loading;$("more").textContent=state.loading?"جارٍ التحميل...":state.hasMore?"تحميل المزيد":"لا توجد صفحات إضافية";
+}
+async function load(reset=false){
+  if(state.loading)return;
+  if(reset){state.items=[];state.cursor=null;state.hasMore=false;}
+  state.loading=true;setError("");$("more").disabled=true;$("rows").innerHTML='<tr><td colspan="9" class="state">جارٍ الاتصال بـ Notion...</td></tr>';
+  try{
+    const params=new URLSearchParams({cell:state.cell,page_size:"100"});if(state.cursor)params.set("cursor",state.cursor);
+    const response=await fetch("/api/content-hub-review?"+params.toString(),{credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){if(response.status===401)throw new Error("يلزم تسجيل الدخول بحساب إداري. افتح لوحة الإدارة ثم أعد تحميل هذه الصفحة.");throw new Error(data.error||"تعذر تحميل محتوى الخلية.");}
+    if(!data.success||!Array.isArray(data.items))throw new Error("استجابة Notion غير مكتملة.");
+    const seen=new Set(state.items.map(item=>item.source_page_id));for(const item of data.items){if(!seen.has(item.source_page_id)){state.items.push(item);seen.add(item.source_page_id);}}
+    state.cursor=data.next_cursor||null;state.hasMore=data.has_more===true;
+  }catch(error){setError(error instanceof Error?error.message:"تعذر تحميل السجلات.");}
+  finally{state.loading=false;render();}
+}
+$("cell").addEventListener("change",()=>{state.cell=$("cell").value;load(true);});
+$("bucket").addEventListener("change",render);$("search").addEventListener("input",render);$("refresh").addEventListener("click",()=>load(true));
+$("more").addEventListener("click",()=>load(false));load(true);
+</script>
+</body>
+</html>
