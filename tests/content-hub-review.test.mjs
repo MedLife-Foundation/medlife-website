@@ -34,7 +34,8 @@ assert.equal(mapped.publish_url, "https://example.org/post");
 assert.deepEqual(mapped.writer_relation_ids, ["writer-1"]);
 assert.equal(mapped.source_page_id, "page-1");
 assert.equal(mapped.source_cell_key, "astrocyte");
-assert.equal(CONTENT_SOURCES.length, 7);
+assert.equal(CONTENT_SOURCES.length, 6);
+assert.equal(CONTENT_SOURCES.some((source) => source.key === "brain"), false);
 
 const redBlood = CONTENT_SOURCES.find((source) => source.key === "red-blood");
 const ambiguousRedBlood = mapNotionPost({
