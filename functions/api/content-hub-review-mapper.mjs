@@ -3,7 +3,6 @@ export const CONTENT_SOURCES = Object.freeze([
   { key: "leukocyte", label: "Leukocyte Cell", dataSourceId: "67929a3c-e40d-46a9-b754-ce36480d652d" },
   { key: "plasma", label: "Plasma Cell", dataSourceId: "63fa4fd2-0c8c-4868-a142-76ec4e721758" },
   { key: "heart", label: "Heart Cell", dataSourceId: "c6d40e43-f732-49c3-bb36-18230a4a88ea" },
-  { key: "brain", label: "Brain Cells", dataSourceId: "1653de24-5d4c-81bf-82f2-000bfcc30b24" },
   { key: "red-blood", label: "Red Blood Cell", dataSourceId: "9ea536d7-e219-4df0-8e9f-4eb9552055dd" },
   { key: "stem", label: "Stem Cells", dataSourceId: "c7c382d1-6067-446e-8651-d89c5b4ffff4" }
 ]);
