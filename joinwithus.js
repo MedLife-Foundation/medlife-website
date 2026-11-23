@@ -7,23 +7,34 @@
     { name:"البيانات الشخصية", desc:"نحتاج معلوماتك الأساسية كما ترغب بتسجيلها رسمياً." },
     { name:"التواصل والإقامة", desc:"سنتواصل معك على المعلومات التي تقدمها هنا." },
     { name:"الدراسة والعمل", desc:"أخبرنا عن تحصيلك العلمي وخبراتك المهنية." },
-    { name:"الاهتمامات والمهارات", desc:"اختر مجال العمل المفضل والمهارات الإضافية التي تمتلكها." },
-    { name:"أسئلة الاختصاص", desc:"أسئلة مخصصة للمجال الذي اخترته، حتى نتعرف إلى نقاط قوتك." },
+    { name:"مجالات الانضمام", desc:"اختر المجال الذي ترغب بالانضمام إليه، ويمكنك إضافة رغبتين اختياريتين." },
+    { name:"الأسئلة التخصصية", desc:"تظهر أسئلة خاصة بكل مجال ترغب بالانضمام إليه." },
     { name:"الدافع والتفرغ", desc:"وضح سبب رغبتك بالعمل التطوعي والوقت الذي تستطيع الالتزام به." },
     { name:"مراجعة وإرسال", desc:"تحقق من البيانات واقرأ الإقرار قبل إرسال طلبك." }
   ];
   const GROUPS = [
     ["full_name","father_name","mother_name","date_of_birth","gender","national_id"],
-    ["email","phone","country","governorate","city","address"],
+    ["email","phone","country","other_country","governorate","foreign_region","city","address"],
     ["academic_status","university","faculty","study_year","resident_specialty","residency_year","residency_hospital","doctor_specialty","specialty","profession","workplace"],
-    ["primary_volunteer_field","volunteer_interest_preferences","secondary_talent_field","secondary_talent_other","practical_skills","tools_used","portfolio_url"],
+    ["primary_volunteer_field","volunteer_interest_preferences","practical_skills","tools_used","portfolio_url"],
     [],
     ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability"]
   ];
   const known = new Set(GROUPS.flat());
   const $ = id => document.getElementById(id);
   const state = { form:null, fields:[], settings:null, categories:[], preferences:["","",""], values:{}, step:0, consent:false, sending:false };
+  const MEDICAL_ELIGIBLE_ROLES = new Set(["doctor","resident_doctor","specialist","pharmacist"]);
+  const PHARMACY_SPECIALTIES = new Set(["pharmacy","clinical_pharmacy","pharmacology"]);
   const STEP_TOTAL = STEPS.length;
+  function consultationsEligible() { return MEDICAL_ELIGIBLE_ROLES.has(text(valueOf("academic_status"))); }
+  function choiceOptions(field) {
+    const all=opts(field);
+    if(field.field_key==="medical_consultation_specialties") {
+      const pharmacist=valueOf("academic_status")==="pharmacist";
+      return all.filter(option=>PHARMACY_SPECIALTIES.has(String(option.value))===pharmacist);
+    }
+    return all;
+  }
   function setVisible(id, yes) { $(id).classList.toggle("hidden", !yes); }
   function showOnly(which) { for (const id of ["loading","closed","failure","success","form-ui"]) setVisible(id, id === which); }
   function setAlert(message) {
@@ -73,7 +84,22 @@
     return el;
   }
   function setValue(key, value, refresh) {
+    const previous=state.values[key];
     state.values[key] = value;
+    if(key==="academic_status" && previous!==value) {
+      state.values.medical_consultation_specialties=[];
+      if(!consultationsEligible() && state.preferences.includes("medical_consultations")) {
+        state.preferences=state.preferences.filter(item=>item && item!=="medical_consultations");
+        while(state.preferences.length<3)state.preferences.push("");
+        state.values.primary_volunteer_field=state.preferences[0]||"";
+        state.values.volunteer_interest_preferences=state.preferences.filter(Boolean);
+      }
+    }
+    if(key==="country" && previous!==value) {
+      state.values.other_country="";
+      state.values.foreign_region="";
+      state.values.governorate="";
+    }
     setAlert("");
     if (refresh) renderFields();
   }
@@ -95,7 +121,7 @@
       el = create("div","choices-grid");
       el.id = "jf-" + key;
       const chosen = new Set(Array.isArray(valueOf(key)) ? valueOf(key).map(String) : []);
-      for (const o of opts(field)) {
+      for (const o of choiceOptions(field)) {
         const v = text(o.value);
         const row = create("label","choice-option");
         const cb = create("input");
@@ -103,13 +129,36 @@
         cb.checked = chosen.has(v);
         cb.value = v;
         cb.addEventListener("change", () => {
+          if (cb.checked && key==="medical_consultation_specialties" && chosen.size>=2) {
+            cb.checked=false;
+            setAlert("يمكنك اختيار اختصاصين فقط في الاستشارات الطبية والصيدلانية.");
+            return;
+          }
           if (cb.checked) chosen.add(v); else chosen.delete(v);
           setValue(key, Array.from(chosen), false);
+          if (key==="medical_consultation_specialties") {
+            const count=wrap.querySelector(".selected-specialty-count");
+            if(count)count.textContent="تم اختيار "+chosen.size+" من أصل اختصاصين كحد أقصى";
+          }
         });
         row.append(cb, create("span","",o.label_ar || o.label_en || v));
         el.append(row);
       }
-      if (!opts(field).length) el.append(create("span","help","لم تتوفر خيارات لهذا السؤال."));
+      if (key==="medical_consultation_specialties") {
+        el.classList.add("specialty-choices");
+        const search=create("input","specialty-search");
+        search.type="search";search.placeholder="ابحث عن اختصاص طبي أو صيدلاني...";
+        search.setAttribute("aria-label","بحث في الاختصاصات");
+        search.addEventListener("input",()=>{
+          const searchText=search.value.trim().toLocaleLowerCase("ar");
+          [...el.querySelectorAll(".choice-option")].forEach(item=>{
+            item.classList.toggle("hidden",!item.textContent.toLocaleLowerCase("ar").includes(searchText));
+          });
+        });
+        const count=create("p","selected-specialty-count","تم اختيار "+chosen.size+" من أصل اختصاصين كحد أقصى");
+        wrap.append(search,count);
+      }
+      if (!choiceOptions(field).length) el.append(create("span","help","لم تتوفر خيارات لهذا السؤال."));
     } else if (type === "select") {
       el = create("select");
       const placeholder = create("option","", "اختر الإجابة");
@@ -154,10 +203,10 @@
     area.querySelector("#preference-area")?.remove();
     const section = create("div","preference-area wide");
     section.id = "preference-area";
-    section.append(create("h3","preference-title","مجالات التطوع المفضلة"));
+    section.append(create("h3","preference-title","المجال الذي ترغب بالانضمام إليه"));
     section.append(create("p","help","اختر المجال الذي ترغب بالتقدم إليه أولاً، ويمكنك إضافة مجالين آخرين حسب الأولوية. هذه اختيارات أولية ولا تعني تعييناً في خلية أو قسم؛ يتم التوزيع بعد الفرز والمقابلة والتقييم."));
     const grid = create("div","preference-grid");
-    const positions = ["المجال الأول — إلزامي","المجال الثاني — اختياري","المجال الثالث — اختياري"];
+    const positions = ["المجال الذي ترغب بالانضمام إليه — إلزامي","مجال إضافي ترغب بالانضمام إليه — اختياري","مجال ثالث ترغب بالانضمام إليه — اختياري"];
     for (let i=0; i<3; i++) {
       const wrap = create("div","field");
       const label = create("label","",positions[i]);
@@ -166,7 +215,7 @@
       select.id="jf-preference-"+i;
       const empty=create("option","",i===0?"اختر مجال التطوع":"لا أرغب بمجال إضافي");
       empty.value="";select.append(empty);
-      for (const cat of state.categories) {
+      for (const cat of state.categories.filter(category=>category.value!=="medical_consultations" || consultationsEligible())) {
         const option=create("option","",cat.label_ar);
         option.value=cat.value;
         option.disabled=state.preferences.some((value,index)=>index!==i && value===cat.value);
@@ -297,6 +346,9 @@
   function validStep(step) {
     if (step===3) {
       const chosen=state.preferences.filter(Boolean);
+      if(chosen.includes("medical_consultations") && !consultationsEligible()) {
+        setAlert("الاستشارات الطبية والصيدلانية متاحة فقط للأطباء والمقيمين والأطباء الاختصاصيين والصيادلة.");return false;
+      }
       if (!state.preferences[0] || !state.categories.some(category=>category.value===state.preferences[0])) {
         setAlert("يرجى اختيار المجال الأول من المجالات المتاحة.");return false;
       }
@@ -314,6 +366,13 @@
         return false;
       }
       if (missing) continue;
+      if (field.field_key==="medical_consultation_specialties") {
+        const choices=Array.isArray(value)?value:[];
+        if(choices.length>2 || new Set(choices).size!==choices.length ||
+            !choices.every(code=>choiceOptions(field).some(option=>option.value===code))) {
+          setAlert("يرجى اختيار اختصاص أو اختصاصين مناسبين لصفتك المهنية فقط.");return false;
+        }
+      }
       if (field.field_type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(value))) {
         setAlert("يرجى كتابة بريد إلكتروني صحيح.");return false;
       }
