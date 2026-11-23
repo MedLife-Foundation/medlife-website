@@ -133,6 +133,28 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
     visibility: {mode: "when", field_key: "primary_volunteer_field", operator: "equals", value: "podcast_live"},
   },
   {
+    field_key: "telegram_channel_experience",
+    label_ar: "ما مدى خبرتك في إدارة قنوات التليجرام وجدولة المنشورات؟",
+    field_type: "select", required: true, sort_order: 387,
+    options: [
+      {value:"experienced",label_ar:"أدرت قناة أو مجموعة ونشرت محتوى بانتظام"},
+      {value:"basic",label_ar:"أعرف أساسيات النشر والإشراف"},
+      {value:"learn",label_ar:"لا أملك خبرة لكنني أرغب بالتدرب"},
+    ],
+    visibility: {mode:"when",field_key:"primary_volunteer_field",operator:"equals",value:"telegram"},
+  },
+  {
+    field_key: "instagram_content_experience",
+    label_ar: "ما مدى خبرتك في نشر القصص والريلز ومتابعة تفاعل الجمهور عبر الإنستاغرام؟",
+    field_type: "select", required: true, sort_order: 388,
+    options: [
+      {value:"experienced",label_ar:"عملت على محتوى إنستاغرام وتحليل أدائه"},
+      {value:"basic",label_ar:"أتقن النشر الأساسي للمنشورات والقصص"},
+      {value:"learn",label_ar:"لا أملك خبرة لكنني أرغب بالتدرب"},
+    ],
+    visibility: {mode:"when",field_key:"primary_volunteer_field",operator:"equals",value:"instagram"},
+  },
+  {
     field_key: "practical_skills", label_ar: "ما المهارات العملية التي تتقنها ويمكنك توظيفها في ميدلايف؟",
     help_ar: "اذكر مهارات محددة مع أمثلة قصيرة، مثل الكتابة أو التصوير أو البحث أو التنظيم.",
     field_type: "textarea", required: true, sort_order: 155,
