@@ -1217,8 +1217,17 @@ export async function onRequestPost({ request }) {
       const allowedNames = new Set(
         (Array.isArray(units) ? units : []).flatMap((unit) => [unit.name_ar, unit.name_en]).filter(Boolean)
       );
+      if (body.action === "new_volunteer_application") {
+        const preferred = payload.requested_departments;
+        if (preferred.length < 1 || preferred.length > 3 ||
+            new Set(preferred).size !== preferred.length ||
+            !preferred.every(name => allowedNames.has(name))) {
+          return json({ success: false, error: "يجب اختيار رغبة إلى ثلاث رغبات تطوعية صحيحة وغير مكررة." }, 400);
+        }
+        // The membership number is issued only after an authorized acceptance decision.
+        payload.id = crypto.randomUUID();
+      }
       payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
-      if (body.action === "new_volunteer_application") payload.id = crypto.randomUUID();
     }
 
     const writeUrl = SUPABASE_URL + "/rest/v1/" + target;
