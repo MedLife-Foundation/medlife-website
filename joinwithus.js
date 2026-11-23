@@ -15,13 +15,13 @@
     ["full_name","father_name","mother_name","date_of_birth","gender","national_id"],
     ["email","phone","country","governorate","city","address"],
     ["academic_status","university","faculty","study_year","resident_specialty","residency_year","residency_hospital","doctor_specialty","specialty","profession","workplace"],
-    ["primary_volunteer_field","secondary_talent_field","secondary_talent_other","portfolio_url"],
+    ["primary_volunteer_field","secondary_talent_field","secondary_talent_other","practical_skills","tools_used","portfolio_url"],
     [],
-    ["motivation","weekly_availability"]
+    ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability"]
   ];
   const known = new Set(GROUPS.flat());
   const $ = id => document.getElementById(id);
-  const state = { form:null, fields:[], settings:null, values:{}, step:0, consent:false, sending:false };
+  const state = { form:null, fields:[], settings:null, units:[], preferences:["","",""], values:{}, step:0, consent:false, sending:false };
   const STEP_TOTAL = STEPS.length;
   function setVisible(id, yes) { $(id).classList.toggle("hidden", !yes); }
   function showOnly(which) { for (const id of ["loading","closed","failure","success","form-ui"]) setVisible(id, id === which); }
@@ -135,6 +135,45 @@
     if (field.help_ar) wrap.append(create("p","help",field.help_ar));
     return wrap;
   }
+  function renderPreferences() {
+    const area = $("field-area");
+    area.querySelector("#preference-area")?.remove();
+    const section = create("div","preference-area wide");
+    section.id = "preference-area";
+    section.append(create("h3","preference-title","رغبات الانضمام إلى الخلايا والأقسام"));
+    section.append(create("p","help","اختر حتى ثلاث جهات من ميدلايف حسب الأولوية، مع مراعاة خبرتك ومجال التطوع الذي حددته. الرغبة الأولى إلزامية والثانية والثالثة اختياريتان."));
+    const grid = create("div","preference-grid");
+    const positions = ["الأولوية الأولى — أساسية","الأولوية الثانية — اختيارية","الأولوية الثالثة — اختيارية"];
+    for(let i=0;i<3;i++){
+      const wrap = create("div","field");
+      const label = create("label","",positions[i]);
+      label.htmlFor = "jf-preference-"+i;
+      const select = create("select");
+      select.id = "jf-preference-"+i;
+      const empty = create("option","",i===0?"اختر الخلية أو القسم":"لا توجد رغبة إضافية");
+      empty.value = "";select.append(empty);
+      for (const unit of state.units) {
+        const option = create("option","",unit.name_ar+(unit.unit_type==="field_team"?" · فريق ميداني":unit.unit_type==="cell"?" · خلية":" · قسم"));
+        option.value = unit.id;
+        option.disabled = state.preferences.some((id,index)=>index!==i && id===unit.id);
+        select.append(option);
+      }
+      select.value = state.preferences[i] || "";
+      select.addEventListener("change",()=>{
+        const value = select.value;
+        if (value && state.preferences.some((item,index)=>index!==i && item===value)) {
+          setAlert("لا يمكن اختيار نفس الخلية أو القسم في أكثر من رغبة.");
+          select.value=state.preferences[i] || "";return;
+        }
+        state.preferences[i]=value;
+        // A vacant second preference also clears the third one to preserve ordering.
+        if (i===1 && !value) state.preferences[2]="";
+        renderPreferences();setAlert("");
+      });
+      wrap.append(label,select);grid.append(wrap);
+    }
+    section.append(grid);area.append(section);
+  }
   function showValue(field) {
     const v = state.values[field.field_key];
     if (v === undefined || v === null || v === "") return "—";
@@ -161,6 +200,13 @@
         area.append(item);
       }
     }
+    if (state.units.length) {
+      const prefs = create("div","review-item wide");
+      prefs.append(create("strong","","رغبات الانضمام مرتبة حسب الأولوية"));
+      const names = state.preferences.filter(Boolean).map((id,i) => (i+1)+". "+(state.units.find(unit=>unit.id===id)?.name_ar || "—"));
+      prefs.append(create("span","", names.join(" | ") || "لم يتم اختيار رغبة"));
+      area.append(prefs);
+    }
     const consent = create("label","consent-box");
     const box = create("input");
     box.type = "checkbox";
@@ -182,6 +228,7 @@
     if (state.step === 4) area.append(create("p","section-tip","الأسئلة التالية مرتبطة بالمجال الأساسي الذي اخترته. قد تختلف بحسب الخلية أو اختصاصك."));
     if (state.step === 0) area.append(create("p","section-tip","تُستخدم بيانات الهوية الحساسة للتحقق من عدم تكرار طلبات الانتساب، ولا تُنشر ضمن الملف العام."));
     for (const field of fields) area.append(controlFor(field));
+    if (state.step===3) renderPreferences();
   }
   function render() {
     $("step-title").textContent = STEPS[state.step].name;
@@ -203,6 +250,13 @@
     renderFields();setAlert("");
   }
   function validStep(step) {
+    if (step===3) {
+      const chosen=state.preferences.filter(Boolean);
+      if (!chosen.length) {setAlert("يرجى تحديد رغبتك الأولى في التطوع.");return false;}
+      if (new Set(chosen).size!==chosen.length || (state.preferences[2] && !state.preferences[1])) {
+        setAlert("يرجى ترتيب الرغبات دون تكرار أو تجاوز الأولوية الثانية.");return false;
+      }
+    }
     const fields = fieldsForStep(step);
     for (const field of fields) {
       const value = valueOf(field.field_key);
@@ -240,13 +294,15 @@
   async function load() {
     showOnly("loading");
     try {
-      const [settingsResponse, formResponse] = await Promise.all([
+      const [settingsResponse, formResponse, unitsResponse] = await Promise.all([
         fetch("/api/management?resource=volunteer_recruitment",{cache:"no-store"}),
-        fetch("/api/management?resource=join_form&form_key="+encodeURIComponent(FORM_KEY),{cache:"no-store"})
+        fetch("/api/management?resource=join_form&form_key="+encodeURIComponent(FORM_KEY),{cache:"no-store"}),
+        fetch("/api/management?resource=join_units",{cache:"no-store"})
       ]);
-      if (!settingsResponse.ok || !formResponse.ok) throw Error("تعذر تحميل بيانات الاستمارة من المنصة.");
+      if (!settingsResponse.ok || !formResponse.ok || !unitsResponse.ok) throw Error("تعذر تحميل بيانات الاستمارة والخلايا من المنصة.");
       const settingsPayload = await settingsResponse.json();
       const formPayload = await formResponse.json();
+      const unitsPayload = await unitsResponse.json();
       const settings = settingsPayload?.data?.[0];
       const now = Date.now();
       const open = settings?.is_open === true
@@ -260,6 +316,10 @@
       if (form?.form_key !== FORM_KEY || form.form_kind !== "new_member" || !Array.isArray(form.fields) || !form.fields.length) {
         throw Error("لم يتم العثور على استمارة استقطاب الأعضاء الجدد المعتمدة.");
       }
+      const units = Array.isArray(unitsPayload?.data) ? unitsPayload.data : [];
+      state.units = units.filter(unit => unit?.id && unit?.name_ar && ["cell","department","field_team"].includes(unit.unit_type));
+      if (!state.units.length) throw Error("تعذر تحميل قائمة الخلايا والأقسام المتاحة.");
+      state.preferences = ["","",""];
       state.form = form;
       state.fields = form.fields.filter(x=>x.is_active !== false);
       state.settings = settings;
@@ -286,7 +346,12 @@
         if (value===undefined || value===null || value==="" || (Array.isArray(value) && !value.length)) continue;
         formData[field.field_key] = value;
       }
+      const requestedDepartments = state.preferences.filter(Boolean).map(id=>state.units.find(unit=>unit.id===id)?.name_ar).filter(Boolean);
+      if (!requestedDepartments.length || new Set(requestedDepartments).size !== requestedDepartments.length) {
+        throw Error("يرجى اختيار رغبات تطوع صحيحة وغير مكررة.");
+      }
       const body = Object.assign({},formData,{
+        requested_departments:requestedDepartments,
         action:"new_volunteer_application",
         application_kind:"new_member",
         form_id:state.form.id,
@@ -300,6 +365,7 @@
       const result = await response.json().catch(()=>({}));
       if (!response.ok || !result.success) throw Error(result.error || "تعذر تسجيل الطلب. يرجى المحاولة مجدداً.");
       state.values={};
+      state.preferences=["","",""];
       state.consent=false;
       if (result.submission_id) {
         $("receipt").textContent = "رقم متابعة الطلب: " + result.submission_id;
