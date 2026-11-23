@@ -1016,7 +1016,7 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
   {"field_key":"study_field_other","label_ar":"ما الاختصاص الذي تدرسه؟ (اذكره كما هو مسجل في جامعتك)","field_type":"text","required":true,"sort_order":121.2,"visibility":{"mode":"when","field_key":"study_field","operator":"equals","value":"other"}},
   {"field_key":"medical_profession","label_ar":"ما المجال الطبي الذي تنتمي إليه؟","field_type":"select","required":true,"sort_order":122.1,"options":[{"value":"human_medicine","label_ar":"طب بشري"},{"value":"dentistry","label_ar":"طب أسنان"},{"value":"pharmacy","label_ar":"صيدلة"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"in","value":"doctor,resident_doctor,specialist,pharmacist"}},
   {"field_key":"resident_specialty_other","label_ar":"اذكر اسم اختصاص الإقامة غير الموجود بالقائمة","field_type":"text","required":true,"sort_order":123.1,"visibility":{"mode":"when","field_key":"resident_specialty","operator":"equals","value":"other"}},
-  {"field_key":"residency_start_year","label_ar":"سنة بدء الإقامة الفعلية (تاريخ المباشرة)","field_type":"number","required":true,"sort_order":124.4,"validation":{"min":1980,"max":2026,"step":1},"help_ar":"اكتب سنة بدء المباشرة الفعلية في المشفى، وليس سنة التخرج.","visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
+  {"field_key":"residency_start_year","label_ar":"سنة بدء الإقامة الفعلية (تاريخ المباشرة)","field_type":"number","required":true,"sort_order":124.4,"validation":{"min":1980,"max":new Date().getFullYear(),"step":1},"help_ar":"اكتب سنة بدء المباشرة الفعلية في المشفى، وليس سنة التخرج.","visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
   {"field_key":"residency_program","label_ar":"ما نظام الإقامة أو الجهة التدريبية؟","field_type":"select","required":true,"sort_order":124.6,"options":[{"value":"syrian_board","label_ar":"الهيئة السورية للاختصاصات الطبية / البورد السوري"},{"value":"university","label_ar":"الدراسات العليا / الجامعة"},{"value":"health_ministry","label_ar":"برنامج تابع لوزارة الصحة"},{"value":"other","label_ar":"جهة تدريبية أخرى"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
   {"field_key":"residency_program_other","label_ar":"اذكر الجهة التدريبية الأخرى","field_type":"text","required":true,"sort_order":124.7,"visibility":{"mode":"when","field_key":"residency_program","operator":"equals","value":"other"}},
   {"field_key":"doctor_specialty_other","label_ar":"اذكر اختصاصك غير المدرج","field_type":"text","required":true,"sort_order":126.1,"visibility":{"mode":"when","field_key":"doctor_specialty","operator":"equals","value":"other"}},
@@ -1037,8 +1037,8 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
   },
   {
     field_key:"medical_consultation_specialties",label_ar:"اختر اختصاصاً أو اختصاصين للاستشارات الطبية والصيدلانية",field_type:"multi_select",required:true,sort_order:312,
-    help_ar:"الحد الأقصى اختصاصان. تظهر الاختصاصات الطبية للأطباء والمقيمين، والاختصاصات الصيدلانية للصيادلة فقط.",
-    options:MEDICAL_CONSULTATION_SPECIALTIES,
+    help_ar:"الحد الأقصى اختصاصان. تُعرض اختصاصات الطب البشري أو طب الأسنان أو الصيدلة حسب المجال المهني، ويُراجع المؤهل والترخيص قبل تكليف المتطوع بأي استشارة.",
+    options:INTAKE_ALL_SPECIALTIES,
     visibility:{mode:"when",field_key:"primary_volunteer_field",operator:"equals",value:"medical_consultations"},
   },
   {
@@ -1639,21 +1639,76 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       throw new Error("لإرسال طلب الانضمام، يجب تأكيد القدرة على الالتزام بالعمل التطوعي وأنظمة المؤسسة.");
     }
 
-    if (preferences.includes("medical_consultations")) {
-      if (!RECRUITMENT_ELIGIBLE_MEDICAL_ROLES.has(String(formData.academic_status || ""))) {
-        throw new Error("مجال الاستشارات الطبية والصيدلانية متاح فقط للطبيب والطبيب المقيم والطبيب الاختصاصي والصيدلي.");
+    // The applicant's actual medical discipline must match their declared
+    // professional role; students and non-clinical members cannot enter consultations.
+    const role = String(formData.academic_status||"");
+    const profession = String(formData.medical_profession||"");
+    const isMedicalRole = RECRUITMENT_ELIGIBLE_MEDICAL_ROLES.has(role);
+    if (isMedicalRole) {
+      if (!["human_medicine","dentistry","pharmacy"].includes(profession) ||
+          (role==="pharmacist" && profession!=="pharmacy") ||
+          (["doctor","specialist"].includes(role) && profession==="pharmacy")) {
+        throw new Error("يرجى تحديد مجال مهني صحيح: طب بشري أو طب أسنان للأطباء، وصيدلة للصيادلة.");
       }
-      const chosen = formData.medical_consultation_specialties;
-      const allCodes = new Set(MEDICAL_CONSULTATION_SPECIALTIES.map(option=>option.value));
-      if (!Array.isArray(chosen) || chosen.length<1 || chosen.length>2 ||
-          new Set(chosen).size!==chosen.length || !chosen.every(code=>allCodes.has(String(code)))) {
-        throw new Error("يرجى اختيار اختصاص أو اختصاصين فقط من قائمة الاستشارات.");
+      for (const key of ["resident_specialty","doctor_specialty","specialty"]) {
+        const chosen = formData[key];
+        if (!chosen || chosen==="other") continue;
+        if (!INTAKE_ALL_SPECIALTIES.some(option=>option.value===chosen)) {
+          throw new Error("الاختصاص المحدد غير موجود في القائمة المعتمدة.");
+        }
+        const valid = profession==="human_medicine"
+          ? INTAKE_MEDICAL_SPECIALTIES.some(option=>option.value===chosen)
+          : profession==="dentistry"
+            ? INTAKE_DENTAL_SPECIALTIES.some(option=>option.value===chosen)
+            : [...MEDICAL_CONSULTATION_SPECIALTIES.filter(x=>PHARMACY_CONSULTATION_CODES.has(x.value)),...INTAKE_PHARMACY_SPECIALTIES].some(option=>option.value===chosen);
+        if (!valid) throw new Error("الاختصاص المحدد لا يطابق المجال الطبي الذي اخترته.");
       }
-      const pharmacist = formData.academic_status==="pharmacist";
-      if (chosen.some(code=>PHARMACY_CONSULTATION_CODES.has(code)!==pharmacist)) {
-        throw new Error("اختصاصات الصيدلة متاحة للصيادلة فقط، والاختصاصات الطبية متاحة للأطباء والمقيمين.");
+      if (role==="resident_doctor") {
+        const started = Number(formData.residency_start_year);
+        if (!Number.isInteger(started) || started<1980 || started>new Date().getFullYear()) {
+          throw new Error("يرجى إدخال سنة بدء الإقامة الفعلية بصورة صحيحة.");
+        }
       }
     }
+
+    if (preferences.includes("medical_consultations")) {
+      if (!isMedicalRole) {
+        throw new Error("مجال الاستشارات متاح فقط للأطباء والمقيمين والاختصاصيين والصيادلة، وليس للطلاب.");
+      }
+      const chosen = formData.medical_consultation_specialties;
+      const allowedByProfession = profession==="human_medicine"
+        ? INTAKE_MEDICAL_SPECIALTIES
+        : profession==="dentistry"
+          ? INTAKE_DENTAL_SPECIALTIES
+          : [...MEDICAL_CONSULTATION_SPECIALTIES.filter(x=>PHARMACY_CONSULTATION_CODES.has(x.value)),...INTAKE_PHARMACY_SPECIALTIES];
+      const codes = new Set(allowedByProfession.map(option=>option.value));
+      if (!Array.isArray(chosen) || chosen.length<1 || chosen.length>2 ||
+          new Set(chosen).size!==chosen.length || !chosen.every(value=>codes.has(String(value)))) {
+        throw new Error("يجب اختيار اختصاص أو اختصاصين فقط، بما يتوافق مع مؤهلك الطبي أو الصيدلاني.");
+      }
+    }
+    // University/unlisted specialty values must be completed when selected.
+    if (formData.university==="other" && !formData.university_other) {
+      throw new Error("يرجى كتابة اسم الجامعة الأخرى.");
+    }
+    if (formData.study_field==="other" && !formData.study_field_other) {
+      throw new Error("يرجى كتابة اختصاصك الدراسي.");
+    }
+    // The number is normalized and validated server-side; the checkbox is an
+    // applicant attestation, not proof of WhatsApp ownership.
+    const telephone = String(formData.phone||"").replace(/[\s\-().]/g,"");
+    const prefix = formData.phone_country_code==="other"
+      ? String(formData.phone_dial_other||"").replace(/\s/g,"")
+      : String(formData.phone_country_code||"");
+    if (!/^\+[1-9]\d{7,14}$/.test(telephone) ||
+        !/^\+[1-9]\d{0,3}$/.test(prefix) ||
+        !telephone.startsWith(prefix) || telephone.slice(prefix.length).length<6) {
+      throw new Error("يرجى إدخال رقم واتساب صحيح مع رمز الاتصال الدولي، مثال: +9639XXXXXXXX.");
+    }
+    if (formData.whatsapp_confirmed!=="yes") {
+      throw new Error("يجب تأكيد أن الرقم مرتبط بواتساب نشط لاستلام مراسلات الانضمام.");
+    }
+    formData.phone=telephone;
     if (formData.country==="أخرى") {
       const chosen = formData.other_country;
       if (!INTAKE_OTHER_COUNTRIES.some(option=>option.value===chosen)) {
@@ -2368,10 +2423,11 @@ export async function onRequestPost({ request }) {
           // the application table currently has no dedicated country/city column.
           payload.address = cleanText((country?.label_ar||"") + "، " + (payload.form_data.foreign_region||"") + " — " + (payload.form_data.address||""), 500);
         }
+        // Preserve both the medically scoped choice and its Arabic label.
         if (payload.form_data.medical_consultation_specialties?.length) {
           payload.consultation_specialty = cleanText(
             payload.form_data.medical_consultation_specialties
-              .map(code=>MEDICAL_CONSULTATION_SPECIALTIES.find(option=>option.value===code)?.label_ar||code).join("، "),
+              .map(code=>INTAKE_ALL_SPECIALTIES.find(option=>option.value===code)?.label_ar||code).join("، "),
             250
           );
         }
