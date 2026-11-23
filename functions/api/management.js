@@ -103,7 +103,97 @@ const NEW_VOLUNTEER_CATEGORIES = [
   { value: "medical_consultations", label_ar: "الاستشارات الطبية" },
 ];
 
+
+const RECRUITMENT_ELIGIBLE_MEDICAL_ROLES = new Set(["doctor","resident_doctor","specialist","pharmacist"]);
+const MEDICAL_CONSULTATION_SPECIALTIES = [
+  { value: "general_medicine", label_ar: "الطب العام" },
+  { value: "family_medicine", label_ar: "طب الأسرة" },
+  { value: "internal_medicine", label_ar: "الأمراض الداخلية" },
+  { value: "cardiology", label_ar: "أمراض القلب" },
+  { value: "endocrinology", label_ar: "الغدد الصم والسكري" },
+  { value: "gastroenterology", label_ar: "أمراض الجهاز الهضمي والكبد" },
+  { value: "nephrology", label_ar: "أمراض الكلى" },
+  { value: "pulmonology", label_ar: "الأمراض الصدرية والتنفسية" },
+  { value: "rheumatology", label_ar: "الأمراض الرثوية والمفاصل" },
+  { value: "infectious_diseases", label_ar: "الأمراض المعدية" },
+  { value: "hematology", label_ar: "أمراض الدم" },
+  { value: "medical_oncology", label_ar: "الأورام الطبية" },
+  { value: "radiation_oncology", label_ar: "العلاج الشعاعي للأورام" },
+  { value: "allergy_immunology", label_ar: "الحساسية والمناعة" },
+  { value: "dermatology", label_ar: "الأمراض الجلدية" },
+  { value: "neurology", label_ar: "الأمراض العصبية" },
+  { value: "neurosurgery", label_ar: "الجراحة العصبية" },
+  { value: "psychiatry", label_ar: "الطب النفسي" },
+  { value: "pediatrics", label_ar: "طب الأطفال" },
+  { value: "neonatology", label_ar: "حديثو الولادة والخدّج" },
+  { value: "pediatric_cardiology", label_ar: "قلبية الأطفال" },
+  { value: "pediatric_neurology", label_ar: "عصبية الأطفال" },
+  { value: "pediatric_surgery", label_ar: "جراحة الأطفال" },
+  { value: "obgyn", label_ar: "التوليد وأمراض النساء" },
+  { value: "reproductive_medicine", label_ar: "طب الإنجاب والعقم" },
+  { value: "maternal_fetal_medicine", label_ar: "طب الأم والجنين" },
+  { value: "general_surgery", label_ar: "الجراحة العامة" },
+  { value: "orthopedics", label_ar: "الجراحة العظمية" },
+  { value: "urology", label_ar: "الجراحة البولية" },
+  { value: "cardiac_surgery", label_ar: "جراحة القلب" },
+  { value: "vascular_surgery", label_ar: "جراحة الأوعية" },
+  { value: "thoracic_surgery", label_ar: "الجراحة الصدرية" },
+  { value: "plastic_surgery", label_ar: "الجراحة التجميلية والترميمية" },
+  { value: "ent", label_ar: "أمراض وجراحة الأذن والأنف والحنجرة" },
+  { value: "ophthalmology", label_ar: "طب وجراحة العيون" },
+  { value: "anesthesiology", label_ar: "التخدير والإنعاش" },
+  { value: "emergency_medicine", label_ar: "طب الطوارئ" },
+  { value: "critical_care", label_ar: "العناية المشددة" },
+  { value: "radiology", label_ar: "الأشعة والتصوير الطبي" },
+  { value: "nuclear_medicine", label_ar: "الطب النووي" },
+  { value: "pathology", label_ar: "التشريح المرضي" },
+  { value: "laboratory_medicine", label_ar: "الطب المخبري" },
+  { value: "microbiology", label_ar: "الأحياء الدقيقة الطبية" },
+  { value: "clinical_genetics", label_ar: "الوراثة الطبية" },
+  { value: "physical_medicine", label_ar: "الطب الفيزيائي وإعادة التأهيل" },
+  { value: "sports_medicine", label_ar: "الطب الرياضي" },
+  { value: "geriatric_medicine", label_ar: "طب الشيخوخة" },
+  { value: "palliative_medicine", label_ar: "الطب التلطيفي" },
+  { value: "occupational_medicine", label_ar: "طب العمل" },
+  { value: "public_health", label_ar: "الصحة العامة والطب الوقائي" },
+  { value: "nutrition", label_ar: "التغذية العلاجية" },
+  { value: "pain_medicine", label_ar: "طب الألم" },
+  { value: "sleep_medicine", label_ar: "طب النوم" },
+  { value: "tropical_medicine", label_ar: "طب المناطق المدارية" },
+  { value: "forensic_medicine", label_ar: "الطب الشرعي" },
+  { value: "transfusion_medicine", label_ar: "طب نقل الدم" },
+  { value: "pharmacy", label_ar: "الصيدلة" },
+  { value: "clinical_pharmacy", label_ar: "الصيدلة السريرية" },
+  { value: "pharmacology", label_ar: "علم الأدوية والمعلومات الدوائية" },
+];
+const PHARMACY_CONSULTATION_CODES = new Set(["pharmacy","clinical_pharmacy","pharmacology"]);
+
+// Verified ISO 3166-1 alpha-2 territory list. Labels are Arabic CLDR region names.
+const INTAKE_COUNTRY_CODES = "AW AF AO AI AX AL AD AE AR AM AS AQ TF AG AU AT AZ BI BE BJ BQ BF BD BG BH BS BA BL BY BZ BM BO BR BB BN BT BV BW CF CA CC CH CL CN CI CM CD CG CK CO KM CV CR CU CW CX KY CY CZ DE DJ DM DK DO DZ EC EG ER EH ES EE ET FI FJ FK FR FO FM GA GB GE GG GH GI GN GP GM GW GQ GR GD GL GT GF GU GY HK HM HN HR HT HU ID IM IN IO IE IR IQ IS IL IT JM JE JO JP KZ KE KG KH KI KN KR KW LA LB LR LY LC LI LK LS LT LU LV MO MF MA MC MD MG MV MX MH MK ML MT MM ME MN MP MZ MR MS MQ MU MW MY YT NA NC NE NF NG NI NU NL NO NP NR NZ OM PK PA PN PE PH PW PG PL PR KP PT PY PS PF QA RE RO RU RW SA SD SN SG GS SH SJ SB SL SV SM SO PM RS SS ST SR SK SI SE SZ SX SC SY TC TD TG TH TJ TK TM TL TO TT TN TR TV TW TZ UG UA UM UY US UZ VA VC VE VG VI VN VU WF WS YE ZA ZM ZW".split(" ");
+const INTAKE_OTHER_COUNTRIES = (() => {
+  const names = new Intl.DisplayNames(["ar"], {type:"region"});
+  return INTAKE_COUNTRY_CODES.filter(code=>code!=="SY")
+    .map(code=>({value:code,label_ar:names.of(code)||code}))
+    .sort((a,b)=>a.label_ar.localeCompare(b.label_ar,"ar"));
+})();
+
 const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  {
+    field_key:"other_country",label_ar:"اختر بلد الإقامة من قائمة الدول",field_type:"select",required:true,sort_order:85,
+    help_ar:"تظهر هذه القائمة عند اختيار «أخرى» بدلاً من سوريا، ويمكن البحث عن البلد بكتابة اسمه داخل القائمة في بعض المتصفحات.",
+    options:INTAKE_OTHER_COUNTRIES,
+    visibility:{mode:"when",field_key:"country",operator:"equals",value:"أخرى"},
+  },
+  {
+    field_key:"foreign_region",label_ar:"المحافظة أو الولاية أو المنطقة في بلد الإقامة",field_type:"text",required:true,sort_order:91,
+    visibility:{mode:"when",field_key:"country",operator:"equals",value:"أخرى"},
+  },
+  {
+    field_key:"medical_consultation_specialties",label_ar:"اختر اختصاصاً أو اختصاصين للاستشارات الطبية والصيدلانية",field_type:"multi_select",required:true,sort_order:312,
+    help_ar:"الحد الأقصى اختصاصان. تظهر الاختصاصات الطبية للأطباء والمقيمين، والاختصاصات الصيدلانية للصيادلة فقط.",
+    options:MEDICAL_CONSULTATION_SPECIALTIES,
+    visibility:{mode:"when",field_key:"primary_volunteer_field",operator:"equals",value:"medical_consultations"},
+  },
   {
     field_key: "volunteer_interest_preferences", label_ar: "ترتيب مجالات التطوع المفضلة",
     help_ar: "أولوية أولى إلزامية وأولويتان إضافيتان اختياريتان؛ ليست تعييناً لأي خلية أو قسم.",
@@ -214,12 +304,27 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
 function fieldsForNewVolunteerIntake(baseFields, formKey) {
   if (formKey !== "new_volunteer_application") return baseFields;
   // Hold back the monthly-fee question pending a clear organizational policy.
-  const base = baseFields.filter(field => field.field_key !== "field_work_monthly_fee");
+  const base = baseFields.filter(field => ![
+    "field_work_monthly_fee",
+    "secondary_talent_field",
+    "secondary_talent_other",
+    "medical_consultation_specialty"
+  ].includes(field.field_key));
   const seen = new Set(base.map(field => field.field_key));
   return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key))]
     .map(field => {
       if (field.field_key === "primary_volunteer_field") {
-        return {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "مجال التطوع الأساسي"};
+        return {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "المجال الذي ترغب بالانضمام إليه"};
+      }
+      if (field.field_key === "academic_status") {
+        const options = Array.isArray(field.options) ? field.options : [];
+        return {...field, options: [
+          ...options.filter(option=>option.value!=="pharmacist"),
+          {value:"pharmacist",label_ar:"صيدلي / صيدلانية"}
+        ]};
+      }
+      if (field.field_key === "governorate") {
+        return {...field, visibility:{mode:"when",field_key:"country",operator:"equals",value:"سوريا"}};
       }
       // All selected recruitment preferences get their own questions, not just preference #1.
       // This stays scoped to new-member intake and does not modify renewal form definitions.
@@ -636,6 +741,28 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
         !preferences.every(value => allowed.has(String(value))) ||
         preferences[0] !== formData.primary_volunteer_field) {
       throw new Error("يرجى اختيار من مجال إلى ثلاثة مجالات تطوع صحيحة حسب الأولوية، مع تطابق المجال الأساسي مع الرغبة الأولى.");
+    }
+
+    if (preferences.includes("medical_consultations")) {
+      if (!RECRUITMENT_ELIGIBLE_MEDICAL_ROLES.has(String(formData.academic_status || ""))) {
+        throw new Error("مجال الاستشارات الطبية والصيدلانية متاح فقط للطبيب والطبيب المقيم والطبيب الاختصاصي والصيدلي.");
+      }
+      const chosen = formData.medical_consultation_specialties;
+      const allCodes = new Set(MEDICAL_CONSULTATION_SPECIALTIES.map(option=>option.value));
+      if (!Array.isArray(chosen) || chosen.length<1 || chosen.length>2 ||
+          new Set(chosen).size!==chosen.length || !chosen.every(code=>allCodes.has(String(code)))) {
+        throw new Error("يرجى اختيار اختصاص أو اختصاصين فقط من قائمة الاستشارات.");
+      }
+      const pharmacist = formData.academic_status==="pharmacist";
+      if (chosen.some(code=>PHARMACY_CONSULTATION_CODES.has(code)!==pharmacist)) {
+        throw new Error("اختصاصات الصيدلة متاحة للصيادلة فقط، والاختصاصات الطبية متاحة للأطباء والمقيمين.");
+      }
+    }
+    if (formData.country==="أخرى") {
+      const chosen = formData.other_country;
+      if (!INTAKE_OTHER_COUNTRIES.some(option=>option.value===chosen)) {
+        throw new Error("يرجى اختيار بلد الإقامة الصحيح من القائمة.");
+      }
     }
   }
 
@@ -1337,6 +1464,20 @@ export async function onRequestPost({ request }) {
           "residency_year","residency_hospital","doctor_specialty","specialty","motivation"
         ]) payload[key] = identity[key];
         payload.national_id = normalizeNationalIdentifier(payload.form_data.national_id);
+        if (payload.form_data.country === "أخرى") {
+          const country = INTAKE_OTHER_COUNTRIES.find(option=>option.value===payload.form_data.other_country);
+          payload.governorate = cleanText(payload.form_data.foreign_region, 100);
+          // Keep country + region in the existing address column as well as the versioned answers;
+          // the application table currently has no dedicated country/city column.
+          payload.address = cleanText((country?.label_ar||"") + "، " + (payload.form_data.foreign_region||"") + " — " + (payload.form_data.address||""), 500);
+        }
+        if (payload.form_data.medical_consultation_specialties?.length) {
+          payload.consultation_specialty = cleanText(
+            payload.form_data.medical_consultation_specialties
+              .map(code=>MEDICAL_CONSULTATION_SPECIALTIES.find(option=>option.value===code)?.label_ar||code).join("، "),
+            250
+          );
+        }
         if (!payload.national_id) {
           return json({success:false,error:"يرجى إدخال رقم وطني صحيح في بياناتك الشخصية."},400);
         }
