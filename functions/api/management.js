@@ -1436,7 +1436,8 @@ export async function onRequestPost({ request }) {
       }
 
       payload = volunteerPayload(body);
-      if (!payload.full_name || !payload.phone || !payload.governorate) {
+      if (!payload.full_name || !payload.phone ||
+          (body.action !== "new_volunteer_application" && !payload.governorate)) {
         return json({ success: false, error: "يرجى تعبئة الاسم والهاتف والمحافظة." }, 400);
       }
 
@@ -1480,6 +1481,9 @@ export async function onRequestPost({ request }) {
         }
         if (!payload.national_id) {
           return json({success:false,error:"يرجى إدخال رقم وطني صحيح في بياناتك الشخصية."},400);
+        }
+        if (!payload.governorate) {
+          return json({success:false,error:"يرجى تحديد المحافظة أو الولاية أو المنطقة التي تقيم فيها."},400);
         }
         // Applicant preferences are broad recruitment tracks, NOT internal org units.
         // The assigned unit and internal distribution are selected later by authorized HR staff.
