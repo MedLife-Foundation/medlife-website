@@ -14,8 +14,8 @@
   ];
   const GROUPS = [
     ["full_name","father_name","mother_name","date_of_birth","gender","national_id"],
-    ["email","phone","country","other_country","governorate","foreign_region","city","address","social_profile_url"],
-    ["academic_status","university","faculty","study_year","resident_specialty","residency_year","residency_hospital","doctor_specialty","specialty","profession","workplace"],
+    ["email","phone_country_code","phone_dial_other","phone","whatsapp_confirmed","country","other_country","governorate","foreign_region","city","address","social_profile_url"],
+    ["academic_status","academic_status_other","school_name","institute_name","university","university_other","faculty","study_field","study_field_other","study_year","medical_profession","resident_specialty","resident_specialty_other","residency_year","residency_start_year","residency_program","residency_program_other","residency_hospital","doctor_specialty","doctor_specialty_other","specialty","specialty_other","profession","workplace"],
     ["primary_volunteer_field","volunteer_interest_preferences","practical_skills","tools_used","portfolio_url"],
     [],
     ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability","referral_channel","what_stands_out","opinion_of_medlife","expected_contribution","future_ideas","volunteer_commitment"]
@@ -24,14 +24,33 @@
   const $ = id => document.getElementById(id);
   const state = { form:null, fields:[], settings:null, categories:[], preferences:["","",""], values:{}, step:0, consent:false, sending:false };
   const MEDICAL_ELIGIBLE_ROLES = new Set(["doctor","resident_doctor","specialist","pharmacist"]);
-  const PHARMACY_SPECIALTIES = new Set(["pharmacy","clinical_pharmacy","pharmacology"]);
+  const PHARMACY_SPECIALTIES = new Set(["pharmacy","clinical_pharmacy","pharmacology","pharm_1","pharm_2","pharm_3","pharm_4","pharm_5"]);
   const STEP_TOTAL = STEPS.length;
-  function consultationsEligible() { return MEDICAL_ELIGIBLE_ROLES.has(text(valueOf("academic_status"))); }
+  const clinicianRole = () => text(valueOf("academic_status"));
+  const medicalDiscipline = () => text(valueOf("medical_profession"));
+  function consultationsEligible() {
+    const role=clinicianRole(), discipline=medicalDiscipline();
+    return MEDICAL_ELIGIBLE_ROLES.has(role) &&
+      ["human_medicine","dentistry","pharmacy"].includes(discipline) &&
+      (role!=="pharmacist" || discipline==="pharmacy") &&
+      (!["doctor","specialist"].includes(role)||discipline!=="pharmacy");
+  }
   function choiceOptions(field) {
     const all=opts(field);
-    if(field.field_key==="medical_consultation_specialties") {
-      const pharmacist=valueOf("academic_status")==="pharmacist";
-      return all.filter(option=>PHARMACY_SPECIALTIES.has(String(option.value))===pharmacist);
+    const key=field.field_key,role=clinicianRole(),discipline=medicalDiscipline();
+    if(key==="medical_profession")return all.filter(option=>{
+      if(role==="pharmacist")return option.value==="pharmacy";
+      if(["doctor","specialist"].includes(role))return option.value!=="pharmacy";
+      return true;
+    });
+    if(["medical_consultation_specialties","resident_specialty","doctor_specialty","specialty"].includes(key)){
+      return all.filter(option=>{
+        const code=String(option.value);
+        if(code==="other")return true;
+        if(discipline==="dentistry")return code.startsWith("dent_");
+        if(discipline==="pharmacy")return PHARMACY_SPECIALTIES.has(code);
+        return !code.startsWith("dent_")&&!PHARMACY_SPECIALTIES.has(code);
+      });
     }
     return all;
   }
@@ -87,7 +106,12 @@
     const previous=state.values[key];
     state.values[key] = value;
     if(key==="academic_status" && previous!==value) {
-      state.values.medical_consultation_specialties=[];
+      for(const k of ["university","university_other","study_field","study_field_other",
+        "medical_profession","resident_specialty","resident_specialty_other","residency_year",
+        "residency_start_year","residency_program","residency_program_other","residency_hospital",
+        "doctor_specialty","doctor_specialty_other","specialty","specialty_other",
+        "medical_consultation_specialties"]) delete state.values[k];
+      if(value==="pharmacist")state.values.medical_profession="pharmacy";
       if(!consultationsEligible() && state.preferences.includes("medical_consultations")) {
         state.preferences=state.preferences.filter(item=>item && item!=="medical_consultations");
         while(state.preferences.length<3)state.preferences.push("");
@@ -95,14 +119,38 @@
         state.values.volunteer_interest_preferences=state.preferences.filter(Boolean);
       }
     }
+    if(key==="medical_profession" && previous!==value) {
+      for(const k of ["resident_specialty","resident_specialty_other","doctor_specialty",
+        "doctor_specialty_other","specialty","specialty_other",
+        "medical_consultation_specialties"])delete state.values[k];
+      if(!consultationsEligible()&&state.preferences.includes("medical_consultations")){
+        state.preferences=state.preferences.filter(item=>item && item!=="medical_consultations");
+        while(state.preferences.length<3)state.preferences.push("");
+        state.values.primary_volunteer_field=state.preferences[0]||"";
+        state.values.volunteer_interest_preferences=state.preferences.filter(Boolean);
+      }
+    }
+    if(key==="university" && previous!==value)delete state.values.university_other;
+    if(key==="study_field" && previous!==value)delete state.values.study_field_other;
+    if(["resident_specialty","doctor_specialty","specialty","residency_program"].includes(key)&&previous!==value)
+      delete state.values[key+"_other"];
     if(key==="country" && previous!==value) {
-      state.values.other_country="";
-      state.values.foreign_region="";
-      state.values.governorate="";
+      delete state.values.other_country;
+      delete state.values.foreign_region;
+      delete state.values.governorate;
+    }
+    if(key==="phone_country_code"&&previous!==value) {
+      delete state.values.phone_dial_other;
+      const oldCode=previous!=="other"?text(previous):"";
+      const newCode=value!=="other"?text(value):"";
+      const current=text(state.values.phone);
+      if(newCode && (!current||current===oldCode))state.values.phone=newCode;
+      else if(newCode&&oldCode&&current.startsWith(oldCode))state.values.phone=newCode+current.slice(oldCode.length);
     }
     setAlert("");
     if (refresh) renderFields();
   }
+
   function controlFor(field) {
     const key = field.field_key;
     const type = field.field_type;
