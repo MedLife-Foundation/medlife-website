@@ -15,6 +15,9 @@ function jsonArticle(row){
     author_name: row.author_name,
     category: row.category,
     image_url: row.image_url,
+    image_alt: row.image_alt || null,
+    seo_title: row.seo_title || null,
+    seo_description: row.meta_description || row.seo_description || null,
     slug: row.slug,
     canonical_path: row.canonical_path,
     published_at: row.published_at,
@@ -37,6 +40,9 @@ function normalizeCmsArticle(row) {
     author_name: metadata.author_name || "MedLife",
     category: metadata.category || metadata.specialty || "محتوى طبي",
     image_url: row.image_url || metadata.image_url || null,
+    image_alt: metadata.image_alt || null,
+    seo_title: metadata.seo_title || null,
+    seo_description: metadata.seo_description || null,
     slug: row.slug,
     canonical_path: row.slug,
     published_at: row.published_at,
@@ -70,6 +76,90 @@ async function fetchCmsArticle(routeKey) {
   return row ? normalizeCmsArticle(row) : null;
 }
 
+
+function articlePlainText(value) {
+  return String(value || "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&(?:nbsp|#160);/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ").trim();
+}
+
+function htmlEsc(value) {
+  return String(value || "").replace(/[&<>"']/g, function(character) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character];
+  });
+}
+
+function articleShortText(value, max) {
+  const clean = articlePlainText(value);
+  if (clean.length <= max) return clean;
+  const segment = clean.slice(0, max + 1);
+  const boundary = segment.lastIndexOf(" ");
+  return (boundary >= max * .6 ? segment.slice(0, boundary) : segment.slice(0, max)).trim();
+}
+
+function safeArticleImage(url) {
+  try {
+    const value = new URL(String(url || ""));
+    return value.protocol === "https:" ? value.href : null;
+  } catch { return null; }
+}
+
+function articleMetaTags(article, canonicalUrl) {
+  const rawTitle = articlePlainText(article.seo_title || article.title_ar) || "مقال طبي";
+  const title = /(?:medlife|ميدلايف)/i.test(rawTitle) ? rawTitle : rawTitle + " | MedLife";
+  const description = articleShortText(
+    article.seo_description || article.excerpt_ar || article.content_ar || "مقال طبي من المكتبة الطبية لمؤسسة ميدلايف.",
+    175
+  );
+  const image = safeArticleImage(article.image_url);
+  const alt = articlePlainText(article.image_alt || article.title_ar || "");
+  const publisher = "MedLife";
+  const tags = [
+    '<title>' + htmlEsc(title) + '</title>',
+    '<meta name="description" content="' + htmlEsc(description) + '">',
+    '<link rel="canonical" href="' + htmlEsc(canonicalUrl) + '">',
+    '<meta property="og:type" content="article">',
+    '<meta property="og:site_name" content="' + publisher + '">',
+    '<meta property="og:locale" content="ar_SY">',
+    '<meta property="og:title" content="' + htmlEsc(title) + '">',
+    '<meta property="og:description" content="' + htmlEsc(description) + '">',
+    '<meta property="og:url" content="' + htmlEsc(canonicalUrl) + '">',
+    '<meta name="twitter:card" content="' + (image ? 'summary_large_image' : 'summary') + '">',
+    '<meta name="twitter:title" content="' + htmlEsc(title) + '">',
+    '<meta name="twitter:description" content="' + htmlEsc(description) + '">'
+  ];
+  if (image) {
+    tags.push('<meta property="og:image" content="' + htmlEsc(image) + '">');
+    tags.push('<meta name="twitter:image" content="' + htmlEsc(image) + '">');
+    if (alt) tags.push('<meta property="og:image:alt" content="' + htmlEsc(alt) + '">');
+  }
+  const graph = {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    headline: articlePlainText(article.title_ar),
+    description: description,
+    inLanguage:"ar",
+    mainEntityOfPage:canonicalUrl,
+    publisher:{"@type":"Organization",name:publisher,url:"https://www.medlifesy.org"},
+  };
+  if (article.author_name) {
+    graph.author = {
+      "@type":/^(?:MedLife|ميدلايف)$/i.test(article.author_name)?"Organization":"Person",
+      name:articlePlainText(article.author_name)
+    };
+  }
+  if (article.published_at) graph.datePublished = article.published_at;
+  if (article.updated_at) graph.dateModified = article.updated_at;
+  if (image) graph.image = [image];
+  tags.push('<script type="application/ld+json">' +
+    JSON.stringify(graph).replace(/</g, "\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029") +
+    '</script>');
+  return tags.join("");
+}
+
 async function renderArticle(context, article, routeKey) {
   const assetResponse = await context.env.ASSETS.fetch(new URL(READER_ASSET, context.request.url));
   if (!assetResponse.ok) return assetResponse;
@@ -83,8 +173,13 @@ async function renderArticle(context, article, routeKey) {
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
   const bootstrap = `<script>(function(){const article=${safeArticle};window.__MEDLIFE_ARTICLE__=article;window.__MEDLIFE_ARTICLE_ROUTE__=${safeRoute};})();</script>`;
-  const patched = html.replace(/<head>/i, `<head>${bootstrap}`);
-  const canonical = new URL(`/articles/${encodeURIComponent(canonicalKey)}`, context.request.url).href;
+  const canonical = new URL(`/articles/${encodeURIComponent(canonicalKey)}`, "https://www.medlifesy.org").href;
+  // Public metadata must be rendered by the server, not added by JavaScript after crawl.
+  const cleanTemplate = html
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>/i, "")
+    .replace(/<meta\b[^>]*name=["']description["'][^>]*>/i, "");
+  const tags = articleMetaTags(article, canonical);
+  const patched = cleanTemplate.replace(/<head>/i, `<head>${tags}${bootstrap}`);
 
   return new Response(patched, {
     status: 200,
