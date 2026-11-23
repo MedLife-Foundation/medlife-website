@@ -1202,7 +1202,7 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
   {"field_key":"study_field_other","label_ar":"ما الاختصاص الذي تدرسه؟ (اذكره كما هو مسجل في جامعتك)","field_type":"text","required":true,"sort_order":121.2,"visibility":{"mode":"when","field_key":"study_field","operator":"equals","value":"other"}},
   {"field_key":"medical_profession","label_ar":"ما المجال الطبي الذي تنتمي إليه؟","field_type":"select","required":true,"sort_order":122.1,"options":[{"value":"human_medicine","label_ar":"طب بشري"},{"value":"dentistry","label_ar":"طب أسنان"},{"value":"pharmacy","label_ar":"صيدلة"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"in","value":"doctor,resident_doctor,specialist,pharmacist"}},
   {"field_key":"resident_specialty_other","label_ar":"اذكر اسم اختصاص الإقامة غير الموجود بالقائمة","field_type":"text","required":true,"sort_order":123.1,"visibility":{"mode":"when","field_key":"resident_specialty","operator":"equals","value":"other"}},
-  {"field_key":"residency_start_year","label_ar":"سنة بدء الإقامة الفعلية (تاريخ المباشرة)","field_type":"number","required":true,"sort_order":124.4,"validation":{"min":1980,"max":new Date().getFullYear(),"step":1},"help_ar":"اكتب سنة بدء المباشرة الفعلية في المشفى، وليس سنة التخرج.","visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
+  {"field_key":"residency_start_year","label_ar":"سنة بدء الإقامة الفعلية (تاريخ المباشرة)","field_type":"number","required":true,"sort_order":124.4,"validation":{"min":1980,"max":2100,"step":1},"help_ar":"اكتب سنة بدء المباشرة الفعلية في المشفى، وليس سنة التخرج.","visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
   {"field_key":"residency_program","label_ar":"ما نظام الإقامة أو الجهة التدريبية؟","field_type":"select","required":true,"sort_order":124.6,"options":[{"value":"syrian_board","label_ar":"الهيئة السورية للاختصاصات الطبية / البورد السوري"},{"value":"university","label_ar":"الدراسات العليا / الجامعة"},{"value":"health_ministry","label_ar":"برنامج تابع لوزارة الصحة"},{"value":"other","label_ar":"جهة تدريبية أخرى"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
   {"field_key":"residency_program_other","label_ar":"اذكر الجهة التدريبية الأخرى","field_type":"text","required":true,"sort_order":124.7,"visibility":{"mode":"when","field_key":"residency_program","operator":"equals","value":"other"}},
   {"field_key":"doctor_specialty_other","label_ar":"اذكر اختصاصك غير المدرج","field_type":"text","required":true,"sort_order":126.1,"visibility":{"mode":"when","field_key":"doctor_specialty","operator":"equals","value":"other"}},
@@ -1383,6 +1383,11 @@ function fieldsForNewVolunteerIntake(baseFields, formKey) {
           options:[...INTAKE_ALL_SPECIALTIES,{value:"other",label_ar:"اختصاص غير مدرج — سأكتبه بنفسي"}],
           label_ar:field.field_key==="resident_specialty"
             ? "اختصاص الإقامة الحالية" : "اختصاصك الطبي أو المهني"};
+      }
+      if (field.field_key === "residency_start_year") {
+        // Workers may expose 1970 when Date is evaluated at module load.
+        // Derive the max within the request handler, after asynchronous I/O.
+        return {...field,validation:{min:1980,max:Math.max(2026,new Date().getUTCFullYear()),step:1}};
       }
       if (field.field_key === "residency_year") {
         return {...field,field_type:"select",
