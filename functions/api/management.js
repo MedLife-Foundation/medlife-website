@@ -1007,7 +1007,193 @@ const LEGACY_RECRUITMENT_REFERENCE_FIELDS = [
   }
 ];
 
+const NEW_VOLUNTEER_SCENARIO_FIELDS = [
+  {
+    "field_key": "scenario_medical_content",
+    "label_ar": "كتابة المحتوى الطبي — موقف عملي",
+    "help_ar": "مهمة عملية: طُلب منك إعداد منشور توعوي عن الاستخدام الصحيح للمضادات الحيوية. كيف ستحدد 3 رسائل أساسية، وتبحث عن مراجع موثوقة، وتتأكد من سلامة المحتوى قبل نشره؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 600,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content"
+    }
+  },
+  {
+    "field_key": "scenario_medical_content_formatting",
+    "label_ar": "تنسيق المحتوى الطبي — موقف عملي",
+    "help_ar": "مهمة عملية: وصلتك مقالة طبية طويلة وغير مرتبة تتضمن عنواناً وعناوين فرعية ومراجع وصوراً. كيف ستعيد تنظيمها دون تغيير المعلومات أو فقدان المراجع؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 601,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content_formatting"
+    }
+  },
+  {
+    "field_key": "scenario_design",
+    "label_ar": "التصميم الجرافيكي والبوسترات — موقف عملي",
+    "help_ar": "مهمة عملية: طُلب منك تصميم بوستر توعوي عاجل لميدلايف خلال ساعات. صف خطواتك من استلام النص حتى التسليم، وكيف تحافظ على الهوية البصرية والشعار ودقة المعلومات. يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 602,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "design"
+    }
+  },
+  {
+    "field_key": "scenario_video_editing",
+    "label_ar": "مونتاج الفيديوهات — موقف عملي",
+    "help_ar": "مهمة عملية: لديك 8 لقطات هاتف من فعالية طبية وصوت متفاوت الجودة وتحتاج ريل مدته 45 ثانية. كيف ترتب اللقطات وتعالج الصوت وتحافظ على خصوصية المشاركين؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 603,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "video_editing"
+    }
+  },
+  {
+    "field_key": "scenario_visual_media",
+    "label_ar": "الإعلام المرئي — موقف عملي",
+    "help_ar": "موقف عملي: أثناء تصوير فعالية، ظهر مريض بوضوح أمام الكاميرا ولم يوافق على التصوير. ما تصرفك؟ وكيف تحضر مقابلة قصيرة تحترم الخصوصية وتوصل الرسالة؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 604,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "visual_media"
+    }
+  },
+  {
+    "field_key": "scenario_field_work",
+    "label_ar": "القسم الميداني — موقف عملي",
+    "help_ar": "موقف عملي: قبل نشاط ميداني بساعة تغيب عدد من المتطوعين، وهناك ازدحام ونقص مواد. كيف تعيد توزيع المهام وتحدد الأولويات وتحافظ على سلامة المشاركين؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 605,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "field_work"
+    }
+  },
+  {
+    "field_key": "scenario_university_media",
+    "label_ar": "الإعلام الجامعي — موقف عملي",
+    "help_ar": "مهمة عملية: مطلوب تعريف 30 طالباً بميدلايف داخل جامعتك من دون ميزانية كبيرة. صف طريقة الوصول للطلاب والتنظيم والتواصل والقياس بعد النشاط. يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 606,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "university_media"
+    }
+  },
+  {
+    "field_key": "scenario_voice_over",
+    "label_ar": "التعليق الصوتي — موقف عملي",
+    "help_ar": "مهمة عملية: استلمت نصاً طبياً يتضمن مصطلحات إنكليزية صعبة وتحتاج تسجيل دقيقة صوتية واضحة خلال يوم. كيف تتحقق من النطق وتضبط الصوت وتراجع التسجيل؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 607,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "voice_over"
+    }
+  },
+  {
+    "field_key": "scenario_it",
+    "label_ar": "تقنية المعلومات IT — موقف عملي",
+    "help_ar": "موقف عملي: أبلغ عدة متطوعين أن تسجيل الدخول للمنصة لا يعمل بعد تحديث جديد. ما أول خطوات التشخيص؟ وكيف تحمي بيانات المستخدمين وتتحقق من الحل قبل نشره؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 608,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "it"
+    }
+  },
+  {
+    "field_key": "scenario_telegram",
+    "label_ar": "إدارة التليجرام — موقف عملي",
+    "help_ar": "موقف عملي: وصل منشور طبي عاجل مع صورة لكن معلوماته ناقصة، وهناك ضغط لنشره فوراً. كيف تتحقق منه وتنسق مع الفريق وتتعامل مع التعليقات بعد النشر؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 609,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "telegram"
+    }
+  },
+  {
+    "field_key": "scenario_instagram",
+    "label_ar": "إدارة الإنستاغرام — موقف عملي",
+    "help_ar": "مهمة عملية: صمّم تصوراً لستوري وريل توعوي من فعالية واحدة. كيف تختار الرسالة والتوقيت ونداء التفاعل، وما المؤشرات التي ستراجعها لقياس الأثر؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 610,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "instagram"
+    }
+  },
+  {
+    "field_key": "scenario_podcast_live",
+    "label_ar": "البودكاست والبث المباشر — موقف عملي",
+    "help_ar": "موقف عملي: أثناء بث صحي مباشر، قدّم أحد الضيوف معلومة علاجية قد تكون غير دقيقة. كيف تتعامل مع الموقف باحترام وتحمي الجمهور وتحافظ على سير الحوار؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 611,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "podcast_live"
+    }
+  },
+  {
+    "field_key": "scenario_medical_consultations",
+    "label_ar": "الاستشارات الطبية — موقف عملي",
+    "help_ar": "موقف مهني: وصلتك استشارة تحتوي بيانات حساسة وأعراضاً قد تدل على حالة إسعافية خارج حدود خبرتك. كيف تتعامل مع خصوصية المريض وتقيّم الحاجة للإحالة أو الرعاية الإسعافية؟ يمكنك الإجابة حتى لو كانت خبرتك محدودة؛ صف طريقة تفكيرك، ولا تذكر معلومات شخصية لمرضى أو متطوعين.",
+    "field_type": "textarea",
+    "required": true,
+    "sort_order": 612,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_consultations"
+    }
+  }
+];
+
 const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  ...NEW_VOLUNTEER_SCENARIO_FIELDS,
   {"field_key":"academic_status_other","label_ar":"ما وضعك الدراسي أو المهني حالياً؟","field_type":"text","required":true,"sort_order":111,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"other"}},
   {"field_key":"school_name","label_ar":"اسم المدرسة","field_type":"text","required":true,"sort_order":118,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"school"}},
   {"field_key":"institute_name","label_ar":"اسم المعهد واختصاصك فيه","field_type":"text","required":true,"sort_order":119,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"institute"}},
