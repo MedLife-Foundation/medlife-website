@@ -120,6 +120,7 @@
           if (field.validation && field.validation.min !== undefined) el.min = field.validation.min;
           if (field.validation && field.validation.max !== undefined) el.max = field.validation.max;
           if (field.validation && field.validation.step !== undefined) el.step = field.validation.step;
+          if (key === "weekly_availability") { el.min = "1"; el.max = "80"; }
         }
       } else el.rows = 3;
       el.value = text(valueOf(key));
@@ -277,7 +278,7 @@
       if (field.field_type === "number") {
         const n = Number(value);
         const v = field.validation || {};
-        if (!Number.isFinite(n) || (v.min!==undefined && n<Number(v.min)) || (v.max!==undefined && n>Number(v.max))) {
+        if (!Number.isFinite(n) || (v.min!==undefined && n<Number(v.min)) || (v.max!==undefined && n>Number(v.max)) || (field.field_key==="weekly_availability" && (n<1 || n>80))) {
           setAlert("يرجى إدخال قيمة رقمية صحيحة للحقل: "+labelOf(field));return false;
         }
       }
