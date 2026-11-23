@@ -14,11 +14,11 @@
   ];
   const GROUPS = [
     ["full_name","father_name","mother_name","date_of_birth","gender","national_id"],
-    ["email","phone","country","other_country","governorate","foreign_region","city","address"],
+    ["email","phone","country","other_country","governorate","foreign_region","city","address","social_profile_url"],
     ["academic_status","university","faculty","study_year","resident_specialty","residency_year","residency_hospital","doctor_specialty","specialty","profession","workplace"],
     ["primary_volunteer_field","volunteer_interest_preferences","practical_skills","tools_used","portfolio_url"],
     [],
-    ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability"]
+    ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability","referral_channel","what_stands_out","opinion_of_medlife","expected_contribution","future_ideas","volunteer_commitment"]
   ];
   const known = new Set(GROUPS.flat());
   const $ = id => document.getElementById(id);
@@ -344,6 +344,9 @@
     renderFields();setAlert("");
   }
   function validStep(step) {
+    if (step===5 && valueOf("volunteer_commitment")==="2") {
+      setAlert("لا يمكن إتمام الانضمام دون الموافقة على الالتزام بالعمل التطوعي وأنظمة المؤسسة.");return false;
+    }
     if (step===3) {
       const chosen=state.preferences.filter(Boolean);
       if(chosen.includes("medical_consultations") && !consultationsEligible()) {
