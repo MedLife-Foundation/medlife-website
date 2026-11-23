@@ -205,6 +205,11 @@
     section.id = "preference-area";
     section.append(create("h3","preference-title","المجال الذي ترغب بالانضمام إليه"));
     section.append(create("p","help","اختر المجال الذي ترغب بالتقدم إليه أولاً، ويمكنك إضافة مجالين آخرين حسب الأولوية. هذه اختيارات أولية ولا تعني تعييناً في خلية أو قسم؛ يتم التوزيع بعد الفرز والمقابلة والتقييم."));
+    const eligibilityTip=create("p","consultation-note",
+      consultationsEligible()
+        ? "الاستشارات الطبية متاحة لك حسب الصفة المهنية المحددة. اختر المجال ثم حدد اختصاصاً أو اختصاصين في الخطوة التالية."
+        : "قسم الاستشارات الطبية موجود ضمن المجالات الـ13، لكنه متاح فقط للطبيب والطبيب المقيم والطبيب الاختصاصي والصيدلي. لاختياره، يرجى تحديد صفتك المهنية الصحيحة في خطوة «الدراسة والعمل».");
+    section.append(eligibilityTip);
     const grid = create("div","preference-grid");
     const positions = ["المجال الذي ترغب بالانضمام إليه — إلزامي","مجال إضافي ترغب بالانضمام إليه — اختياري","مجال ثالث ترغب بالانضمام إليه — اختياري"];
     for (let i=0; i<3; i++) {
@@ -215,10 +220,11 @@
       select.id="jf-preference-"+i;
       const empty=create("option","",i===0?"اختر مجال التطوع":"لا أرغب بمجال إضافي");
       empty.value="";select.append(empty);
-      for (const cat of state.categories.filter(category=>category.value!=="medical_consultations" || consultationsEligible())) {
-        const option=create("option","",cat.label_ar);
+      for (const cat of state.categories) {
+        const restricted = cat.value==="medical_consultations" && !consultationsEligible();
+        const option=create("option","",cat.label_ar + (restricted?" (للأطباء والمقيمين والصيادلة فقط)":""));
         option.value=cat.value;
-        option.disabled=state.preferences.some((value,index)=>index!==i && value===cat.value);
+        option.disabled=restricted || state.preferences.some((value,index)=>index!==i && value===cat.value);
         select.append(option);
       }
       select.value=state.preferences[i] || "";
