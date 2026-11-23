@@ -87,7 +87,51 @@ const DEFAULT_CERTIFICATE_TYPE_OPTIONS = [
 
 /* Separate intake-only questions. Published renewal schemas and existing member records are unchanged.
    These become part of the versioned form snapshot attached to each new application. */
+const NEW_VOLUNTEER_CATEGORIES = [
+  { value: "medical_content", label_ar: "كتابة المحتوى الطبي" },
+  { value: "medical_content_formatting", label_ar: "تنسيق المحتوى الطبي" },
+  { value: "design", label_ar: "التصميم الجرافيكي والبوسترات" },
+  { value: "video_editing", label_ar: "مونتاج الفيديوهات" },
+  { value: "visual_media", label_ar: "الإعلام المرئي" },
+  { value: "field_work", label_ar: "القسم الميداني" },
+  { value: "university_media", label_ar: "الإعلام الجامعي" },
+  { value: "voice_over", label_ar: "التعليق الصوتي" },
+  { value: "it", label_ar: "تقنية المعلومات IT" },
+  { value: "telegram", label_ar: "إدارة التليجرام" },
+  { value: "instagram", label_ar: "إدارة الإنستاغرام" },
+  { value: "podcast_live", label_ar: "البودكاست والبث المباشر" },
+  { value: "medical_consultations", label_ar: "الاستشارات الطبية" },
+];
+
 const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  {
+    field_key: "volunteer_interest_preferences", label_ar: "ترتيب مجالات التطوع المفضلة",
+    help_ar: "أولوية أولى إلزامية وأولويتان إضافيتان اختياريتان؛ ليست تعييناً لأي خلية أو قسم.",
+    field_type: "multi_select", required: true, sort_order: 151,
+    options: NEW_VOLUNTEER_CATEGORIES,
+  },
+  {
+    field_key: "podcast_experience", label_ar: "هل لديك خبرة في إعداد وتقديم البودكاست أو البث المباشر؟",
+    field_type: "select", required: true, sort_order: 385,
+    options: [
+      {value: "experienced", label_ar: "نعم، لدي خبرة عملية"},
+      {value: "some", label_ar: "لدي تجربة بسيطة"},
+      {value: "learn", label_ar: "لا، لكنني أرغب بالتعلم"},
+    ],
+    visibility: {mode: "when", field_key: "primary_volunteer_field", operator: "equals", value: "podcast_live"},
+  },
+  {
+    field_key: "podcast_skills", label_ar: "ما الأدوار التي تستطيع تنفيذها في البودكاست والبث المباشر؟",
+    field_type: "multi_select", required: true, sort_order: 386,
+    options: [
+      {value:"hosting",label_ar:"التقديم وإدارة الحوار"},
+      {value:"planning",label_ar:"إعداد المحاور والبحث"},
+      {value:"recording",label_ar:"التسجيل الصوتي وتصوير الفيديو"},
+      {value:"streaming",label_ar:"إدارة البث المباشر والأجهزة"},
+      {value:"editing",label_ar:"تحرير الحلقات وإنتاجها"},
+    ],
+    visibility: {mode: "when", field_key: "primary_volunteer_field", operator: "equals", value: "podcast_live"},
+  },
   {
     field_key: "practical_skills", label_ar: "ما المهارات العملية التي تتقنها ويمكنك توظيفها في ميدلايف؟",
     help_ar: "اذكر مهارات محددة مع أمثلة قصيرة، مثل الكتابة أو التصوير أو البحث أو التنظيم.",
@@ -148,7 +192,11 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
 function fieldsForNewVolunteerIntake(baseFields, formKey) {
   if (formKey !== "new_volunteer_application") return baseFields;
   // Hold back the monthly-fee question pending a clear organizational policy.
-  const base = baseFields.filter(field => field.field_key !== "field_work_monthly_fee");
+  const base = baseFields
+    .filter(field => field.field_key !== "field_work_monthly_fee")
+    .map(field => field.field_key === "primary_volunteer_field"
+      ? {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "مجال التطوع الأساسي"}
+      : field);
   const seen = new Set(base.map(field => field.field_key));
   return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key))]
     .sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
@@ -521,6 +569,17 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
         ? false
         : value === undefined || value === null || String(value).trim() === "";
     if (missing) throw new Error("يرجى تعبئة السؤال: " + String(field.label_ar || field.field_key));
+  }
+
+  if (form.form_key === "new_volunteer_application") {
+    const preferences = formData.volunteer_interest_preferences;
+    const allowed = new Set(NEW_VOLUNTEER_CATEGORIES.map(item => item.value));
+    if (!Array.isArray(preferences) || preferences.length < 1 || preferences.length > 3 ||
+        new Set(preferences).size !== preferences.length ||
+        !preferences.every(value => allowed.has(String(value))) ||
+        preferences[0] !== formData.primary_volunteer_field) {
+      throw new Error("يرجى اختيار من مجال إلى ثلاثة مجالات تطوع صحيحة حسب الأولوية، مع تطابق المجال الأساسي مع الرغبة الأولى.");
+    }
   }
 
   const formSchema = {
@@ -1203,31 +1262,45 @@ export async function onRequestPost({ request }) {
         return json({ success: false, error: formError.message || "نموذج الانضمام غير صالح." }, 400);
       }
 
-      const unitsResponse = await fetch(
-        SUPABASE_URL + "/rest/v1/org_units?select=name_ar,name_en&unit_type=in.(cell,department,field_team)&is_active=eq.true",
-        {
-          headers: {
-            apikey: SUPABASE_PUBLISHABLE_KEY,
-            Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-            Accept: "application/json"
-          }
-        }
-      );
-      const units = await unitsResponse.json().catch(() => []);
-      const allowedNames = new Set(
-        (Array.isArray(units) ? units : []).flatMap((unit) => [unit.name_ar, unit.name_en]).filter(Boolean)
-      );
       if (body.action === "new_volunteer_application") {
-        const preferred = payload.requested_departments;
-        if (preferred.length < 1 || preferred.length > 3 ||
-            new Set(preferred).size !== preferred.length ||
-            !preferred.every(name => allowedNames.has(name))) {
-          return json({ success: false, error: "يجب اختيار رغبة إلى ثلاث رغبات تطوعية صحيحة وغير مكررة." }, 400);
+        // Applicant preferences are broad recruitment tracks, NOT internal org units.
+        // The assigned unit and internal distribution are selected later by authorized HR staff.
+        const ranked = payload.form_data?.volunteer_interest_preferences;
+        const first = payload.form_data?.primary_volunteer_field;
+        const label = NEW_VOLUNTEER_CATEGORIES.find(category => category.value === first)?.label_ar;
+        if (!Array.isArray(ranked) || ranked.length < 1 || !label) {
+          return json({ success: false, error: "يرجى تحديد مجال التطوع الأساسي." }, 400);
         }
-        // The membership number is issued only after an authorized acceptance decision.
+        payload.interest = label;
+        payload.requested_departments = [];
         payload.id = crypto.randomUUID();
+      } else {
+        const unitsResponse = await fetch(
+          SUPABASE_URL + "/rest/v1/org_units?select=name_ar,name_en&unit_type=in.(cell,department,field_team)&is_active=eq.true",
+          {
+            headers: {
+              apikey: SUPABASE_PUBLISHABLE_KEY,
+              Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY,
+              Accept: "application/json"
+            }
+          }
+        );
+        const units = await unitsResponse.json().catch(() => []);
+        const allowedNames = new Set(
+          (Array.isArray(units) ? units : []).flatMap((unit) => [unit.name_ar, unit.name_en]).filter(Boolean)
+        );
+        if (body.action === "new_volunteer_application") {
+          const preferred = payload.requested_departments;
+          if (preferred.length < 1 || preferred.length > 3 ||
+              new Set(preferred).size !== preferred.length ||
+              !preferred.every(name => allowedNames.has(name))) {
+            return json({ success: false, error: "يجب اختيار رغبة إلى ثلاث رغبات تطوعية صحيحة وغير مكررة." }, 400);
+          }
+          // The membership number is issued only after an authorized acceptance decision.
+          payload.id = crypto.randomUUID();
+        }
+        payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
       }
-      payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
     }
 
     const writeUrl = SUPABASE_URL + "/rest/v1/" + target;
