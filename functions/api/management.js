@@ -170,6 +170,13 @@ const PHARMACY_CONSULTATION_CODES = new Set(["pharmacy","clinical_pharmacy","pha
 
 // Verified ISO 3166-1 alpha-2 territory list. Labels are Arabic CLDR region names.
 const INTAKE_COUNTRY_CODES = "AW AF AO AI AX AL AD AE AR AM AS AQ TF AG AU AT AZ BI BE BJ BQ BF BD BG BH BS BA BL BY BZ BM BO BR BB BN BT BV BW CF CA CC CH CL CN CI CM CD CG CK CO KM CV CR CU CW CX KY CY CZ DE DJ DM DK DO DZ EC EG ER EH ES EE ET FI FJ FK FR FO FM GA GB GE GG GH GI GN GP GM GW GQ GR GD GL GT GF GU GY HK HM HN HR HT HU ID IM IN IO IE IR IQ IS IL IT JM JE JO JP KZ KE KG KH KI KN KR KW LA LB LR LY LC LI LK LS LT LU LV MO MF MA MC MD MG MV MX MH MK ML MT MM ME MN MP MZ MR MS MQ MU MW MY YT NA NC NE NF NG NI NU NL NO NP NR NZ OM PK PA PN PE PH PW PG PL PR KP PT PY PS PF QA RE RO RU RW SA SD SN SG GS SH SJ SB SL SV SM SO PM RS SS ST SR SK SI SE SZ SX SC SY TC TD TG TH TJ TK TM TL TO TT TN TR TV TW TZ UG UA UM UY US UZ VA VC VE VG VI VN VU WF WS YE ZA ZM ZW".split(" ");
+const INTAKE_UNIVERSITIES = [{"value":"uni_1","label_ar":"جامعة دمشق"},{"value":"uni_2","label_ar":"جامعة حلب"},{"value":"uni_3","label_ar":"جامعة اللاذقية (تشرين سابقاً)"},{"value":"uni_4","label_ar":"جامعة حمص (البعث سابقاً)"},{"value":"uni_5","label_ar":"جامعة الفرات"},{"value":"uni_6","label_ar":"جامعة حماة"},{"value":"uni_7","label_ar":"جامعة طرطوس"},{"value":"uni_8","label_ar":"جامعة إدلب"},{"value":"uni_9","label_ar":"الجامعة الافتراضية السورية"},{"value":"uni_10","label_ar":"جامعة الأندلس الخاصة للعلوم الطبية"},{"value":"uni_11","label_ar":"الجامعة السورية الخاصة"},{"value":"uni_12","label_ar":"جامعة القلمون الخاصة"},{"value":"uni_13","label_ar":"جامعة الوادي الدولية الخاصة"},{"value":"uni_14","label_ar":"جامعة المنارة"},{"value":"uni_15","label_ar":"جامعة الشام الخاصة"},{"value":"uni_16","label_ar":"الجامعة العربية الدولية"},{"value":"uni_17","label_ar":"جامعة قرطبة الخاصة"},{"value":"uni_18","label_ar":"جامعة الاتحاد الخاصة"},{"value":"uni_19","label_ar":"جامعة الحواش الخاصة"},{"value":"uni_20","label_ar":"جامعة تشرين الخاصة"},{"value":"uni_21","label_ar":"جامعة الرشيد الدولية الخاصة"},{"value":"uni_22","label_ar":"جامعة الشهباء الخاصة"},{"value":"uni_23","label_ar":"جامعة اليرموك الخاصة"},{"value":"uni_24","label_ar":"الجامعة الدولية الخاصة للعلوم والتكنولوجيا"},{"value":"uni_25","label_ar":"جامعة الزيتونة الدولية الخاصة"},{"value":"uni_26","label_ar":"جامعة أنطاكية السورية الخاصة"},{"value":"other","label_ar":"جامعة أخرى / خارج القائمة"}];
+const INTAKE_DENTAL_SPECIALTIES = [{"value":"dent_1","label_ar":"طب الأسنان العام"},{"value":"dent_2","label_ar":"جراحة الفم والوجه والفكين"},{"value":"dent_3","label_ar":"تقويم الأسنان والفكين"},{"value":"dent_4","label_ar":"المعالجة اللبية"},{"value":"dent_5","label_ar":"أمراض وجراحة اللثة"},{"value":"dent_6","label_ar":"التعويضات السنية الثابتة"},{"value":"dent_7","label_ar":"التعويضات السنية المتحركة"},{"value":"dent_8","label_ar":"زراعة الأسنان"},{"value":"dent_9","label_ar":"طب أسنان الأطفال"},{"value":"dent_10","label_ar":"طب أسنان الأسرة والمجتمع"},{"value":"dent_11","label_ar":"طب الفم وتشخيص أمراضه"},{"value":"dent_12","label_ar":"طب الأسنان الترميمي والتجميلي"},{"value":"dent_13","label_ar":"الأشعة الفموية والفكية"},{"value":"dent_14","label_ar":"الصحة العامة الفموية"},{"value":"dent_15","label_ar":"النسج الفموية والمرضية"},{"value":"dent_16","label_ar":"الوقاية وصحة الفم"}];
+const INTAKE_PHARMACY_SPECIALTIES = [{"value":"pharm_1","label_ar":"الصيدلة الصناعية"},{"value":"pharm_2","label_ar":"الصيدلة التحليلية"},{"value":"pharm_3","label_ar":"الصيدلة الحيوية"},{"value":"pharm_4","label_ar":"مراقبة جودة الأدوية"},{"value":"pharm_5","label_ar":"التيقظ الدوائي"}];
+const INTAKE_MEDICAL_SPECIALTIES = MEDICAL_CONSULTATION_SPECIALTIES.filter(x=>!PHARMACY_CONSULTATION_CODES.has(x.value));
+const INTAKE_ALL_SPECIALTIES = [...INTAKE_MEDICAL_SPECIALTIES,...INTAKE_DENTAL_SPECIALTIES,...MEDICAL_CONSULTATION_SPECIALTIES.filter(x=>PHARMACY_CONSULTATION_CODES.has(x.value)),...INTAKE_PHARMACY_SPECIALTIES];
+const INTAKE_WHATSAPP_DIAL_CODES = [{"value":"+963","label_ar":"سوريا +963"},{"value":"+961","label_ar":"لبنان +961"},{"value":"+90","label_ar":"تركيا +90"},{"value":"+962","label_ar":"الأردن +962"},{"value":"+964","label_ar":"العراق +964"},{"value":"+970","label_ar":"فلسطين +970"},{"value":"+972","label_ar":"إسرائيل +972"},{"value":"+20","label_ar":"مصر +20"},{"value":"+966","label_ar":"السعودية +966"},{"value":"+971","label_ar":"الإمارات +971"},{"value":"+974","label_ar":"قطر +974"},{"value":"+965","label_ar":"الكويت +965"},{"value":"+968","label_ar":"عُمان +968"},{"value":"+973","label_ar":"البحرين +973"},{"value":"+967","label_ar":"اليمن +967"},{"value":"+31","label_ar":"هولندا +31"},{"value":"+49","label_ar":"ألمانيا +49"},{"value":"+33","label_ar":"فرنسا +33"},{"value":"+44","label_ar":"المملكة المتحدة +44"},{"value":"+1","label_ar":"الولايات المتحدة / كندا +1"},{"value":"+46","label_ar":"السويد +46"},{"value":"+47","label_ar":"النرويج +47"},{"value":"+45","label_ar":"الدنمارك +45"},{"value":"+32","label_ar":"بلجيكا +32"},{"value":"+41","label_ar":"سويسرا +41"},{"value":"+43","label_ar":"النمسا +43"},{"value":"+39","label_ar":"إيطاليا +39"},{"value":"+34","label_ar":"إسبانيا +34"},{"value":"+7","label_ar":"روسيا / كازاخستان +7"},{"value":"+61","label_ar":"أستراليا +61"},{"value":"+64","label_ar":"نيوزيلندا +64"},{"value":"+91","label_ar":"الهند +91"},{"value":"+86","label_ar":"الصين +86"},{"value":"+81","label_ar":"اليابان +81"},{"value":"+82","label_ar":"كوريا الجنوبية +82"},{"value":"+92","label_ar":"باكستان +92"},{"value":"+98","label_ar":"إيران +98"},{"value":"+27","label_ar":"جنوب أفريقيا +27"},{"value":"other","label_ar":"رمز دولة أخرى (أدخله يدوياً)"}];
+
 const INTAKE_OTHER_COUNTRIES = (() => {
   const names = new Intl.DisplayNames(["ar"], {type:"region"});
   return INTAKE_COUNTRY_CODES.filter(code=>code!=="SY")
@@ -1001,6 +1008,22 @@ const LEGACY_RECRUITMENT_REFERENCE_FIELDS = [
 ];
 
 const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  {"field_key":"academic_status_other","label_ar":"ما وضعك الدراسي أو المهني حالياً؟","field_type":"text","required":true,"sort_order":111,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"other"}},
+  {"field_key":"school_name","label_ar":"اسم المدرسة","field_type":"text","required":true,"sort_order":118,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"school"}},
+  {"field_key":"institute_name","label_ar":"اسم المعهد واختصاصك فيه","field_type":"text","required":true,"sort_order":119,"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"institute"}},
+  {"field_key":"university_other","label_ar":"اكتب اسم الجامعة كاملاً","field_type":"text","required":true,"sort_order":120.5,"visibility":{"mode":"when","field_key":"university","operator":"equals","value":"other"}},
+  {"field_key":"study_field","label_ar":"ما الاختصاص الذي تدرسه أو تخرجت منه؟","field_type":"select","required":true,"sort_order":121.1,"options":[{"value":"human_medicine","label_ar":"طب بشري"},{"value":"dentistry","label_ar":"طب أسنان"},{"value":"pharmacy","label_ar":"صيدلة"},{"value":"nursing","label_ar":"تمريض"},{"value":"other","label_ar":"اختصاص آخر"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"in","value":"university,graduate,postgraduate"}},
+  {"field_key":"study_field_other","label_ar":"ما الاختصاص الذي تدرسه؟ (اذكره كما هو مسجل في جامعتك)","field_type":"text","required":true,"sort_order":121.2,"visibility":{"mode":"when","field_key":"study_field","operator":"equals","value":"other"}},
+  {"field_key":"medical_profession","label_ar":"ما المجال الطبي الذي تنتمي إليه؟","field_type":"select","required":true,"sort_order":122.1,"options":[{"value":"human_medicine","label_ar":"طب بشري"},{"value":"dentistry","label_ar":"طب أسنان"},{"value":"pharmacy","label_ar":"صيدلة"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"in","value":"doctor,resident_doctor,specialist,pharmacist"}},
+  {"field_key":"resident_specialty_other","label_ar":"اذكر اسم اختصاص الإقامة غير الموجود بالقائمة","field_type":"text","required":true,"sort_order":123.1,"visibility":{"mode":"when","field_key":"resident_specialty","operator":"equals","value":"other"}},
+  {"field_key":"residency_start_year","label_ar":"سنة بدء الإقامة الفعلية (تاريخ المباشرة)","field_type":"number","required":true,"sort_order":124.4,"validation":{"min":1980,"max":2026,"step":1},"help_ar":"اكتب سنة بدء المباشرة الفعلية في المشفى، وليس سنة التخرج.","visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
+  {"field_key":"residency_program","label_ar":"ما نظام الإقامة أو الجهة التدريبية؟","field_type":"select","required":true,"sort_order":124.6,"options":[{"value":"syrian_board","label_ar":"الهيئة السورية للاختصاصات الطبية / البورد السوري"},{"value":"university","label_ar":"الدراسات العليا / الجامعة"},{"value":"health_ministry","label_ar":"برنامج تابع لوزارة الصحة"},{"value":"other","label_ar":"جهة تدريبية أخرى"}],"visibility":{"mode":"when","field_key":"academic_status","operator":"equals","value":"resident_doctor"}},
+  {"field_key":"residency_program_other","label_ar":"اذكر الجهة التدريبية الأخرى","field_type":"text","required":true,"sort_order":124.7,"visibility":{"mode":"when","field_key":"residency_program","operator":"equals","value":"other"}},
+  {"field_key":"doctor_specialty_other","label_ar":"اذكر اختصاصك غير المدرج","field_type":"text","required":true,"sort_order":126.1,"visibility":{"mode":"when","field_key":"doctor_specialty","operator":"equals","value":"other"}},
+  {"field_key":"specialty_other","label_ar":"اذكر اختصاصك غير المدرج","field_type":"text","required":true,"sort_order":127.1,"visibility":{"mode":"when","field_key":"specialty","operator":"equals","value":"other"}},
+  {"field_key":"phone_country_code","label_ar":"رمز اتصال بلد الواتساب","field_type":"select","required":true,"sort_order":55,"options":[{"value":"+963","label_ar":"سوريا +963"},{"value":"+961","label_ar":"لبنان +961"},{"value":"+90","label_ar":"تركيا +90"},{"value":"+962","label_ar":"الأردن +962"},{"value":"+964","label_ar":"العراق +964"},{"value":"+970","label_ar":"فلسطين +970"},{"value":"+972","label_ar":"إسرائيل +972"},{"value":"+20","label_ar":"مصر +20"},{"value":"+966","label_ar":"السعودية +966"},{"value":"+971","label_ar":"الإمارات +971"},{"value":"+974","label_ar":"قطر +974"},{"value":"+965","label_ar":"الكويت +965"},{"value":"+968","label_ar":"عُمان +968"},{"value":"+973","label_ar":"البحرين +973"},{"value":"+967","label_ar":"اليمن +967"},{"value":"+31","label_ar":"هولندا +31"},{"value":"+49","label_ar":"ألمانيا +49"},{"value":"+33","label_ar":"فرنسا +33"},{"value":"+44","label_ar":"المملكة المتحدة +44"},{"value":"+1","label_ar":"الولايات المتحدة / كندا +1"},{"value":"+46","label_ar":"السويد +46"},{"value":"+47","label_ar":"النرويج +47"},{"value":"+45","label_ar":"الدنمارك +45"},{"value":"+32","label_ar":"بلجيكا +32"},{"value":"+41","label_ar":"سويسرا +41"},{"value":"+43","label_ar":"النمسا +43"},{"value":"+39","label_ar":"إيطاليا +39"},{"value":"+34","label_ar":"إسبانيا +34"},{"value":"+7","label_ar":"روسيا / كازاخستان +7"},{"value":"+61","label_ar":"أستراليا +61"},{"value":"+64","label_ar":"نيوزيلندا +64"},{"value":"+91","label_ar":"الهند +91"},{"value":"+86","label_ar":"الصين +86"},{"value":"+81","label_ar":"اليابان +81"},{"value":"+82","label_ar":"كوريا الجنوبية +82"},{"value":"+92","label_ar":"باكستان +92"},{"value":"+98","label_ar":"إيران +98"},{"value":"+27","label_ar":"جنوب أفريقيا +27"},{"value":"other","label_ar":"رمز دولة أخرى (أدخله يدوياً)"}],"help_ar":"اختر رمز الاتصال الدولي الذي يبدأ به رقمك، حتى لو كان مختلفاً عن بلد إقامتك."},
+  {"field_key":"phone_dial_other","label_ar":"اكتب رمز الاتصال الدولي (مثل +358)","field_type":"text","required":true,"sort_order":55.5,"visibility":{"mode":"when","field_key":"phone_country_code","operator":"equals","value":"other"}},
+  {"field_key":"whatsapp_confirmed","label_ar":"هل الرقم أعلاه مرتبط بحساب واتساب نشط ويمكن التواصل معك عبره؟","field_type":"select","required":true,"sort_order":61,"options":[{"value":"yes","label_ar":"نعم، هذا الرقم مرتبط بواتساب وأستطيع استقبال الرسائل"},{"value":"no","label_ar":"لا، ليس لدي واتساب على هذا الرقم"}],"help_ar":"نستخدم واتساب للتواصل بخصوص المقابلات وقبول المتطوعين. لا يُرسل طلبك إن كان الرقم غير مفعّل على واتساب."},
   ...LEGACY_RECRUITMENT_REFERENCE_FIELDS,
   {
     field_key:"other_country",label_ar:"اختر بلد الإقامة من قائمة الدول",field_type:"select",required:true,sort_order:85,
@@ -1153,18 +1176,44 @@ function fieldsForNewVolunteerIntake(baseFields, formKey) {
           ...additions
         ]};
       }
-      if (field.field_key === "full_name") {
-        return {...field,label_ar:"الاسم الثلاثي الكامل"};
-      }
       if (field.field_key === "university") {
-        // Employment-only applicants are not required to provide a university.
-        return {...field,label_ar:"اسم الجامعة أو المعهد أو المؤسسة التعليمية",
+        return {...field,field_type:"select",options:INTAKE_UNIVERSITIES,
+          label_ar: "اختر الجامعة التي تدرس أو درست فيها",
           visibility:{mode:"when",field_key:"academic_status",operator:"in",
-            value:"school,institute,university,graduate,doctor,resident_doctor,specialist,postgraduate,pharmacist"}};
+            value:"university,graduate,doctor,resident_doctor,specialist,postgraduate,pharmacist"}};
       }
       if (field.field_key === "faculty") {
-        return {...field,visibility:{mode:"when",field_key:"academic_status",operator:"in",
-          value:"university,graduate,doctor,resident_doctor,specialist,postgraduate,pharmacist"}};
+        return {...field,required:false,
+          visibility:{mode:"when",field_key:"academic_status",operator:"in",
+            value:"graduate,postgraduate"}};
+      }
+      if (field.field_key === "study_year") {
+        return {...field,label_ar:"السنة الدراسية الحالية",required:true,
+          visibility:{mode:"when",field_key:"academic_status",operator:"in",
+            value:"school,institute,university"}};
+      }
+      if (["resident_specialty","doctor_specialty","specialty"].includes(field.field_key)) {
+        return {...field,field_type:"select",
+          options:[...INTAKE_ALL_SPECIALTIES,{value:"other",label_ar:"اختصاص غير مدرج — سأكتبه بنفسي"}],
+          label_ar:field.field_key==="resident_specialty"
+            ? "اختصاص الإقامة الحالية" : "اختصاصك الطبي أو المهني"};
+      }
+      if (field.field_key === "residency_year") {
+        return {...field,field_type:"select",
+          options:Array.from({length:10},(_,i)=>({value:String(i+1),label_ar:"السنة "+(i+1)})),
+          label_ar:"السنة الحالية من الإقامة"};
+      }
+      if (field.field_key === "residency_hospital") {
+        return {...field,label_ar:"اسم المشفى الذي تباشر فيه الإقامة حالياً",
+          placeholder_ar:"مثال: مشفى التوليد والأطفال بطرطوس"};
+      }
+      if (field.field_key === "phone") {
+        return {...field,label_ar:"رقم الهاتف المرتبط بواتساب مع الرمز الدولي",
+          placeholder_ar:"+9639XXXXXXXX",
+          help_ar:"أدخل الرقم كاملاً بالصيغة الدولية، مثلاً +9639XXXXXXXX، من دون صفر إضافي بعد رمز البلد. يجب أن يكون واتساب فعالاً على هذا الرقم."};
+      }
+      if (field.field_key === "full_name") {
+        return {...field,label_ar:"الاسم الثلاثي الكامل"};
       }
       if (field.field_key === "governorate") {
         return {...field, visibility:{mode:"when",field_key:"country",operator:"equals",value:"سوريا"}};
