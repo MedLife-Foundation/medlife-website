@@ -32,6 +32,7 @@ function normalizeCmsArticle(row) {
     excerpt_ar: row.excerpt,
     excerpt_en: metadata.excerpt_en || null,
     content_ar: row.body,
+    body_format_version: metadata.body_format_version,
     content_en: metadata.content_en || null,
     author_name: metadata.author_name || "MedLife",
     category: metadata.category || metadata.specialty || "محتوى طبي",

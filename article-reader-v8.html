@@ -104,7 +104,7 @@ function normalizeFlatArticleBlocks(container) {
 }
 
 const articleBody = document.getElementById("articleBody");
-if (!articleBody.querySelector(":scope > p, :scope > h2, :scope > h3")) {
+if (a.body_format_version !== 2 && !articleBody.querySelector(":scope > p, :scope > h2, :scope > h3")) {
   normalizeFlatArticleBlocks(articleBody);
 }
 articleBody.querySelectorAll("table").forEach(table => {
