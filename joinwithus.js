@@ -212,17 +212,47 @@
       const placeholder = create("option","", "اختر الإجابة");
       placeholder.value = "";
       el.append(placeholder);
-      for (const o of opts(field)) {
+      for (const o of choiceOptions(field)) {
         const op = create("option","",o.label_ar || o.label_en || o.value);
         op.value = text(o.value);
         el.append(op);
       }
-      el.value = text(valueOf(key));
+      const chosen=text(valueOf(key));
+      el.value=chosen;
+      if(chosen && ![...el.options].some(option=>option.value===chosen))el.value="";
       el.addEventListener("change", () => setValue(key,el.value,true));
+      // Avoid an unmanageable dropdown when choosing universities or Syrian board specialties.
+      if (["university","resident_specialty","doctor_specialty","specialty","other_country"].includes(key)) {
+        const searchable=create("input","select-search");
+        searchable.type="search";
+        searchable.placeholder=key==="university"?"ابحث عن اسم الجامعة..."
+          :key==="other_country"?"ابحث عن بلد الإقامة...":"ابحث عن الاختصاص...";
+        searchable.setAttribute("aria-label","تصفية خيارات "+labelOf(field));
+        searchable.addEventListener("input",()=>{
+          const term=searchable.value.trim().toLocaleLowerCase("ar");
+          const selected=el.value;
+          el.replaceChildren();
+          const initial=create("option","","اختر الإجابة");initial.value="";el.append(initial);
+          for(const opt of choiceOptions(field)){
+            if(term && !(String(opt.label_ar||opt.value).toLocaleLowerCase("ar").includes(term))
+                && String(opt.value)!==selected)continue;
+            const option=create("option","",opt.label_ar||opt.label_en||opt.value);
+            option.value=String(opt.value);el.append(option);
+          }
+          el.value=selected;
+          if(!selected)el.selectedIndex=0;
+        });
+        wrap.append(searchable);
+      }
     } else {
       el = create(type === "textarea" ? "textarea" : "input");
       if (type !== "textarea") {
         el.type = {email:"email",phone:"tel",url:"url",number:"number",date:"date"}[type] || "text";
+        if(key==="phone"){
+          el.dir="ltr";el.inputMode="tel";
+          el.placeholder="+9639XXXXXXXX";
+        }
+        if(key==="phone_dial_other"){el.dir="ltr";el.placeholder="+358";el.inputMode="tel";}
         if (type === "number") {
           if (field.validation && field.validation.min !== undefined) el.min = field.validation.min;
           if (field.validation && field.validation.max !== undefined) el.max = field.validation.max;
@@ -370,7 +400,17 @@
       for (const field of fields) if (!rendered.has(field.field_key)) area.append(controlFor(field));
       return;
     }
-    if (state.step === 0) area.append(create("p","section-tip","تُستخدم بيانات الهوية الحساسة للتحقق من عدم تكرار طلبات الانتساب، ولا تُنشر ضمن الملف العام."));
+    if (state.step === 0) area.append(create("p","section-tip","تُستخدم بيانات الهوية للتحقق من عدم تكرار طلبات الانضمام. تُحفظ بسرية ولا تُنشر ضمن الملف العام."));
+    if (state.step === 1) area.append(create("p","section-tip","رجاءً أدخل رقم هاتف دولياً يعمل عليه واتساب، لأننا سنعتمد عليه في التواصل بشأن المقابلة والقبول. مثال سوريا: +9639XXXXXXXX، وليس 09XXXXXXXX."));
+    if (state.step === 2) {
+      const status=clinicianRole();
+      const tip=status==="university"
+        ?"نحتاج اسم جامعتك واختصاصك الحقيقي (طب بشري، طب أسنان، صيدلة، تمريض أو غير ذلك)، لأن الأسئلة التالية تعتمد على دراستك."
+        :status==="resident_doctor"
+          ?"بيانات الإقامة تشمل المجال الطبي، الاختصاص، اسم المشفى، سنة المباشرة الفعلية وسنة الإقامة الحالية."
+          :"اختر وضعك الدراسي أو المهني بدقة؛ ستظهر فقط الأسئلة التي تخصك.";
+      area.append(create("p","section-tip",tip));
+    }
     for (const field of fields) {
       if (state.step===3 && ["primary_volunteer_field","volunteer_interest_preferences"].includes(field.field_key)) continue;
       area.append(controlFor(field));
@@ -430,7 +470,22 @@
           setAlert("يرجى اختيار اختصاص أو اختصاصين مناسبين لصفتك المهنية فقط.");return false;
         }
       }
-      if (field.field_type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(value))) {
+      if (field.field_key === "phone") {
+        const normalized=text(value).replace(/[\s().-]/g,"");
+        const prefix=valueOf("phone_country_code")==="other"
+          ?text(valueOf("phone_dial_other")):text(valueOf("phone_country_code"));
+        if(!/^\+[1-9]\d{7,14}$/.test(normalized)||
+           !/^\+[1-9]\d{0,3}$/.test(prefix)||
+           !normalized.startsWith(prefix)||normalized.slice(prefix.length).length<6){
+          setAlert("اكتب رقم واتساب صحيحاً مع رمز الاتصال الدولي؛ مثال: +9639XXXXXXXX (بدون الصفر المحلي).");
+          document.getElementById("jf-phone")?.focus();return false;
+        }
+      }
+      if (field.field_key === "whatsapp_confirmed" && value!=="yes"){
+        setAlert("أكّد أن رقم الهاتف عليه حساب واتساب نشط ويمكن التواصل معك من خلاله.");
+        document.getElementById("jf-whatsapp_confirmed")?.focus();return false;
+      }
+      if (field.field_key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(value))) {
         setAlert("يرجى كتابة بريد إلكتروني صحيح.");return false;
       }
       if (field.field_type === "url") {
