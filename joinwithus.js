@@ -2,6 +2,7 @@
 (() => {
   "use strict";
   const FORM_KEY = "new_volunteer_application";
+  const PREVIEW_ONLY = location.hostname.toLowerCase().endsWith(".pages.dev");
   const STEPS = [
     { name:"البيانات الشخصية", desc:"نحتاج معلوماتك الأساسية كما ترغب بتسجيلها رسمياً." },
     { name:"التواصل والإقامة", desc:"سنتواصل معك على المعلومات التي تقدمها هنا." },
@@ -214,6 +215,9 @@
       prefs.append(create("span","", names.join(" | ") || "لم يتم اختيار مجال"));
       area.append(prefs);
     }
+    if (PREVIEW_ONLY) {
+      area.append(create("p","review-intro","هذه نسخة معاينة للاطلاع على الأسئلة والتصميم. الإرسال معطل هنا لحماية قاعدة بيانات المتطوعين؛ يُفعّل فقط بعد نشر الرابط الرسمي."));
+    }
     const consent = create("label","consent-box");
     const box = create("input");
     box.type = "checkbox";
@@ -256,7 +260,8 @@
     $("previous").disabled = state.step===0 || state.sending;
     setVisible("next",state.step<6);
     setVisible("submit",state.step===6);
-    $("submit").disabled = state.sending;
+    $("submit").disabled = state.sending || PREVIEW_ONLY;
+    $("submit").textContent = PREVIEW_ONLY ? "معاينة فقط — الإرسال غير مفعل" : "إرسال طلب الانضمام ←";
     renderFields();setAlert("");
   }
   function validStep(step) {
@@ -346,6 +351,7 @@
   async function submit(event) {
     event.preventDefault();
     if (state.sending || state.step!==6) return;
+    if (PREVIEW_ONLY) {setAlert("لا يمكن إرسال طلب حقيقي من رابط المعاينة.");return;}
     for (let i=0;i<6;i++) if (!validStep(i)) {state.step=i;render();validStep(i);visitTop();return;}
     if (!state.consent) {setAlert("يرجى الموافقة على إقرار البيانات قبل إرسال الطلب.");return;}
     state.sending=true;$("submit").disabled=true;$("submit").textContent="جارٍ إرسال الطلب...";
