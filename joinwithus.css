@@ -32,3 +32,6 @@
 .choices-grid.specialty-choices .choice-option{background:#fff;font-size:11px}
 .choices-grid.specialty-choices .choice-option:has(input:checked){background:#eaf1fb}
 @media(max-width:620px){.choices-grid.specialty-choices{max-height:300px}}
+
+/* Clarifies the restricted consultation track without hiding it from applicants. */
+.consultation-note{margin:0;border:1px solid #dce6f3;border-radius:11px;background:#fff;color:var(--navy);padding:10px 13px;font-size:11px;line-height:1.9;font-weight:700}
