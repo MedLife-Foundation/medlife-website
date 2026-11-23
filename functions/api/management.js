@@ -1142,10 +1142,29 @@ function fieldsForNewVolunteerIntake(baseFields, formKey) {
       }
       if (field.field_key === "academic_status") {
         const options = Array.isArray(field.options) ? field.options : [];
-        return {...field, options: [
-          ...options.filter(option=>option.value!=="pharmacist"),
+        const additions = [
+          {value:"postgraduate",label_ar:"طالب دراسات عليا"},
+          {value:"employee",label_ar:"موظف / موظفة"},
+          {value:"freelancer",label_ar:"مستقل / Freelancer"},
           {value:"pharmacist",label_ar:"صيدلي / صيدلانية"}
+        ];
+        return {...field, options:[
+          ...options.filter(option=>!additions.some(extra=>extra.value===option.value)),
+          ...additions
         ]};
+      }
+      if (field.field_key === "full_name") {
+        return {...field,label_ar:"الاسم الثلاثي الكامل"};
+      }
+      if (field.field_key === "university") {
+        // Employment-only applicants are not required to provide a university.
+        return {...field,label_ar:"اسم الجامعة أو المعهد أو المؤسسة التعليمية",
+          visibility:{mode:"when",field_key:"academic_status",operator:"in",
+            value:"school,institute,university,graduate,doctor,resident_doctor,specialist,postgraduate,pharmacist"}};
+      }
+      if (field.field_key === "faculty") {
+        return {...field,visibility:{mode:"when",field_key:"academic_status",operator:"in",
+          value:"university,graduate,doctor,resident_doctor,specialist,postgraduate,pharmacist"}};
       }
       if (field.field_key === "governorate") {
         return {...field, visibility:{mode:"when",field_key:"country",operator:"equals",value:"سوريا"}};
