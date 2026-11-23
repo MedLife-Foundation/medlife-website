@@ -167,6 +167,7 @@
           select.value=state.preferences[i] || "";return;
         }
         state.preferences[i]=value;
+        if (i===0 && !value) {state.preferences[1]="";state.preferences[2]="";}
         // A vacant second preference also clears the third one to preserve ordering.
         if (i===1 && !value) state.preferences[2]="";
         renderPreferences();setAlert("");
@@ -253,7 +254,7 @@
   function validStep(step) {
     if (step===3) {
       const chosen=state.preferences.filter(Boolean);
-      if (!chosen.length) {setAlert("يرجى تحديد رغبتك الأولى في التطوع.");return false;}
+      if (!state.preferences[0]) {setAlert("يرجى تحديد رغبتك الأولى في التطوع.");return false;}
       if (new Set(chosen).size!==chosen.length || (state.preferences[2] && !state.preferences[1])) {
         setAlert("يرجى ترتيب الرغبات دون تكرار أو تجاوز الأولوية الثانية.");return false;
       }
