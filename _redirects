@@ -33,3 +33,7 @@
 
 # NOTE: /articles/* is intentionally NOT rewritten here.
 # Canonical article URLs are handled by functions/articles/[slug].js.
+
+# Recruitment intake for NEW volunteers only; renewal routes remain unchanged.
+/joinwithus /joinwithus.html 200
+/joinwithus/ /joinwithus.html 200
