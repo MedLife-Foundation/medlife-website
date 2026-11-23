@@ -1393,7 +1393,10 @@ export async function onRequestPost({ request }) {
     });
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Public management write failed", target, response.status, errorText);
+      // Database uniqueness errors can contain sensitive identity details.
+      // Do not log raw errors from new volunteer applications.
+      console.error("Public management write failed", target, response.status,
+        body.action === "new_volunteer_application" ? "[identity details suppressed]" : errorText.slice(0,500));
       if (body.action === "new_volunteer_application" && (
         /national_id|الرقم الوطني|public_volunteer_applications_national_id/i.test(errorText)
       )) {
