@@ -1071,6 +1071,10 @@ export async function onRequestPost({ request }) {
           : "تم استلام البيانات وحفظ الطلب، لكن تعذر تأكيد رقم العضوية الآن. لا تعِد إرسال النموذج؛ يرجى التواصل مع الإدارة."
       }, 201);
     } else {
+      // New applicants are handled separately from the existing member renewal flow.
+      if (body.action === "new_volunteer_application" && body.privacy_consent !== true) {
+        return json({ success: false, error: "يرجى الموافقة على معالجة بيانات طلب الانضمام." }, 400);
+      }
       const recruitmentResponse = await fetch(
         SUPABASE_URL + "/rest/v1/volunteer_recruitment_settings?select=is_open,opens_at,closes_at&id=eq.1",
         {
@@ -1098,6 +1102,9 @@ export async function onRequestPost({ request }) {
 
       try {
         const dynamic = await validateAndSanitizeFormData(body);
+        if (body.action === "new_volunteer_application" && dynamic.form_schema?.form_key !== "new_volunteer_application") {
+          return json({ success: false, error: "استمارة الانضمام المعتمدة غير متطابقة." }, 400);
+        }
         payload.form_id = dynamic.form_id;
         payload.form_version = dynamic.form_version;
         payload.form_data = dynamic.form_data;
@@ -1121,6 +1128,7 @@ export async function onRequestPost({ request }) {
         (Array.isArray(units) ? units : []).flatMap((unit) => [unit.name_ar, unit.name_en]).filter(Boolean)
       );
       payload.requested_departments = payload.requested_departments.filter((item) => allowedNames.has(item));
+      if (body.action === "new_volunteer_application") payload.id = crypto.randomUUID();
     }
 
     const writeUrl = SUPABASE_URL + "/rest/v1/" + target;
@@ -1148,7 +1156,7 @@ export async function onRequestPost({ request }) {
       }
       return json({ success: false, error: "تعذر تسجيل الطلب في منصة الإدارة." }, 502);
     }
-    const submissionId = body.action === "article_submission" ? payload.id || null : null;
+    const submissionId = ["article_submission","new_volunteer_application"].includes(body.action) ? payload.id || null : null;
     return json({ success: true, submission_id: submissionId, message: "تم تسجيل الطلب في منصة الإدارة." }, 201);
   } catch (error) {
     console.error("Management API POST error", error);
