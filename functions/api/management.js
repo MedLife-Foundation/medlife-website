@@ -110,6 +110,10 @@ async function fetchResource(resource, url) {
   const requestedFormKey = resource === "membership_renewal_form"
     ? cleanText(url.searchParams.get("form_key"), 120)
     : "";
+  // New volunteer intake has its own published definition; never fall back to renewals.
+  const requestedJoinFormKey = resource === "join_form"
+    ? cleanText(url.searchParams.get("form_key"), 120) || "new_volunteer_application"
+    : "";
   const limitRaw = Number(url.searchParams.get("limit") || 50);
   const limit = Number.isFinite(limitRaw) ? Math.min(50, Math.max(1, Math.trunc(limitRaw))) : 50;
   const query = new URLSearchParams({select: config.select, order: config.order, limit: String(limit)});
@@ -144,7 +148,11 @@ async function fetchResource(resource, url) {
     query.set("is_active", "eq.true");
   }
   if (resource === "join_form") {
+    if (!["new_member", "new_volunteer_application"].includes(requestedJoinFormKey)) {
+      throw new Error("نموذج الانضمام المطلوب غير صالح.");
+    }
     query.set("form_kind", "eq.new_member");
+    query.set("form_key", "eq." + requestedJoinFormKey);
     query.set("status", "eq.published");
     query.set("is_public", "eq.true");
     query.set("limit", "1");
