@@ -192,13 +192,26 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
 function fieldsForNewVolunteerIntake(baseFields, formKey) {
   if (formKey !== "new_volunteer_application") return baseFields;
   // Hold back the monthly-fee question pending a clear organizational policy.
-  const base = baseFields
-    .filter(field => field.field_key !== "field_work_monthly_fee")
-    .map(field => field.field_key === "primary_volunteer_field"
-      ? {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "مجال التطوع الأساسي"}
-      : field);
+  const base = baseFields.filter(field => field.field_key !== "field_work_monthly_fee");
   const seen = new Set(base.map(field => field.field_key));
   return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key))]
+    .map(field => {
+      if (field.field_key === "primary_volunteer_field") {
+        return {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "مجال التطوع الأساسي"};
+      }
+      // All selected recruitment preferences get their own questions, not just preference #1.
+      // This stays scoped to new-member intake and does not modify renewal form definitions.
+      const v = field.visibility;
+      if (v?.mode === "when" && v.field_key === "primary_volunteer_field") {
+        return {...field, visibility: {
+          mode: "when",
+          field_key: "volunteer_interest_preferences",
+          operator: "intersects",
+          value: Array.isArray(v.value) ? v.value : [v.value]
+        }};
+      }
+      return field;
+    })
     .sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 }
 
@@ -540,6 +553,10 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     const actual = formData[cleanText(visibility.field_key, 120)];
     const expected = String(visibility.value ?? "");
     const operator = cleanText(visibility.operator, 30) || "equals";
+    if (operator === "intersects") {
+      return Array.isArray(actual) && Array.isArray(visibility.value) &&
+        visibility.value.some(value => actual.map(String).includes(String(value)));
+    }
     if (operator === "contains") {
       return Array.isArray(actual)
         ? actual.map(String).includes(expected)
@@ -554,6 +571,14 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     if (operator === "not_equals") return String(actual ?? "") !== expected;
     return String(actual ?? "") === expected;
   };
+
+  // A removed preference must never leave stale specialty answers in the submitted record.
+  // Do not change membership renewal validation or stored data.
+  if (form.form_key === "new_volunteer_application") {
+    for (const field of fieldRows) {
+      if (!fieldIsVisible(field)) delete formData[field.field_key];
+    }
+  }
 
   for (const field of fieldRows) {
     if (!field.required || !fieldIsVisible(field)) continue;
@@ -1324,14 +1349,29 @@ export async function onRequestPost({ request }) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Public management write failed", target, response.status, errorText);
-      if (
-        response.status === 409 ||
-        /23505|national_id|public_volunteer_applications_national_id_active_unique|الرقم الوطني/i.test(errorText)
-      ) {
+      if (body.action === "new_volunteer_application" && (
+        /national_id|الرقم الوطني|public_volunteer_applications_national_id/i.test(errorText)
+      )) {
         return json({
-          success: false,
-          error: "هذا الرقم الوطني مسجل مسبقاً. لا يمكن إنشاء سجل عضو مكرر."
+          success: false, code: "duplicate_national_id",
+          error: "هذه البيانات مرتبطة بسجل سابق في ميدلايف. إذا كنت عضواً سابقاً وترغب بالعودة، يرجى التواصل مع إدارة المؤسسة بدلاً من تقديم طلب انضمام جديد.",
+          contact_email: "info@medlifesy.org",
+          complaints_url: "/contact.html#complaints"
         }, 409);
+      }
+      if (body.action === "new_volunteer_application" && (
+        response.status === 409 || /23505|email_uq|duplicate key/i.test(errorText)
+      )) {
+        return json({
+          success: false, code: "duplicate_application",
+          error: "يوجد طلب سابق مرتبط بمعلوماتك. يرجى التواصل مع إدارة المؤسسة للتحقق من حالة طلبك.",
+          contact_email: "info@medlifesy.org",
+          complaints_url: "/contact.html#complaints"
+        }, 409);
+      }
+      if (response.status === 409 ||
+          /23505|national_id|public_volunteer_applications_national_id_active_unique|الرقم الوطني/i.test(errorText)) {
+        return json({success: false, error: "هذا الرقم الوطني مسجل مسبقاً. لا يمكن إنشاء سجل عضو مكرر."}, 409);
       }
       return json({ success: false, error: "تعذر تسجيل الطلب في منصة الإدارة." }, 502);
     }
