@@ -671,6 +671,13 @@ export async function onRequestPost({ request }) {
     const body = await request.json();
     if (body.website) return json({ success: true });
 
+    // Cloudflare Pages preview hosts share the live Supabase project.
+    // Never accept real new-volunteer submissions from a public preview URL.
+    if (body.action === "new_volunteer_application" &&
+        new URL(request.url).hostname.toLowerCase().endsWith(".pages.dev")) {
+      return json({ success: false, error: "هذه نسخة معاينة للاختبار فقط؛ إرسال الطلبات متاح بعد نشر الرابط الرسمي." }, 403);
+    }
+
     const target = body.action === "article_submission"
       ? "public_article_submissions"
       : body.action === "membership_renewal"
