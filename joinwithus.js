@@ -29,6 +29,13 @@
   function setAlert(message) {
     $("form-alert").textContent = message || "";
     setVisible("form-alert", Boolean(message));
+    if (!message) setVisible("duplicate-help",false);
+  }
+  function showContactHelp(result) {
+    const err = result?.code;
+    if (err !== "duplicate_national_id" && err !== "duplicate_application") return;
+    // Static trusted links live in the HTML template. Never interpolate server input into markup.
+    setVisible("duplicate-help",true);
   }
   function text(value) { return String(value ?? "").trim(); }
   function opts(field) { return Array.isArray(field.options) ? field.options : []; }
@@ -42,6 +49,8 @@
     const actual = valueOf(v.field_key);
     const actualList = Array.isArray(actual) ? actual.map(String) : [text(actual)];
     const wanted = Array.isArray(v.value) ? v.value.map(String) : text(v.value).split(",").map(s=>s.trim());
+    if (v.operator === "intersects")
+      return Array.isArray(v.value) && v.value.some(value=>actualList.includes(text(value)));
     if (v.operator === "not_equals") return !actualList.includes(text(v.value));
     if (v.operator === "in") return actualList.some(a => wanted.includes(a));
     if (v.operator === "contains") return actualList.some(a => a.includes(text(v.value)));
@@ -135,6 +144,9 @@
     }
     wrap.append(el);
     if (field.help_ar) wrap.append(create("p","help",field.help_ar));
+    if (key === "national_id") {
+      wrap.append(create("p","help","يُستخدم الرقم الوطني لمنع تكرار طلبات الانضمام وربطه بالسجلات السابقة بشكل آمن. لا يمكن البحث عن العضوية بواسطة الرقم الوطني وحده."));
+    }
     return wrap;
   }
   function renderPreferences() {
@@ -236,7 +248,25 @@
       area.append(create("div","no-fields",state.step === 4 ? "لا توجد أسئلة إضافية لهذا التخصص حالياً. يمكنك المتابعة." : "لا توجد أسئلة لهذه المرحلة."));
       return;
     }
-    if (state.step === 4) area.append(create("p","section-tip","الأسئلة التالية مرتبطة بالمجال الأساسي الذي اخترته. قد تختلف بحسب الخلية أو اختصاصك."));
+    if (state.step === 4) {
+      area.append(create("p","section-tip","الأسئلة التالية مخصصة لكل مجال من المجالات التي اخترتها حسب ترتيب الأولوية. ستظهر أسئلة كل مجال بشكل مستقل، ويمكن تعديل رغباتك بالعودة للخطوة السابقة."));
+      const rendered = new Set();
+      for (const track of state.preferences.filter(Boolean)) {
+        const matched = fields.filter(field => !rendered.has(field.field_key) &&
+          Array.isArray(field.visibility?.value) &&
+          field.visibility.value.includes(track));
+        if (!matched.length) continue;
+        const heading = create("h3","specialty-heading",
+          state.categories.find(category=>category.value===track)?.label_ar || "أسئلة التخصص");
+        area.append(heading);
+        for (const field of matched) {
+          rendered.add(field.field_key);
+          area.append(controlFor(field));
+        }
+      }
+      for (const field of fields) if (!rendered.has(field.field_key)) area.append(controlFor(field));
+      return;
+    }
     if (state.step === 0) area.append(create("p","section-tip","تُستخدم بيانات الهوية الحساسة للتحقق من عدم تكرار طلبات الانتساب، ولا تُنشر ضمن الملف العام."));
     for (const field of fields) {
       if (state.step===3 && ["primary_volunteer_field","volunteer_interest_preferences"].includes(field.field_key)) continue;
@@ -382,7 +412,14 @@
         body:JSON.stringify(body)
       });
       const result = await response.json().catch(()=>({}));
-      if (!response.ok || !result.success) throw Error(result.error || "تعذر تسجيل الطلب. يرجى المحاولة مجدداً.");
+      if (!response.ok || !result.success) {
+        if (result.code === "duplicate_national_id" || result.code === "duplicate_application") {
+          setAlert(result.error || "بياناتك مسجلة مسبقاً، يرجى التواصل مع الإدارة.");
+          showContactHelp(result);
+          return;
+        }
+        throw Error(result.error || "تعذر تسجيل الطلب. يرجى المحاولة مجدداً.");
+      }
       state.values={};
       state.preferences=["","",""];
       state.consent=false;
@@ -396,8 +433,8 @@
       setAlert(err?.message || "تعذر إرسال طلب الانضمام.");
     } finally {
       state.sending=false;
-      $("submit").disabled=false;
-      $("submit").textContent="إرسال طلب الانضمام ←";
+      $("submit").disabled=PREVIEW_ONLY;
+      $("submit").textContent=PREVIEW_ONLY ? "معاينة فقط — الإرسال غير مفعل" : "إرسال طلب الانضمام ←";
     }
   }
   $("retry").addEventListener("click",load);
