@@ -425,7 +425,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
           (!Array.isArray(value) || !value.every(item => choices.includes(String(item))))) {
         throw new Error("هناك إجابة غير صالحة في: " + String(field.label_ar || field.field_key));
       }
-      if (field.field_type === "email" && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(value))) {
+      if (field.field_type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value))) {
         throw new Error("البريد الإلكتروني غير صالح.");
       }
       if (field.field_type === "number" && field.field_key === "weekly_availability" &&
