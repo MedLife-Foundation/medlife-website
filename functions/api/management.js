@@ -177,7 +177,831 @@ const INTAKE_OTHER_COUNTRIES = (() => {
     .sort((a,b)=>a.label_ar.localeCompare(b.label_ar,"ar"));
 })();
 
+// Legacy 2026 MedLife recruitment form, 64 questions across 20 pages.
+// Adapted for multi-track intake; specialist questions render for all selected preferences.
+const LEGACY_RECRUITMENT_REFERENCE_FIELDS = [
+  {
+    "field_key": "social_profile_url",
+    "label_ar": "رابط حسابك الشخصي على وسائل التواصل الاجتماعي (اختياري)",
+    "sort_order": 62,
+    "field_type": "url",
+    "required": false,
+    "help_ar": "فيسبوك أو إنستاغرام أو لينكدإن، إن وجد."
+  },
+  {
+    "field_key": "field_direct_participation",
+    "label_ar": "هل تستطيع المشاركة في الأنشطة والحملات الميدانية بشكل مباشر؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 303,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "field_work"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "أحياناً"
+      },
+      {
+        "value": "3",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "field_work_pressure",
+    "label_ar": "هل تستطيع العمل ضمن فريق وتحمل ضغط العمل أثناء الأنشطة؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 304,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "field_work"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "إلى حد ما"
+      },
+      {
+        "value": "3",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "field_work_preferred_tasks",
+    "label_ar": "ما المهام الميدانية التي تجد نفسك مناسباً لها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 305,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "field_work"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "تنظيم الفرق"
+      },
+      {
+        "value": "2",
+        "label_ar": "التنسيق اللوجستي"
+      },
+      {
+        "value": "3",
+        "label_ar": "التواصل مع الناس"
+      },
+      {
+        "value": "4",
+        "label_ar": "إدارة النشاط"
+      },
+      {
+        "value": "5",
+        "label_ar": "التوثيق والمتابعة"
+      },
+      {
+        "value": "6",
+        "label_ar": "الدعم الإنساني"
+      }
+    ]
+  },
+  {
+    "field_key": "medical_content_background",
+    "label_ar": "هل لديك خلفية أو دراسة طبية؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 231,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "medical_content_study_details",
+    "label_ar": "اذكر الاختصاص أو المجال الطبي إن وجد",
+    "field_type": "text",
+    "required": false,
+    "sort_order": 232,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content"
+    }
+  },
+  {
+    "field_key": "medical_writing_languages",
+    "label_ar": "ما اللغات التي تستطيع الكتابة بها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 233,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "العربية"
+      },
+      {
+        "value": "2",
+        "label_ar": "الإنكليزية"
+      },
+      {
+        "value": "3",
+        "label_ar": "لغة أخرى"
+      }
+    ]
+  },
+  {
+    "field_key": "formatting_programs",
+    "label_ar": "ما البرامج التي تجيد استخدامها في تنسيق المحتوى؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 251,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content_formatting"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "Microsoft Word"
+      },
+      {
+        "value": "2",
+        "label_ar": "PowerPoint"
+      },
+      {
+        "value": "3",
+        "label_ar": "Canva"
+      },
+      {
+        "value": "4",
+        "label_ar": "Google Docs"
+      },
+      {
+        "value": "5",
+        "label_ar": "برامج أخرى"
+      }
+    ]
+  },
+  {
+    "field_key": "formatting_formal_reports",
+    "label_ar": "هل سبق لك العمل على تقارير أو ملفات رسمية؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 252,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "medical_content_formatting"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "design_software",
+    "label_ar": "ما برامج التصميم التي تجيد استخدامها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 341,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "design"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "Canva"
+      },
+      {
+        "value": "2",
+        "label_ar": "Photoshop"
+      },
+      {
+        "value": "3",
+        "label_ar": "Illustrator"
+      },
+      {
+        "value": "4",
+        "label_ar": "Figma"
+      },
+      {
+        "value": "5",
+        "label_ar": "برنامج آخر"
+      }
+    ]
+  },
+  {
+    "field_key": "design_types",
+    "label_ar": "ما أنواع التصاميم التي لديك خبرة بها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 342,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "design"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "بوسترات طبية"
+      },
+      {
+        "value": "2",
+        "label_ar": "منشورات سوشال ميديا"
+      },
+      {
+        "value": "3",
+        "label_ar": "شعارات وهوية بصرية"
+      },
+      {
+        "value": "4",
+        "label_ar": "إنفوغرافيك"
+      },
+      {
+        "value": "5",
+        "label_ar": "تصميم فيديوهات قصيرة"
+      }
+    ]
+  },
+  {
+    "field_key": "design_experience_level",
+    "label_ar": "كيف تصف مستوى خبرتك في التصميم؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 343,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "design"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "مبتدئ"
+      },
+      {
+        "value": "2",
+        "label_ar": "متوسط"
+      },
+      {
+        "value": "3",
+        "label_ar": "متقدم"
+      }
+    ]
+  },
+  {
+    "field_key": "montage_software",
+    "label_ar": "ما البرامج التي تستخدمها في مونتاج الفيديوهات؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 331,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "video_editing"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "CapCut"
+      },
+      {
+        "value": "2",
+        "label_ar": "Premiere Pro"
+      },
+      {
+        "value": "3",
+        "label_ar": "After Effects"
+      },
+      {
+        "value": "4",
+        "label_ar": "VN"
+      },
+      {
+        "value": "5",
+        "label_ar": "DaVinci Resolve"
+      },
+      {
+        "value": "6",
+        "label_ar": "برنامج آخر"
+      }
+    ]
+  },
+  {
+    "field_key": "montage_video_types",
+    "label_ar": "ما أنواع الفيديوهات التي تستطيع العمل عليها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 332,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "video_editing"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "ريلز قصيرة"
+      },
+      {
+        "value": "2",
+        "label_ar": "فيديوهات توعوية"
+      },
+      {
+        "value": "3",
+        "label_ar": "مقابلات"
+      },
+      {
+        "value": "4",
+        "label_ar": "تغطيات أنشطة"
+      },
+      {
+        "value": "5",
+        "label_ar": "موشن جرافيك"
+      }
+    ]
+  },
+  {
+    "field_key": "montage_deadline_commitment",
+    "label_ar": "هل تستطيع إنجاز الفيديوهات بشكل منتظم ضمن المواعيد المحددة؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 333,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "video_editing"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "visual_media_roles",
+    "label_ar": "أي مهام الإعلام المرئي تفضل تنفيذها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 267,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "visual_media"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "الظهور أمام الكاميرا"
+      },
+      {
+        "value": "2",
+        "label_ar": "كتابة النصوص للتصوير"
+      },
+      {
+        "value": "3",
+        "label_ar": "التصوير وإدارة الكاميرا"
+      },
+      {
+        "value": "4",
+        "label_ar": "التقديم الإعلامي"
+      },
+      {
+        "value": "5",
+        "label_ar": "إعداد الأفكار والسيناريوهات"
+      }
+    ]
+  },
+  {
+    "field_key": "visual_media_camera_comfort",
+    "label_ar": "هل تشعر بالراحة أمام الكاميرا وأثناء التصوير؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 268,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "visual_media"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "visual_media_equipment_details",
+    "label_ar": "ما معدات التصوير أو التسجيل التي تتوفر لديك؟",
+    "field_type": "textarea",
+    "required": false,
+    "sort_order": 269,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "visual_media"
+    }
+  },
+  {
+    "field_key": "university_media_tasks",
+    "label_ar": "ما المهام التي تستطيع تنفيذها في الإعلام الجامعي؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 372,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "university_media"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نشر الأنشطة"
+      },
+      {
+        "value": "2",
+        "label_ar": "استقطاب متطوعين"
+      },
+      {
+        "value": "3",
+        "label_ar": "تنظيم فعاليات جامعية"
+      },
+      {
+        "value": "4",
+        "label_ar": "التنسيق مع الطلاب"
+      },
+      {
+        "value": "5",
+        "label_ar": "التغطية الإعلامية"
+      }
+    ]
+  },
+  {
+    "field_key": "university_media_previous_experience",
+    "label_ar": "هل شاركت سابقاً في نشاطات طلابية أو فرق جامعية؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 373,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "university_media"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "voiceover_experience",
+    "label_ar": "هل لديك خبرة سابقة في التعليق الصوتي؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 352,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "voice_over"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "voiceover_production_types",
+    "label_ar": "ما أنواع الأعمال الصوتية التي تستطيع تقديمها؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 353,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "voice_over"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "تعليق صوتي طبي"
+      },
+      {
+        "value": "2",
+        "label_ar": "إعلانات"
+      },
+      {
+        "value": "3",
+        "label_ar": "بودكاست"
+      },
+      {
+        "value": "4",
+        "label_ar": "تقارير وفيديوهات توعوية"
+      }
+    ]
+  },
+  {
+    "field_key": "it_prior_projects",
+    "label_ar": "هل لديك مشاريع أو أعمال تقنية سابقة؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 382,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "it"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "it_project_links",
+    "label_ar": "رابط إلى مشروع تقني سابق إن وجد",
+    "field_type": "url",
+    "required": false,
+    "sort_order": 383,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "it"
+    }
+  },
+  {
+    "field_key": "telegram_tasks",
+    "label_ar": "ما المهام التي تستطيع القيام بها في إدارة التليجرام؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 389,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "telegram"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نشر المحتوى"
+      },
+      {
+        "value": "2",
+        "label_ar": "تنظيم القنوات"
+      },
+      {
+        "value": "3",
+        "label_ar": "التفاعل مع الأعضاء"
+      },
+      {
+        "value": "4",
+        "label_ar": "إدارة البوتات"
+      },
+      {
+        "value": "5",
+        "label_ar": "التنسيق الإعلامي"
+      }
+    ]
+  },
+  {
+    "field_key": "instagram_tasks",
+    "label_ar": "ما المجالات التي تستطيع العمل فيها على إنستاغرام؟",
+    "field_type": "multi_select",
+    "required": true,
+    "sort_order": 390,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "instagram"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "كتابة التعليقات التوضيحية Caption"
+      },
+      {
+        "value": "2",
+        "label_ar": "تنظيم المحتوى"
+      },
+      {
+        "value": "3",
+        "label_ar": "إدارة القصص Stories"
+      },
+      {
+        "value": "4",
+        "label_ar": "إدارة الريلز Reels"
+      },
+      {
+        "value": "5",
+        "label_ar": "الرد على الرسائل"
+      },
+      {
+        "value": "6",
+        "label_ar": "تحليل الأداء"
+      }
+    ]
+  },
+  {
+    "field_key": "podcast_presenting_comfort",
+    "label_ar": "هل تشعر بالراحة أثناء الحوار والتقديم؟",
+    "field_type": "select",
+    "required": true,
+    "sort_order": 391,
+    "visibility": {
+      "mode": "when",
+      "field_key": "primary_volunteer_field",
+      "operator": "equals",
+      "value": "podcast_live"
+    },
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا"
+      }
+    ]
+  },
+  {
+    "field_key": "referral_channel",
+    "label_ar": "كيف تعرفت على مؤسسة ميدلايف؟",
+    "sort_order": 460,
+    "field_type": "select",
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "فيسبوك"
+      },
+      {
+        "value": "2",
+        "label_ar": "إنستاغرام"
+      },
+      {
+        "value": "3",
+        "label_ar": "تليجرام"
+      },
+      {
+        "value": "4",
+        "label_ar": "الجامعة"
+      },
+      {
+        "value": "5",
+        "label_ar": "صديق أو متطوع"
+      },
+      {
+        "value": "6",
+        "label_ar": "نشاط أو فعالية"
+      },
+      {
+        "value": "7",
+        "label_ar": "موقع إلكتروني"
+      },
+      {
+        "value": "8",
+        "label_ar": "طريقة أخرى"
+      }
+    ]
+  },
+  {
+    "field_key": "what_stands_out",
+    "label_ar": "ما الذي يلفت انتباهك أو يميز مؤسسة ميدلايف برأيك؟",
+    "sort_order": 470,
+    "field_type": "textarea",
+    "required": true
+  },
+  {
+    "field_key": "opinion_of_medlife",
+    "label_ar": "ما رأيك بفريق ميدلايف؟",
+    "sort_order": 480,
+    "field_type": "textarea",
+    "required": false
+  },
+  {
+    "field_key": "expected_contribution",
+    "label_ar": "كيف يمكن أن تسهم في تطوير المؤسسة أو المجال الذي اخترته؟",
+    "sort_order": 490,
+    "field_type": "textarea",
+    "required": true
+  },
+  {
+    "field_key": "future_ideas",
+    "label_ar": "هل لديك أفكار أو اقتراحات مستقبلية يمكن أن تضيف قيمة لعمل المؤسسة؟",
+    "sort_order": 500,
+    "field_type": "textarea",
+    "required": false
+  },
+  {
+    "field_key": "volunteer_commitment",
+    "label_ar": "هل تستطيع الالتزام بالعمل التطوعي والتعاون ضمن فريق وفق الأنظمة والتعليمات التنظيمية؟",
+    "sort_order": 510,
+    "field_type": "select",
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم، أستطيع الالتزام"
+      },
+      {
+        "value": "2",
+        "label_ar": "لا أستطيع حالياً"
+      }
+    ]
+  }
+];
+
 const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  ...LEGACY_RECRUITMENT_REFERENCE_FIELDS,
   {
     field_key:"other_country",label_ar:"اختر بلد الإقامة من قائمة الدول",field_type:"select",required:true,sort_order:85,
     help_ar:"تظهر هذه القائمة عند اختيار «أخرى» بدلاً من سوريا، ويمكن البحث عن البلد بكتابة اسمه داخل القائمة في بعض المتصفحات.",
@@ -743,6 +1567,10 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       throw new Error("يرجى اختيار من مجال إلى ثلاثة مجالات تطوع صحيحة حسب الأولوية، مع تطابق المجال الأساسي مع الرغبة الأولى.");
     }
 
+    if (formData.volunteer_commitment !== "1") {
+      throw new Error("لإرسال طلب الانضمام، يجب تأكيد القدرة على الالتزام بالعمل التطوعي وأنظمة المؤسسة.");
+    }
+
     if (preferences.includes("medical_consultations")) {
       if (!RECRUITMENT_ELIGIBLE_MEDICAL_ROLES.has(String(formData.academic_status || ""))) {
         throw new Error("مجال الاستشارات الطبية والصيدلانية متاح فقط للطبيب والطبيب المقيم والطبيب الاختصاصي والصيدلي.");
@@ -787,7 +1615,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
       options: field.field_key === "certificate_types" && !Array.isArray(field.options?.filter?.(option => option?.value && option.value !== "none")) 
         ? DEFAULT_CERTIFICATE_TYPE_OPTIONS
         : (Array.isArray(field.options) && field.options.some(option => option?.value && option.value !== "none")
-          ? field.options.slice(0, 100)
+          ? field.options.slice(0, form.form_key==="new_volunteer_application" ? 350 : 100)
           : field.field_key === "certificate_types" ? DEFAULT_CERTIFICATE_TYPE_OPTIONS : []),
       validation: field.validation && typeof field.validation === "object" ? field.validation : {},
       visibility: field.visibility && typeof field.visibility === "object" ? field.visibility : {mode:"always"},
