@@ -229,6 +229,13 @@ function cleanText(value, max) {
   return String(value ?? "").trim().slice(0, max);
 }
 
+function normalizeNationalIdentifier(value) {
+  return cleanText(value, 40).normalize("NFKC")
+    .replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 0x06F0))
+    .replace(/[\s\u200b-\u200d\-\u2010-\u2015]/g, "");
+}
+
 function normalizeDate(value) {
   const raw = cleanText(value, 32);
   return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null;
@@ -462,6 +469,9 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     if ((!allowed.has(safeKey) && !extraAllowed.has(safeKey)) || /password|secret|token/i.test(safeKey)) continue;
     const safeValue = sanitizeFormValue(value);
     if (Array.isArray(safeValue) ? safeValue.length : safeValue !== "") formData[safeKey] = safeValue;
+  }
+  if (form.form_key === "new_volunteer_application" && typeof formData.national_id === "string") {
+    formData.national_id = normalizeNationalIdentifier(formData.national_id);
   }
   if ((form.form_key === "membership_renewal" || form.form_key === "membership_renewal_supervisor") && formData.profile_image_url) {
     const imageUrl = cleanText(formData.profile_image_url, 1000);
@@ -1295,6 +1305,19 @@ export async function onRequestPost({ request }) {
       }
 
       if (body.action === "new_volunteer_application") {
+        // Treat the validated form snapshot as authoritative: the client cannot
+        // bypass national-ID duplicate protection by changing only top-level fields.
+        const identity = volunteerPayload({...body, ...payload.form_data});
+        for (const key of [
+          "full_name","mother_name","national_id","date_of_birth","gender",
+          "email","phone","governorate","address","academic_status","university",
+          "faculty","study_year","profession","workplace","resident_specialty",
+          "residency_year","residency_hospital","doctor_specialty","specialty","motivation"
+        ]) payload[key] = identity[key];
+        payload.national_id = normalizeNationalIdentifier(payload.form_data.national_id);
+        if (!payload.national_id) {
+          return json({success:false,error:"يرجى إدخال رقم وطني صحيح في بياناتك الشخصية."},400);
+        }
         // Applicant preferences are broad recruitment tracks, NOT internal org units.
         // The assigned unit and internal distribution are selected later by authorized HR staff.
         const ranked = payload.form_data?.volunteer_interest_preferences;
