@@ -35,3 +35,29 @@
 
 /* Clarifies the restricted consultation track without hiding it from applicants. */
 .consultation-note{margin:0;border:1px solid #dce6f3;border-radius:11px;background:#fff;color:var(--navy);padding:10px 13px;font-size:11px;line-height:1.9;font-weight:700}
+
+/* Recruitment study / residency selector polish */
+.field:has(#jf-university),.field:has(#jf-residency_hospital),.field:has(#jf-institute_name),
+.field:has(#jf-whatsapp_confirmed),.field:has(#jf-study_field_other),
+.field:has(#jf-resident_specialty),.field:has(#jf-doctor_specialty),.field:has(#jf-specialty),
+.field:has(#jf-academic_status_other),.field:has(#jf-university_other){
+  grid-column:1/-1;
+}
+.select-search{width:100%;min-height:42px;border:1px solid #d9e1eb;background:#f8fafc;
+  border-radius:10px;padding:9px 13px;font-size:12px;font-family:inherit;margin-top:1px;
+  outline:none;color:var(--ink)}
+.select-search:focus{border-color:var(--navy);box-shadow:0 0 0 3px #214f8917}
+.field:has(#jf-phone) input{direction:ltr;text-align:left;font-size:15px;letter-spacing:.25px;font-weight:800}
+.field:has(#jf-phone_country_code) select{font-size:12px}
+.field:has(#jf-whatsapp_confirmed){background:#f4f8fd;border:1px solid #dae6f2;
+  padding:14px;border-radius:12px}
+.field:has(#jf-whatsapp_confirmed) label{color:var(--navy);font-size:13px}
+.field:has(#jf-medical_profession){background:#f5f8fd;padding:13px;border-radius:12px;
+  border:1px solid #e1eaf5}
+.field:has(#jf-residency_start_year) input{direction:ltr;text-align:left}
+.field:has(#jf-university) select,.field:has(#jf-resident_specialty) select,
+.field:has(#jf-doctor_specialty) select,.field:has(#jf-specialty) select{min-height:51px}
+@media(max-width:620px){
+ .select-search{min-height:45px}
+ .field:has(#jf-whatsapp_confirmed){padding:12px}
+}
