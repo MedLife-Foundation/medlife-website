@@ -84,6 +84,76 @@ const DEFAULT_CERTIFICATE_TYPE_OPTIONS = [
   {value:"other",label_ar:"أخرى"}
 ];
 
+
+/* Separate intake-only questions. Published renewal schemas and existing member records are unchanged.
+   These become part of the versioned form snapshot attached to each new application. */
+const NEW_VOLUNTEER_EXTRA_FIELDS = [
+  {
+    field_key: "practical_skills", label_ar: "ما المهارات العملية التي تتقنها ويمكنك توظيفها في ميدلايف؟",
+    help_ar: "اذكر مهارات محددة مع أمثلة قصيرة، مثل الكتابة أو التصوير أو البحث أو التنظيم.",
+    field_type: "textarea", required: true, sort_order: 155,
+  },
+  {
+    field_key: "tools_used", label_ar: "ما البرامج والأدوات التي تجيد استخدامها؟",
+    help_ar: "مثال: Canva، Photoshop، CapCut، Microsoft Office، Notion أو أدوات أخرى.",
+    field_type: "textarea", required: false, sort_order: 195,
+  },
+  {
+    field_key: "volunteer_history", label_ar: "هل سبق لك المشاركة في عمل تطوعي أو مبادرات مجتمعية؟",
+    field_type: "select", required: true, sort_order: 400,
+    options: [
+      { value: "yes", label_ar: "نعم، لدي تجارب سابقة" },
+      { value: "no", label_ar: "لا، وهذه ستكون تجربتي الأولى" },
+    ],
+  },
+  {
+    field_key: "previous_volunteer_experience", label_ar: "اشرح خبراتك التطوعية السابقة ودورك فيها",
+    help_ar: "يمكنك ذكر الجهة، المهام التي نفذتها، والفترة أو الأثر الذي حققته دون مشاركة بيانات أشخاص آخرين.",
+    field_type: "textarea", required: true, sort_order: 410,
+    visibility: { mode: "when", field_key: "volunteer_history", operator: "equals", value: "yes" },
+  },
+  {
+    field_key: "collaboration_example", label_ar: "اذكر موقفاً عملت فيه مع فريق لحل مشكلة أو تنفيذ مهمة",
+    field_type: "textarea", required: false, sort_order: 420,
+  },
+  {
+    field_key: "preferred_work_mode", label_ar: "ما نمط التطوع الأنسب لك؟",
+    field_type: "select", required: true, sort_order: 430,
+    options: [
+      { value: "remote", label_ar: "عن بُعد" },
+      { value: "onsite", label_ar: "ميدانياً / حضورياً" },
+      { value: "both", label_ar: "كلاهما حسب الحاجة" },
+    ],
+  },
+  {
+    field_key: "availability_days", label_ar: "ما الأيام التي يتوفر لديك فيها وقت للتطوع؟",
+    field_type: "multi_select", required: false, sort_order: 440,
+    options: [
+      { value: "sat", label_ar: "السبت" }, { value: "sun", label_ar: "الأحد" },
+      { value: "mon", label_ar: "الاثنين" }, { value: "tue", label_ar: "الثلاثاء" },
+      { value: "wed", label_ar: "الأربعاء" }, { value: "thu", label_ar: "الخميس" },
+      { value: "fri", label_ar: "الجمعة" }, { value: "flexible", label_ar: "حسب الحاجة" },
+    ],
+  },
+  {
+    field_key: "training_goals", label_ar: "ما المهارات التي ترغب في تطويرها خلال تطوعك معنا؟",
+    field_type: "textarea", required: false, sort_order: 450,
+  },
+].map(field => ({
+  options: [], validation: {}, visibility: { mode: "always" },
+  target_unit_ids: [], target_unit_types: [], is_active: true,
+  ...field,
+}));
+
+function fieldsForNewVolunteerIntake(baseFields, formKey) {
+  if (formKey !== "new_volunteer_application") return baseFields;
+  // Hold back the monthly-fee question pending a clear organizational policy.
+  const base = baseFields.filter(field => field.field_key !== "field_work_monthly_fee");
+  const seen = new Set(base.map(field => field.field_key));
+  return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key))]
+    .sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+}
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -262,7 +332,7 @@ async function fetchResource(resource, url) {
       );
       return [{...form, fields: normalizedFields, units: liveUnits}];
     }
-    return [{...form, fields}];
+    return [{...form, fields: fieldsForNewVolunteerIntake(fields, form.form_key)}];
   }
   if (resource === "content") {
     // public_site_content is a published-only projection; expose an explicit
@@ -319,7 +389,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     }
   );
   const fields = await fieldsResponse.json().catch(() => []);
-  const fieldRows = Array.isArray(fields) ? fields : [];
+  const fieldRows = fieldsForNewVolunteerIntake(Array.isArray(fields) ? fields : [], form.form_key);
   const allowed = new Set(fieldRows.map(field => cleanText(field.field_key, 120)).filter(Boolean));
   const extraAllowed = (form.form_key === "membership_renewal" || form.form_key === "membership_renewal_supervisor")
     ? new Set(["profile_image_url", "profile_image_public_id"])
@@ -343,6 +413,26 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
   }
 
   for (const field of fieldRows) {
+    // Validate actual option values for the dedicated new-volunteer intake only.
+    // Do not change behavior for existing membership renewal forms.
+    if (form.form_key === "new_volunteer_application" && formData[field.field_key] !== undefined) {
+      const value = formData[field.field_key];
+      const choices = (Array.isArray(field.options) ? field.options : []).map(option => String(option.value));
+      if (field.field_type === "select" && !choices.includes(String(value))) {
+        throw new Error("الخيار المحدد غير صالح في: " + String(field.label_ar || field.field_key));
+      }
+      if (field.field_type === "multi_select" &&
+          (!Array.isArray(value) || !value.every(item => choices.includes(String(item))))) {
+        throw new Error("هناك إجابة غير صالحة في: " + String(field.label_ar || field.field_key));
+      }
+      if (field.field_type === "email" && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(value))) {
+        throw new Error("البريد الإلكتروني غير صالح.");
+      }
+      if (field.field_type === "number" && field.field_key === "weekly_availability" &&
+          (Number(value) < 1 || Number(value) > 80)) {
+        throw new Error("عدد ساعات التفرغ الأسبوعية يجب أن يكون بين ساعة و80 ساعة.");
+      }
+    }
     if (field.field_type === "number" && formData[field.field_key] !== undefined && formData[field.field_key] !== null && String(formData[field.field_key]).trim() !== "") {
       const number = Number(formData[field.field_key]);
       const rules = field.validation && typeof field.validation === "object" ? field.validation : {};
