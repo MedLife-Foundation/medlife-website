@@ -1334,6 +1334,1089 @@ const NEW_VOLUNTEER_EXTRA_FIELDS = [
   ...field,
 }));
 
+
+// Recruitment revision: shared by preview reads and server-side submission validation.
+const INTAKE_REVISIONS = {
+  "practical_skills": {
+    "label_ar": "ما المهارات التي تمتلكها وترغب في توظيفها ضمن مؤسسة ميدلايف؟",
+    "field_type": "multi_select",
+    "options": [
+      {
+        "value": "writing",
+        "label_ar": "الكتابة وصياغة المحتوى"
+      },
+      {
+        "value": "research",
+        "label_ar": "البحث العلمي وجمع المعلومات"
+      },
+      {
+        "value": "review",
+        "label_ar": "التدقيق اللغوي والعلمي"
+      },
+      {
+        "value": "design",
+        "label_ar": "التصميم الجرافيكي"
+      },
+      {
+        "value": "photo",
+        "label_ar": "التصوير الفوتوغرافي"
+      },
+      {
+        "value": "video",
+        "label_ar": "تصوير وتحرير الفيديو"
+      },
+      {
+        "value": "speaking",
+        "label_ar": "الإلقاء والتحدث أمام الجمهور"
+      },
+      {
+        "value": "voice",
+        "label_ar": "التعليق الصوتي"
+      },
+      {
+        "value": "social",
+        "label_ar": "إدارة منصات التواصل الاجتماعي"
+      },
+      {
+        "value": "events",
+        "label_ar": "تنظيم الفعاليات والأنشطة"
+      },
+      {
+        "value": "communication",
+        "label_ar": "التواصل وبناء العلاقات"
+      },
+      {
+        "value": "team",
+        "label_ar": "العمل الجماعي وقيادة الفرق"
+      },
+      {
+        "value": "training",
+        "label_ar": "التدريب والتعليم"
+      },
+      {
+        "value": "coding",
+        "label_ar": "البرمجة وتطوير المواقع"
+      },
+      {
+        "value": "data",
+        "label_ar": "تحليل البيانات وإعداد التقارير"
+      },
+      {
+        "value": "projects",
+        "label_ar": "إدارة المشاريع والتخطيط"
+      },
+      {
+        "value": "none",
+        "label_ar": "لا أمتلك خبرة حالياً ولكنني مستعد للتعلم"
+      },
+      {
+        "value": "other",
+        "label_ar": "أخرى"
+      }
+    ],
+    "help_ar": "يمكنك اختيار أكثر من خيار.",
+    "validation": {}
+  },
+  "tools_used": {
+    "label_ar": "ما البرامج والأدوات الرقمية التي تجيد استخدامها؟",
+    "field_type": "multi_select",
+    "options": [
+      {
+        "value": "tool_1",
+        "label_ar": "Microsoft Word"
+      },
+      {
+        "value": "tool_2",
+        "label_ar": "Microsoft Excel"
+      },
+      {
+        "value": "tool_3",
+        "label_ar": "Microsoft PowerPoint"
+      },
+      {
+        "value": "tool_4",
+        "label_ar": "Google Workspace"
+      },
+      {
+        "value": "tool_5",
+        "label_ar": "Notion"
+      },
+      {
+        "value": "tool_6",
+        "label_ar": "Trello"
+      },
+      {
+        "value": "tool_7",
+        "label_ar": "Canva"
+      },
+      {
+        "value": "tool_8",
+        "label_ar": "Adobe Photoshop"
+      },
+      {
+        "value": "tool_9",
+        "label_ar": "Adobe Illustrator"
+      },
+      {
+        "value": "tool_10",
+        "label_ar": "Figma"
+      },
+      {
+        "value": "tool_11",
+        "label_ar": "CapCut"
+      },
+      {
+        "value": "tool_12",
+        "label_ar": "Adobe Premiere Pro"
+      },
+      {
+        "value": "tool_13",
+        "label_ar": "Adobe After Effects"
+      },
+      {
+        "value": "tool_14",
+        "label_ar": "DaVinci Resolve"
+      },
+      {
+        "value": "tool_15",
+        "label_ar": "Adobe Audition"
+      },
+      {
+        "value": "tool_16",
+        "label_ar": "PubMed"
+      },
+      {
+        "value": "tool_17",
+        "label_ar": "Google Scholar"
+      },
+      {
+        "value": "tool_18",
+        "label_ar": "Zotero"
+      },
+      {
+        "value": "tool_19",
+        "label_ar": "Mendeley"
+      },
+      {
+        "value": "tool_20",
+        "label_ar": "ChatGPT"
+      },
+      {
+        "value": "tool_21",
+        "label_ar": "GitHub"
+      },
+      {
+        "value": "tool_22",
+        "label_ar": "Visual Studio Code"
+      },
+      {
+        "value": "tool_23",
+        "label_ar": "Supabase"
+      },
+      {
+        "value": "tool_24",
+        "label_ar": "Cloudflare"
+      },
+      {
+        "value": "other_ai",
+        "label_ar": "أدوات ذكاء اصطناعي أخرى"
+      },
+      {
+        "value": "none",
+        "label_ar": "لا أجيد أياً من الأدوات المذكورة"
+      },
+      {
+        "value": "other",
+        "label_ar": "أخرى"
+      }
+    ],
+    "help_ar": "يمكنك اختيار أكثر من خيار.",
+    "validation": {}
+  },
+  "weekly_availability": {
+    "label_ar": "كم ساعة يمكنك تخصيصها أسبوعياً للعمل التطوعي ضمن مؤسسة ميدلايف؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "أقل من ساعتين"
+      },
+      {
+        "value": "2",
+        "label_ar": "من ساعتين إلى أقل من 4 ساعات"
+      },
+      {
+        "value": "3",
+        "label_ar": "من 4 إلى أقل من 6 ساعات"
+      },
+      {
+        "value": "4",
+        "label_ar": "من 6 إلى أقل من 10 ساعات"
+      },
+      {
+        "value": "5",
+        "label_ar": "من 10 إلى 15 ساعة"
+      },
+      {
+        "value": "6",
+        "label_ar": "أكثر من 15 ساعة"
+      },
+      {
+        "value": "7",
+        "label_ar": "يتغير وقت تفرغي بحسب ظروف الدراسة أو العمل"
+      }
+    ],
+    "help_ar": "",
+    "validation": {}
+  },
+  "what_stands_out": {
+    "label_ar": "ما الذي جذبك إلى مؤسسة ميدلايف وشجعك على الانضمام إلى فريقها؟",
+    "help_ar": "أجب باختصار."
+  },
+  "expected_contribution": {
+    "label_ar": "ما الإضافة التي تطمح إلى تقديمها لمؤسسة ميدلايف، سواء من خلال مهاراتك أو أفكارك ومبادراتك المستقبلية؟",
+    "help_ar": "اذكر فكرة أو مساهمة واقعية باختصار."
+  },
+  "field_work_governorate": {
+    "label_ar": "في أي محافظة ترغب بالمشاركة في أنشطة مؤسسة ميدلايف الميدانية؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "طرطوس",
+        "label_ar": "طرطوس"
+      },
+      {
+        "value": "اللاذقية",
+        "label_ar": "اللاذقية"
+      },
+      {
+        "value": "حمص",
+        "label_ar": "حمص"
+      },
+      {
+        "value": "حماة",
+        "label_ar": "حماة"
+      },
+      {
+        "value": "دمشق",
+        "label_ar": "دمشق"
+      },
+      {
+        "value": "ريف دمشق",
+        "label_ar": "ريف دمشق"
+      },
+      {
+        "value": "حلب",
+        "label_ar": "حلب"
+      },
+      {
+        "value": "إدلب",
+        "label_ar": "إدلب"
+      },
+      {
+        "value": "درعا",
+        "label_ar": "درعا"
+      },
+      {
+        "value": "السويداء",
+        "label_ar": "السويداء"
+      },
+      {
+        "value": "القنيطرة",
+        "label_ar": "القنيطرة"
+      },
+      {
+        "value": "دير الزور",
+        "label_ar": "دير الزور"
+      },
+      {
+        "value": "الرقة",
+        "label_ar": "الرقة"
+      },
+      {
+        "value": "الحسكة",
+        "label_ar": "الحسكة"
+      },
+      {
+        "value": "محافظة أخرى",
+        "label_ar": "محافظة أخرى"
+      }
+    ],
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "field_work"
+      ]
+    }
+  },
+  "availability_days": {
+    "label_ar": "ما الأيام التي يمكنك المشاركة فيها بالأنشطة الميدانية؟",
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "field_work"
+      ]
+    },
+    "sort_order": 271,
+    "required": true,
+    "help_ar": "حدد الأيام المناسبة أو اختر بحسب موعد النشاط.",
+    "options": [
+      {
+        "value": "sat",
+        "label_ar": "السبت"
+      },
+      {
+        "value": "sun",
+        "label_ar": "الأحد"
+      },
+      {
+        "value": "mon",
+        "label_ar": "الاثنين"
+      },
+      {
+        "value": "tue",
+        "label_ar": "الثلاثاء"
+      },
+      {
+        "value": "wed",
+        "label_ar": "الأربعاء"
+      },
+      {
+        "value": "thu",
+        "label_ar": "الخميس"
+      },
+      {
+        "value": "fri",
+        "label_ar": "الجمعة"
+      },
+      {
+        "value": "flexible",
+        "label_ar": "بحسب موعد النشاط"
+      }
+    ]
+  },
+  "scenario_medical_content": {
+    "label_ar": "وجدت معلومة طبية منتشرة على وسائل التواصل تتعارض مع بعض المصادر الطبية. كيف تتصرف؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "أعتمد المعلومة لأنها منتشرة"
+      },
+      {
+        "value": "2",
+        "label_ar": "أراجع المصادر الطبية الموثوقة والحديثة قبل اعتمادها"
+      },
+      {
+        "value": "3",
+        "label_ar": "أحذف المعلومة دون محاولة التحقق منها"
+      },
+      {
+        "value": "4",
+        "label_ar": "أعرض المعلومتين دون التحقق من صحتهما"
+      }
+    ],
+    "help_ar": "اختر الإجراء الأقرب لطريقة تفكيرك.",
+    "validation": {},
+    "sort_order": 600
+  },
+  "it_skills": {
+    "label_ar": "ما المجالات التقنية التي تمتلك خبرة فيها أو ترغب في المساهمة بها؟",
+    "field_type": "multi_select",
+    "options": [
+      {
+        "value": "frontend",
+        "label_ar": "تطوير واجهات المواقع Frontend"
+      },
+      {
+        "value": "backend",
+        "label_ar": "تطوير الأنظمة Backend"
+      },
+      {
+        "value": "fullstack",
+        "label_ar": "تطوير المواقع المتكاملة Full Stack"
+      },
+      {
+        "value": "ux",
+        "label_ar": "تصميم تجربة المستخدم UI/UX"
+      },
+      {
+        "value": "database",
+        "label_ar": "إدارة قواعد البيانات"
+      },
+      {
+        "value": "qa",
+        "label_ar": "اختبار الأنظمة واكتشاف الأخطاء QA"
+      },
+      {
+        "value": "security",
+        "label_ar": "الأمن السيبراني وحماية البيانات"
+      },
+      {
+        "value": "hosting",
+        "label_ar": "إدارة المواقع والاستضافة"
+      },
+      {
+        "value": "automation",
+        "label_ar": "الأتمتة والتكامل بين الأنظمة"
+      },
+      {
+        "value": "data",
+        "label_ar": "تحليل البيانات ولوحات المعلومات"
+      },
+      {
+        "value": "support",
+        "label_ar": "الدعم التقني"
+      },
+      {
+        "value": "other",
+        "label_ar": "أخرى"
+      }
+    ],
+    "help_ar": "يمكنك اختيار أكثر من خيار.",
+    "validation": {},
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    }
+  },
+  "it_tools": {
+    "label_ar": "ما التقنيات التي سبق لك العمل بها؟",
+    "field_type": "multi_select",
+    "options": [
+      {
+        "value": "tech_1",
+        "label_ar": "HTML / CSS / JavaScript"
+      },
+      {
+        "value": "tech_2",
+        "label_ar": "TypeScript"
+      },
+      {
+        "value": "tech_3",
+        "label_ar": "React / Next.js"
+      },
+      {
+        "value": "tech_4",
+        "label_ar": "Node.js"
+      },
+      {
+        "value": "tech_5",
+        "label_ar": "Python"
+      },
+      {
+        "value": "tech_6",
+        "label_ar": "SQL / PostgreSQL"
+      },
+      {
+        "value": "tech_7",
+        "label_ar": "Supabase"
+      },
+      {
+        "value": "tech_8",
+        "label_ar": "Cloudflare"
+      },
+      {
+        "value": "tech_9",
+        "label_ar": "Git / GitHub"
+      },
+      {
+        "value": "tech_10",
+        "label_ar": "REST APIs"
+      },
+      {
+        "value": "none",
+        "label_ar": "لا أمتلك خبرة سابقة"
+      },
+      {
+        "value": "other",
+        "label_ar": "أخرى"
+      }
+    ],
+    "help_ar": "يمكنك اختيار أكثر من خيار.",
+    "validation": {},
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    },
+    "required": true
+  },
+  "it_prior_projects": {
+    "label_ar": "هل سبق لك تطوير موقع إلكتروني أو تطبيق أو نظام إداري؟",
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    }
+  },
+  "it_project_links": {
+    "visibility": {
+      "mode": "when",
+      "field_key": "it_prior_projects",
+      "operator": "equals",
+      "value": "1"
+    },
+    "help_ar": "أضف رابط مشروع أو مستودع كود إن وجد."
+  },
+  "scenario_it": {
+    "label_ar": "أبلغ أحد المتطوعين أن المنصة لا تحفظ تعديلاته، بينما تعمل لدى مستخدمين آخرين. ما أول إجراء تقوم به؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "أعيد بناء الميزة بالكامل"
+      },
+      {
+        "value": "2",
+        "label_ar": "أجمع تفاصيل المشكلة وأحاول إعادة إنتاجها وأراجع الصلاحيات والسجلات"
+      },
+      {
+        "value": "3",
+        "label_ar": "أطلب منه استخدام حساب شخص آخر"
+      },
+      {
+        "value": "4",
+        "label_ar": "أتجاهل المشكلة لأنها لا تحدث لدى الجميع"
+      }
+    ],
+    "help_ar": "",
+    "validation": {},
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    },
+    "sort_order": 384
+  },
+  "medical_consultation_capacity": {
+    "label_ar": "هل يمكنك متابعة الطلبات المسندة إليك بشكل منتظم؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "نعم، بشكل يومي"
+      },
+      {
+        "value": "2",
+        "label_ar": "نعم، عدة مرات أسبوعياً"
+      },
+      {
+        "value": "3",
+        "label_ar": "ضمن أوقات محددة يتم الاتفاق عليها مسبقاً"
+      },
+      {
+        "value": "4",
+        "label_ar": "لا أستطيع الالتزام بمتابعة منتظمة حالياً"
+      }
+    ],
+    "help_ar": "",
+    "validation": {},
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "sort_order": 320
+  },
+  "scenario_medical_consultations": {
+    "label_ar": "تلقيت استشارة تتضمن أعراضاً قد تشير إلى حالة إسعافية. كيف تتصرف؟",
+    "field_type": "select",
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "أقدم علاجاً إلكترونياً دون فحص المريض"
+      },
+      {
+        "value": "2",
+        "label_ar": "أوجه المستفيد فوراً لطلب الرعاية الإسعافية المناسبة دون تأخير"
+      },
+      {
+        "value": "3",
+        "label_ar": "أنتظر معلومات إضافية قبل توجيهه"
+      },
+      {
+        "value": "4",
+        "label_ar": "أترك الطلب دون متابعة"
+      }
+    ],
+    "help_ar": "",
+    "validation": {},
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "sort_order": 324
+  }
+};
+const INTAKE_ADDITIONS = [
+  {
+    "field_key": "practical_skills_other",
+    "field_type": "text",
+    "label_ar": "اذكر المهارات الأخرى",
+    "sort_order": 156,
+    "visibility": {
+      "mode": "when",
+      "field_key": "practical_skills",
+      "operator": "contains",
+      "value": "other"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "tools_used_other",
+    "field_type": "text",
+    "label_ar": "اذكر الأدوات الأخرى",
+    "sort_order": 196,
+    "visibility": {
+      "mode": "when",
+      "field_key": "tools_used",
+      "operator": "contains",
+      "value": "other"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "scenario_medical_content_reason",
+    "field_type": "text",
+    "label_ar": "وضح سبب اختيارك بجملة واحدة.",
+    "sort_order": 601,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_content"
+      ]
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true,
+    "help_ar": "إجابة قصيرة توضح طريقة تفكيرك."
+  },
+  {
+    "field_key": "field_work_governorate_other",
+    "field_type": "text",
+    "label_ar": "اكتب اسم المحافظة أو المنطقة",
+    "sort_order": 270.1,
+    "visibility": {
+      "mode": "when",
+      "field_key": "field_work_governorate",
+      "operator": "equals",
+      "value": "محافظة أخرى"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "field_work_times",
+    "field_type": "multi_select",
+    "label_ar": "ما الأوقات التي تناسبك عادةً؟",
+    "sort_order": 272,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "field_work"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "morning",
+        "label_ar": "الفترة الصباحية"
+      },
+      {
+        "value": "evening",
+        "label_ar": "الفترة المسائية"
+      },
+      {
+        "value": "flexible",
+        "label_ar": "بحسب طبيعة النشاط وموعده"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "it_skills_other",
+    "field_type": "text",
+    "label_ar": "اذكر المجال التقني الآخر",
+    "sort_order": 380.1,
+    "visibility": {
+      "mode": "when",
+      "field_key": "it_skills",
+      "operator": "contains",
+      "value": "other"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "it_tools_other",
+    "field_type": "text",
+    "label_ar": "اذكر التقنيات الأخرى",
+    "sort_order": 381.1,
+    "visibility": {
+      "mode": "when",
+      "field_key": "it_tools",
+      "operator": "contains",
+      "value": "other"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "it_level",
+    "field_type": "select",
+    "label_ar": "كيف تقيّم مستواك التقني الحالي؟",
+    "sort_order": 381.2,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "مبتدئ وفي مرحلة التعلم"
+      },
+      {
+        "value": "2",
+        "label_ar": "لدي معرفة أساسية وتجارب بسيطة"
+      },
+      {
+        "value": "3",
+        "label_ar": "متوسط وقادر على تنفيذ مهام مستقلة"
+      },
+      {
+        "value": "4",
+        "label_ar": "متقدم وقادر على تطوير أنظمة متكاملة"
+      },
+      {
+        "value": "5",
+        "label_ar": "خبير وقادر على الإشراف التقني"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true,
+    "help_ar": ""
+  },
+  {
+    "field_key": "it_project_description",
+    "field_type": "textarea",
+    "label_ar": "حدثنا باختصار عن المشروع ودورك فيه",
+    "sort_order": 382.1,
+    "visibility": {
+      "mode": "when",
+      "field_key": "it_prior_projects",
+      "operator": "equals",
+      "value": "1"
+    },
+    "required": true,
+    "options": [],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "it_security_scenario",
+    "field_type": "select",
+    "label_ar": "اكتشفت ثغرة تسمح لمستخدم بالوصول إلى بيانات خارج صلاحياته. كيف تتصرف؟",
+    "sort_order": 384.1,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "أبلغ المسؤول التقني بسرية وأساهم في معالجة الثغرة وفق الصلاحيات"
+      },
+      {
+        "value": "2",
+        "label_ar": "أنشر تفاصيل المشكلة في مجموعة المتطوعين"
+      },
+      {
+        "value": "3",
+        "label_ar": "أستخدم الثغرة للاطلاع على البيانات"
+      },
+      {
+        "value": "4",
+        "label_ar": "أتجاهلها طالما النظام يعمل"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true,
+    "help_ar": ""
+  },
+  {
+    "field_key": "it_task_preferences",
+    "field_type": "multi_select",
+    "label_ar": "ما طبيعة المهام التقنية التي تفضل المشاركة فيها؟",
+    "sort_order": 384.2,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "it"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "تطوير ميزات جديدة"
+      },
+      {
+        "value": "2",
+        "label_ar": "تحسين الميزات الموجودة"
+      },
+      {
+        "value": "3",
+        "label_ar": "اختبار المنصة وإعداد تقارير الأخطاء"
+      },
+      {
+        "value": "4",
+        "label_ar": "تحسين تجربة المستخدم"
+      },
+      {
+        "value": "5",
+        "label_ar": "الدعم التقني ومتابعة مشكلات الأعضاء"
+      },
+      {
+        "value": "6",
+        "label_ar": "إدارة البيانات والتقارير"
+      },
+      {
+        "value": "7",
+        "label_ar": "التعلم تحت إشراف الفريق التقني"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "medical_consultation_demo_seen",
+    "field_type": "select",
+    "label_ar": "هل اطلعت على منصة الاستشارات التجريبية وفهمت طبيعة العمل؟",
+    "sort_order": 311,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "yes",
+        "label_ar": "نعم، اطلعت على المنصة وفهمت طبيعة العمل"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true,
+    "help_ar": "اطلع على النسخة التجريبية قبل الإجابة، ولا تدخل أي بيانات مرضى حقيقية."
+  },
+  {
+    "field_key": "medical_consultation_roles",
+    "field_type": "multi_select",
+    "label_ar": "ما طبيعة المساهمة التي يمكنك تقديمها ضمن قسم الاستشارات؟",
+    "sort_order": 313,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "التوجيه والتثقيف الصحي"
+      },
+      {
+        "value": "2",
+        "label_ar": "الإجابة عن الاستفسارات ضمن اختصاصي وصلاحياتي المهنية"
+      },
+      {
+        "value": "3",
+        "label_ar": "متابعة الحالات المسندة إليّ ضمن نطاق دوري"
+      },
+      {
+        "value": "4",
+        "label_ar": "مراجعة الاستشارات والإشراف العلمي وفق مؤهلاتي"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "medical_consultation_response",
+    "field_type": "select",
+    "label_ar": "ما المدة التي تستطيع الالتزام بها لمراجعة الطلبات غير الإسعافية المسندة إليك؟",
+    "sort_order": 321,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "1",
+        "label_ar": "خلال 12 ساعة"
+      },
+      {
+        "value": "2",
+        "label_ar": "خلال 24 ساعة"
+      },
+      {
+        "value": "3",
+        "label_ar": "خلال 48 ساعة"
+      },
+      {
+        "value": "4",
+        "label_ar": "وفق جدول يتم الاتفاق عليه مسبقاً"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  },
+  {
+    "field_key": "medical_consultation_ethics",
+    "field_type": "multi_select",
+    "label_ar": "الالتزام المهني والأخلاقي — وافق على جميع البنود للانضمام إلى القسم",
+    "sort_order": 325,
+    "visibility": {
+      "mode": "when",
+      "field_key": "volunteer_interest_preferences",
+      "operator": "intersects",
+      "value": [
+        "medical_consultations"
+      ]
+    },
+    "required": true,
+    "options": [
+      {
+        "value": "ethics",
+        "label_ar": "ألتزم بأخلاقيات وآداب المهنة الطبية"
+      },
+      {
+        "value": "privacy",
+        "label_ar": "ألتزم بسرية معلومات المرضى وعدم مشاركتها خارج النظام المصرح به"
+      },
+      {
+        "value": "evidence",
+        "label_ar": "ألتزم بالمعلومات الطبية المبنية على الأدلة العلمية"
+      },
+      {
+        "value": "scope",
+        "label_ar": "ألتزم بحدود اختصاصي ومؤهلاتي وصلاحياتي المهنية"
+      },
+      {
+        "value": "exam",
+        "label_ar": "أدرك أن التوجيه الإلكتروني لا يغني عن الفحص الطبي المباشر عند الحاجة"
+      },
+      {
+        "value": "followup",
+        "label_ar": "ألتزم بمتابعة الطلبات وإبلاغ المشرف عند تعذر المتابعة"
+      },
+      {
+        "value": "verification",
+        "label_ar": "أوافق على التحقق من المؤهلات والإشراف العلمي وضوابط العمل"
+      }
+    ],
+    "validation": {},
+    "target_unit_ids": [],
+    "target_unit_types": [],
+    "is_active": true
+  }
+];
+const INTAKE_REMOVED = new Set(["opinion_of_medlife","future_ideas"]);
+
 function fieldsForNewVolunteerIntake(baseFields, formKey) {
   if (formKey !== "new_volunteer_application") return baseFields;
   // Hold back the monthly-fee question pending a clear organizational policy.
@@ -1344,7 +2427,9 @@ function fieldsForNewVolunteerIntake(baseFields, formKey) {
     "medical_consultation_specialty"
   ].includes(field.field_key));
   const seen = new Set(base.map(field => field.field_key));
-  return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key))]
+  return [...base, ...NEW_VOLUNTEER_EXTRA_FIELDS.filter(field => !seen.has(field.field_key)), ...INTAKE_ADDITIONS.filter(field => !seen.has(field.field_key) && !NEW_VOLUNTEER_EXTRA_FIELDS.some(x=>x.field_key===field.field_key))]
+    .filter(field => !INTAKE_REMOVED.has(field.field_key))
+    .map(field => ({...field,...(INTAKE_REVISIONS[field.field_key]||{})}))
     .map(field => {
       if (field.field_key === "primary_volunteer_field") {
         return {...field, options: NEW_VOLUNTEER_CATEGORIES, label_ar: "المجال الذي ترغب بالانضمام إليه"};
@@ -1698,6 +2783,7 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     // Do not change behavior for existing membership renewal forms.
     if (form.form_key === "new_volunteer_application" && formData[field.field_key] !== undefined) {
       const value = formData[field.field_key];
+      if (["practical_skills","tools_used","it_tools"].includes(field.field_key) && Array.isArray(value) && value.includes("none") && value.length>1) throw new Error("لا يمكن الجمع بين خيار عدم الخبرة وخيارات المهارات أو الأدوات.");
       const choices = (Array.isArray(field.options) ? field.options : []).map(option => String(option.value));
       if (field.field_type === "select" && !choices.includes(String(value))) {
         throw new Error("الخيار المحدد غير صالح في: " + String(field.label_ar || field.field_key));
@@ -1757,7 +2843,9 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     }
   }
 
-  const fieldIsVisible = (field) => {
+  const fieldIsVisible = (field, visited = new Set()) => {
+    if (visited.has(field.field_key)) return false;
+    const nextVisited = new Set([...visited,field.field_key]);
     const targetUnitIds = Array.isArray(field.target_unit_ids)
       ? field.target_unit_ids.map(value => cleanText(value, 80)).filter(Boolean)
       : [];
@@ -1770,6 +2858,10 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
 
     const visibility = field.visibility && typeof field.visibility === "object" ? field.visibility : {};
     if (visibility.mode !== "when") return true;
+    if (form.form_key === "new_volunteer_application") {
+      const parent = fieldRows.find(f=>f.field_key===visibility.field_key);
+      if(parent && !fieldIsVisible(parent,nextVisited)) return false;
+    }
     const actual = formData[cleanText(visibility.field_key, 120)];
     const expected = String(visibility.value ?? "");
     const operator = cleanText(visibility.operator, 30) || "equals";
@@ -1863,6 +2955,13 @@ async function validateAndSanitizeFormData(body, expectedFormKind = "new_member"
     }
 
     if (preferences.includes("medical_consultations")) {
+      const ethics = formData.medical_consultation_ethics;
+      const requiredEthics = ["ethics","privacy","evidence","scope","exam","followup","verification"];
+      if (formData.medical_consultation_demo_seen !== "yes" ||
+          !Array.isArray(ethics) || ethics.length !== requiredEthics.length ||
+          !requiredEthics.every(code=>ethics.includes(code))) {
+        throw new Error("يرجى تأكيد الاطلاع على المنصة والموافقة على جميع بنود الالتزام المهني.");
+      }
       if (!isMedicalRole) {
         throw new Error("مجال الاستشارات متاح فقط للأطباء والمقيمين والاختصاصيين والصيادلة، وليس للطلاب.");
       }

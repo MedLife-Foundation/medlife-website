@@ -16,9 +16,9 @@
     ["full_name","father_name","mother_name","date_of_birth","gender","national_id"],
     ["email","phone_country_code","phone_dial_other","phone","whatsapp_confirmed","country","other_country","governorate","foreign_region","city","address","social_profile_url"],
     ["academic_status","academic_status_other","school_name","institute_name","university","university_other","faculty","study_field","study_field_other","study_year","medical_profession","resident_specialty","resident_specialty_other","residency_year","residency_start_year","residency_program","residency_program_other","residency_hospital","doctor_specialty","doctor_specialty_other","specialty","specialty_other","profession","workplace"],
-    ["primary_volunteer_field","volunteer_interest_preferences","practical_skills","tools_used","portfolio_url"],
+    ["primary_volunteer_field","volunteer_interest_preferences","practical_skills","practical_skills_other","tools_used","tools_used_other","portfolio_url"],
     [],
-    ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","availability_days","training_goals","motivation","weekly_availability","referral_channel","what_stands_out","opinion_of_medlife","expected_contribution","future_ideas","volunteer_commitment"]
+    ["volunteer_history","previous_volunteer_experience","collaboration_example","preferred_work_mode","training_goals","motivation","weekly_availability","referral_channel","what_stands_out","expected_contribution","volunteer_commitment"]
   ];
   const known = new Set(GROUPS.flat());
   const $ = id => document.getElementById(id);
@@ -71,11 +71,15 @@
   function opts(field) { return Array.isArray(field.options) ? field.options : []; }
   function labelOf(field) { return text(field.label_ar || field.label_en || field.field_key); }
   function valueOf(key) { return state.values[key]; }
-  function visible(field) {
+  function visible(field, visited = new Set()) {
+    if(visited.has(field.field_key))return false;
+    const nextVisited=new Set([...visited,field.field_key]);
     const v = field.visibility || {};
     if (Array.isArray(field.target_unit_ids) && field.target_unit_ids.length) return false;
     if (Array.isArray(field.target_unit_types) && field.target_unit_types.length) return false;
     if (v.mode !== "when") return true;
+    const parent=state.fields.find(f=>f.field_key===v.field_key);
+    if(parent&&!visible(parent,nextVisited))return false;
     const actual = valueOf(v.field_key);
     const actualList = Array.isArray(actual) ? actual.map(String) : [text(actual)];
     const wanted = Array.isArray(v.value) ? v.value.map(String) : text(v.value).split(",").map(s=>s.trim());
@@ -83,7 +87,7 @@
       return Array.isArray(v.value) && v.value.some(value=>actualList.includes(text(value)));
     if (v.operator === "not_equals") return !actualList.includes(text(v.value));
     if (v.operator === "in") return actualList.some(a => wanted.includes(a));
-    if (v.operator === "contains") return actualList.some(a => a.includes(text(v.value)));
+    if (v.operator === "contains") return Array.isArray(actual) ? actualList.includes(text(v.value)) : actualList.some(a => a.includes(text(v.value)));
     return actualList.includes(text(v.value));
   }
   function fieldsForStep(step) {
@@ -182,8 +186,15 @@
             setAlert("يمكنك اختيار اختصاصين فقط في الاستشارات الطبية والصيدلانية.");
             return;
           }
-          if (cb.checked) chosen.add(v); else chosen.delete(v);
-          setValue(key, Array.from(chosen), false);
+          if (cb.checked) {
+            if (["practical_skills","tools_used","it_tools"].includes(key)) {
+              if(v==="none")chosen.clear();else chosen.delete("none");
+            }
+            chosen.add(v);
+          } else chosen.delete(v);
+          const conditional=state.fields.some(f=>f.visibility?.field_key===key);
+          setValue(key, Array.from(chosen), conditional);
+          if(!conditional)for(const input of el.querySelectorAll("input[type=checkbox]"))input.checked=chosen.has(input.value);
           if (key==="medical_consultation_specialties") {
             const count=wrap.querySelector(".selected-specialty-count");
             if(count)count.textContent="تم اختيار "+chosen.size+" من أصل اختصاصين كحد أقصى";
@@ -372,6 +383,13 @@
     consent.append(box,create("span","","أقرّ بصحة البيانات المقدمة، وأوافق على معالجتها لأغراض دراسة طلب الانضمام وإجراء المقابلات والتواصل، وفق الصلاحيات الإدارية المعتمدة. أفهم أن تقديم الطلب لا يعني قبول العضوية."));
     area.append(consent);
   }
+  function fieldBelongsToTrack(field,track,visited=new Set()){
+    if(visited.has(field.field_key))return false;
+    const v=field.visibility||{};
+    if(v.field_key==="volunteer_interest_preferences" && Array.isArray(v.value))return v.value.includes(track);
+    const parent=state.fields.find(f=>f.field_key===v.field_key);
+    return Boolean(parent&&fieldBelongsToTrack(parent,track,new Set([...visited,field.field_key])));
+  }
   function renderFields() {
     const area = $("field-area");
     area.replaceChildren();
@@ -386,12 +404,18 @@
       const rendered = new Set();
       for (const track of state.preferences.filter(Boolean)) {
         const matched = fields.filter(field => !rendered.has(field.field_key) &&
-          Array.isArray(field.visibility?.value) &&
-          field.visibility.value.includes(track));
+          fieldBelongsToTrack(field,track));
         if (!matched.length) continue;
         const heading = create("h3","specialty-heading",
           state.categories.find(category=>category.value===track)?.label_ar || "أسئلة التخصص");
         area.append(heading);
+        if(track==="medical_consultations"){
+          const intro=create("div","section-tip","اطلع على النسخة التجريبية للتعرف على آلية الاستشارات. لا تستخدم بيانات حقيقية في التجربة.");
+          const link=create("a","","استكشاف منصة الاستشارات التجريبية ↗");
+          link.href="https://medlife-care-lab.broad-frog-3978.workers.dev";
+          link.target="_blank";link.rel="noopener noreferrer";
+          intro.append(create("br"),link);area.append(intro);
+        }
         for (const field of matched) {
           rendered.add(field.field_key);
           area.append(controlFor(field));
@@ -454,6 +478,13 @@
       }
     }
     const fields = fieldsForStep(step);
+    if(step===4&&state.preferences.includes("medical_consultations")){
+      const ethics=valueOf("medical_consultation_ethics");
+      const required=state.fields.find(f=>f.field_key==="medical_consultation_ethics")?.options||[];
+      if(valueOf("medical_consultation_demo_seen")!=="yes" || !Array.isArray(ethics) || !required.every(o=>ethics.includes(o.value))){
+        setAlert("يرجى تأكيد الاطلاع على المنصة والموافقة على جميع بنود الالتزام المهني.");return false;
+      }
+    }
     for (const field of fields) {
       const value = valueOf(field.field_key);
       const missing = Array.isArray(value) ? !value.length : value === undefined || value === null || !text(value);
