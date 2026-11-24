@@ -102,7 +102,7 @@ test('submission writes only to new member intake, never membership-renewal reco
 test('deployment keeps the real logo and versioned browser assets', () => {
   assert.match(html, /\/logo\.PNG/);
   assert.match(html, /joinwithus\.css\?v=/);
-  assert.match(html, /joinwithus\.js\?v=20261125-4-verified/);
+  assert.match(html, /joinwithus\.js\?v=20261125-5-no-email-verification/);
 });
 
 test('all previous new-member entrypoints lead to the current verified application', () => {
