@@ -681,6 +681,8 @@
       const body = Object.assign({},formData,{
         action:"new_volunteer_application",
         application_kind:"new_member",
+        // Proof is checked and consumed by a Postgres trigger during the insert.
+        identity_challenge_id:state.identity.challenge,
         form_id:state.form.id,
         form_data:formData,
         privacy_consent:true
@@ -691,6 +693,13 @@
       });
       const result = await response.json().catch(()=>({}));
       if (!response.ok || !result.success) {
+        if (result.code === "identity_reverification_required") {
+          // Keep all questionnaire answers, but require a fresh email proof.
+          state.identity={key:"",challenge:"",status:"",message:"",busy:false};
+          state.step=1;render();
+          setAlert(result.error || "انتهت صلاحية رمز التحقق. يرجى التحقق من البريد مجدداً.");
+          visitTop();return;
+        }
         if (result.code === "duplicate_national_id" || result.code === "duplicate_application") {
           setAlert(result.error || "بياناتك مسجلة مسبقاً، يرجى التواصل مع الإدارة.");
           showContactHelp(result);

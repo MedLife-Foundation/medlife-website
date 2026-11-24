@@ -3713,6 +3713,18 @@ export async function onRequestPost({ request }) {
         payload.form_version = dynamic.form_version;
         payload.form_data = dynamic.form_data;
         payload.form_schema = dynamic.form_schema;
+        if (body.action === "new_volunteer_application") {
+          // Never trust a client-only "verified" flag. The database will
+          // atomically verify this server-side OTP proof and consume it on insert.
+          const challenge = cleanText(body.identity_challenge_id, 50);
+          if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(challenge)) {
+            return json({
+              success:false, code:"identity_reverification_required",
+              error:"يرجى إكمال التحقق من بريدك الإلكتروني قبل إرسال طلب الانضمام."
+            },400);
+          }
+          payload.form_data._join_identity_challenge = challenge;
+        }
       } catch (formError) {
         return json({ success: false, error: formError.message || "نموذج الانضمام غير صالح." }, 400);
       }
@@ -3806,6 +3818,13 @@ export async function onRequestPost({ request }) {
       // Do not log raw errors from new volunteer applications.
       console.error("Public management write failed", target, response.status,
         body.action === "new_volunteer_application" ? "[identity details suppressed]" : errorText.slice(0,500));
+      if (body.action === "new_volunteer_application" &&
+          /يرجى (إتمام|إعادة) التحقق من البريد الإلكتروني|join_identity_proof|identity_challenge/i.test(errorText)) {
+        return json({
+          success:false, code:"identity_reverification_required",
+          error:"رمز التحقق من البريد لم يعد صالحاً. يرجى إعادة التحقق ثم إرسال الطلب مجدداً."
+        },400);
+      }
       if (body.action === "new_volunteer_application" && (
         /national_id|الرقم الوطني|public_volunteer_applications_national_id/i.test(errorText)
       )) {
