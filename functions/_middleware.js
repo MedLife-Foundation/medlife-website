@@ -99,6 +99,11 @@ async function fetchManagedLegacyPage(pathname) {
 }
 
 export async function onRequest(context) {
+  const url = new URL(context.request.url);
+  if (["GET","HEAD"].includes(context.request.method) &&
+      ["/new-member","/new-member/","/new-member.html"].includes(url.pathname.toLowerCase())) {
+    return Response.redirect(new URL("/joinwithus", url.origin), 308);
+  }
   let response;
   try {
     response = await context.next();

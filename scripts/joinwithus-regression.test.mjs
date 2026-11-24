@@ -5,6 +5,8 @@ import { test } from 'node:test';
 const html = readFileSync('joinwithus.html', 'utf8');
 const frontend = readFileSync('joinwithus.js', 'utf8');
 const api = readFileSync('functions/api/management.js', 'utf8');
+const middleware = readFileSync('functions/_middleware.js', 'utf8');
+const legacyApi = readFileSync('functions/api/new-member.js', 'utf8');
 
 const tracks = [
   'medical_content',
@@ -105,4 +107,12 @@ test('deployment keeps the real logo and versioned browser assets', () => {
   assert.match(html, /\/logo\.PNG/);
   assert.match(html, /joinwithus\.css\?v=/);
   assert.match(html, /joinwithus\.js\?v=20261125-2/);
+});
+
+test('all previous new-member entrypoints lead to the current verified application', () => {
+  assert.match(middleware, /"\/new-member\.html"/);
+  assert.match(middleware, /Response\.redirect\(new URL\("\/joinwithus"/);
+  assert.match(legacyApi, /code: "use_current_recruitment_form"/);
+  assert.match(legacyApi, /https:\/\/medlifesy\.org\/joinwithus/);
+  assert.doesNotMatch(legacyApi, /INSERT INTO new_member_applications/);
 });
