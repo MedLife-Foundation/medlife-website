@@ -53,10 +53,10 @@ test('no frontend filter callback mistakenly receives numeric index as a recursi
   assert.match(frontend, /\.filter\(field => visible\(field\)\)/);
 });
 
-test('email is collected without verification or OTP dependency', () => {
-  assert.doesNotMatch(frontend, /renderIdentityPanel|normalizedIdentity|state\\.identity|join_identity_check|identity_challenge_id|identity_reverification_required|إرسال رمز التحقق إلى بريدي/);
-  assert.doesNotMatch(api, /body\\.identity_challenge_id|payload\\.form_data\\._join_identity_challenge|identity_reverification_required/);
-  assert.match(api, /body\\.action === "join_identity_check"[\\s\\S]{0,250}410/);
+test('recruitment does not require an email OTP or an identity challenge', () => {
+  assert.doesNotMatch(frontend, /renderIdentityPanel|normalizedIdentity|state\.identity|join_identity_check|identity_challenge_id|identity_reverification_required|إرسال رمز التحقق إلى بريدي/);
+  assert.doesNotMatch(api, /body\.identity_challenge_id|payload\.form_data\._join_identity_challenge|identity_reverification_required/);
+  assert.match(api, /body\.action === "join_identity_check"[\s\S]{0,250}410/);
   assert.match(frontend, /action:"new_volunteer_application"/);
 });
 
