@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#122742">
+  <meta name="description" content="بوابة التقدم للانضمام إلى مؤسسة ميدلايف الطبية التطوعية: طلبات المتطوعين الجدد فقط.">
+  <title>انضم إلى ميدلايف | MedLife Foundation</title>
+  <link rel="icon" href="/logo.PNG">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/joinwithus.css?v=20261123-1">
+  <script src="/joinwithus.js?v=20261123-1" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="/" aria-label="العودة إلى موقع ميدلايف">
+        <img src="/logo.PNG" alt="شعار مؤسسة ميدلايف">
+        <span><strong>MEDLIFE</strong><small>Medical Voluntary Foundation</small></span>
+      </a>
+      <a class="back-link" href="/">العودة للموقع <span aria-hidden="true">↖</span></a>
+    </div>
+  </header>
+  <main class="container main">
+    <section class="hero" aria-labelledby="title">
+      <span class="eyebrow"><span aria-hidden="true">✦</span> بوابة استقطاب المتطوعين</span>
+      <h1 id="title">انضم إلى ميدلايف، <span>وكن جزءاً من الأثر.</span></h1>
+      <p>نرحب بالكفاءات والشغف والرغبة بالتعلم والمساهمة بالعمل الطبي والإنساني. ساعدنا على التعرف إلى مهاراتك واهتماماتك لنرشح لك الفرص الأنسب.</p>
+    </section>
+    <div class="workspace">
+      <aside class="sidebar" aria-label="معلومات عن خطوات الانضمام">
+        <div class="side-heading"><span class="side-icon" aria-hidden="true">✚</span><div><h2>رحلتك مع ميدلايف</h2><p>خطوات بسيطة وواضحة</p></div></div>
+        <ol class="journey">
+          <li><span>01</span><div><strong>إرسال الطلب</strong><small>تعبئة الاستمارة الشاملة</small></div></li>
+          <li><span>02</span><div><strong>الفرز الأولي</strong><small>مراجعة المعلومات والرغبات</small></div></li>
+          <li><span>03</span><div><strong>المقابلة والتقييم</strong><small>التعرف إلى مهاراتك وخبراتك</small></div></li>
+          <li><span>04</span><div><strong>القرار والتوزيع</strong><small>تحديد القسم المناسب حسب الاحتياج</small></div></li>
+          <li><span>05</span><div><strong>تفعيل العضوية</strong><small>بعد الاعتماد، تصلك تعليمات الحساب</small></div></li>
+        </ol>
+        
+        <div class="side-bottom"><span aria-hidden="true">❤</span> معاً لنترك أثراً</div>
+      </aside>
+      <section class="form-card" aria-label="طلب انضمام متطوع جديد">
+        <div id="loading" class="state-screen" role="status"><span class="spinner" aria-hidden="true"></span><h2>جارٍ إعداد استمارة الانضمام...</h2><p>نحمّل الأسئلة المعتمدة من المنصة.</p></div>
+        <div id="closed" class="state-screen hidden" role="status"><span class="state-symbol" aria-hidden="true">🔒</span><h2>باب الانضمام غير متاح حالياً</h2><p id="closed-message">تابع الموقع لمعرفة موعد فتح باب الانضمام القادم.</p><a href="/" class="btn outline">العودة للموقع</a></div>
+        <div id="failure" class="state-screen hidden" role="alert"><span class="state-symbol" aria-hidden="true">!</span><h2>تعذر تحميل استمارة الانضمام</h2><p id="failure-message">تعذر الاتصال حالياً.</p><button class="btn primary" id="retry" type="button">إعادة المحاولة</button></div>
+        <div id="success" class="state-screen hidden" role="status"><span class="state-symbol success-symbol" aria-hidden="true">✓</span><h2>تم استلام طلب الانضمام بنجاح</h2><p>شكراً لاهتمامك بالتطوع مع مؤسسة ميدلايف. سيُراجع فريق الموارد البشرية طلبك ويتواصل معك عند تحديد الخطوة التالية. تقديم الطلب لا يعني قبول العضوية أو تفعيل حساب.</p><p class="receipt hidden" id="receipt"></p><a href="/" class="btn primary">العودة إلى الموقع</a></div>
+        <div id="form-ui" class="hidden">
+          <div class="form-head">
+            <div><span class="form-overline">طلب انتساب متطوع جديد</span><h2 id="step-title">البيانات الشخصية</h2><p id="step-description">يرجى تعبئة البيانات بدقة.</p></div>
+            <span class="step-number" id="step-number">01 / 07</span>
+          </div>
+          <div class="progress"><div id="progress-fill"></div></div>
+          <ol class="stepper" id="stepper" aria-label="مراحل تعبئة الطلب"></ol>
+          <form id="join-form" novalidate>
+            <div id="field-area" class="fields"></div>
+            <div id="form-alert" class="alert hidden" role="alert"></div>
+            <div id="duplicate-help" class="duplicate-help hidden" role="status">
+              <strong>هل سبق أن انضممت إلى ميدلايف أو قدمت طلباً سابقاً؟</strong>
+              <p>لأن معلوماتك مرتبطة بسجل موجود مسبقاً، لا يمكن تسجيل طلب جديد بالرقم الوطني نفسه. لاستكمال إجراءات العودة أو مراجعة البيانات، تواصل مع إدارة المؤسسة:</p>
+              <div class="duplicate-actions">
+                <a href="mailto:info@medlifesy.org" dir="ltr">info@medlifesy.org</a>
+                <a href="/contact.html#complaints">تقديم شكوى أو ملاحظة عبر صندوق الشكاوى</a>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn outline" id="previous">السابق</button>
+              <button type="button" class="btn primary" id="next">التالي <span aria-hidden="true">←</span></button>
+              <button type="submit" class="btn primary hidden" id="submit" disabled>إرسال طلب الانضمام <span aria-hidden="true">←</span></button>
+            </div>
+            <p class="privacy-note">تحفظ معلوماتك لغرض دراسة طلب التطوع وإدارة المقابلة، ولا تظهر تقييمات المتقدمين للمشرفين إلا وفق صلاحياتهم وبعد الاعتماد المناسب.</p>
+          </form>
+        </div>
+      </section>
+    </div>
+    <section class="join-support" aria-label="الشكاوى والملاحظات المتعلقة بالانضمام">
+      <div><strong>لديك شكوى أو ملاحظة بشأن طلب الانضمام؟</strong>
+      <p>يمكن لأي متقدم إرسال شكوى أو ملاحظة بسرية عبر صندوق الشكاوى الرسمي ومتابعتها باستخدام رقمها المرجعي.</p></div>
+      <a href="/contact.html#complaints" class="join-support-link">الانتقال إلى صندوق الشكاوى</a>
+    </section>
+    <footer>© MedLife Foundation · مؤسسة ميدلايف الطبية التطوعية</footer>
+  </main>
+</body>
+</html>

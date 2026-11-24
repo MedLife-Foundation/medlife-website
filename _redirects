@@ -33,3 +33,6 @@
 
 # NOTE: /articles/* is intentionally NOT rewritten here.
 # Canonical article URLs are handled by functions/articles/[slug].js.
+
+# /joinwithus is served automatically from joinwithus.html by Cloudflare Pages.
+# Do not rewrite it: Pages canonicalizes .html -> extensionless and would redirect loop.
