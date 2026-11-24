@@ -138,6 +138,40 @@ test('live 13-track form schema has valid options, dependencies and required fie
       assert.equal(validated.form_data.primary_volunteer_field,track);
       assert.deepEqual(validated.form_data.volunteer_interest_preferences,[track]);
       assert.ok(!validated.form_data.password,'never store a password in the application');
+
+      // Validate fail-closed behavior without ever submitting to the database.
+      if(track==='medical_content'){
+        await assert.rejects(
+          lookup.validateAndSanitizeFormData({form_id:form.id,
+            form_data:{...data,volunteer_interest_preferences:[track,track]}},'new_member'),
+          /الرغبات|مجال|مكررة|صحيحة/
+        );
+        await assert.rejects(
+          lookup.validateAndSanitizeFormData({form_id:form.id,
+            form_data:{...data,phone:'0933333333'}},'new_member'),
+          /واتساب|هاتف|دولي/
+        );
+        await assert.rejects(
+          lookup.validateAndSanitizeFormData({form_id:form.id,
+            form_data:{...data,volunteer_commitment:'2'}},'new_member'),
+          /الالتزام|التطوعي/
+        );
+      }
+      if(track==='medical_consultations'){
+        await assert.rejects(
+          lookup.validateAndSanitizeFormData({form_id:form.id,
+            form_data:{...data,academic_status:'university'}},'new_member'),
+          /الاستشارات|مؤهل|الأطباء/
+        );
+        await assert.rejects(
+          lookup.validateAndSanitizeFormData({form_id:form.id,
+            form_data:{...data,medical_consultation_specialties:[
+              'general_medicine','family_medicine','cardiology'
+            ]}},'new_member'),
+          /اختصاص|اختيار/
+        );
+      }
+
     }
   }finally{globalThis.fetch=originalFetch;}
 
