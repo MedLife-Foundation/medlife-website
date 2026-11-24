@@ -10,6 +10,7 @@ on:
       - 'joinwithus.js'
       - 'functions/api/management.js'
       - 'scripts/joinwithus-regression.test.mjs'
+      - 'scripts/joinwithus-live-schema.test.mjs'
       - '.github/workflows/joinwithus-validation.yml'
 permissions:
   contents: read
