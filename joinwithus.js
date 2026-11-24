@@ -98,7 +98,7 @@
       return group.includes(field.field_key);
     });
     found.sort((a,b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
-    return found.filter(visible);
+    return found.filter(field => visible(field));
   }
   function create(tag, cls, content) {
     const el = document.createElement(tag);
