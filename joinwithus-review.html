@@ -121,7 +121,7 @@
         box.append(line);
         box.append(el("span","key",field.field_key));
         if(field.help_ar)box.append(el("p","help",field.help_ar));
-        if(field.field_key==="medical_consultation_demo_seen"){const link=el("a","help","فتح منصة الاستشارات التجريبية ↗");link.href="https://medlife-care-lab.broad-frog-3978.workers.dev";link.target="_blank";link.rel="noopener noreferrer";box.append(link);}
+        if(field.field_key==="medical_consultation_demo_seen"){const link=el("a","help","فتح منصة الاستشارات التجريبية ↗");link.href="https://medlife-care-intake-demo.broad-frog-3978.workers.dev";link.target="_blank";link.rel="noopener noreferrer";box.append(link);}
         const cond=field.visibility;
         if(cond?.mode==="when"&&cond.field_key) {
           const vals=parseValues(cond.value).map(v=>knownName(v,fieldMap,categories));

@@ -412,7 +412,7 @@
         if(track==="medical_consultations"){
           const intro=create("div","section-tip","اطلع على النسخة التجريبية للتعرف على آلية الاستشارات. لا تستخدم بيانات حقيقية في التجربة.");
           const link=create("a","","استكشاف منصة الاستشارات التجريبية ↗");
-          link.href="https://medlife-care-lab.broad-frog-3978.workers.dev";
+          link.href="https://medlife-care-intake-demo.broad-frog-3978.workers.dev";
           link.target="_blank";link.rel="noopener noreferrer";
           intro.append(create("br"),link);area.append(intro);
         }
