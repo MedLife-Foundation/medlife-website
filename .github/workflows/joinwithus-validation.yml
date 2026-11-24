@@ -2,6 +2,7 @@ name: Validate public volunteer recruitment
 on:
   push:
     branches:
+      - main
       - test/joinwithus-production-regression-20261125
   pull_request:
     paths:
