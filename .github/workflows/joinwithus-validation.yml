@@ -1,0 +1,29 @@
+name: Validate public volunteer recruitment
+on:
+  push:
+    branches:
+      - test/joinwithus-production-regression-20261125
+  pull_request:
+    paths:
+      - 'joinwithus.html'
+      - 'joinwithus.js'
+      - 'functions/api/management.js'
+      - 'scripts/joinwithus-regression.test.mjs'
+      - '.github/workflows/joinwithus-validation.yml'
+permissions:
+  contents: read
+jobs:
+  joinwithus-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax of public intake and API
+        run: |
+          node --check joinwithus.js
+          node --check functions/api/management.js
+      - name: Run intake regression suite
+        run: node --test scripts/joinwithus-regression.test.mjs
