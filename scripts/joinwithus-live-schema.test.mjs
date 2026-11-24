@@ -7,7 +7,7 @@ const key=source.match(/const SUPABASE_PUBLISHABLE_KEY = "([^"]+)"/)?.[1];
 assert.ok(key,'website public key is missing');
 const origin='https://ftvjakwogxdlxxbpfydf.supabase.co';
 const lookup=await import('data:text/javascript;base64,'+
-  Buffer.from(source+'\nexport { fieldsForNewVolunteerIntake };').toString('base64'));
+  Buffer.from(source+'\nexport { fieldsForNewVolunteerIntake, validateAndSanitizeFormData };').toString('base64'));
 async function getRows(path){
   const response=await fetch(origin+'/rest/v1/'+path,{
     headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'},
@@ -86,4 +86,57 @@ test('live 13-track form schema has valid options, dependencies and required fie
     });
     assert.ok(relevant.length>0,'no conditional questions for '+track);
   }
+  const originalFetch=globalThis.fetch;
+  globalThis.fetch=async (resource,opts)=>{
+    const url=String(resource);
+    if(url.includes('/rest/v1/admin_form_definitions?'))return Response.json([{
+      ...form,name_ar:'انضم إلى ميدلايف',name_en:'Join MedLife',
+      description_ar:'النموذج الجديد',version:1,settings:{},updated_at:new Date().toISOString()
+    }]);
+    if(url.includes('/rest/v1/admin_form_fields?'))return Response.json(base);
+    return originalFetch(resource,opts);
+  };
+  try{
+    for(const track of TRACKS){
+      const data={};
+      for(const f of fields){
+        const opts=Array.isArray(f.options)?f.options:[];
+        const preferred=opts.find(o=>o.value&&!['other','none','no'].includes(String(o.value)))
+          ||opts.find(o=>o.value);
+        if(f.field_type==='select')data[f.field_key]=preferred?.value||'yes';
+        else if(f.field_type==='multi_select')data[f.field_key]=preferred?[preferred.value]:[];
+        else if(f.field_type==='number')data[f.field_key]=Math.max(1,Number(f.validation?.min||1));
+        else if(f.field_type==='date')data[f.field_key]='1998-03-10';
+        else if(f.field_type==='url')data[f.field_key]='https://example.org/profile';
+        else if(f.field_type==='email')data[f.field_key]='qa@example.invalid';
+        else if(f.field_type==='boolean')data[f.field_key]=true;
+        else data[f.field_key]='فحص تقني لمجالات التطوع';
+      }
+      Object.assign(data,{
+        full_name:'شخصية اختبارية غير حقيقية',father_name:'فحص',mother_name:'فحص',
+        national_id:'00000000000000000000987654',email:'qa@example.invalid',
+        phone_country_code:'+963',phone:'+963933333333',
+        whatsapp_confirmed:'yes',country:'سوريا',academic_status:'resident_doctor',
+        medical_profession:'human_medicine',resident_specialty:'general_medicine',
+        doctor_specialty:'general_medicine',specialty:'general_medicine',
+        residency_start_year:2023,residency_year:'3',weekly_availability:8,
+        primary_volunteer_field:track,volunteer_interest_preferences:[track],
+        volunteer_commitment:'1',medical_consultation_demo_seen:'yes',
+        medical_consultation_ethics:['ethics','privacy','evidence','scope','exam','followup','verification'],
+        medical_consultation_specialties:['general_medicine']
+      });
+      let validated;
+      try{
+        validated=await lookup.validateAndSanitizeFormData({
+          form_id:form.id,form_data:data
+        },'new_member');
+      }catch(error){
+        assert.fail('Invalid server-side questionnaire for '+track+': '+error.message);
+      }
+      assert.equal(validated.form_data.primary_volunteer_field,track);
+      assert.deepEqual(validated.form_data.volunteer_interest_preferences,[track]);
+      assert.ok(!validated.form_data.password,'never store a password in the application');
+    }
+  }finally{globalThis.fetch=originalFetch;}
+
 });
