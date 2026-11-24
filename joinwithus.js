@@ -22,7 +22,7 @@
   ];
   const known = new Set(GROUPS.flat());
   const $ = id => document.getElementById(id);
-  const state = { form:null, fields:[], settings:null, categories:[], preferences:["","",""], values:{}, step:0, consent:false, sending:false };
+  const state = { form:null, fields:[], settings:null, categories:[], preferences:["","",""], values:{}, step:0, consent:false, sending:false, identity:{key:"",challenge:"",status:"",message:"",busy:false} };
   const MEDICAL_ELIGIBLE_ROLES = new Set(["doctor","resident_doctor","specialist","pharmacist"]);
   const PHARMACY_SPECIALTIES = new Set(["pharmacy","clinical_pharmacy","pharmacology","pharm_1","pharm_2","pharm_3","pharm_4","pharm_5"]);
   const STEP_TOTAL = STEPS.length;
@@ -109,6 +109,10 @@
   function setValue(key, value, refresh) {
     const previous=state.values[key];
     state.values[key] = value;
+    if(["email","national_id"].includes(key)&&previous!==value){
+      state.identity={key:"",challenge:"",status:"",message:"",busy:false};
+      if(state.step===1 && document.getElementById("join-identity-panel"))renderIdentityPanel();
+    }
     if(key==="academic_status" && previous!==value) {
       for(const k of ["university","university_other","study_field","study_field_other",
         "medical_profession","resident_specialty","resident_specialty_other","residency_year",
@@ -390,6 +394,69 @@
     const parent=state.fields.find(f=>f.field_key===v.field_key);
     return Boolean(parent&&fieldBelongsToTrack(parent,track,new Set([...visited,field.field_key])));
   }
+  function normalizedIdentity(){
+    const national_id=text(valueOf("national_id")).normalize("NFKC").replace(/[٠-٩]/g,x=>String(x.charCodeAt(0)-0x660)).replace(/[۰-۹]/g,x=>String(x.charCodeAt(0)-0x6f0)).replace(/[\s\u200b-\u200d\-\u2010-\u2015]/g,"");
+    const email=text(valueOf("email")).toLowerCase();
+    return {national_id,email,key:national_id+"|"+email};
+  }
+  function renderIdentityPanel(){
+    const area=$("field-area");
+    const old=document.getElementById("join-identity-panel");
+    if(state.step!==1){old?.remove();return;}
+    const panel=create("div","field wide");
+    panel.id="join-identity-panel";
+    panel.style.cssText="border:1px solid #dae4ef;border-radius:12px;padding:16px;background:#f8fafd";
+    panel.append(create("h3","","التحقق المبكر من البيانات"));
+    panel.append(create("p","help","أرسل رمز تحقق إلى بريدك الإلكتروني للتأكد من ملكيته ومراجعة تطابق بياناتك مع أي سجل سابق. لا تظهر أي تفاصيل عن ملفات المتطوعين."));
+    if(PREVIEW_ONLY)panel.append(create("p","help","المعاينة ترسل رمزاً حقيقياً عند طلبه. استخدم بريدك ورقمك فقط؛ إرسال طلب الانضمام غير متاح."));
+    const current=normalizedIdentity();
+    const identity=state.identity;
+    const same=identity.key===current.key;
+    const message=create("p","help",same?identity.message:"");
+    message.setAttribute("role","status");
+    if(same&&identity.status==="duplicate"){
+      message.style.color="#a12537";
+      const mail=create("a","","التواصل مع إدارة المؤسسة — info@medlifesy.org");mail.href="mailto:info@medlifesy.org";
+      const complaint=create("a","","صندوق الشكاوى");complaint.href="/contact.html#complaints";
+      panel.append(message,mail,complaint);
+    }else if(same&&identity.status==="continue"){
+      message.style.color="#14643c";panel.append(message);
+    }else{
+      const send=create("button","","إرسال رمز التحقق إلى بريدي");
+      send.type="button";send.className="btn";send.style.cssText="border:1px solid #b3c5dc;border-radius:8px;padding:10px;cursor:pointer";
+      send.disabled=(same&&identity.busy)||!/^[0-9]{5,30}$/.test(current.national_id)||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current.email);
+      send.addEventListener("click",()=>checkIdentity("start"));
+      panel.append(send);
+      if(same&&identity.challenge){
+        const lab=create("label","","رمز التحقق (6 أرقام)");lab.htmlFor="join-identity-code";
+        const input=create("input");input.id="join-identity-code";input.type="text";input.inputMode="numeric";input.autocomplete="one-time-code";input.maxLength=6;input.dir="ltr";
+        const verify=create("button","","تحقق وتابع");verify.type="button";verify.className="btn";verify.disabled=identity.busy;
+        verify.style.cssText="border:1px solid #b3c5dc;border-radius:8px;padding:10px;cursor:pointer";
+        verify.addEventListener("click",()=>checkIdentity("verify",input.value));
+        panel.append(lab,input,verify);
+      }
+      panel.append(message);
+    }
+    if(old)old.replaceWith(panel);else area.append(panel);
+  }
+  async function checkIdentity(mode,code=""){
+    const current=normalizedIdentity();
+    if(state.identity.busy)return;
+    const previous=state.identity.key===current.key?state.identity:{challenge:""};
+    const identity={key:current.key,challenge:previous.challenge||"",status:"",message:"جارٍ التحقق...",busy:true};
+    state.identity=identity;renderIdentityPanel();
+    try{
+      const r=await fetch("/api/management",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"join_identity_check",mode,email:current.email,national_id:current.national_id,challenge_id:identity.challenge,code})});
+      const data=await r.json();
+      if(state.identity!==identity||normalizedIdentity().key!==current.key)return;
+      if(!r.ok||!data.success)throw Error(data.error||"تعذر إتمام التحقق.");
+      if(mode==="start"){identity.challenge=data.challenge_id;identity.message="أُرسل رمز التحقق إلى بريدك. أدخله هنا خلال 10 دقائق.";}
+      else if(data.status==="duplicate"){identity.status="duplicate";identity.message="تعذر متابعة طلب الانضمام بهذه البيانات لوجود سجل سابق مطابق. يرجى التواصل مع المؤسسة لمراجعة ملفك.";}
+      else if(data.status==="continue"){identity.status="continue";identity.message="تم التحقق من البريد. يمكنك متابعة الاستمارة؛ تُراجع السجلات مجدداً عند إرسال الطلب.";}
+      else throw Error("تعذر إتمام التحقق.");
+    }catch(e){if(state.identity===identity)identity.message=e.message||"تعذر التحقق حالياً.";}
+    finally{if(state.identity===identity){identity.busy=false;renderIdentityPanel();}}
+  }
   function renderFields() {
     const area = $("field-area");
     area.replaceChildren();
@@ -440,6 +507,7 @@
       area.append(controlFor(field));
     }
     if (state.step===3) renderPreferences();
+    if (state.step===1) renderIdentityPanel();
   }
   function render() {
     $("step-title").textContent = STEPS[state.step].name;
@@ -464,6 +532,13 @@
   function validStep(step) {
     if (step===5 && valueOf("volunteer_commitment")==="2") {
       setAlert("لا يمكن إتمام الانضمام دون الموافقة على الالتزام بالعمل التطوعي وأنظمة المؤسسة.");return false;
+    }
+    if(step===1){
+      const current=normalizedIdentity();
+      if(state.identity.key!==current.key || state.identity.status!=="continue"){
+        setAlert(state.identity.status==="duplicate"?"يرجى التواصل مع إدارة المؤسسة لمراجعة سجلك السابق.":"يرجى التحقق من بريدك الإلكتروني والبيانات قبل المتابعة.");
+        return false;
+      }
     }
     if (step===3) {
       const chosen=state.preferences.filter(Boolean);
@@ -573,6 +648,7 @@
       state.settings = settings;
       state.step = 0;
       state.values = {};
+      state.identity={key:"",challenge:"",status:"",message:"",busy:false};
       state.consent = false;
       showOnly("form-ui");render();
     } catch (err) {

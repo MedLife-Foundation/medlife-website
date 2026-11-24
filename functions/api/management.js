@@ -3095,6 +3095,28 @@ export async function onRequestPost({ request }) {
   try {
     const body = await request.json();
     if (body.website) return json({ success: true });
+    if (body.action === "join_identity_check") {
+      const origin = request.headers.get("origin");
+      if (origin && origin !== new URL(request.url).origin) return json({success:false},403);
+      if (!["start","verify"].includes(body.mode)) return json({success:false},400);
+      const identityRequest = {
+        mode: body.mode, email: cleanText(body.email,254), national_id: normalizeNationalIdentifier(body.national_id),
+        challenge_id: cleanText(body.challenge_id,40), code:cleanText(body.code,10)
+      };
+      try {
+        const upstream=await fetch(SUPABASE_URL+"/functions/v1/join-identity-verification",{
+          method:"POST",
+          headers:{apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY,"Content-Type":"application/json"},
+          body:JSON.stringify(identityRequest)
+        });
+        const result=await upstream.json();
+        if(upstream.ok && result.success===true){
+          if(body.mode==="start" && typeof result.challenge_id==="string")return json({success:true,challenge_id:result.challenge_id});
+          if(body.mode==="verify" && ["continue","duplicate"].includes(result.status))return json({success:true,status:result.status});
+        }
+        return json({success:false,error:typeof result.error==="string"?result.error:"تعذر إتمام التحقق حالياً."},upstream.status===429?429:upstream.status===400?400:503);
+      }catch(_){return json({success:false,error:"تعذر الاتصال بخدمة التحقق حالياً."},503);}
+    }
 
     // Cloudflare Pages preview hosts share the live Supabase project.
     // Never accept real new-volunteer submissions from a public preview URL.
