@@ -53,11 +53,22 @@ test('no frontend filter callback mistakenly receives numeric index as a recursi
   assert.match(frontend, /\.filter\(field => visible\(field\)\)/);
 });
 
-test('recruitment does not require an email OTP or an identity challenge', () => {
-  assert.doesNotMatch(frontend, /renderIdentityPanel|normalizedIdentity|state\.identity|join_identity_check|identity_challenge_id|identity_reverification_required|إرسال رمز التحقق إلى بريدي/);
-  assert.doesNotMatch(api, /body\.identity_challenge_id|payload\.form_data\._join_identity_challenge|identity_reverification_required/);
-  assert.match(api, /body\.action === "join_identity_check"[\s\S]{0,250}410/);
-  assert.match(frontend, /action:"new_volunteer_application"/);
+test('verified email challenge is enforced before submitting', () => {
+  assert.match(frontend, /function renderIdentityPanel\(/);
+  assert.match(frontend, /async function checkIdentity\(/);
+  assert.match(frontend, /action:"join_identity_check"/);
+  assert.match(frontend, /state\.identity\.status!=="continue"/);
+  assert.match(frontend, /identity_challenge_id:state\.identity\.challenge/);
+  assert.match(api, /payload\.form_data\._join_identity_challenge = challenge/);
+  assert.match(api, /const challenge = cleanText\(body\.identity_challenge_id/);
+  assert.match(api, /identity_reverification_required/);
+  assert.doesNotMatch(api, /body\.action === "join_identity_check"[\s\S]{0,150}410/);
+});
+
+test('expired verification routes applicant back without losing answers', () => {
+  assert.match(frontend, /result\.code === "identity_reverification_required"/);
+  assert.match(frontend, /state\.step=1;render\(\)/);
+  assert.doesNotMatch(frontend, /result\.code === "identity_reverification_required"[\s\S]{0,220}state\.values=\{\}/);
 });
 
 test('consultation demo link uses the deployed Worker', () => {
@@ -102,7 +113,7 @@ test('submission writes only to new member intake, never membership-renewal reco
 test('deployment keeps the real logo and versioned browser assets', () => {
   assert.match(html, /\/logo\.PNG/);
   assert.match(html, /joinwithus\.css\?v=/);
-  assert.match(html, /joinwithus\.js\?v=20261125-3-no-otp/);
+  assert.match(html, /joinwithus\.js\?v=20261125-4-verified/);
 });
 
 test('all previous new-member entrypoints lead to the current verified application', () => {
