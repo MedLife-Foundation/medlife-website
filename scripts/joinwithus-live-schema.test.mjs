@@ -1,7 +1,21 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-const FORM_URL='https://medlifesy.org/api/management?resource=join_form&form_key=new_volunteer_application';
+import { readFileSync } from 'node:fs';
+const source=readFileSync('functions/api/management.js','utf8');
+const key=source.match(/const SUPABASE_PUBLISHABLE_KEY = "([^"]+)"/)?.[1];
+assert.ok(key,'website public key is missing');
+const origin='https://ftvjakwogxdlxxbpfydf.supabase.co';
+const lookup=await import('data:text/javascript;base64,'+
+  Buffer.from(source+'\nexport { fieldsForNewVolunteerIntake };').toString('base64'));
+async function getRows(path){
+  const response=await fetch(origin+'/rest/v1/'+path,{
+    headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'},
+    signal:AbortSignal.timeout(25000)
+  });
+  assert.equal(response.status,200,'Supabase read-only public form metadata must be reachable');
+  return await response.json();
+}
 const TRACKS=[
   'medical_content','medical_content_formatting','design','video_editing',
   'visual_media','field_work','university_media','voice_over','it',
@@ -9,12 +23,13 @@ const TRACKS=[
 ];
 
 test('live 13-track form schema has valid options, dependencies and required fields',async()=>{
-  const response=await fetch(FORM_URL,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(25000)});
-  assert.equal(response.status,200,'published form API must be reachable');
-  const payload=await response.json(),form=payload.data?.[0];
+  const forms=await getRows('admin_form_definitions?select=id,form_key,form_kind,status,is_public&form_key=eq.new_volunteer_application&status=eq.published&is_public=eq.true&limit=1');
+  const form=forms?.[0];
   assert.equal(form?.form_key,'new_volunteer_application');
   assert.equal(form?.form_kind,'new_member');
-  const fields=form.fields||[];
+  const base=await getRows('admin_form_fields?select=field_key,label_ar,label_en,help_ar,placeholder_ar,field_type,required,options,validation,visibility,target_unit_ids,target_unit_types,sort_order&form_id=eq.'+
+    encodeURIComponent(form.id)+'&is_active=eq.true&order=sort_order.asc&limit=200');
+  const fields=lookup.fieldsForNewVolunteerIntake(base,'new_volunteer_application');
   assert.ok(fields.length>=45,'comprehensive questionnaire is missing');
   const keys=fields.map(f=>f.field_key);
   assert.equal(keys.length,new Set(keys).size,'duplicate field keys');
