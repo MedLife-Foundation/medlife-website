@@ -683,6 +683,7 @@
         application_kind:"new_member",
         form_id:state.form.id,
         form_data:formData,
+        identity_challenge:state.identity.challenge,
         privacy_consent:true
       });
       const response = await fetch("/api/management",{
@@ -691,6 +692,10 @@
       });
       const result = await response.json().catch(()=>({}));
       if (!response.ok || !result.success) {
+        if(result.code==="identity_verification_required"){
+          state.identity={key:"",challenge:"",status:"",message:"",busy:false};
+          state.step=1;render();setAlert(result.error);visitTop();return;
+        }
         if (result.code === "duplicate_national_id" || result.code === "duplicate_application") {
           setAlert(result.error || "بياناتك مسجلة مسبقاً، يرجى التواصل مع الإدارة.");
           showContactHelp(result);

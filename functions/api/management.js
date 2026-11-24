@@ -3728,6 +3728,11 @@ export async function onRequestPost({ request }) {
           "residency_year","residency_hospital","doctor_specialty","specialty","motivation"
         ]) payload[key] = identity[key];
         payload.national_id = normalizeNationalIdentifier(payload.form_data.national_id);
+        const proof = cleanText(body.identity_challenge,40);
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(proof)) {
+          return json({success:false,code:"identity_verification_required",error:"يرجى التحقق من البريد الإلكتروني قبل إرسال الطلب."},400);
+        }
+        payload.form_data._join_identity_challenge=proof;
         if (payload.form_data.country === "أخرى") {
           const country = INTAKE_OTHER_COUNTRIES.find(option=>option.value===payload.form_data.other_country);
           payload.governorate = cleanText(payload.form_data.foreign_region, 100);
@@ -3802,6 +3807,9 @@ export async function onRequestPost({ request }) {
     });
     if (!response.ok) {
       const errorText = await response.text();
+      if(body.action==="new_volunteer_application" && response.status===400 && /التحقق من البريد الإلكتروني/.test(errorText)){
+        return json({success:false,code:"identity_verification_required",error:"انتهت صلاحية التحقق أو لم تتطابق البيانات. يرجى إعادة التحقق من بريدك الإلكتروني."},400);
+      }
       // Database uniqueness errors can contain sensitive identity details.
       // Do not log raw errors from new volunteer applications.
       console.error("Public management write failed", target, response.status,
