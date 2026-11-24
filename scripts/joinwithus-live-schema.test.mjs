@@ -119,7 +119,9 @@ test('live 13-track form schema has valid options, dependencies and required fie
         whatsapp_confirmed:'yes',country:'سوريا',academic_status:'resident_doctor',
         medical_profession:'human_medicine',resident_specialty:'general_medicine',
         doctor_specialty:'general_medicine',specialty:'general_medicine',
-        residency_start_year:2023,residency_year:'3',weekly_availability:8,
+        residency_start_year:2023,residency_year:'3',
+        weekly_availability:map.get('weekly_availability').field_type==='select'
+          ?map.get('weekly_availability').options[0].value:8,
         primary_volunteer_field:track,volunteer_interest_preferences:[track],
         volunteer_commitment:'1',medical_consultation_demo_seen:'yes',
         medical_consultation_ethics:['ethics','privacy','evidence','scope','exam','followup','verification'],
