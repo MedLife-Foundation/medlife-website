@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const html = readFileSync('joinwithus.html', 'utf8');
 const frontend = readFileSync('joinwithus.js', 'utf8');
@@ -102,7 +103,7 @@ test('submission writes only to new member intake, never membership-renewal reco
 test('deployment keeps the real logo and versioned browser assets', () => {
   assert.match(html, /\/logo\.PNG/);
   assert.match(html, /joinwithus\.css\?v=/);
-  assert.match(html, /joinwithus\.js\?v=20261125-5-no-email-verification/);
+  assert.match(html, /joinwithus\.js\?v=20261127-1-social-url/);
 });
 
 test('all previous new-member entrypoints lead to the current verified application', () => {
@@ -111,4 +112,26 @@ test('all previous new-member entrypoints lead to the current verified applicati
   assert.match(legacyApi, /code: "use_current_recruitment_form"/);
   assert.match(legacyApi, /https:\/\/medlifesy\.org\/joinwithus/);
   assert.doesNotMatch(legacyApi, /INSERT INTO new_member_applications/);
+});
+
+test('social URLs are normalized safely without requiring a value', () => {
+  const source=frontend.slice(frontend.indexOf('  function normalizeSocialUrl('),frontend.indexOf('  function opts(field)'));
+  assert.ok(source.includes('function normalizeSocialUrl'));
+  const normalize=runInNewContext(source+'\nnormalizeSocialUrl', {URL,text:value=>String(value??'').trim()});
+  const cases=[
+    ['/https://www.facebook.com/share/example','https://www.facebook.com/share/example'],
+    ['facebook.com/share/example','https://facebook.com/share/example'],
+    ['\u200fhttps://m.facebook.com/profile.php?id=123\u200e','https://m.facebook.com/profile.php?id=123'],
+    ['www.instagram.com/example','https://www.instagram.com/example'],
+    ['linkedin.com/in/example','https://linkedin.com/in/example'],
+    ['//facebook.com/example','https://facebook.com/example'],
+    ['', ''],
+    ['javascript:alert(1)',null],
+    ['not a url',null],
+    ['https://',null],
+    ['https://x:y@facebook.com/abc',null]
+  ];
+  for (const [value,expected] of cases) assert.equal(normalize(value),expected,value);
+  assert.match(frontend,/el\.dir="ltr";el\.inputMode="url"/);
+  assert.match(frontend,/state\.values\[field\.field_key\]=normalized/);
 });
