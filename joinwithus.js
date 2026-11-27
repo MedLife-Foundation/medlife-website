@@ -68,6 +68,20 @@
     setVisible("duplicate-help",true);
   }
   function text(value) { return String(value ?? "").trim(); }
+  function normalizeSocialUrl(value) {
+    let raw = text(value).replace(/[\u061c\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g,"").trim();
+    if (!raw) return "";
+    raw = raw.replace(/^\/+(?=https?:\/\/)/i,"");
+    if (/^\/\/[^/]/.test(raw)) raw = "https:" + raw;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) raw = "https://" + raw;
+    if (/\s/.test(raw) || !/^https?:\/\/[^/]/i.test(raw)) return null;
+    try {
+      const u = new URL(raw);
+      if (!["http:","https:"].includes(u.protocol) || u.username || u.password ||
+          !u.hostname.includes(".") || u.hostname.endsWith(".")) return null;
+      return u.href;
+    } catch { return null; }
+  }
   function opts(field) { return Array.isArray(field.options) ? field.options : []; }
   function labelOf(field) { return text(field.label_ar || field.label_en || field.field_key); }
   function valueOf(key) { return state.values[key]; }
@@ -259,6 +273,10 @@
       el = create(type === "textarea" ? "textarea" : "input");
       if (type !== "textarea") {
         el.type = {email:"email",phone:"tel",url:"url",number:"number",date:"date"}[type] || "text";
+        if (key==="social_profile_url") {
+          el.type="text";el.dir="ltr";el.inputMode="url";el.autocapitalize="none";el.spellcheck=false;
+          el.style.textAlign="left";
+        }
         if(key==="phone"){
           el.dir="ltr";el.inputMode="tel";
           el.placeholder="+9639XXXXXXXX";
@@ -275,6 +293,10 @@
       el.placeholder = text(field.placeholder_ar);
       el.maxLength = 5000;
       el.addEventListener("input", () => setValue(key,el.value,false));
+      if (key==="social_profile_url") el.addEventListener("blur", () => {
+        const normalized=normalizeSocialUrl(el.value);
+        if (normalized!==null && normalized!==el.value) {el.value=normalized;setValue(key,normalized,false);}
+      });
     }
     if (el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA") {
       el.id = "jf-" + key;
@@ -519,7 +541,15 @@
       if (field.field_key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text(value))) {
         setAlert("يرجى كتابة بريد إلكتروني صحيح.");return false;
       }
-      if (field.field_type === "url") {
+      if (field.field_key === "social_profile_url") {
+        const normalized=normalizeSocialUrl(value);
+        if (normalized===null) {
+          setAlert("يرجى كتابة رابط صحيح لحساب التواصل الاجتماعي، أو ترك الحقل فارغاً لأنه اختياري.");
+          document.getElementById("jf-social_profile_url")?.focus();return false;
+        }
+        state.values[field.field_key]=normalized;
+        const input=document.getElementById("jf-social_profile_url");if(input)input.value=normalized;
+      } else if (field.field_type === "url") {
         try { const u = new URL(text(value));if (!["http:","https:"].includes(u.protocol)) throw Error("invalid"); }
         catch { setAlert("يرجى كتابة رابط يبدأ بـ https:// أو http://");return false; }
       }
